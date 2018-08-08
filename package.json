@@ -1,5 +1,5 @@
 {
-  "name": "Suggestions Bot",
+  "name": "nerd-suggestions",
   "version": "2.0.0",
   "description": "A simple suggestions bot for users to create new suggestions that go directly into a '#suggestions' channel. From there. users can vote on a suggestion via reactions.",
   "main": "app.js",
@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "Anthony Collier",
+  "author": "xSinclare",
   "license": "MIT",
   "dependencies": {
     "discord.js": "^11.3.2"
