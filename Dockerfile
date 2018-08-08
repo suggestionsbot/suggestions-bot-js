@@ -13,3 +13,5 @@ COPY . /usr/src/nerd-suggestions
 
 #Start the bot!
 CMD ["node", "app.js"]
+
+# Testing git inside docker container. If you see this, that means it worked!
