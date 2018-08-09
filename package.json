@@ -1,6 +1,6 @@
 {
   "name": "nerd-suggestions",
-  "version": "2.2",
+  "version": "2.2.0",
   "description": "A simple suggestions bot for users to create new suggestions that go directly into a '#suggestions' channel. From there. users can vote on a suggestion via reactions.",
   "main": "app.js",
   "scripts": {
