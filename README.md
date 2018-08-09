@@ -1,5 +1,5 @@
 # Suggestions Bot
-The Suggestions Bot is a simple bot. It handles the creation of new suggestions that are pushed into a `#suggestions` channel on the guild. From there, users can react with a `✅` to agree with a suggestion or a `❌` to disagree with a suggestions. 
+The Suggestions Bot is a simple bot. It handles the creation of new suggestions that are pushed into a `#suggestions` channel on the guild. From there, users can react with a `✅` to agree with a suggestion or a `❌` to disagree with a suggestions. Suggestions can be removed by the suggestion author or the bot owner (soon to be updated to those who have the `MANAGE_MESSAGES` permission).
 
 ## Requirements
 
