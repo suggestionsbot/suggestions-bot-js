@@ -42,13 +42,6 @@ exports.run = (client, message, args) => {
         .setTimestamp();
 
     suggestionsChannel.send(sEmbed)
-        /*
-        .then(async function (message) {
-            await message.react(`✅`)
-            await message.react(`❌`)
-            await message.react('🗑')
-        })
-        */
         .then(botmessage => reactionrem(message, botmessage, true))
         .catch(error => {
             console.error
