@@ -21,7 +21,7 @@ client.on('ready', async () => {
     console.log(`Logged in as ${client.user.tag} (${client.user.id})`);
 
     client.user.setStatus('online');
-    client.user.setActivity(';;help', { type: 'PLAYING' })
+    client.user.setActivity('at Trump Tower', { type: 'PLAYING' })
         .then(presence => console.log(`Activity set to ${presence.game ? presence.game.name : 'none'}`))
         .catch(console.error);
 });
