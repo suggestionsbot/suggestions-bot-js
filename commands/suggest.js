@@ -1,11 +1,13 @@
 const Discord = require('discord.js');
+const reactionrem = require('@the-nerd-cave/discord.js-remove-on-reaction');
 const config = require('../config.json');
 let ORANGE = config.embedOrange;
+let PREFIX = config.prefix;
 
 exports.run = (client, message, args) => {
 
-    let sUser = message.member;
-    let suggestionsChannel = message.guild.channels.find('name', 'suggestions');
+    const sUser = message.member;
+    const suggestionsChannel = message.guild.channels.find('name', 'suggestions');
     if (!suggestionsChannel) return message.channel.send('A suggestions channel does not exist! Please create one or contact a server administrator.')
         .then(message => {
             message.delete(3000)
@@ -23,8 +25,8 @@ exports.run = (client, message, args) => {
 
     message.delete().catch(O_o=>{});
 
-    let suggestion = args.join(' ');
-    if (!suggestion) return message.channel.send('Incorrect command arguments: `,suggest <suggestion>`')
+    const suggestion = args.join(' ');
+    if (!suggestion) return message.channel.send('Incorrect command arguments:' + '`' + `${PREFIX}` + 'suggest <suggestion>' + '`')
         .then(message => {
             message.delete(3000)
         })
@@ -40,10 +42,14 @@ exports.run = (client, message, args) => {
         .setTimestamp();
 
     suggestionsChannel.send(sEmbed)
+        /*
         .then(async function (message) {
             await message.react(`✅`)
             await message.react(`❌`)
+            await message.react('🗑')
         })
+        */
+        .then(botmessage => reactionrem(message, botmessage, true))
         .catch(error => {
             console.error
         });

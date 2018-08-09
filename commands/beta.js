@@ -16,6 +16,7 @@ exports.run = (client, message, args) => {
        });
             
     } else {
-        message.channel.send('the black bob the builder is the best bob the buikder');
+        message.channel.send('Ye, man. Nice perms ya have there.');
+        return;
     }
 }

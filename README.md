@@ -18,7 +18,7 @@ In a command prompt in your projects folder (wherever that may be) run the follo
 
 Once finished: 
 
-- In the folder from where you ran the git command, run `cd suggestions-bot` and then run `npm install`
+- In the folder from where you ran the git command, run `cd nerd-suggestions` and then run `npm install`
 - Edit the `config.json` to your like (you MUST update `owner` and `token` to your user ID and bot token)
 - Edit `config.js` and fill in all the relevant details as indicated in the file's comments.
 
