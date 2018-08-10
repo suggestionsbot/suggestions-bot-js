@@ -10,7 +10,7 @@
   "author": "xSinclare",
   "license": "ISC",
   "dependencies": {
-    "@the-nerd-cave/discord.js-remove-on-reaction": "^1.0.6",
+    "@the-nerd-cave/discord.js-remove-on-reaction": "^1.0.9",
     "discord.js": "^11.3.2"
   }
 }
