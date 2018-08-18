@@ -1,8 +1,5 @@
 const Discord = require('discord.js');
-const reactionrem = require('@the-nerd-cave/discord.js-remove-on-reaction');
-const config = require('../config.json');
-let ORANGE = config.embedOrange;
-let PREFIX = config.prefix;
+const { orange, prefix } = require('../config.json');
 
 exports.run = (client, message, args) => {
 
@@ -18,7 +15,7 @@ exports.run = (client, message, args) => {
 
     const embed = new Discord.RichEmbed()
         .setDescription(`Hey, ${sUser}. Your suggestion has been added in the ${suggestionsChannel} channel to be voted on!`)
-        .setColor(ORANGE)
+        .setColor(orange)
         .setAuthor(sUser.displayName)
         .setFooter(`User ID: ${sUser.id}`)
         .setTimestamp();
@@ -26,7 +23,7 @@ exports.run = (client, message, args) => {
     message.delete().catch(O_o=>{});
 
     const suggestion = args.join(' ');
-    if (!suggestion) return message.channel.send('Incorrect command arguments:' + '`' + `${PREFIX}` + 'suggest <suggestion>' + '`')
+    if (!suggestion) return message.channel.send('Incorrect command arguments:' + '`' + `${prefix}` + 'suggest <suggestion>' + '`')
         .then(message => {
             message.delete(3000)
         })
@@ -37,12 +34,16 @@ exports.run = (client, message, args) => {
     const sEmbed = new Discord.RichEmbed()
         .setTitle(sUser.displayName)
         .setDescription(suggestion)
-        .setColor(ORANGE)
+        .setColor(orange)
         .setFooter(`User ID: ${sUser.id}`)
         .setTimestamp();
 
     suggestionsChannel.send(sEmbed)
-        .then(botmessage => reactionrem(message, botmessage, true))
+        .then(async function (message) {
+            await message.react(`✅`);
+            await message.react(`❌`);
+        })
+        //.then(botmessage => reactionrem(message, botmessage, true))
         .catch(error => {
             console.error
         });

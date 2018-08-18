@@ -1,20 +1,21 @@
 const Discord = require('discord.js');
 const client = new Discord.Client();
-const config = require('../config.json');
-let OWNER = config.owner;
-let ORANGE = config.embedOrange;
-let PREFIX = config.prefix;
+const { owner, orange, prefix, discord } = require('../config.json');
+const cmdSeconds = 5;
 
-exports.run = (client, message, args) => {
+exports.run = async (client, message, args) => {
+
+    const msg = await message.channel.send("Seeking help?");
 
     const helpEmbed = new Discord.RichEmbed()
         .setTitle('Help Commands')
         .setDescription(`View all the commands for ${client.user}.`)
-        .addField('User Commands', '`' + `${PREFIX}` + 'suggest` | ' + '`' + `${PREFIX}` + 'info` | ' + '`' + `${PREFIX}` + 'ping` | ' + '`' + `${PREFIX}` + 'help`')
-        .addField('Bot Owner Commands', '`' + `${PREFIX}` + 'beta`', false)
-        .addField('Found an issue?', `Please report any issues to <@${OWNER}>.`, false)
-        .setColor(ORANGE);
+        .addField('User Commands', '`' + `${prefix}suggest` + '` |' + '`' + `${prefix}ping` + '` |' + '`' +  `${prefix}help` + '` |' + '`' +  `${prefix}info` + '`')
+        //.addField('Bot Owner Commands', '`' + `${prefix}` + 'beta`', false)
+        .addField('Command Cooldown', `A ${cmdSeconds} second(s) cooldown is in place except on bot commands for users with the ` + '`' + 'ADMINISTRATOR' + '`' + ' permission.')
+        .addField('Found an issue?', `Please report any issues to <@${owner}> via the Support Discord: ${discord}.`, false)
+        .setColor(orange);
 
-        message.channel.send(helpEmbed);
+        msg.edit(helpEmbed);
 
 }
