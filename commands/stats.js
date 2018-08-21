@@ -11,23 +11,18 @@ exports.run = (client, message, args) => {
     const channelSize = client.guilds.size.toLocaleString();
     const userSize = client.users.size.toLocaleString();
 
-    if(message.author.id !== owner) {
-        message.channel.send('Sorry! Only the Bot Owner can run this command.');
-    } else {
-        
-        const embed = new Discord.RichEmbed()
-            .setTitle('Bot Statistics')
-            .setDescription(`Detailed information of the statistics for the ${client.user}.`)
-            .addField('Servers', guildSize)
-            .addField('Users', userSize)
-            .addField('Channels', channelSize)
-            .setColor(orange)
-            .addField('Bot Uptime', botUptime)
-            .addField('Memory Usage', `${Math.round(memUsage)}%`)
-            .addField('Discord.js', `v${Discord.version}`)
-            .addField('Node', `${process.version}`)
-            .setTimestamp();
+    const embed = new Discord.RichEmbed()
+        .setTitle('Bot Statistics')
+        .setDescription(`Detailed information of the statistics for the ${client.user}.`)
+        .addField('Servers', guildSize)
+        .addField('Users', userSize)
+        .addField('Channels', channelSize)
+        .setColor(orange)
+        .addField('Bot Uptime', botUptime)
+        .addField('Memory Usage', `${Math.round(memUsage)}%`)
+        .addField('Discord.js', `v${Discord.version}`)
+        .addField('Node', `${process.version}`)
+        .setTimestamp();
 
-        message.channel.send(embed);
-    }
+    message.channel.send(embed);
 }
