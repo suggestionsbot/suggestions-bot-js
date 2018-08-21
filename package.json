@@ -1,6 +1,6 @@
 {
   "name": "nerd-suggestions",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "description": "A simple suggestions bot for users to create new suggestions that go directly into a '#suggestions' channel. From there. users can vote on a suggestion via reactions.",
   "main": "app.js",
   "scripts": {
@@ -11,6 +11,8 @@
   "license": "ISC",
   "dependencies": {
     "@the-nerd-cave/discord.js-remove-on-reaction": "^1.0.9",
-    "discord.js": "^11.3.2"
+    "discord.js": "^11.3.2",
+    "moment": "^2.22.2",
+    "moment-duration-format": "^2.2.2"
   }
 }
