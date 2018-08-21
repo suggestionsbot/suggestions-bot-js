@@ -10,7 +10,7 @@ exports.run = async (client, message, args) => {
     const helpEmbed = new Discord.RichEmbed()
         .setTitle('Help Commands')
         .setDescription(`View all the commands for ${client.user}.`)
-        .addField('User Commands', '`' + `${prefix}suggest` + '` |' + '`' + `${prefix}ping` + '` |' + '`' +  `${prefix}help` + '` |' + '`' +  `${prefix}info` + '`' + '` |' + '`' +  `${prefix}stats` + '`')
+        .addField('User Commands', '`' + `${prefix}suggest` + '` |' + '`' + `${prefix}ping` + '` |' + '`' +  `${prefix}help` + '` |' + '`' +  `${prefix}info` + '` |' + '`' +  `${prefix}stats` + '`')
         //.addField('Bot Owner Commands', '`' + `${prefix}` + 'beta`', false)
         .addField('Command Cooldown', `A ${cmdSeconds} second(s) cooldown is in place on bot commands except for users with the ` + '`' + 'ADMINISTRATOR' + '`' + ' permission.')
         .addField('Found an issue?', `Please report any issues to <@${owner}> via the Support Discord: ${discord}.`, false)
