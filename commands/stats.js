@@ -1,5 +1,5 @@
 const Discord = require('discord.js');
-const {owner, orange} = require('../config.json');
+const { orange } = require('../config.json');
 const moment = require('moment');
 require('moment-duration-format');
 
@@ -25,3 +25,9 @@ exports.run = (client, message, args) => {
 
     message.channel.send(embed);
 }
+
+exports.help = {
+    name: 'stats',
+    description: 'View bot statistics',
+    usage: 'stats'
+};

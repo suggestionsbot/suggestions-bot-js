@@ -13,3 +13,9 @@ exports.run = (client, message, args) => {
 
     message.channel.send(embed);
 }
+
+exports.help = {
+    name: 'info',
+    description: 'View bot information',
+    usage: 'ban'
+};

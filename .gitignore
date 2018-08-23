@@ -1,0 +1,11 @@
+# Packages
+node_modules/
+package-lock.json
+
+# Log files
+logs/
+*.log
+
+# Miscellaneous
+.tmp/
+.vscode/

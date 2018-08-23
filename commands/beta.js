@@ -23,3 +23,9 @@ exports.run = (client, message, args) => {
         //return;
     }
 }
+
+exports.help = {
+    name: 'beta',
+    description: 'Used for development testing.',
+    usage: 'beta'
+};

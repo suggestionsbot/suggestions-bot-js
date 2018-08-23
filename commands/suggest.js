@@ -4,14 +4,8 @@ const { orange, prefix } = require('../config.json');
 exports.run = (client, message, args) => {
 
     const sUser = message.member;
-    const suggestionsChannel = message.guild.channels.find('name', 'suggestions');
-    if (!suggestionsChannel) return message.channel.send('A suggestions channel does not exist! Please create one or contact a server administrator.')
-        .then(message => {
-            message.delete(3000)
-        })
-        .catch(error => {
-            console.error;
-        });
+    const suggestionsChannel = message.guild.channels.find(channel => channel.name === 'suggestions');
+    if (!suggestionsChannel) return message.channel.send('A suggestions channel does not exist! Please create one or contact a server administrator.').then(message => { message.delete(3000) }).catch(console.error);
 
     const embed = new Discord.RichEmbed()
         .setDescription(`Hey, ${sUser}. Your suggestion has been added in the ${suggestionsChannel} channel to be voted on!`)
@@ -23,13 +17,7 @@ exports.run = (client, message, args) => {
     message.delete().catch(O_o=>{});
 
     const suggestion = args.join(' ');
-    if (!suggestion) return message.channel.send('Incorrect command arguments:' + '`' + `${prefix}` + 'suggest <suggestion>' + '`')
-        .then(message => {
-            message.delete(3000)
-        })
-        .catch(error => {
-            console.error;
-        });
+    if (!suggestion) return message.channel.send('Incorrect command arguments:' + '`' + `${prefix}` + 'suggest <suggestion>' + '`').then(message => { message.delete(3000) }).catch(console.error);
 
     const sEmbed = new Discord.RichEmbed()
         .setTitle(sUser.displayName)
@@ -48,11 +36,11 @@ exports.run = (client, message, args) => {
             console.error
         });
 
-    message.channel.send(embed)
-        .then(message => {
-            message.delete(5000)
-        })
-        .catch(error => {
-            console.error;
-        });
+    message.channel.send(embed).then(message => { message.delete(5000) }).catch(console.error);
 }
+
+exports.help = {
+    name: 'suggest',
+    description: 'Submit a new suggestion',
+    usage: 'suggest <suggestion>'
+};
