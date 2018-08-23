@@ -13,17 +13,6 @@ module.exports = async (client, message) => {
     if (message.author.bot) return;
     if (message.content.indexOf(newPrefix) !== 0) return;
 
-    const suggestionsChannel = message.guild.channels.find(channel => channel.name === 'suggestions');
-
-    if (message.content.startsWith(`${prefix}suggest`) && suggestionsChannel) {
-        console.log(`A new message has been sent in the suggestions channel: 
-        Sender: ${message.author.tag}
-        Message Content:${message.content.slice(9)}
-        Sent At: ${message.createdAt}`);
-    } else {
-        return;
-    }
-
     if (cmdCooldown.has(message.author.id)) {
         message.reply(`slow down there! You need to wait ${cmdSeconds} second(s) before issuing another command. `)
         .then(message => {

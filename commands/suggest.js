@@ -37,6 +37,12 @@ exports.run = (client, message, args) => {
         });
 
     message.channel.send(embed).then(message => { message.delete(5000) }).catch(console.error);
+    console.log(`A new suggestion has been created in:
+        Author: ${sUser.user.tag}
+        Suggestion: ${suggestion}
+        Time: ${message.createdAt}
+        Channel: ${suggestionsChannel.name}
+        Guild: ${client.guilds.first()}`);
 }
 
 exports.help = {
