@@ -1,5 +1,10 @@
 const Discord = require('discord.js');
-const client = new Discord.Client({disableEveryone: true});
+const client = new Discord.Client({
+    disableEveryone: true,
+    messageCacheMaxSize: 500,
+    messageCacheLifetime: 120,
+    messageSweepInterval: 60
+});
 //const fs = require('fs');
 const { prefix, token } = require('./config.json');
 
