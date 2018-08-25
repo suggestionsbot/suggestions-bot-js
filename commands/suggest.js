@@ -42,7 +42,7 @@ exports.run = (client, message, args) => {
         Suggestion: ${suggestion}
         Time: ${message.createdAt}
         Channel: ${suggestionsChannel.name}
-        Guild: ${client.guilds.first()}`);
+        Guild: ${message.guild.name}`);
 }
 
 exports.help = {
