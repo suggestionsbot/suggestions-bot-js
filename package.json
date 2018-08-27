@@ -11,6 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "@the-nerd-cave/discord.js-remove-on-reaction": "^1.0.9",
+    "dblapi.js": "^2.2.0",
     "discord.js": "^11.4.2",
     "enmap": "^3.1.4",
     "enmap-sqlite": "^2.0.5",
