@@ -1,7 +1,7 @@
 {
-  "name": "nerd-suggestions",
-  "version": "2.3.0",
-  "description": "A simple suggestions bot for users to create new suggestions that go directly into a '#suggestions' channel. From there. users can vote on a suggestion via reactions.",
+  "name": "suggestions-bot",
+  "version": "2.4.0",
+  "description": "A simple suggestions bot for users to create new suggestions for users to vote on in your Discord.",
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
