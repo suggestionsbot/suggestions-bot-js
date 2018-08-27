@@ -10,7 +10,7 @@ const client = new Discord.Client({
     messageSweepInterval: 60
 });
 
-const { token, prefix, suggestionsChannel } = require('./config.json');
+const { token, prefix, suggestionsChannel, dblToken } = require('./config.json');
 
 client.commands = new Enmap();
 client.aliases = new Enmap();
@@ -21,6 +21,17 @@ defaultSettings = {
     prefix: prefix,
     suggestionsChannel: suggestionsChannel
 }
+
+const DBL = require('dblapi.js');
+const dbl = new DBL(dblToken, client);
+
+dbl.on('posted', () => {
+    console.log('Server count posted to DiscordBots.org!');
+});
+
+dbl.on('error', e => {
+    console.log(e);
+});
 
 fs.readdir('./events/', (err, files) => {
     if (err) return console.error(err)
