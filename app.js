@@ -1,6 +1,7 @@
 const fs = require('fs');
 const Discord = require('discord.js');
 const Enmap = require('enmap');
+const Provider = require('enmap-sqlite');
 
 const client = new Discord.Client({
     disableEveryone: true,
@@ -9,7 +10,17 @@ const client = new Discord.Client({
     messageSweepInterval: 60
 });
 
-const { token } = require('./config.json');
+const { token, prefix, suggestionsChannel } = require('./config.json');
+
+client.commands = new Enmap();
+client.aliases = new Enmap();
+
+client.settings = new Enmap({provider: new Provider({name: 'settings'})});
+
+defaultSettings = {
+    prefix: prefix,
+    suggestionsChannel: suggestionsChannel
+}
 
 fs.readdir('./events/', (err, files) => {
     if (err) return console.error(err)
@@ -21,8 +32,6 @@ fs.readdir('./events/', (err, files) => {
     });
 });
 
-client.commands = new Enmap();
-
 fs.readdir('./commands/', (err, files) => {
     if (err) return console.error(err);
     files.forEach(file => {
@@ -31,6 +40,9 @@ fs.readdir('./commands/', (err, files) => {
         let cmdName = file.split('.')[0];
         console.log(`Loaded command '${cmdName}'`);
         client.commands.set(cmdName, props);
+        props.conf.aliases.forEach(alias => {
+            client.aliases.set(alias, cmdName);
+        });
     });
 });
 

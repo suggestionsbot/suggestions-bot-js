@@ -15,13 +15,14 @@ exports.run = (client, message, args) => {
             
     } else {
         //message.channel.send('Ye, man. Nice perms ya have there.');
-        message.channel.send(`So...
-            I guess putting multiple lines
-            in a message should be much
-            easier at this point with
-            template literals?`);
+
+
         //return;
     }
+}
+
+exports.conf = {
+    aliases: []
 }
 
 exports.help = {

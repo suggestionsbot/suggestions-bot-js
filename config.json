@@ -1,7 +1,9 @@
 {
 	"token": "NDc0MDUxOTU0OTk4NTA5NTcx.Dlk9Gw.lzCJydBbHA7pLmGnGMDd_5anGbA",
 	"prefix": ",",
+	"suggestionsChannel": "suggestions",
 	"owner": "158063324699951104",
 	"orange": "0xdd9323",
-	"discord": "https://discord.gg/g7wr8xb"
+	"discord": "https://discord.gg/g7wr8xb",
+	"invite": "https://discordapp.com/oauth2/authorize?client_id=474051954998509571&scope=bot&permissions=93248"
 }

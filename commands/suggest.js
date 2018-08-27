@@ -1,10 +1,16 @@
 const Discord = require('discord.js');
+//const reactionrem = require('@the-nerd-cave/discord.js-remove-on-reaction');
 const { orange, prefix } = require('../config.json');
+const moment = require('moment');
+require('moment-duration-format');
+require('moment-timezone');
 
 exports.run = (client, message, args) => {
 
+    const guildConf = client.settings.get(message.guild.id) || defaultSettings;
+
     const sUser = message.member;
-    const suggestionsChannel = message.guild.channels.find(channel => channel.name === 'suggestions');
+    const suggestionsChannel = message.guild.channels.find(channel => channel.name === guildConf.suggestionsChannel);
     if (!suggestionsChannel) return message.channel.send('A suggestions channel does not exist! Please create one or contact a server administrator.').then(message => { message.delete(3000) }).catch(console.error);
 
     const embed = new Discord.RichEmbed()
@@ -17,14 +23,27 @@ exports.run = (client, message, args) => {
     message.delete().catch(O_o=>{});
 
     const suggestion = args.join(' ');
-    if (!suggestion) return message.channel.send('Incorrect command arguments:' + '`' + `${prefix}` + 'suggest <suggestion>' + '`').then(message => { message.delete(3000) }).catch(console.error);
+    if (!suggestion) return message.channel.send(`Incorrect command arguments: \`${guildConf.prefix} suggest <suggestion>\``).then(message => { message.delete(3000) }).catch(console.error);
+
+    const submittedOn = moment(message.createdAt).tz('America/New_York').format('MMM Do YY hh:mm:ss z')
 
     const sEmbed = new Discord.RichEmbed()
-        .setTitle(sUser.displayName)
-        .setDescription(suggestion)
+        //.setAuthor(sUser.user.tag)
+        //.setTitle(sUser.displayName)
+        .setThumbnail(sUser.user.avatarURL)
+        .setDescription(`
+        **Submitter**
+        ${sUser.user.tag}
+
+        **Suggestion**
+        ${suggestion}
+
+        **Submitted**
+        ${submittedOn}
+        `)
         .setColor(orange)
         .setFooter(`User ID: ${sUser.id}`)
-        .setTimestamp();
+        //.setTimestamp();
 
     suggestionsChannel.send(sEmbed)
         .then(async function (message) {
@@ -33,16 +52,21 @@ exports.run = (client, message, args) => {
         })
         //.then(botmessage => reactionrem(message, botmessage, true))
         .catch(error => {
-            console.error
+            console.log(error);
         });
+
 
     message.channel.send(embed).then(message => { message.delete(5000) }).catch(console.error);
     console.log(`A new suggestion has been created in:
-        Author: ${sUser.user.tag}
+        Author: ${sUser.user.tag} (${sUser.id})
         Suggestion: ${suggestion}
-        Time: ${message.createdAt}
+        Time: ${submittedOn}
         Channel: ${suggestionsChannel.name}
-        Guild: ${message.guild.name}`);
+        Guild: ${message.guild.name} (${message.guild.id})`);
+}
+
+exports.conf = {
+    aliases: []
 }
 
 exports.help = {

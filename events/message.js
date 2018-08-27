@@ -2,13 +2,17 @@ const { prefix, token } = require('../config.json');
 
 module.exports = async (client, message) => {
 
+    if(!message.guild) return;
+
+    // Load the config. Uses default settings if it doesn't exist
+    // This is an extra security measure, in case enmap fails (it won't, just being safe)
+    const guildConf = client.settings.get(message.guild.id) || defaultSettings;
+
     const cmdCooldown = new Set();
     const cmdSeconds = 5;
 
     const prefixMention = new RegExp(`^<@!?${client.user.id}> `);
-    const newPrefix = message.content.match(prefixMention) ? message.content.match(prefixMention)[0] : prefix;
-
-    if(!message.guild) return;
+    const newPrefix = message.content.match(prefixMention) ? message.content.match(prefixMention)[0] : guildConf.prefix;
 
     if (message.author.bot) return;
     if (message.content.indexOf(newPrefix) !== 0) return;
@@ -31,7 +35,7 @@ module.exports = async (client, message) => {
     const args = message.content.slice(newPrefix.length).trim().split(/ +/g);
     const command = args.shift().toLowerCase();
 
-    const cmd = client.commands.get(command);
+    const cmd = client.commands.get(command) || client.commands.get(client.aliases.get(command));
     if(!cmd) return;
 
     cmd.run(client, message, args);

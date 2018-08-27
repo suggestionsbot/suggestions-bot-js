@@ -4,7 +4,7 @@ const { orange, discord } = require('../config.json');
 exports.run = (client, message, args) => {
     const embed = new Discord.RichEmbed()
         .setTitle('Suggestions Bot')
-        .setDescription('This is a bot that allows a user to submit new suggestions to a `#suggestions` channel.')
+        .setDescription('This is a bot that allows a user to submit new suggestions in your discord.')
         .setColor(orange)
         .setThumbnail('https://cdn.discordapp.com/app-icons/474051954998509571/2a0d63280cc2f2a3bcf0d71c993bcf11.png?size=512')
         .addField('Bot Author', '<@158063324699951104>')
@@ -12,6 +12,10 @@ exports.run = (client, message, args) => {
         .setFooter('© 2018 The Nerd Cave');
 
     message.channel.send(embed);
+}
+
+exports.conf = {
+    aliases: ['botinfo', 'suggestions']
 }
 
 exports.help = {
