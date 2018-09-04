@@ -21,7 +21,15 @@ exports.run = (client, message, args) => {
         .addField('Node', `${process.version}`, true)
         .setTimestamp();
 
-    message.channel.send(embed);
+    let perms = message.guild.me.permissions;
+
+    if (!perms.has(['EMBED_LINKS', 'ADD_REACTIONS'])) {
+        message.channel.send(`I'm missing some permissions!
+        
+        \`EMBED_LINKS\``);
+    } else {
+        message.channel.send(embed);
+    }
 }
 
 exports.conf = {

@@ -1,16 +1,17 @@
 const Discord = require('discord.js');
+const { noPerms } = require('../utils/errors.js');
 
 exports.run = async (client, message, args) => {
 
     await message.delete().catch(O_o => {});
 
     const guildConf = client.settings.get(message.guild.id) || defaultSettings;
-
-    if (!message.member.hasPermission('ADMINISTRATOR')) return message.channel.send('Sorry! Only users with the `ADMINISTRATOR` permission may change the bot prefix!').then(m => m.delete(2000)).catch(err => console.log(err));
-
     const cmdName = client.commands.get('setprefix', 'help.name');
+
+    if (!message.member.hasPermission('ADMINISTRATOR')) return noPerms(message, 'ADMINISTRATOR');
+
     const value = args[0];
-    if (!value) return message.channel.send('Incorrect command arguments: `' + `${guildConf.prefix + cmdName}` + ' <prefix>`').then(m => m.delete(2000)).catch(err => console.log(err));
+    if (!value) return message.channel.send(`Incorrect command arguments: \`${guildConf.prefix + cmdName} <prefix>\``).then(m => m.delete(5000)).catch(err => console.log(err));
 
     client.settings.set(message.guild.id, value, 'prefix');
 

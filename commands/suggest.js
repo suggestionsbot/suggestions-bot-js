@@ -1,17 +1,21 @@
 const Discord = require('discord.js');
 //const reactionrem = require('@the-nerd-cave/discord.js-remove-on-reaction');
-const { orange, prefix } = require('../config.json');
+const { orange } = require('../config.json');
 const moment = require('moment');
+const { noSuggestions, noBotPerms } = require('../utils/errors.js');
 require('moment-duration-format');
 require('moment-timezone');
 
 exports.run = (client, message, args) => {
 
     const guildConf = client.settings.get(message.guild.id) || defaultSettings;
+    const cmdName = client.commands.get('suggest', 'help.name');
 
     const sUser = message.member;
-    const suggestionsChannel = message.guild.channels.find(channel => channel.name === guildConf.suggestionsChannel);
-    if (!suggestionsChannel) return message.channel.send('A suggestions channel does not exist! Please create one or contact a server administrator.').then(message => { message.delete(3000) }).catch(console.error);
+    const suggestionsChannel = message.guild.channels.find(c => c.name === guildConf.suggestionsChannel) ||  message.guild.channels.find(c => c.toString() === guildConf.suggestionsChannel);
+    if (!suggestionsChannel) return noSuggestions(message.channel);
+
+    //if (!message.guild.me.hasPermission('EMBED_LINKS')) return noBotPerms(message , 'EMBED_LINKS');
 
     const embed = new Discord.RichEmbed()
         .setDescription(`Hey, ${sUser}. Your suggestion has been added in the ${suggestionsChannel} channel to be voted on!`)
@@ -23,13 +27,11 @@ exports.run = (client, message, args) => {
     message.delete().catch(O_o=>{});
 
     const suggestion = args.join(' ');
-    if (!suggestion) return message.channel.send(`Incorrect command arguments: \`${guildConf.prefix} suggest <suggestion>\``).then(message => { message.delete(3000) }).catch(console.error);
+    if (!suggestion) return message.channel.send(`Usage: \`${guildConf.prefix + cmdName} <suggestion>\``).then(message => { message.delete(5000) }).catch(console.error);
 
-    const submittedOn = moment(message.createdAt).tz('America/New_York').format('MMM Do YY hh:mm:ss z')
+    const submittedOn = moment(message.createdAt).tz('America/New_York').format('MM/DD/YY @ h:mm A (z)')
 
     const sEmbed = new Discord.RichEmbed()
-        //.setAuthor(sUser.user.tag)
-        //.setTitle(sUser.displayName)
         .setThumbnail(sUser.user.avatarURL)
         .setDescription(`
         **Submitter**
@@ -42,27 +44,42 @@ exports.run = (client, message, args) => {
         ${submittedOn}
         `)
         .setColor(orange)
-        .setFooter(`User ID: ${sUser.id}`)
-        //.setTimestamp();
+        .setFooter(`User ID: ${sUser.id}`);
 
-    suggestionsChannel.send(sEmbed)
-        .then(async function (message) {
-            await message.react(`✅`);
-            await message.react(`❌`);
-        })
-        //.then(botmessage => reactionrem(message, botmessage, true))
-        .catch(error => {
-            console.log(error);
-        });
+    let perms = message.guild.me.permissions;
+
+    if (!perms.has(['EMBED_LINKS', 'ADD_REACTIONS'])) {
+        message.channel.send(`I'm missing some permissions!
+        
+        \`EMBED_LINKS\`
+        \`ADD_REACTIONS\``);
+    } else {
+
+        message.channel.send(embed).then(message => {
+                message.delete(5000)
+            })
+            .catch(err => {
+                console.log(err);
+            });
+
+        suggestionsChannel.send(sEmbed)
+            .then(async function (message) {
+                await message.react(`✅`);
+                await message.react(`❌`);
+            })
+            //.then(botmessage => reactionrem(message, botmessage, true))
+            .catch(err => {
+                console.log(err);
+            });
 
 
-    message.channel.send(embed).then(message => { message.delete(5000) }).catch(console.error);
-    console.log(`A new suggestion has been created in:
-        Author: ${sUser.user.tag} (${sUser.id})
-        Suggestion: ${suggestion}
-        Time: ${submittedOn}
-        Channel: ${suggestionsChannel.name}
-        Guild: ${message.guild.name} (${message.guild.id})`);
+        console.log(`A new suggestion has been created in:
+            Author: ${sUser.user.tag} (ID: ${sUser.id})
+            Suggestion: ${suggestion}
+            Time: ${submittedOn}
+            Channel: ${suggestionsChannel.name}
+            Guild: ${message.guild.name} (ID: ${message.guild.id})`);
+    }
 }
 
 exports.conf = {

@@ -6,7 +6,7 @@ exports.run = async (client, message, args) => {
 
     const guildConf = client.settings.get(message.guild.id) || defaultSettings;
 
-    message.channel.send(`Current suggestions channel for ${client.user} in **${message.guild.name}**: \`${guildConf.suggestionsChannel}\``);
+    message.channel.send(`Current suggestions channel: ${guildConf.suggestionsChannel}`);
 }
 
 exports.conf = {

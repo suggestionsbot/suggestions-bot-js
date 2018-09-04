@@ -7,25 +7,31 @@ exports.run = async (client, message, args) => {
     const guildConf = client.settings.get(message.guild.id) || defaultSettings;
 
     const cmds = Array.from(client.commands.keys());
-        
-    const newCmds = cmds.map(function(el) {
+    const newCmds = cmds.map(el => {
         return '`' + el + '`';
     });
 
-    channelName = message.guild.channels.find(c => c.name === guildConf.suggestionsChannel);
+    const suggestionsChannel = message.guild.channels.find(c => c.name === guildConf.suggestionsChannel) ||  message.guild.channels.find(c => c.toString() === guildConf.suggestionsChannel) || 'None';
 
     const helpEmbed = new Discord.RichEmbed()
         .setTitle('Help Information')
         .setDescription(`View help information for ${client.user}.`)
         .addField('Current Prefix', guildConf.prefix)
-        .addField('Suggestions Channel', `<#${channelName.id}>`)
+        .addField('Suggestions Channel', suggestionsChannel)
         .addField('Bot Commands', newCmds.join(' | '))
         .addField('Command Cooldown', `A ${cmdSeconds} second(s) cooldown is in place on bot commands except for users with the \`ADMINISTRATOR\` permission.`)
         .addField('Found an issue?', `Please report any issues to <@${owner}> via the Support Discord: ${discord}.`, false)
         .setColor(orange);
 
-    message.channel.send(helpEmbed);
+    let perms = message.guild.me.permissions;
 
+    if (!perms.has(['EMBED_LINKS', 'ADD_REACTIONS'])) {
+        message.channel.send(`I'm missing some permissions!
+        
+        \`EMBED_LINKS\``);
+    } else { 
+        message.channel.send(helpEmbed);
+    }
 }
 
 exports.conf = {

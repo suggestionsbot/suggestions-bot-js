@@ -1,25 +1,33 @@
 const Discord = require('discord.js');
-const { yellow, discord, invite } = require('../config.json');
+const { orange, discord, invite } = require('../config.json');
 
-exports.run = (client, message, args) => {
+exports.run = async (client, message, args) => {
     
     const dmEmbed = new Discord.RichEmbed()
         .setAuthor('Bot Invite Information', client.user.avatarURL)
         .setDescription(`Hello ${message.author},
         
-            **Before inviting, you need** ` + '`MANAGE SERVER` **or** `ADMINISTRATOR` **permissions to add bots to a server.** \n' + 
-            `
+            **Before inviting, you need** \`MANAGE SERVER\` **or** \`ADMINISTRATOR\` **permissions to add bots to a server.** 
+            
             **Bot Invite:**
             ${invite}
 
             **Support Server:**
             ${discord}
             `)
-        .setColor(yellow)
+        .setColor(orange)
         .setTimestamp();
 
-    message.react('📧').then(message.delete(2500)).catch(err => console.log(err));    
-    message.member.send(dmEmbed);
+    let perms = message.guild.me.permissions;
+
+    if (!perms.has(['EMBED_LINKS', 'ADD_REACTIONS'])) {
+        message.channel.send(`I'm missing some permissions!
+        
+        \`ADD_REACTIONS\``);
+    } else {
+        await message.react('📧').then(message.delete(2500));
+        await message.member.send(dmEmbed);
+    }
 }
 
 exports.conf = {

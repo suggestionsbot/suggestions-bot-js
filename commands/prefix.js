@@ -6,7 +6,7 @@ exports.run = async (client, message, args) => {
 
     const guildConf = client.settings.get(message.guild.id) || defaultSettings;
 
-    message.channel.send(`Current prefix for ${client.user} in **${message.guild.name}**: \`${guildConf.prefix}\``);
+    message.channel.send(`Current prefix: \`${guildConf.prefix}\``);
 }
 
 exports.conf = {
