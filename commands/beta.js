@@ -4,7 +4,7 @@ const { noBotPerms } = require('../utils/errors.js');
 
 exports.run = (client, message, args) => {
 
-    const guildConf = client.settings.get(message.guild.id) || defaultSettings;
+    //const guildConf = client.settings.get(message.guild.id) || defaultSettings;
 
     if(message.author.id !== owner) {
 
@@ -18,7 +18,7 @@ exports.run = (client, message, args) => {
             
     } else {
         //message.channel.send('Ye, man. Nice perms ya have there.');
-        
+
 
 
         //return;

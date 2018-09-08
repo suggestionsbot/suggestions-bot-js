@@ -1,7 +1,7 @@
 {
   "name": "suggestions-bot",
-  "version": "2.8.0",
-  "description": "A simple suggestions bot for users to create new suggestions for users to vote on in your Discord.",
+  "version": "2.0.0",
+  "description": "The only suggestions bot you'll ever need. Simple usage and management of suggestions for public and staff use.",
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -10,7 +10,6 @@
   "author": "xSinclare",
   "license": "ISC",
   "dependencies": {
-    "@the-nerd-cave/discord.js-remove-on-reaction": "^1.0.9",
     "dblapi.js": "^2.2.0",
     "discord.js": "^11.4.2",
     "enmap": "^3.1.4",

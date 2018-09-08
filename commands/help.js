@@ -1,5 +1,5 @@
 const Discord = require('discord.js');
-const { owner, orange, discord } = require('../config.json');
+const { owner, orange, discord, docs } = require('../config.json');
 const cmdSeconds = 5;
 
 exports.run = async (client, message, args) => {
@@ -20,6 +20,7 @@ exports.run = async (client, message, args) => {
         .addField('Suggestions Channel', suggestionsChannel)
         .addField('Bot Commands', newCmds.join(' | '))
         .addField('Command Cooldown', `A ${cmdSeconds} second(s) cooldown is in place on bot commands except for users with the \`ADMINISTRATOR\` permission.`)
+        .addField('Documentation', docs)
         .addField('Found an issue?', `Please report any issues to <@${owner}> via the Support Discord: ${discord}.`, false)
         .setColor(orange);
 

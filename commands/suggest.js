@@ -1,13 +1,14 @@
 const Discord = require('discord.js');
-//const reactionrem = require('@the-nerd-cave/discord.js-remove-on-reaction');
+const crypto = require('crypto');
 const { orange } = require('../config.json');
 const moment = require('moment');
 const { noSuggestions, noBotPerms } = require('../utils/errors.js');
 require('moment-duration-format');
 require('moment-timezone');
 
-exports.run = (client, message, args) => {
+exports.run = async (client, message, args) => {
 
+    
     const guildConf = client.settings.get(message.guild.id) || defaultSettings;
     const cmdName = client.commands.get('suggest', 'help.name');
 
@@ -15,16 +16,17 @@ exports.run = (client, message, args) => {
     const suggestionsChannel = message.guild.channels.find(c => c.name === guildConf.suggestionsChannel) ||  message.guild.channels.find(c => c.toString() === guildConf.suggestionsChannel);
     if (!suggestionsChannel) return noSuggestions(message.channel);
 
-    //if (!message.guild.me.hasPermission('EMBED_LINKS')) return noBotPerms(message , 'EMBED_LINKS');
+    const id = crypto.randomBytes(20).toString('hex').slice(12,20);
 
-    const embed = new Discord.RichEmbed()
-        .setDescription(`Hey, ${sUser}. Your suggestion has been added in the ${suggestionsChannel} channel to be voted on!`)
+    const dmEmbed = new Discord.RichEmbed()
+        .setDescription(`Hey, ${sUser}. Your suggestion has been sent to the ${suggestionsChannel} channel to be voted on!
+        
+        Please wait until it gets approved or rejected by a staff member.
+        
+        Your suggestion ID (sID) for reference is **${id}**.
+        `)
         .setColor(orange)
-        .setAuthor(sUser.displayName)
-        .setFooter(`User ID: ${sUser.id}`)
         .setTimestamp();
-
-    message.delete().catch(O_o=>{});
 
     const suggestion = args.join(' ');
     if (!suggestion) return message.channel.send(`Usage: \`${guildConf.prefix + cmdName} <suggestion>\``).then(message => { message.delete(5000) }).catch(console.error);
@@ -44,7 +46,7 @@ exports.run = (client, message, args) => {
         ${submittedOn}
         `)
         .setColor(orange)
-        .setFooter(`User ID: ${sUser.id}`);
+        .setFooter(`User ID: ${sUser.id} | sID: ${id}`);
 
     let perms = message.guild.me.permissions;
 
@@ -55,30 +57,29 @@ exports.run = (client, message, args) => {
         \`ADD_REACTIONS\``);
     } else {
 
-        message.channel.send(embed).then(message => {
-                message.delete(5000)
+        sUser.send(dmEmbed);
+
+        suggestionsChannel.send(sEmbed)
+            .then(async message => {
+                await message.react(`✅`);
+                await message.react(`❌`);
             })
             .catch(err => {
                 console.log(err);
             });
 
-        suggestionsChannel.send(sEmbed)
-            .then(async function (message) {
-                await message.react(`✅`);
-                await message.react(`❌`);
-            })
-            //.then(botmessage => reactionrem(message, botmessage, true))
-            .catch(err => {
-                console.log(err);
-            });
+        client.suggestions.set(message.guild.id, {submitter: sUser.id, suggestion: suggestion, sID: id});
 
 
         console.log(`A new suggestion has been created in:
             Author: ${sUser.user.tag} (ID: ${sUser.id})
-            Suggestion: ${suggestion}
+            Suggestion: ${suggestion} (ID: ${id})
             Time: ${submittedOn}
             Channel: ${suggestionsChannel.name}
             Guild: ${message.guild.name} (ID: ${message.guild.id})`);
+
+        await message.react('✉');
+        await message.delete(3000).catch(O_o=>{});
     }
 }
 

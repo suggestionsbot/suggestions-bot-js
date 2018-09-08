@@ -1,5 +1,5 @@
 const Discord = require('discord.js');
-const { orange, discord, invite } = require('../config.json');
+const { orange, discord, invite, docs } = require('../config.json');
 
 exports.run = async (client, message, args) => {
     
@@ -11,6 +11,9 @@ exports.run = async (client, message, args) => {
             
             **Bot Invite:**
             ${invite}
+
+            **Documentation:**
+            ${docs}
 
             **Support Server:**
             ${discord}

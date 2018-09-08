@@ -1,8 +1,14 @@
+const { prefix } = require('../config.json');
+
 module.exports = async client => {
+
     console.log(`Logged in as ${client.user.tag} (${client.user.id}) in ${client.guilds.size} server(s).`);
 
+    const userSize = client.users.size.toLocaleString();
+    const cmdHelp = client.commands.get('help', 'help.name');
+
     client.user.setStatus('online');
-    client.user.setActivity('your suggestions', { type: 'LISTENING' })
+    client.user.setActivity(`${userSize} users | ${prefix + cmdHelp}`, { type: 'WATCHING' })
         .catch(console.error);
 
     client.guilds.forEach(guild => {
@@ -12,9 +18,4 @@ module.exports = async client => {
             client.settings.set(guild.id, defaultSettings);
         }
     });
-
-    // const suggestions = client.channels.find(c => c.name === 'suggestions' && c.type === 'text');
-    // suggestions.fetchMessages().then(m => {
-    //     console.log(`Fetched ${m.filter(msgs => msgs.author.id === client.user.id).size} message(s) from ${client.guilds.size} server(s).`)
-    // }).catch(console.error);
 };
