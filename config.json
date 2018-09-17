@@ -8,7 +8,7 @@
 	"discord": "https://discord.gg/g7wr8xb",
 	"docs": "https://docs.thenerdcave.us/",
 	"invite": "https://discordapp.com/oauth2/authorize?client_id=474051954998509571&scope=bot&permissions=93248",
-	"dblToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjQ3NDA1MTk1NDk5ODUwOTU3MSIsImJvdCI6dHJ1ZSwiaWF0IjoxNTM0NzM1MDI2fQ.Rwk2bK17T-hk0uwdD9PK8KsQa3TrqZdq1EeRMCJty6c",
+	"dblToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjQ3NDA1MTk1NDk5ODUwOTU3MSIsImJvdCI6dHJ1ZSwiaWF0IjoxNTM3MTcwNTc1fQ.TRtoKpD4XrTYTvi9KpEOF5CQiExLov86FER2dCsQWPs",
 	"db": {
 		"host": "104.207.142.201",
 		"port": "27017",
