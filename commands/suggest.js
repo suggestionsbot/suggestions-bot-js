@@ -26,41 +26,47 @@ exports.run = async (client, message, args) => {
     }, async (err, res) => {
         if (err) return console.log(err);
 
-        if (res.cmdStatus !== 'true' && message.author.id !== owner) return maintenanceMode(message.channel);
+        Settings.findOne({
+            guildID: '345753533141876737'
+        }, (err, res) => {
+            if (err) return console.log(err);
 
-        let status = args[0]
-        if (message.author.id === owner) {
-            if (status === 'true') {
-                Settings.findOneAndUpdate(
-                    { guildID: message.guild.id },
-                    { cmdStatus: status },
-                )
-                .then(() => {
-                    console.log(`MAINTENANCE: Enabled the ${cmdName} command.`);
-                    message.channel.send(`***Suggestions command enabled by __${initiator(owner)}__.***`);
-                })
-                .catch(err => {
-                    console.log(err);message.channel.send('Error setting command status!');
-                });
-                return;
+            if (res.cmdStatus !== 'true' && message.author.id !== owner) return maintenanceMode(message.channel);
+
+            let status = args[0]
+            if (message.author.id === owner) {
+                if (status === 'true') {
+                    Settings.findOneAndUpdate(
+                        { guildID: message.guild.id },
+                        { cmdStatus: status },
+                    )
+                    .then(() => {
+                        console.log(`MAINTENANCE: Enabled the ${cmdName} command.`);
+                        message.channel.send(`***Suggestions command enabled by __${initiator(owner)}__.***`);
+                    })
+                    .catch(err => {
+                        console.log(err);message.channel.send('Error setting command status!');
+                    });
+                    return;
+                }
+        
+                if (status === 'false') {
+                    Settings.findOneAndUpdate(
+                        { guildID: message.guild.id },
+                        { cmdStatus: status },
+                    )
+                    .then(() => {
+                        console.log(`MAINTENANCE: Disabled the ${cmdName} command.`);
+                        message.channel.send(`***Suggestions command disabled by __${initiator(owner)}__.***`);
+                    })
+                    .catch(err => {
+                        console.log(err);message.channel.send('Error setting command status!');
+                    });
+                    return;
+                }
+        
             }
-    
-            if (status === 'false') {
-                Settings.findOneAndUpdate(
-                    { guildID: message.guild.id },
-                    { cmdStatus: status },
-                )
-                .then(() => {
-                    console.log(`MAINTENANCE: Disabled the ${cmdName} command.`);
-                    message.channel.send(`***Suggestions command disabled by __${initiator(owner)}__.***`);
-                })
-                .catch(err => {
-                    console.log(err);message.channel.send('Error setting command status!');
-                });
-                return;
-            }
-    
-        }
+        });
 
         const sUser = message.member;
         const suggestionsChannel = message.guild.channels.find(c => c.name === res.suggestionsChannel) ||  message.guild.channels.find(c => c.toString() === res.suggestionsChannel);
