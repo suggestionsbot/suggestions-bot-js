@@ -2,6 +2,7 @@ const Discord = require('discord.js');
 const Settings = require('../models/settings.js');
 const { owner, orange, discord, docs } = require('../config.json');
 const cmdSeconds = 5;
+let cmdStatus = JSON.parse(fs.readFileSync('../cmdStatus.json', 'utf8'));
 
 exports.run = async (client, message, args) => {
 

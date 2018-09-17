@@ -1,5 +1,7 @@
 const Discord = require('discord.js');
-const { orange, discord, invite, docs } = require('../config.json');
+const { orange, discord, invite, docs, owner } = require('../config.json');
+let cmdStatus = JSON.parse(fs.readFileSync('../cmdStatus.json', 'utf8'));
+const { maintenanceMode } = require('../utils/errors.js');
 
 exports.run = async (client, message, args) => {
     

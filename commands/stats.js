@@ -1,6 +1,8 @@
 const Discord = require('discord.js');
-const { orange } = require('../config.json');
+const { orange, owner } = require('../config.json');
 const moment = require('moment');
+let cmdStatus = JSON.parse(fs.readFileSync('../cmdStatus.json', 'utf8'));
+const { maintenanceMode } = require('../utils/errors.js');
 require('moment-duration-format');
 
 exports.run = (client, message, args) => {

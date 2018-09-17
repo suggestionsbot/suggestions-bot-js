@@ -1,8 +1,9 @@
 const Discord = require('discord.js');
 const Settings = require('../models/settings.js');
-const { orange } = require('../config.json');
-const { noSuggestionsPerms } = require('../utils/errors.js');
+const { orange, owner } = require('../config.json');
+const { noSuggestionsPerms, maintenanceMode } = require('../utils/errors.js');
 const moment = require('moment');
+let cmdStatus = JSON.parse(fs.readFileSync('../cmdStatus.json', 'utf8'));
 require('moment-duration-format');
 require('moment-timezone');
 

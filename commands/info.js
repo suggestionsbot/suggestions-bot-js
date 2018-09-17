@@ -1,7 +1,10 @@
 const Discord = require('discord.js');
 const { orange, discord, owner, docs } = require('../config.json');
+let cmdStatus = JSON.parse(fs.readFileSync('../cmdStatus.json', 'utf8'));
+const { maintenanceMode } = require('../utils/errors.js');
 
 exports.run = (client, message, args) => {
+    
     const embed = new Discord.RichEmbed()
         .setTitle(client.user.username)
         .setDescription('This is a bot that allows a user to submit new suggestions in your discord.')

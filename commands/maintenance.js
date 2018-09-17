@@ -11,7 +11,7 @@ exports.run = async (client, message, args) => {
     
     Settings.findOne({
         guildID: message.guild.id,
-    }, (err, res) => {
+    }, async (err, res) => {
         if (err) return console.log(err);
 
         const cmdName = client.commands.get('maintenance', 'help.name');
@@ -65,6 +65,15 @@ exports.run = async (client, message, args) => {
 
                                             client.aliases.delete(aliases[i]);
                                         }
+
+                                        // let path = '../cmdStatus.json';
+                                        // let data = {
+                                        //     "status": 'off'
+                                        // };
+                                        
+                                        // fs.writeFile(path, JSON.stringify(data), (err) => {
+                                        //     if (err) throw err;
+                                        // });
                                     })
                                     .then(() => {
                                         client.user.setActivity(`Maintenance Mode...`, {
@@ -91,8 +100,8 @@ exports.run = async (client, message, args) => {
                             .then(() => {
                                 console.log('MAINTENANCE: Loading all commands and aliases...');
                                 message.channel.send(`***Bot Maintenance Mode deactivated by __${initiator(owner)}__. All commands and aliases are loaded.***`)
-                                    .then(() => {
-                                        fs.readdir('./commands', async (err, files) => {
+                                    .then(async () => {
+                                        await fs.readdir('./commands', async (err, files) => {
                                             if (err) return console.error(err);
                                             files.forEach(file => {
                                                 if (!file.endsWith('.js')) return;
@@ -104,7 +113,16 @@ exports.run = async (client, message, args) => {
                                                     client.aliases.set(alias, cmdName);
                                                 });
                                             });
-                                        })
+                                        });
+
+                                        // let path = '../cmdStatus.json';
+                                        // let data = {
+                                        //     "status": 'on'
+                                        // };
+                                        
+                                        // await fs.writeFile(path, JSON.stringify(data), (err) => {
+                                        //     if (err) throw err;
+                                        // });
                                     })
                                     .then(() => {
                                         const userSize = client.users.size.toLocaleString();

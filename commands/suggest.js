@@ -3,10 +3,14 @@ const Settings = require('../models/settings.js');
 const Suggestion = require('../models/suggestions.js');
 const mongoose = require('mongoose');
 const crypto = require('crypto');
-const { orange, discord } = require('../config.json');
+const fs = require('fs');
+const { owner, orange, discord } = require('../config.json');
 const moment = require('moment');
 const { noSuggestions, noBotPerms, maintenanceMode } = require('../utils/errors.js');
-const { owner } = require('../config.json');
+let cmdStatus = fs.readFile('../cmdStatus.json', (err, data) => {
+    if (err) throw err;
+    return status = JSON.parse(data);
+});
 require('moment-duration-format');
 require('moment-timezone');
 
@@ -14,60 +18,10 @@ exports.run = async (client, message, args) => {
 
     const cmdName = client.commands.get('suggest', 'help.name');
 
-    function initiator(user) {
-        if (!user) return;
-
-        let obj = client.users.find(u => u.id === owner);
-        return `${obj.username}#${obj.discriminator}`;
-    }
-
     Settings.findOne({
         guildID: message.guild.id,
     }, async (err, res) => {
         if (err) return console.log(err);
-
-        Settings.findOne({
-            guildID: '345753533141876737'
-        }, (err, res) => {
-            if (err) return console.log(err);
-
-            if (res.cmdStatus !== 'true' && message.author.id !== owner) return maintenanceMode(message.channel);
-
-            let status = args[0]
-            if (message.author.id === owner) {
-                if (status === 'true') {
-                    Settings.findOneAndUpdate(
-                        { guildID: message.guild.id },
-                        { cmdStatus: status },
-                    )
-                    .then(() => {
-                        console.log(`MAINTENANCE: Enabled the ${cmdName} command.`);
-                        message.channel.send(`***Suggestions command enabled by __${initiator(owner)}__.***`);
-                    })
-                    .catch(err => {
-                        console.log(err);
-                        message.channel.send('Error setting command status!');
-                    });
-                    return;
-                }
-        
-                if (status === 'false') {
-                    Settings.findOneAndUpdate(
-                        { guildID: message.guild.id },
-                        { cmdStatus: status },
-                    )
-                    .then(() => {
-                        console.log(`MAINTENANCE: Disabled the ${cmdName} command.`);
-                        message.channel.send(`***Suggestions command disabled by __${initiator(owner)}__.***`);
-                    })
-                    .catch(err => {
-                        console.log(err);message.channel.send('Error setting command status!');
-                    });
-                    return;
-                }
-        
-            }
-        });
 
         const sUser = message.member;
         const suggestionsChannel = message.guild.channels.find(c => c.name === res.suggestionsChannel) ||  message.guild.channels.find(c => c.toString() === res.suggestionsChannel);
