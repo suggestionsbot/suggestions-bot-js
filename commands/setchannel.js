@@ -1,25 +1,38 @@
 const Discord = require('discord.js');
+const Settings = require('../models/settings.js');
 const { noPerms } = require('../utils/errors.js');
 
 exports.run = async (client, message, args) => {
 
     await message.delete().catch(O_o => {});
 
-    const guildConf = client.settings.get(message.guild.id) || defaultSettings;
-    const cmdName = client.commands.get('setchannel', 'help.name');
+    Settings.findOne({
+        guildID: message.guild.id,
+    }, async (err, res) => {
+        if (err) return console.log(err);
 
-    if (!message.member.hasPermission('ADMINISTRATOR')) return noPerms(message, 'ADMINISTRATOR');
+        const cmdName = client.commands.get('setchannel', 'help.name');
 
-    const value = args[0];
-    if (!value) return message.channel.send(`Usage: \`${guildConf.prefix + cmdName} <name>\``).then(m => m.delete(5000)).catch(err => console.log(err));
-
-    client.settings.set(message.guild.id, value, 'suggestionsChannel');
-
-    message.channel.send(`Suggestions channel has been changed to: ${value}`);
+        if (!message.member.hasPermission('ADMINISTRATOR')) return noPerms(message, 'ADMINISTRATOR');
+    
+        const value = args[0];
+        if (!value) return message.channel.send(`Usage: \`${res.prefix + cmdName} <name>\``).then(m => m.delete(5000)).catch(err => console.log(err));
+    
+        await Settings.findOneAndUpdate(
+            { guildID: message.guild.id },
+            { suggestionsChannel: value },
+        ).catch(err => {
+            console.log(err);
+            message.channel.send('Error setting the suggestions channel!');
+        });
+    
+        await message.channel.send(`Suggestions channel has been changed to: ${value}`);
+    });
 }
 
 exports.conf = {
-    aliases: []
+    aliases: [],
+    status: ''
 }
 
 exports.help = {

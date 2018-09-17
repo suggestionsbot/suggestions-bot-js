@@ -1,7 +1,12 @@
+const Settings = require('../models/settings.js');
+
 module.exports = async (client, guild) => {
 
-    // Removing an element uses `delete(key)`
-    client.settings.delete(guild.id);
-    client.suggestions.delete(guild.id);
+    Settings.findOneAndDelete({guildID: guild.id}, err => {
+        if (err) console.log(err);
+        
+        console.log(`Settings deleted for guild ${guild.name} (${guild.id})`);
+    })
 
+    await console.log(`${client.user.username} has left a guild: ${guild.name} (${guild.id})`);
 };

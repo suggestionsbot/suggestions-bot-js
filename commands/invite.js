@@ -34,7 +34,8 @@ exports.run = async (client, message, args) => {
 }
 
 exports.conf = {
-    aliases: ['bot', 'botinvite']
+    aliases: ['bot', 'botinvite'],
+    status: ''
 }
 
 exports.help = {

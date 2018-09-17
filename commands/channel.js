@@ -1,16 +1,22 @@
-Discord = require('discord.js');
+const Discord = require('discord.js');
+const Settings = require('../models/settings.js');
 
 exports.run = async (client, message, args) => {
 
     await message.delete().catch(O_o => {});
 
-    const guildConf = client.settings.get(message.guild.id) || defaultSettings;
+    Settings.findOne({
+        guildID: message.guild.id,
+    }, (err, res) => {
+        if (err) return console.log(err);
 
-    message.channel.send(`Current suggestions channel: ${guildConf.suggestionsChannel}`);
+        return message.channel.send(`Current suggestions channel: ${res.suggestionsChannel}`);
+    });
 }
 
 exports.conf = {
-    aliases: []
+    aliases: [],
+    status: ''
 }
 
 exports.help = {

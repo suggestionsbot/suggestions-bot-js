@@ -1,4 +1,5 @@
 const Discord = require('discord.js');
+const { discord } = require('../config.json');
 const fs = require('fs');
 const red = '#FF4500';
 
@@ -13,15 +14,15 @@ module.exports.noPerms = (message, perm) => {
     message.channel.send(embed).then(m => m.delete(5000)).catch(err => console.log(err));
 }
 
-module.exports.noSuggestionsPerms = (message, role) => {
+module.exports.noSuggestionsPerms = channel => {
 
     let embed = new Discord.RichEmbed()
         .setTitle('Error')
-        .setDescription(`${message.author}, you lack certain roles to do this action. Please create this role and assign it to the intended users or ignore this message.`)
-        .setColor(red)
-        .addField('Role', `\`${role}\``);
+        .setDescription(`You lack certain staff roles to do this action.`)
+        .setColor(red);
+        //.addField('Role', `\`${role}\``);
 
-    message.channel.send(embed).then(m => m.delete(5000)).catch(err => console.log(err));
+    channel.send(embed).then(m => m.delete(5000)).catch(err => console.log(err));
 }
 
 module.exports.noSuggestions = channel => {
@@ -42,4 +43,13 @@ module.exports.noSuggestionsLogs = channel => {
         .setColor(red);
         
     channel.send(embed).then(m => m.delete(5000)).catch(err => console.log(err));
+}
+
+module.exports.maintenanceMode = channel => {
+
+    channel.send(`***MAINTENANCE***
+    
+    Maintenance mode is currently active due to a database update. If you have any further questions, join the Support Discord:
+    
+    ${discord}`).then(msg => msg.delete(7500));
 }

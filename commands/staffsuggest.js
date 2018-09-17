@@ -1,4 +1,5 @@
 const Discord = require('discord.js');
+const Settings = require('../models/settings.js');
 const { orange } = require('../config.json');
 const { noSuggestionsPerms } = require('../utils/errors.js');
 const moment = require('moment');
@@ -7,33 +8,56 @@ require('moment-timezone');
 
 exports.run = async (client, message, args) => {
 
-    const guildConf = client.settings.get(message.guild.id);
     const cmdName = client.commands.get('staffsuggest', 'help.name');
 
-    const suggestionsRole = message.guild.roles.find(r => r.name === guildConf.staffRole);
-    if (!suggestionsRole) return message.channel.send('A staff role doesn\'t exist! Please create one or contact a server administrator to handle suggestions.').then(message => { message.delete(5000) }).catch(console.error);
-    if (!message.member.roles.has(suggestionsRole.id)) return noSuggestionsPerms(message, guildConf.staffRole);
+        Settings.findOne({
+            guildID: message.guild.id,
+        }, (err, res) => {
+            if (err) return console.log(err);
 
-    const sUser = message.member;
-    const staffSuggestionsChannel = message.guild.channels.find(c => c.name === guildConf.staffSuggestionsChannel) || message.guild.channels.find(c => c.toString() === guildConf.staffSuggestionsChannel);
+            const roles = res.staffRoles;
 
-    const embed = new Discord.RichEmbed()
-        .setDescription(`Hey, ${sUser}. Your suggestion has been added in the ${staffSuggestionsChannel} channel to be voted on!`)
-        .setColor(orange)
-        .setAuthor(sUser.displayName)
-        .setFooter(`User ID: ${sUser.id}`)
-        .setTimestamp();
+            const staffRoles = roles.map(el => {
+                return message.guild.roles.find(r => r.name === el.role || r.id === el.role);
+            });
 
-    message.delete().catch(O_o => {});
+            let admins = [];
+            message.guild.members.forEach(collected => {
+                if (collected.hasPermission('MANAGE_GUILD') && !collected.user.bot) {
+                    
+                    admins.push(collected.id);
+                }
+            });
 
-    const suggestion = args.join(' ');
-    if (!suggestion) return message.channel.send(`Usage: \`${guildConf.prefix + cmdName} <suggestion>\``).then(message => { message.delete(5000) }).catch(console.error);
+            if (!staffRoles) return message.channel.send('No staff roles exist! Please create them or contact a server administrator to handle suggestions.').then(message => {
+                message.delete(5000)
+            }).catch(err => console.log(err));
+            
+            if (!admins.includes(message.member.id) && !message.member.roles.some(r => staffRoles.includes(r))) return noSuggestionsPerms(message.channel);
 
-    const submittedOn = moment(message.createdAt).tz('America/New_York').format('MM/DD/YY @ h:mm A (z)')
+            const staffSuggestionsChannel = message.guild.channels.find(c => c.name === res.staffSuggestionsChannel) || message.guild.channels.find(c => c.toString() === res.staffSuggestionsChannel);
 
-    const sEmbed = new Discord.RichEmbed()
-        .setThumbnail(sUser.user.avatarURL)
-        .setDescription(`
+            const sUser = message.member;
+
+            const embed = new Discord.RichEmbed()
+                .setDescription(`Hey, ${sUser}. Your suggestion has been added in the ${staffSuggestionsChannel} channel to be voted on!`)
+                .setColor(orange)
+                .setAuthor(sUser.displayName)
+                .setFooter(`User ID: ${sUser.id}`)
+                .setTimestamp();
+
+            message.delete().catch(O_o => {});
+
+            const suggestion = args.join(' ');
+            if (!suggestion) return message.channel.send(`Usage: \`${res.prefix + cmdName} <suggestion>\``).then(message => {
+                message.delete(5000)
+            }).catch(console.error);
+
+            const submittedOn = moment(message.createdAt).tz('America/New_York').format('MM/DD/YY @ h:mm A (z)')
+
+            const sEmbed = new Discord.RichEmbed()
+                .setThumbnail(sUser.user.avatarURL)
+                .setDescription(`
         **Submitter**
         ${sUser.user.tag}
 
@@ -43,45 +67,48 @@ exports.run = async (client, message, args) => {
         **Submitted**
         ${submittedOn}
         `)
-        .setColor(orange)
-        .setFooter(`User ID: ${sUser.id}`);
+                .setColor(orange)
+                .setFooter(`User ID: ${sUser.id}`);
 
-    let perms = message.guild.me.permissions;
+            let perms = message.guild.me.permissions;
 
-    if (!perms.has(['EMBED_LINKS', 'ADD_REACTIONS'])) {
-        message.channel.send(`I'm missing some permissions!
+            if (!perms.has(['EMBED_LINKS', 'ADD_REACTIONS'])) {
+                message.channel.send(`I'm missing some permissions!
         
         \`EMBED_LINKS\`
         \`ADD_REACTIONS\``);
-    } else {
+            } else {
 
-        message.channel.send(embed).then(message => {
-                message.delete(5000)
-            })
-            .catch(err => {
-                console.log(err);
-            });
+                message.channel.send(embed).then(message => {
+                        message.delete(5000)
+                    })
+                    .catch(err => {
+                        console.log(err);
+                    });
 
-        staffSuggestionsChannel.send(sEmbed)
-            .then(async message => {
-                await message.react(`✅`);
-                await message.react(`❌`);
-            })
-            .catch(err => {
-                console.log(err);
-            });
+                staffSuggestionsChannel.send(sEmbed)
+                    .then(async message => {
+                        await message.react(`✅`);
+                        await message.react(`❌`);
+                    })
+                    .catch(err => {
+                        console.log(err);
+                    });
 
-        console.log(`A new staff suggestion has been created in:
+                console.log(`A new staff suggestion has been created in:
             Author: ${sUser.user.tag} (ID: ${sUser.id})
             Suggestion: ${suggestion}
             Time: ${submittedOn}
             Channel: ${staffSuggestionsChannel.name}
             Guild: ${message.guild.name} (ID: ${message.guild.id})`);
-    }
-}
+            }
+
+        });
+        }
 
 exports.conf = {
-    aliases: []
+    aliases: [],
+    status: ''
 }
 
 exports.help = {

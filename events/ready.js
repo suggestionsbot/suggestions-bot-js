@@ -10,12 +10,4 @@ module.exports = async client => {
     client.user.setStatus('online');
     client.user.setActivity(`${userSize} users | ${prefix + cmdHelp}`, { type: 'WATCHING' })
         .catch(console.error);
-
-    client.guilds.forEach(guild => {
-        // For this guild, check if enmap has its guild conf
-        if (!client.settings.has(guild.id)) {
-            // add it if it's not there
-            client.settings.set(guild.id, defaultSettings);
-        }
-    });
 };

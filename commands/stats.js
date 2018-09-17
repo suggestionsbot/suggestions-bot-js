@@ -33,7 +33,8 @@ exports.run = (client, message, args) => {
 }
 
 exports.conf = {
-    aliases: ['botstats', 'usage']
+    aliases: ['botstats', 'usage'],
+    status: ''
 }
 
 exports.help = {

@@ -24,7 +24,8 @@ exports.run = (client, message, args) => {
 }
 
 exports.conf = {
-    aliases: ['botinfo', 'suggestions']
+    aliases: ['botinfo', 'suggestions'],
+    status: ''
 }
 
 exports.help = {

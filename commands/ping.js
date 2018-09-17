@@ -10,7 +10,8 @@ exports.run = async (client, message, args) => {
 }
 
 exports.conf = {
-    aliases: []
+    aliases: [],
+    status: ''
 }
 
 exports.help = {

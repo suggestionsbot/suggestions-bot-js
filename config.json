@@ -1,5 +1,5 @@
 {
-	"token": "NDc0MDUxOTU0OTk4NTA5NTcx.DnCC8A.rGBAnBtIJeNDnUOkSU2sIVUqVKQ",
+	"token": "NDc0MDUxOTU0OTk4NTA5NTcx.DoDpYA.iylyd3hnjAFXCbiBuh7ZUdxtUn4",
 	"prefix": ",",
 	"suggestionsChannel": "suggestions",
 	"suggestionsLogs": "suggestions-logs",
@@ -8,5 +8,11 @@
 	"discord": "https://discord.gg/g7wr8xb",
 	"docs": "https://docs.thenerdcave.us/",
 	"invite": "https://discordapp.com/oauth2/authorize?client_id=474051954998509571&scope=bot&permissions=93248",
-	"dblToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjQ3NDA1MTk1NDk5ODUwOTU3MSIsImJvdCI6dHJ1ZSwiaWF0IjoxNTM2MTc0NDQ4fQ.8_BYEF0plVyv5gp_2owbgkegKwSIy27nweUPi5oiQ7s"
+	"dblToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjQ3NDA1MTk1NDk5ODUwOTU3MSIsImJvdCI6dHJ1ZSwiaWF0IjoxNTM0NzM1MDI2fQ.Rwk2bK17T-hk0uwdD9PK8KsQa3TrqZdq1EeRMCJty6c",
+	"db": {
+		"host": "104.207.142.201",
+		"port": "27017",
+		"user": "db_nerdcave",
+		"password": "P6X62cSt4pX7yUZBMpPFcNRWh9kxH9W6ZYcsTterMmXAsKpJmBF7cbB6X3psukBm"
+	}
 }
