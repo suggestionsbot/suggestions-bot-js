@@ -45,7 +45,8 @@ exports.run = async (client, message, args) => {
                         message.channel.send(`***Suggestions command enabled by __${initiator(owner)}__.***`);
                     })
                     .catch(err => {
-                        console.log(err);message.channel.send('Error setting command status!');
+                        console.log(err);
+                        message.channel.send('Error setting command status!');
                     });
                     return;
                 }

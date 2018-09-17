@@ -43,8 +43,6 @@ exports.run = async (client, message, args) => {
         Suggestion.findOne({
             guildID: message.guild.id,
         }, async (err, res) => {
-            if (err) return console.log(err);
-
             const sUser = message.guild.members.get(res.userID);
 
             await suggestionsChannel.fetchMessages({ limit: 100 }).then(collected => {

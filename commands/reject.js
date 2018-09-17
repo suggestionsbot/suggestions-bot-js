@@ -11,7 +11,7 @@ exports.run = async (client, message, args) => {
     Settings.findOne({
         guildID: message.guild.id,
     }, async (err, res) => {
-        if (err) return console.log(err);
+        if (err) console.log(err);
 
         const roles = res.staffRoles;
 
@@ -43,8 +43,6 @@ exports.run = async (client, message, args) => {
         Suggestion.findOne({
             guildID: message.guild.id,
         }, async (err, res) => {
-            if (err) return console.log(err);
-
             const sUser = message.guild.members.get(res.userID);
 
             await suggestionsChannel.fetchMessages({ limit: 100 }).then(collected => {
@@ -93,7 +91,8 @@ exports.run = async (client, message, args) => {
                             .setFooter(`sID: ${id}`)
                             .setTimestamp();
         
-                        if (embed.footer.text.includes(id)) {
+                        console.log(footer)
+                        if (footer.includes(id)) {
                             suggestionsChannel.fetchMessage(embed.message.id)
                                 .then(async m => {
                                     await m.edit(rejectedEmbed).then(m.delete(5000));
