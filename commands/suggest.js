@@ -3,14 +3,9 @@ const Settings = require('../models/settings.js');
 const Suggestion = require('../models/suggestions.js');
 const mongoose = require('mongoose');
 const crypto = require('crypto');
-const fs = require('fs');
 const { owner, orange, discord } = require('../config.json');
 const moment = require('moment');
 const { noSuggestions, noBotPerms, maintenanceMode } = require('../utils/errors.js');
-let cmdStatus = fs.readFile('../cmdStatus.json', (err, data) => {
-    if (err) throw err;
-    return status = JSON.parse(data);
-});
 require('moment-duration-format');
 require('moment-timezone');
 

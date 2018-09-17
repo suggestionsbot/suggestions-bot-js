@@ -1,6 +1,5 @@
 const Discord = require('discord.js');
 const Settings = require('../models/settings.js');
-let cmdStatus = JSON.parse(fs.readFileSync('../cmdStatus.json', 'utf8'));
 const { maintenanceMode } = require('../utils/errors.js');
 
 exports.run = async (client, message, args) => {

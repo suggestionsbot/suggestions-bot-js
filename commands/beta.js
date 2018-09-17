@@ -1,10 +1,8 @@
 const Discord = require('discord.js');
-const fs = require('fs');
 const Settings = require('../models/settings.js');
 const Suggestion = require('../models/suggestions.js')
 const { owner, orange } = require('../config.json');
 const { noBotPerms, noPerms } = require('../utils/errors.js');
-let file = JSON.parse(fs.readFileSync('../cmdStatus.json', 'utf8'));
 //let file = fs.readFileSync('../cmdStatus.json', 'utf8');
 
 exports.run = async (client, message, args) => {
