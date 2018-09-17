@@ -20,7 +20,7 @@ exports.run = async (client, message, args) => {
     
         await Settings.findOneAndUpdate(
             { guildID: message.guild.id },
-            { suggestionsChannel: value },
+            { prefix: value },
         ).catch(err => {
             console.log(err);
             message.channel.send('Error setting the bot prefix!');

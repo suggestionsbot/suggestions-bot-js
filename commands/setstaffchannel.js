@@ -20,7 +20,7 @@ exports.run = async (client, message, args) => {
     
         await Settings.findOneAndUpdate(
             { guildID: message.guild.id },
-            { suggestionsChannel: value },
+            { staffSuggestionsChannel: value },
         ).catch(err => {
             console.log(err);
             message.channel.send('Error setting the staff suggestions channel!');
