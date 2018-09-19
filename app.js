@@ -52,7 +52,6 @@ dbl.on('error', e => {
 });
 
 const dbURI = `mongodb://${n.db.user}:${n.db.password}@${n.db.host}:${n.db.port}/${n.db.name}?authSource=admin`;
-//const dbURI = `mongodb://localhost/suggestions-data`;
 const dbURILog = `mongodb://${n.db.user}@${n.db.host}:${n.db.port}/${n.db.name}`;
 
 const dbOtions = {

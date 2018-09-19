@@ -5,12 +5,10 @@ const { owner } = require('../config.json');
 
 exports.run = async (client, message, args) => {
 
-    await message.delete().catch(O_o => {});
-
     let status = cmdStatus.get('status');
-    if (status === 'off' && message.author.id !== owner) {
-        return maintenanceMode(message.channel);
-    }
+    if (status === 'off' && message.author.id !== owner)  return maintenanceMode(message.channel);
+
+    await message.delete().catch(O_o => {});
 
     Settings.findOne({
         guildID: message.guild.id,

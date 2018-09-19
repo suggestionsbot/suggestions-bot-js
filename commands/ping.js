@@ -1,13 +1,6 @@
 //const Discord = require('discord.js');
-const { owner } = require('../config.json');
-const { maintenanceMode } = require('../utils/errors.js');
 
 exports.run = async (client, message, args) => {
-
-    let status = cmdStatus.get('status');
-    if (status === 'off' && message.author.id !== owner) {
-        return maintenanceMode(message.channel);
-    }
 
     const msg = await message.channel.send("Ping?");
 

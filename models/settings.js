@@ -4,7 +4,6 @@ const settingsSchema = mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,
     guildID: String,
     guildName: String,
-    guildOwner: String,
     guildOwnerID: String,
     prefix: String,
     suggestionsChannel: String,
