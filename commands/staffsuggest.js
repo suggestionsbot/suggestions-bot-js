@@ -9,9 +9,7 @@ require('moment-timezone');
 exports.run = async (client, message, args) => {
 
     let status = cmdStatus.get('status');
-    if (status === 'off' && message.author.id !== owner) {
-        return maintenanceMode(message.channel);
-    }
+    if (status === 'off' && message.author.id !== owner)  return maintenanceMode(message.channel);
 
     const cmdName = client.commands.get('staffsuggest', 'help.name');
 
