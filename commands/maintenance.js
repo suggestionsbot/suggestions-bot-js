@@ -4,11 +4,6 @@ const Settings = require('../models/settings');
 
 exports.run = async (client, message, args) => {
 
-    let perms = message.guild.me.permissions;
-    if (!perms.has('MANAGE_MESSAGES')) return message.channel.send('I can\'t delete messages! Make sure I have this permission: Manage Messages`').then(msg => msg.delete(5000));
-
-    message.delete().catch(O_o=>{});
-
     if (message.author.id !== owner) return;
     
     Settings.findOne({
