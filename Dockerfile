@@ -12,4 +12,4 @@ RUN npm install
 COPY . /usr/src/suggestions-bot
 
 #Start the bot!
-CMD ["node", "app.js"]
+CMD ["NODE_ENV=production", "npm", "start"]

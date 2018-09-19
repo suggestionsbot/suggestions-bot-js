@@ -7,12 +7,11 @@ module.exports = async (client, guild) => {
         _id: mongoose.Types.ObjectId(),
         guildID: guild.id,
         guildName: guild.name,
-        guildOwner: guild.owner.tag,
         guildOwnerID: guild.ownerID,
         prefix: defaultSettings.prefix,
         suggestionsChannel:  defaultSettings.suggestionsChannel,
         suggestionsLogs: defaultSettings.suggestionsLogs
-    })
+    });
 
     await console.log(`${client.user.username} has joined a new guild: ${guild.name} (${guild.id})`); 
     await newSettings.save().then(console.log(`Default settings saved for guild ${guild.name} (${guild.id})`)).catch(err => console.log(err));

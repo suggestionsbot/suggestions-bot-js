@@ -1,8 +1,12 @@
 const { prefix } = require('../config.json');
+require('dotenv-flow').config();
 
 module.exports = async client => {
 
-    console.log(`Logged in as ${client.user.tag} (${client.user.id}) in ${client.guilds.size} server(s).`);
+    await console.log(`Logged in as ${client.user.tag} (${client.user.id}) in ${client.guilds.size} server(s).`);
+    await cmdStatus.set('status', 'on');
+    await console.log(`Commands status set to ${cmdStatus.get('status')}`);
+    await console.log(`${process.env.VER} version of the bot loaded.`);
 
     const userSize = client.users.size.toLocaleString();
     const cmdHelp = client.commands.get('help', 'help.name');

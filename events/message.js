@@ -23,7 +23,7 @@ module.exports = async (client, message) => {
         if (cmdCooldown.has(message.author.id)) {
             message.reply(`slow down there! You need to wait ${cmdSeconds} second(s) before issuing another command. `)
             .then(message => {
-                message.delete(1500)
+                message.delete(1500);
             })
             .catch(error => {
                 console.error;

@@ -5,7 +5,15 @@ const { owner } = require('../config.json');
 
 exports.run = async (client, message, args) => {
 
+    let perms = message.guild.me.permissions;
+    if (!perms.has('MANAGE_MESSAGES')) return message.channel.send('I can\'t delete messages! Make sure I have this permission: Manage Messages`').then(msg => msg.delete(5000));
+
     await message.delete().catch(O_o => {});
+
+    let status = cmdStatus.get('status');
+    if (status === 'off' && message.author.id !== owner) {
+        return maintenanceMode(message.channel);
+    }
 
     Settings.findOne({
         guildID: message.guild.id,
@@ -29,15 +37,15 @@ exports.run = async (client, message, args) => {
     
         await message.channel.send(`Suggestions logs channel has been changed to: ${value}`);
     });
-}
+};
 
 exports.conf = {
     aliases: [],
-    status: ''
-}
+    status: 'true'
+};
 
 exports.help = {
     name: 'setlogs',
     description: 'Set a logs channel for suggestion results',
     usage: 'setlogs <name>'
-}
+};

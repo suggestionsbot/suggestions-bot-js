@@ -5,7 +5,15 @@ const { owner } = require('../config.json');
 
 exports.run = async (client, message, args) => {
 
+    let perms = message.guild.me.permissions;
+    if (!perms.has('MANAGE_MESSAGES')) return message.channel.send('I can\'t delete messages! Make sure I have this permission: Manage Messages`').then(msg => msg.delete(5000));
+
     await message.delete().catch(O_o => {});
+
+    let status = cmdStatus.get('status');
+    if (status === 'off' && message.author.id !== owner) {
+        return maintenanceMode(message.channel);
+    }
 
     Settings.findOne({
         guildID: message.guild.id,
@@ -45,7 +53,7 @@ exports.run = async (client, message, args) => {
                     message.channel.send('Error setting a staff role!');
                 };
     
-                await message.channel.send(`<:nerdSuccess:490708616056406017> Added **${staffRole.name}** to the staff roles.`).then(message => { message.delete(5000) }).catch(console.error);
+                await message.channel.send(`<:nerdSuccess:490708616056406017> Added **${staffRole.name}** to the staff roles.`).then(message => { message.delete(5000); }).catch(console.error);
     
                 break;
             case 'remove':
@@ -57,21 +65,21 @@ exports.run = async (client, message, args) => {
                     message.channel.send('Error removing a staff role!');
                 };
     
-                await message.channel.send(`<:nerdSuccess:490708616056406017> Removed **${staffRole.name}** from the staff roles.`).then(message => { message.delete(5000) }).catch(console.error);
+                await message.channel.send(`<:nerdSuccess:490708616056406017> Removed **${staffRole.name}** from the staff roles.`).then(message => { message.delete(5000); }).catch(console.error);
     
                 break;
             default:
         }
     });
-}
+};
 
 exports.conf = {
     aliases: ['staffrole'],
-    status: ''
-}
+    status: 'true'
+};
 
 exports.help = {
     name: 'role',
     description: 'Add or remove staff roles for managing suggestions',
     usage: 'role <add/remove> <role>'
-}
+};

@@ -1,18 +1,10 @@
 {
-	"token": "NDc0MDUxOTU0OTk4NTA5NTcx.DoDpYA.iylyd3hnjAFXCbiBuh7ZUdxtUn4",
-	"prefix": ",",
+	"prefix": ";;",
 	"suggestionsChannel": "suggestions",
 	"suggestionsLogs": "suggestions-logs",
 	"owner": "158063324699951104",
 	"orange": "0xdd9323",
 	"discord": "https://discord.gg/g7wr8xb",
 	"docs": "https://docs.thenerdcave.us/",
-	"invite": "https://discordapp.com/oauth2/authorize?client_id=474051954998509571&scope=bot&permissions=93248",
-	"dblToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjQ3NDA1MTk1NDk5ODUwOTU3MSIsImJvdCI6dHJ1ZSwiaWF0IjoxNTM3MTcwNTc1fQ.TRtoKpD4XrTYTvi9KpEOF5CQiExLov86FER2dCsQWPs",
-	"db": {
-		"host": "104.207.142.201",
-		"port": "27017",
-		"user": "db_nerdcave",
-		"password": "P6X62cSt4pX7yUZBMpPFcNRWh9kxH9W6ZYcsTterMmXAsKpJmBF7cbB6X3psukBm"
-	}
+	"invite": "https://discordapp.com/oauth2/authorize?client_id=474051954998509571&scope=bot&permissions=93248"
 }

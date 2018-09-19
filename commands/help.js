@@ -5,14 +5,15 @@ const cmdSeconds = 5;
 
 exports.run = async (client, message, args) => {
 
+    let perms = message.guild.me.permissions;
+    if (!perms.has('MANAGE_MESSAGES')) return message.channel.send('I can\'t delete messages! Make sure I have this permission: Manage Messages`').then(msg => msg.delete(5000));
+
     let cmds = Array.from(client.commands.keys());
     let newCmds = [];
 
     for (let i = 0; i < cmds.length; i++) {
-        if (cmds[i] === 'maintenance')
-            continue;
-        if (cmds[i] === 'beta')
-            continue;
+        if (cmds[i] === 'maintenance') continue;
+        if (cmds[i] === 'beta') continue;
 
         newCmds.push(cmds[i]);
     }
@@ -23,7 +24,7 @@ exports.run = async (client, message, args) => {
 
     Settings.findOne({
         guildID: message.guild.id,
-    }, (err, res) => {
+    }, async (err, res) => {
         if (err) return console.log(err);
 
         let channel = res.suggestionsChannel;
@@ -43,21 +44,19 @@ exports.run = async (client, message, args) => {
             .setColor(orange);
 
         let perms = message.guild.me.permissions;
+        if (!perms.has('EMBED_LINKS')) return message.channel.send('I can\'t embed links! Make sure I have this permission: `Embed Links`').then(msg => msg.delete(5000));
+        
+        let status = cmdStatus.get('status');
+        if (status === 'off') await helpEmbed.addField('Maintenance', 'The bot is currently in maintenance . If you have further questions, please join the Support Discord. Otherwise, the maintenance period should not be that long.');
 
-        if (!perms.has(['EMBED_LINKS', 'ADD_REACTIONS'])) {
-            message.channel.send(`I'm missing some permissions!
-                
-                \`EMBED_LINKS\``);
-        } else {
-            message.channel.send(helpEmbed);
-        }
+        await message.channel.send(helpEmbed);
     });
-}
+};
 
 exports.conf = {
     aliases: ['h', 'halp'],
-    status: ''
-}
+    status: 'true'
+};
 
 exports.help = {
     name: 'help',

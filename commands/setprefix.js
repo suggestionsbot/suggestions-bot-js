@@ -7,6 +7,14 @@ exports.run = async (client, message, args) => {
 
     await message.delete().catch(O_o => {});
 
+    let perms = message.guild.me.permissions;
+    if (!perms.has('MANAGE_MESSAGES')) return message.channel.send('I can\'t delete messages! Make sure I have this permission: Manage Messages`').then(msg => msg.delete(5000));
+
+    let status = cmdStatus.get('status');
+    if (status === 'off' && message.author.id !== owner) {
+        return maintenanceMode(message.channel);
+    }
+
     Settings.findOne({
         guildID: message.guild.id,
     }, async (err, res) => {
@@ -29,15 +37,15 @@ exports.run = async (client, message, args) => {
     
         await message.channel.send(`Bot prefix has been changed to: \`${value}\``);
     });
-}
+};
 
 exports.conf = {
     aliases: [],
-    status: ''
-}
+    status: 'true'
+};
 
 exports.help = {
     name: 'setprefix',
     description: 'Set a new prefix for the bot',
     usage: 'setprefix <prefix>'
-}
+};

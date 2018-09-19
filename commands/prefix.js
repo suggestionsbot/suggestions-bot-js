@@ -7,6 +7,11 @@ exports.run = async (client, message, args) => {
 
     await message.delete().catch(O_o => {});
 
+    let status = cmdStatus.get('status');
+    if (status === 'off' && message.author.id !== owner) {
+        return maintenanceMode(message.channel);
+    }
+
     Settings.findOne({
         guildID: message.guild.id,
     }, (err, res) => {
@@ -14,15 +19,15 @@ exports.run = async (client, message, args) => {
 
         return message.channel.send(`Current prefix: \`${res.prefix}\``);
     });
-}
+};
 
 exports.conf = {
     aliases: [],
-    status: ''
-}
+    status: 'true'
+};
 
 exports.help = {
     name: 'prefix',
     description: 'View the current bot prefix',
     usage: 'prefix'
-}
+};

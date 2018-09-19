@@ -12,7 +12,7 @@ module.exports.noPerms = (message, perm) => {
         .addField('Permission', `\`${perm}\``);
 
     message.channel.send(embed).then(m => m.delete(5000)).catch(err => console.log(err));
-}
+};
 
 module.exports.noSuggestionsPerms = channel => {
 
@@ -23,7 +23,7 @@ module.exports.noSuggestionsPerms = channel => {
         //.addField('Role', `\`${role}\``);
 
     channel.send(embed).then(m => m.delete(5000)).catch(err => console.log(err));
-}
+};
 
 module.exports.noSuggestions = channel => {
 
@@ -33,7 +33,7 @@ module.exports.noSuggestions = channel => {
         .setColor(red);
         
     channel.send(embed).then(m => m.delete(5000)).catch(err => console.log(err));
-}
+};
 
 module.exports.noSuggestionsLogs = channel => {
 
@@ -43,13 +43,15 @@ module.exports.noSuggestionsLogs = channel => {
         .setColor(red);
         
     channel.send(embed).then(m => m.delete(5000)).catch(err => console.log(err));
-}
+};
 
 module.exports.maintenanceMode = channel => {
 
+    let reason = cmdStatus.get('reason');
+
     channel.send(`***MAINTENANCE***
     
-    Maintenance mode is currently active due to a database update. If you have any further questions, join the Support Discord:
+    Maintenance mode is currently active due to this reason: **${reason}**
     
-    ${discord}`).then(msg => msg.delete(7500));
-}
+    If you have any further questions, please join the Support Discord: ${discord}`).then(msg => msg.delete(7500));
+};

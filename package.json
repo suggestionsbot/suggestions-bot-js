@@ -4,7 +4,8 @@
   "description": "The only suggestions bot you'll ever need. Simple usage and management of suggestions for public and staff use.",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node ."
   },
   "repository": {
     "type": "git",
@@ -20,10 +21,14 @@
   "dependencies": {
     "dblapi.js": "^2.2.0",
     "discord.js": "^11.4.2",
+    "dotenv-flow": "^0.1.0",
     "enmap": "^4.2.0",
     "moment": "^2.22.2",
     "moment-duration-format": "^2.2.2",
     "moment-timezone": "^0.5.21",
     "mongoose": "^5.2.14"
+  },
+  "devDependencies": {
+    "eslint": "^5.6.0"
   }
 }

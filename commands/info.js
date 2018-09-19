@@ -1,6 +1,5 @@
 const Discord = require('discord.js');
 const { orange, discord, owner, docs } = require('../config.json');
-const { maintenanceMode } = require('../utils/errors.js');
 
 exports.run = (client, message, args) => {
     
@@ -15,20 +14,16 @@ exports.run = (client, message, args) => {
         .setFooter('© 2018 The Nerd Cave');
 
     let perms = message.guild.me.permissions;
+    if (!perms.has('EMBED_LINKS')) return message.channel.send('I can\'t embed links! Make sure I have this permission: `Embed Links`').then(msg => msg.delete(5000));
+    if (!perms.has('ADD_REACTIONS')) return message.channel.send('I can\'t add reactions! Make sure I have this permission: `Add Reactions`').then(msg => msg.delete(5000));
 
-    if (!perms.has(['EMBED_LINKS', 'ADD_REACTIONS'])) {
-        message.channel.send(`I'm missing some permissions!
-        
-        \`EMBED_LINKS\``);
-    } else {
-        message.channel.send(embed);
-    }
-}
+    message.channel.send(embed);
+};
 
 exports.conf = {
     aliases: ['botinfo', 'suggestions'],
-    status: ''
-}
+    status: 'true'
+};
 
 exports.help = {
     name: 'info',

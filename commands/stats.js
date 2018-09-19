@@ -1,11 +1,11 @@
 const Discord = require('discord.js');
-const { orange, owner } = require('../config.json');
+const { orange } = require('../config.json');
 const moment = require('moment');
-const { maintenanceMode } = require('../utils/errors.js');
 require('moment-duration-format');
 
 exports.run = (client, message, args) => {
 
+    let status = cmdStatus.get('status');
     const botUptime = moment.duration(client.uptime).format(' D [days], H [hrs], m [mins], s [secs]');
     const memUsage = (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2);
     const guildSize = client.guilds.size.toLocaleString();
@@ -22,21 +22,21 @@ exports.run = (client, message, args) => {
         .addField('Node', `${process.version}`, true)
         .setTimestamp();
 
-    let perms = message.guild.me.permissions;
-
-    if (!perms.has(['EMBED_LINKS', 'ADD_REACTIONS'])) {
-        message.channel.send(`I'm missing some permissions!
-        
-        \`EMBED_LINKS\``);
-    } else {
-        message.channel.send(embed);
+    if (status === 'off') {
+        embed.setFooter('Maintenance Mode Active');
+        embed.setColor('#d64541');
     }
-}
+
+    let perms = message.guild.me.permissions;
+    if (!perms.has('EMBED_LINKS')) return message.channel.send('I can\'t embed links! Make sure I have this permission: Embed Links`').then(msg => msg.delete(5000));
+
+    message.channel.send(embed);
+};
 
 exports.conf = {
     aliases: ['botstats', 'usage'],
-    status: ''
-}
+    status: 'true'
+};
 
 exports.help = {
     name: 'stats',

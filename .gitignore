@@ -9,3 +9,6 @@ logs/
 # Miscellaneous
 .tmp/
 .vscode/
+.eslintrc.json
+nodemon.json
+data/
