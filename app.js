@@ -43,16 +43,18 @@ cmdStatus = new Enmap();
 const DBL = require('dblapi.js');
 const dbl = new DBL(n.dblToken, client);
 
-dbl.on('posted', () => {
-    console.log('Server count posted to DiscordBots.org!');
-});
+if (n.name === 'production') {
 
-dbl.on('error', e => {
-    console.log(e);
-});
+    dbl.on('posted', () => {
+        console.log('Server count posted to DiscordBots.org!');
+    });
+    
+    dbl.on('error', e => {
+        console.log(e);
+    });
+}
 
 const dbURI = `mongodb://${n.db.user}:${n.db.password}@${n.db.host}:${n.db.port}/${n.db.name}?authSource=admin`;
-//const dbURI = `mongodb://localhost/suggestions-data`;
 const dbURILog = `mongodb://${n.db.user}@${n.db.host}:${n.db.port}/${n.db.name}`;
 
 const dbOtions = {

@@ -5,15 +5,13 @@ const { owner } = require('../config.json');
 
 exports.run = async (client, message, args) => {
 
+    let status = cmdStatus.get('status');
+    if (status === 'off' && message.author.id !== owner)  return maintenanceMode(message.channel);
+
     await message.delete().catch(O_o => {});
 
     let perms = message.guild.me.permissions;
     if (!perms.has('MANAGE_MESSAGES')) return message.channel.send('I can\'t delete messages! Make sure I have this permission: Manage Messages`').then(msg => msg.delete(5000));
-
-    let status = cmdStatus.get('status');
-    if (status === 'off' && message.author.id !== owner) {
-        return maintenanceMode(message.channel);
-    }
 
     Settings.findOne({
         guildID: message.guild.id,

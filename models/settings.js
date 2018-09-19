@@ -4,7 +4,10 @@ const settingsSchema = mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,
     guildID: String,
     guildName: String,
+<<<<<<< HEAD
     guildOwner: String,
+=======
+>>>>>>> development
     guildOwnerID: String,
     prefix: String,
     suggestionsChannel: String,
