@@ -1,5 +1,9 @@
 FROM node:latest
 
+#Update container and install vim
+RUN ["apt-get", "update"]
+RUN ["apt-get", "install", "-y", "vim-tiny", "apt-utils"]
+
 #Create the directory
 RUN mkdir -p /usr/src/suggestions-bot
 WORKDIR /usr/src/suggestions-bot
@@ -12,4 +16,4 @@ RUN npm install
 COPY . /usr/src/suggestions-bot
 
 #Start the bot!
-CMD ["NODE_ENV=production", "npm", "start"]
+CMD ["npm", "start"]
