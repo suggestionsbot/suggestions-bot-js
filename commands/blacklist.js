@@ -6,6 +6,8 @@ let blConfig = JSON.parse(fs.readFileSync('./blacklisted.json', 'utf8'));
 
 exports.run = async (client, message, args) => {
 
+    // Need to properly sync blacklist file changes in cache?
+
     if (message.author.id !== owner) return;
 
     await message.delete().catch(O_o=>{});
