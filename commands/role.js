@@ -21,8 +21,15 @@ exports.run = async (client, message, args) => {
         if (err) return console.log(err);
 
         const cmdName = client.commands.get('role', 'help.name');
+
+        let admins = [];
+        message.guild.members.forEach(collected => {
+            
+            if (collected.hasPermission('MANAGE_GUILD') && !collected.user.bot) return admins.push(collected.id);
+            
+        });
     
-        if (!message.member.hasPermission('ADMINISTRATOR')) return noPerms(message, 'ADMINISTRATOR');
+        if (!admins.includes(message.member.id)) return noPerms(message, 'MANAGE_GUILD');
     
         function getRoleFromMention(mention) {
             if (!mention) return;
@@ -53,7 +60,7 @@ exports.run = async (client, message, args) => {
                     message.channel.send('Error setting a staff role!');
                 };
     
-                await message.channel.send(`<:nerdSuccess:490708616056406017> Added **${staffRole.name}** to the staff roles.`).then(message => { message.delete(5000); }).catch(console.error);
+                await message.channel.send(`<:nerdSuccess:490708616056406017> Added **${staffRole.name}** to the staff roles.`).then(msg => msg.delete(5000)).catch(console.error);
     
                 break;
             case 'remove':
@@ -65,7 +72,7 @@ exports.run = async (client, message, args) => {
                     message.channel.send('Error removing a staff role!');
                 };
     
-                await message.channel.send(`<:nerdSuccess:490708616056406017> Removed **${staffRole.name}** from the staff roles.`).then(message => { message.delete(5000); }).catch(console.error);
+                await message.channel.send(`<:nerdSuccess:490708616056406017> Removed **${staffRole.name}** from the staff roles.`).then(msg => msg.delete(5000)).catch(console.error);
     
                 break;
             default:

@@ -20,7 +20,14 @@ exports.run = async (client, message, args) => {
 
         const cmdName = client.commands.get('setchannel', 'help.name');
 
-        if (!message.member.hasPermission('ADMINISTRATOR')) return noPerms(message, 'ADMINISTRATOR');
+        let admins = [];
+        message.guild.members.forEach(collected => {
+            
+            if (collected.hasPermission('MANAGE_GUILD') && !collected.user.bot) return admins.push(collected.id);
+            
+        });
+
+        if (!admins.includes(message.member.id)) return noPerms(message, 'MANAGE_GUILD');
     
         const value = args[0];
         if (!value) return message.channel.send(`Usage: \`${res.prefix + cmdName} <name>\``).then(m => m.delete(5000)).catch(err => console.log(err));

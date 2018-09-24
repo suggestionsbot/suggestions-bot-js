@@ -14,6 +14,8 @@ exports.run = async (client, message, args) => {
     for (let i = 0; i < cmds.length; i++) {
         if (cmds[i] === 'maintenance') continue;
         if (cmds[i] === 'beta') continue;
+        if (cmds[i] === 'eval') continue;
+        if (cmds[i] === 'blacklist') continue;
 
         newCmds.push(cmds[i]);
     }
