@@ -39,6 +39,8 @@ exports.run = async (client, message, args) => {
             }
         });
 
+        if (!admins.includes(message.member.id)) return noPerms(message, 'MANAGE_GUILD');
+
         let embed = new Discord.RichEmbed()
             .setColor(orange)
             .addField('Admins', adminPerms.join('\n'));
