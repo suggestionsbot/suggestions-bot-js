@@ -9,6 +9,13 @@ const bl = require('../blacklisted.json');
 exports.run = async (client, message, args) => {
 
     if(message.author.id !== owner) return;
+
+    let userID = '158063324699951104';
+
+    let user = client.users.get(userID);
+    let name = user.tag;
+
+    console.log(name);
     
 };
 

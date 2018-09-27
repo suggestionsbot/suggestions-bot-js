@@ -1,7 +1,6 @@
-const fs = require('fs');
 const moment = require('moment');
 const Settings = require('../models/settings.js');
-let blConfig = JSON.parse(fs.readFileSync('./blacklisted.json', 'utf8'));
+const Blacklist = require('../models/blacklist.js');
 
 module.exports = async (client, message) => {
 
@@ -44,15 +43,14 @@ module.exports = async (client, message) => {
         const cmd = client.commands.get(command) || client.commands.get(client.aliases.get(command));
         if(!cmd) return;
 
-        // fs.readFile('./blacklisted.json', 'utf-8', (err, data) => { if (err) return console.log(err); });
+        Blacklist.findOne().then(async res => {
+            if (!res) return cmd.run(client, message, args);
 
-        for (let i in blConfig.cases) {
-            if (blConfig.cases[i].id === message.author.id) return console.log(`"${message.author.tag}" (${message.author.id}) in the guild "${message.guild.name}" (${message.guild.id}) tried to use the command "${cmd.help.name}", but is blacklisted. [${moment(message.createdAt)}]`);
-        }
-
-        //if (blConfig.cases.id.includes(message.author.id) && message.content.startsWith(cmd)) return console.log(`"${message.author.tag}" (${message.author.id}) in the guild "${message.guild.name}" (${message.guild.id}) tried to use a command, but is blacklisted. [${moment(message.createdAt)}]`);
-    
-        cmd.run(client, message, args);
+            if (message.author.id === res.userID && res.status === true) return console.log(`"${message.author.tag}" (${message.author.id}) in the guild "${message.guild.name}" (${message.guild.id}) tried to use the command "${cmd.help.name}", but is blacklisted. [${moment(message.createdAt)}]`);
+        
+            cmd.run(client, message, args);
+        })
+        .catch(err => console.log(err));
     
         setTimeout(() => {
             cmdCooldown.delete(message.author.id);
