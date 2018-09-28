@@ -1,8 +1,12 @@
 const Discord = require('discord.js');
+const moment = require('moment');
 const Settings = require('../models/settings.js');
 const Suggestion = require('../models/suggestions.js');
 const { noSuggestionsPerms, noSuggestionsLogs, noPerms, maintenanceMode } = require('../utils/errors.js');
 const { owner } = require('../config.json');
+require('moment-duration-format');
+require('moment-timezone');
+moment.suppressDeprecationWarnings = true;
 
 exports.run = async (client, message, args) => {
 
@@ -51,6 +55,8 @@ exports.run = async (client, message, args) => {
                 { sID: id },
             ]}
         , async (err, res) => {
+
+            if (res.status === 'approved') return message.channel.send(`sID **${id}** has already been approved. Cannot do this action again.`).then(msg => msg.delete(3000)).catch(err => console.log(err));
 
             const sUser = message.guild.members.get(res.userID);
 
@@ -108,7 +114,23 @@ exports.run = async (client, message, args) => {
                                     await message.channel.send(`Suggestion **${args[0]}** has been approved.`).then(msg => msg.delete(5000)).catch(console.error);
                                     await suggestionsLogs.send(logsEmbed);
                                     await sUser.send(dmEmbed);
-        
+                                    await Suggestion.findOneAndUpdate(
+                                        { $and: [
+                                            { guildID: message.guild.id },
+                                            { sID: id }
+                                        ]},
+                                        { $set:
+                                            { 
+                                                status: 'approved',
+                                                statusUpdated: moment(Date.now()),
+                                                staffMemberID: message.member.id,
+                                                staffMemberUsername: message.member.user.tag,
+                                                results: results.join(' ')
+                                            }
+                                        }
+                                    )
+                                    .then(console.log(`sID ${id} has been approved in the guild ${message.guild.name} (${message.guild.id}).`))
+                                    .catch(err => console.log(`Could not update the status of ${id} in the database. `, err));
                                 })
                                 .catch(async err => {
                                     console.log(err);

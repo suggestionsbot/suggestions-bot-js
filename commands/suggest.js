@@ -26,7 +26,7 @@ exports.run = async (client, message, args) => {
         if (!suggestionsChannel) return noSuggestions(message.channel);
     
         const id = crypto.randomBytes(20).toString('hex').slice(12,20);
-        let time = moment(Date.now());
+        //let time = moment(Date.now());
     
         const dmEmbed = new Discord.RichEmbed()
             .setDescription(`Hey, ${sUser}. Your suggestion has been sent to the ${suggestionsChannel} channel to be voted on!
@@ -81,7 +81,7 @@ exports.run = async (client, message, args) => {
             userID: sUser.id,
             suggestion: suggestion,
             sID: id,
-            time: time
+            time: moment(Date.now())
         });
 
         await newSuggestion.save().then(res => console.log('New Suggestion: \n', res)).catch(err => console.log(err));
