@@ -45,9 +45,13 @@ exports.run = async (client, message, args) => {
         let id = args[0];
         if (!id) return message.channel.send(`Usage: \`${res.prefix + cmdName} <id>\``).then(msg => msg.delete(5000)).catch(console.error);
 
-        Suggestion.findOne({
-            guildID: message.guild.id,
-        }, async (err, res) => {
+        Suggestion.findOne(
+            { $and: [
+                { guildID: message.guild.id },
+                { sID: id },
+            ]}
+        , async (err, res) => {
+
             const sUser = message.guild.members.get(res.userID);
 
             await suggestionsChannel.fetchMessages({ limit: 100 }).then(collected => {
