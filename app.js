@@ -28,7 +28,8 @@ const n = {
         user: process.env.DB_USER,
         password: process.env.DB_PASS,
         name: process.env.DB_NAME
-    }
+    },
+    ver: process.env.VER
 };
 
 cmdStatus = {
@@ -43,7 +44,7 @@ cmdStatus = new Enmap();
 const DBL = require('dblapi.js');
 const dbl = new DBL(n.dblToken, client);
 
-if (n.name === 'production') {
+if (n.ver === 'production') {
 
     dbl.on('posted', () => {
         console.log('Server count posted to DiscordBots.org!');
