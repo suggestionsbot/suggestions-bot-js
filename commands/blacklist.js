@@ -57,16 +57,12 @@ exports.run = async (client, message, args) => {
             if (!userIDCheck.test(blacklisted)) return message.channel.send('You must supply a user ID.').then(msg => msg.delete(3000)).catch(console.error);
             const blUser = blacklisted.match(userIDCheck)[0];
 
-            let user = client.users.get(blUser);
-            let blUsername = user.tag;
-
             if (args[0] === 'add') {
                 if (!reason) return message.channel.send('Please provide a reason!').then(msg => msg.delete(5000)).catch(console.error);
 
                 const newBlacklist = await new Blacklist({
                     _id: mongoose.Types.ObjectId(),
                     userID: blUser,
-                    username: blUsername,
                     reason: reason,
                     issuerID: message.author.id,
                     issuerUsername: message.member.user.tag,
@@ -76,10 +72,10 @@ exports.run = async (client, message, args) => {
                 });
 
                 await newBlacklist.save().then(res => console.log('New Blacklist: \n ', res)).catch(err => console.log(err));
-                await console.log(`${message.member.user.tag} ("${message.author.id}" has issued a blacklist to the user ${blUsername} (${blUser}). [${moment(message.createdAt)}]`);
+                await console.log(`${message.member.user.tag} ("${message.author.id}" has issued a blacklist to the user ${blUser}. [${moment(message.createdAt)}]`);
                 await blEmbed.setTitle(`${client.user.username} | Blacklisted User Added`);
                 await blEmbed.setColor('#00e640');
-                await blEmbed.addField('User', `${blUsername} (${blUser})`, true);
+                await blEmbed.addField('User ID', `${blUser}`, true);
                 await blEmbed.addField('Reason', reason, true);
                 await blEmbed.addField('Issuer', `${message.member.user.tag} (${message.author.id})`);
 
@@ -97,11 +93,11 @@ exports.run = async (client, message, args) => {
                 )
                 .sort({ case: -1 })
                 .then(async () => {
-                    await console.log(`${message.member.user.tag} ("${message.author.id}") has issued an unblacklist for the user ${blUsername} (${blUser}).`);
+                    await console.log(`${message.member.user.tag} ("${message.author.id}") has issued an unblacklist for the user ${blUser}.`);
 
                     await blEmbed.setTitle(`${client.user.username} | Blacklisted User Removed`);
                     await blEmbed.setColor('#d64541');
-                    await blEmbed.addField('User', `${blUsername} (${blUser})`, true);
+                    await blEmbed.addField('User ID', `${blUser}`, true);
                     await blEmbed.addField('Issuer', `${message.member.user.tag} (${message.author.id})`);
 
                     await message.channel.send(blEmbed).then(msg => msg.delete(5000)).catch(console.error);
