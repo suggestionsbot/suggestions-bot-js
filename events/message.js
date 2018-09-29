@@ -1,6 +1,8 @@
 const moment = require('moment');
+const mongoose = require('mongoose');
 const Settings = require('../models/settings.js');
 const Blacklist = require('../models/blacklist.js');
+const Command = require('../models/commands.js');
 
 module.exports = async (client, message) => {
 
@@ -49,6 +51,20 @@ module.exports = async (client, message) => {
             if (message.author.id === res.userID && res.status === true) return console.log(`"${message.author.tag}" (${message.author.id}) in the guild "${message.guild.name}" (${message.guild.id}) tried to use the command "${cmd.help.name}", but is blacklisted. [${moment(message.createdAt)}]`);
         
             cmd.run(client, message, args);
+
+            const newCommand = await new Command({
+                _id: mongoose.Types.ObjectId(),
+                guildID: message.guild.id,
+                guildName: message.guild.name,
+                guildOwnerID: message.guild.ownerID,
+                command: cmd.help.name,
+                channel: message.channel.name,
+                username: message.member.user.tag,
+                userID: message.member.id,
+                time: moment(Date.now())
+            });
+
+            await newCommand.save().catch(err => console.log(err));
         })
         .catch(err => console.log(err));
     

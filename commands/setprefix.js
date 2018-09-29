@@ -30,7 +30,7 @@ exports.run = async (client, message, args) => {
         if (!admins.includes(message.member.id)) return noPerms(message, 'MANAGE_GUILD');
     
         const value = args[0];
-        if (!value) return message.channel.send(`Incorrect command arguments: \`${res.prefix + cmdName} <prefix>\``).then(m => m.delete(5000)).catch(err => console.log(err));
+        if (!value) return message.channel.send(`Usage: \`${res.prefix + cmdName} <prefix>\``).then(m => m.delete(5000)).catch(err => console.log(err));
     
         await Settings.findOneAndUpdate(
             { guildID: message.guild.id },

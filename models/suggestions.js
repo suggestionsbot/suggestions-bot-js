@@ -9,7 +9,11 @@ const suggestionSchema = mongoose.Schema({
     suggestion: String,
     sID: String,
     time: String,
-    status: String
+    status: String,
+    statusUpdated: String,
+    staffMemberID: String,
+    staffMemberUsername: String,
+    results: String
 });
 
 module.exports = mongoose.model('Suggestion', suggestionSchema);
