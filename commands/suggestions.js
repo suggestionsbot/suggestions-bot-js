@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
 const Settings = require('../models/settings.js');
 const Suggestion = require('../models/suggestions.js');
-const { noPerms, maintenanceMode, noSuggestionsPerms } = require('../utils/errors.js');
+const {  maintenanceMode } = require('../utils/errors.js');
 const { orange, owner } = require('../config.json');
 
 exports.run = async (client, message, args) => {
@@ -18,22 +18,6 @@ exports.run = async (client, message, args) => {
         guildID: message.guild.id,
     }, async (err, res) => {
         if (err) return console.log(err);
-
-        const roles = res.staffRoles;
-
-        const staffRoles = roles.map(el => {
-            return message.guild.roles.find(r => r.name === el.role || r.id === el.role);
-        });
-
-        let admins = [];
-        message.guild.members.forEach(collected => {
-            
-            if (collected.hasPermission('MANAGE_GUILD') && !collected.user.bot) return admins.push(collected.id);
-            
-        });
-
-        if (!admins.includes(message.member.id) && !message.member.roles.some(r => staffRoles.includes(r))) return noSuggestionsPerms(message.channel);
-
         
         Suggestion.find(
             { guildID: message.guild.id }
