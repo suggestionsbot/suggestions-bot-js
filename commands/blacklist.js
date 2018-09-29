@@ -33,7 +33,7 @@ exports.run = async (client, message, args) => {
                     try {
                         if (res[i].status === false || res.length === 0) return message.channel.send('There are no currently active blacklisted users!').then(msg => msg.delete(5000)).catch(console.error);
                         let caseNum = res[i].case;
-                        let caseUser = `${res[i].username} (${res[i].userID})`;
+                        let caseUser = `${res[i].userID}`;
                         let caseReason = res[i].reason;
                         let caseIssuer = `${res[i].issuerUsername} (${res[i].issuerID})`;
                         let caseStatus = status[res[i].status];
