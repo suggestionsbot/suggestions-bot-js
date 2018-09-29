@@ -69,7 +69,7 @@ exports.run = async (client, message, args) => {
             return;
         }
 
-        if (res.voteEmojis === 'defaultEmojis' || res.voteEmojis === null) {
+        if (res.voteEmojis === null || res.voteEmojis === 'defaultEmojis') {
             embed.setDescription(`
             **Voting Emojis**
             Choose from 3 different emoji sets to be used for voting in your guild.
