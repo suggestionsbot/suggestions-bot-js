@@ -6,6 +6,7 @@ const crypto = require('crypto');
 const { owner, orange, discord } = require('../config.json');
 const moment = require('moment');
 const { noSuggestions, noBotPerms, maintenanceMode } = require('../utils/errors.js');
+const { defaultEmojis, thumbsEmojis, arrowsEmojis } = require('../utils/voteEmojis');
 require('moment-duration-format');
 require('moment-timezone');
 
@@ -25,8 +26,10 @@ exports.run = async (client, message, args) => {
         const suggestionsChannel = message.guild.channels.find(c => c.name === res.suggestionsChannel) ||  message.guild.channels.find(c => c.toString() === res.suggestionsChannel);
         if (!suggestionsChannel) return noSuggestions(message.channel);
     
+        let emojis = res.voteEmojis;
+
         const id = crypto.randomBytes(20).toString('hex').slice(12,20);
-        //let time = moment(Date.now());
+        let time = moment(Date.now());
     
         const dmEmbed = new Discord.RichEmbed()
             .setDescription(`Hey, ${sUser}. Your suggestion has been sent to the ${suggestionsChannel} channel to be voted on!
@@ -65,9 +68,24 @@ exports.run = async (client, message, args) => {
         sUser.send(dmEmbed);
     
         suggestionsChannel.send(sEmbed)
-            .then(async message => {
-                await message.react(`✅`);
-                await message.react(`❌`);
+            .then(async msg => {
+                if (emojis === 'defaultEmojis') {
+                    for (let i in defaultEmojis) {
+                        await msg.react(defaultEmojis[i]);
+                    }
+                }
+
+                if (emojis === 'thumbsEmojis') {
+                    for (let i in thumbsEmojis) {
+                        await msg.react(thumbsEmojis[i]);
+                    }
+                }
+
+                if (emojis === 'arrowsEmojis') {
+                    for (let i in arrowsEmojis) {
+                        await msg.react(arrowsEmojis[i]);
+                    }
+                }
             })
             .catch(err => {
                 console.log(err);
@@ -81,7 +99,7 @@ exports.run = async (client, message, args) => {
             userID: sUser.id,
             suggestion: suggestion,
             sID: id,
-            time: moment(Date.now())
+            time: time
         });
 
         await newSuggestion.save().then(res => console.log('New Suggestion: \n', res)).catch(err => console.log(err));
@@ -89,6 +107,7 @@ exports.run = async (client, message, args) => {
         await message.delete(3000).catch(O_o=>{});
     });
 };
+
 
 exports.conf = {
     aliases: [],

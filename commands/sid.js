@@ -19,7 +19,6 @@ exports.run = async (client, message, args) => {
     let status = cmdStatus.get('status');
     if (status === 'off' && message.author.id !== owner)  return maintenanceMode(message.channel);
 
-
     Settings.findOne({
         guildID: message.guild.id,
     }, async (err, res) => {

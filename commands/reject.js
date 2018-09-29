@@ -50,6 +50,8 @@ exports.run = async (client, message, args) => {
         let id = args[0];
         if (!id) return message.channel.send(`Usage: \`${res.prefix + cmdName} <id>\``).then(msg => msg.delete(5000)).catch(console.error);
 
+        let date = moment(Date.now()).format();
+
         Suggestion.findOne(
             { $and: [
                 { guildID: message.guild.id },
@@ -123,7 +125,7 @@ exports.run = async (client, message, args) => {
                                         { $set:
                                             { 
                                                 status: 'rejected',
-                                                statusUpdated: moment(Date.now()),
+                                                statusUpdated: date,
                                                 staffMemberID: message.member.id,
                                                 staffMemberUsername: message.member.user.tag,
                                                 results: results.join(' ')

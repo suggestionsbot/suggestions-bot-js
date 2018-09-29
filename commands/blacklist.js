@@ -70,7 +70,7 @@ exports.run = async (client, message, args) => {
                     reason: reason,
                     issuerID: message.author.id,
                     issuerUsername: message.member.user.tag,
-                    time: Date.now(),
+                    time: moment(Date.now()),
                     status: true,
                     case: caseNum
                 });
