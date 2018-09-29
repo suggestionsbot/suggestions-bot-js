@@ -69,7 +69,7 @@ exports.run = async (client, message, args) => {
     
         suggestionsChannel.send(sEmbed)
             .then(async msg => {
-                if (emojis === 'defaultEmojis') {
+                if (emojis === 'defaultEmojis' || !emojis) {
                     for (let i in defaultEmojis) {
                         await msg.react(defaultEmojis[i]);
                     }
