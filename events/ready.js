@@ -15,8 +15,4 @@ module.exports = async client => {
     client.user.setStatus('online');
     client.user.setActivity(`${userSize} users | ${prefix + cmdHelp}`, { type: 'WATCHING' })
         .catch(console.error);
-
-    client.setInterval(() => {
-        fs.readFile('./blacklisted.json', 'utf-8', (err, data) => { if (err) return console.log(err); });
-    }, 1500);
 };
