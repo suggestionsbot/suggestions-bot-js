@@ -50,21 +50,23 @@ module.exports = async (client, message) => {
 
             if (message.author.id === res.userID && res.status === true) return console.log(`"${message.author.tag}" (${message.author.id}) in the guild "${message.guild.name}" (${message.guild.id}) tried to use the command "${cmd.help.name}", but is blacklisted. [${moment(message.createdAt)}]`);
         
-            cmd.run(client, message, args);
+            cmd.run(client, message, args).then(async () => {
 
-            const newCommand = await new Command({
-                _id: mongoose.Types.ObjectId(),
-                guildID: message.guild.id,
-                guildName: message.guild.name,
-                guildOwnerID: message.guild.ownerID,
-                command: cmd.help.name,
-                channel: message.channel.name,
-                username: message.member.user.tag,
-                userID: message.member.id,
-                time: moment(Date.now())
-            });
-
-            await newCommand.save().catch(err => console.log(err));
+                const newCommand = await new Command({
+                    _id: mongoose.Types.ObjectId(),
+                    guildID: message.guild.id,
+                    guildName: message.guild.name,
+                    guildOwnerID: message.guild.ownerID,
+                    command: cmd.help.name,
+                    channel: message.channel.name,
+                    username: message.member.user.tag,
+                    userID: message.member.id,
+                    time: moment(Date.now())
+                });
+    
+                await newCommand.save().catch(err => console.log(err));
+            })
+            .catch(err => console.log('An error occurred running this command. ', err));
         })
         .catch(err => console.log(err));
     
