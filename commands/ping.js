@@ -1,4 +1,3 @@
-//const Discord = require('discord.js');
 const { owner } = require('../config.json');
 const { maintenanceMode } = require('../utils/errors.js');
 

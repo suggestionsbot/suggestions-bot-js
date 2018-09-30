@@ -13,8 +13,6 @@ exports.run = async (client, message, args) => {
 
     if(message.author.id !== owner) return;
 
-    
-
 };
 
 exports.conf = {
