@@ -1,8 +1,11 @@
 const Discord = require('discord.js');
+const moment = require('moment');
 const Settings = require('../models/settings.js');
 const Suggestion = require('../models/suggestions.js');
 const {  maintenanceMode } = require('../utils/errors.js');
 const { orange, owner } = require('../config.json');
+require('moment-duration-format');
+require('moment-timezone');
 
 exports.run = async (client, message, args) => {
 
@@ -18,12 +21,15 @@ exports.run = async (client, message, args) => {
         guildID: message.guild.id,
     }, async (err, res) => {
         if (err) return console.log(err);
-        
+
         Suggestion.find(
-            { guildID: message.guild.id }
+            { $and: [
+                { guildID: message.guild.id },
+                { userID: message.author.id }
+            ]}
         ,async (err, res) => {
 
-            if (res.length === 0) return message.channel.send('No suggestions data exists in this guild!').then(msg => msg.delete(3000)).catch(err => console.log(err));
+            if (res.length === 0) return message.channel.send('No suggestions data exists for you in this guild!').then(msg => msg.delete(3000)).catch(err => console.log(err));
 
             let approved = [];
             let rejected = [];
@@ -32,27 +38,28 @@ exports.run = async (client, message, args) => {
                 if (res[i].status === 'rejected') rejected.push(res[i]);
             }
 
-            const icon = message.guild.icon;
-            const id = message.guild.id;
-            const srvIcon = `https://cdn.discordapp.com/icons/${id}/${icon}.png?size=2048`;
+            const lastDate = moment(res[0].time).utc().format('MM/DD/YY');
+            const lastsID = res[0].sID;
 
             const embed = new Discord.RichEmbed()
-                .setAuthor(message.guild.name, message.guild.iconURL)
+                .setAuthor(message.member.user.tag + ' | ' + message.guild.name, message.member.user.avatarURL)
                 .setDescription(`
-                **Suggestions Data**
+                **Suggestions Data for ${message.member.user.tag}**
 
                 **Total:** ${res.length}
 
                 **Approved:** ${approved.length}
 
                 **Rejected:** ${rejected.length}
+
+                **Last Suggestion:** ${lastsID} (${lastDate})
                 `)
                 .setColor(orange)
-                .setThumbnail(srvIcon)
-                .setFooter(`Guild ID: ${message.guild.id}`)
+                .setThumbnail(message.member.user.avatarURL)
+                .setFooter(`ID: ${message.author.id}`)
                 .setTimestamp();
 
-            message.channel.send(embed);
+        message.channel.send(embed);
         });
     });
 };
@@ -62,7 +69,7 @@ exports.conf = {
 };
 
 exports.help = {
-    name: 'suggestions',
-    description: 'View suggestions data in your guild',
-    usage: 'suggestions'
+    name: 'mysuggestions',
+    description: 'View your own suggestions data',
+    usage: 'mysuggestions'
 };
