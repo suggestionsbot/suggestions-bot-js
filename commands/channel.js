@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
 const Settings = require('../models/settings.js');
 const { maintenanceMode } = require('../utils/errors.js');
-const { owner } = require('../config.json');
+const { owner } = settings;
 
 exports.run = async (client, message, args) => {
 
@@ -15,22 +15,19 @@ exports.run = async (client, message, args) => {
         return maintenanceMode(message.channel);
     }
 
-    Settings.findOne({
+    let gSettings = await Settings.findOne({
         guildID: message.guild.id,
-    }, (err, res) => {
-        if (err) return console.log(err);
-
-        return message.channel.send(`Current suggestions channel: ${res.suggestionsChannel}`);
+    }).catch(err => {
+        console.log(err);
+        return message.channel.send(`Error querying the database for this guild's information: **${err.message}**.`);
     });
-};
 
-exports.conf = {
-    aliases: [],
-    status: 'true'
+    message.channel.send(`Current suggestions channel: ${gSettings.suggestionsChannel}`);
 };
 
 exports.help = {
     name: 'channel',
+    aliases: [],
     description: 'View the current suggestions channel',
     usage: 'channel'
 };

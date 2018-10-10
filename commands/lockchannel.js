@@ -8,12 +8,9 @@ exports.run = async (client, message, args) => [
 
 ];
 
-exports.conf = {
-    aliases: []
-};
-
 exports.help = {
     name: 'lockchannel',
+    aliases: [],
     description: 'Lock the suggestions channel',
     usage: 'lockchannel <on/off>'
 };

@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const Settings = require('../models/settings.js');
 const Suggestion = require('../models/suggestions.js');
 const {  maintenanceMode } = require('../utils/errors.js');
-const { orange, owner } = require('../config.json');
+const { embedColor, owner } = settings;
 
 exports.run = async (client, message, args) => {
 
@@ -12,57 +12,48 @@ exports.run = async (client, message, args) => {
     message.delete().catch(O_o=>{});
 
     let status = cmdStatus.get('status');
-    if (status === 'off' && message.author.id !== owner)  return maintenanceMode(message.channel);
+    if (status === 'off' && message.author.id !== owner) return maintenanceMode(message.channel);
 
-    Settings.findOne({
-        guildID: message.guild.id,
-    }, async (err, res) => {
-        if (err) return console.log(err);
-        
-        Suggestion.find(
-            { guildID: message.guild.id }
-        ,async (err, res) => {
-
-            if (res.length === 0) return message.channel.send('No suggestions data exists in this guild!').then(msg => msg.delete(3000)).catch(err => console.log(err));
-
-            let approved = [];
-            let rejected = [];
-            for (let i in res) {
-                if (res[i].status === 'approved') approved.push(res[i]);
-                if (res[i].status === 'rejected') rejected.push(res[i]);
-            }
-
-            const icon = message.guild.icon;
-            const id = message.guild.id;
-            const srvIcon = `https://cdn.discordapp.com/icons/${id}/${icon}.png?size=2048`;
-
-            const embed = new Discord.RichEmbed()
-                .setAuthor(message.guild.name, message.guild.iconURL)
-                .setDescription(`
-                **Suggestions Data**
-
-                **Total:** ${res.length}
-
-                **Approved:** ${approved.length}
-
-                **Rejected:** ${rejected.length}
-                `)
-                .setColor(orange)
-                .setThumbnail(srvIcon)
-                .setFooter(`Guild ID: ${message.guild.id}`)
-                .setTimestamp();
-
-            message.channel.send(embed);
-        });
+    let gSuggestions = await Suggestion.find({ guildID: message.guild.id }).catch(err => {
+        console.log(err);
+        return message.channel.send(`Error querying the database for this guild's suggestions: **${err.message}**.`);
     });
-};
 
-exports.conf = {
-    aliases: []
+    if (gSuggestions.length === 0) return message.channel.send('No suggestions data exists in this guild!').then(msg => msg.delete(3000)).catch(err => console.log(err));
+
+    let approved = [];
+    let rejected = [];
+    for (let i in gSuggestions) {
+        if (gSuggestions[i].status === 'approved') approved.push(gSuggestions[i]);
+        if (gSuggestions[i].status === 'rejected') rejected.push(gSuggestions[i]);
+    }
+
+    const icon = message.guild.icon;
+    const id = message.guild.id;
+    const srvIcon = `https://cdn.discordapp.com/icons/${id}/${icon}.png?size=2048`;
+
+    const embed = new Discord.RichEmbed()
+        .setAuthor(message.guild.name, message.guild.iconURL)
+        .setDescription(`
+            **Suggestions Data**
+
+            **Total:** ${gSuggestions.length}
+
+            **Approved:** ${approved.length}
+
+            **Rejected:** ${rejected.length}
+        `)
+        .setColor(embedColor)
+        .setThumbnail(srvIcon)
+        .setFooter(`Guild ID: ${message.guild.id}`)
+        .setTimestamp();
+
+    message.channel.send(embed);
 };
 
 exports.help = {
     name: 'suggestions',
+    aliases: [],
     description: 'View suggestions data in your guild',
     usage: 'suggestions'
 };

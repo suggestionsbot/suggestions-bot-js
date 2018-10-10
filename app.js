@@ -11,15 +11,7 @@ const client = new Discord.Client({
     messageSweepInterval: 60
 });
 
-const { prefix, suggestionsChannel, suggestionsLogs } = require('./config.json');
-
-defaultSettings = {
-    prefix: prefix,
-    suggestionsChannel: suggestionsChannel,
-    suggestionsLogs: suggestionsLogs
-};
-
-const n = {
+settings = {
     token: process.env.TOKEN,
     dblToken: process.env.DBLTOKEN,
     db : {
@@ -29,7 +21,21 @@ const n = {
         password: process.env.DB_PASS,
         name: process.env.DB_NAME
     },
+    prefix: process.env.PREFIX,
+    suggestionsChannel: process.env.SUGGESTIONSCHANNEL,
+    suggestionsLogs: process.env.SUGGESTIONSLOGS,
+    owner: process.env.OWNER,
+    embedColor: process.env.DEFAULT_COLOR,
+    discord: process.env.DISCORD,
+    docs: process.env.DOCS,
+    invite: process.env.INVITE,
     ver: process.env.VER
+};
+
+defaultSettings = {
+    prefix: settings.prefix,
+    suggestionsChannel: settings.suggestionsChannel,
+    suggestionsLogs: settings.suggestionsLogs
 };
 
 cmdStatus = {
@@ -41,10 +47,10 @@ client.commands = new Enmap();
 client.aliases = new Enmap();
 cmdStatus = new Enmap(); 
 
-const DBL = require('dblapi.js');
-const dbl = new DBL(n.dblToken, client);
+if (settings.ver === 'production') {
 
-if (n.ver === 'production') {
+    const DBL = require('dblapi.js');
+    const dbl = new DBL(settings.dblToken, client);
 
     dbl.on('posted', () => {
         console.log('Server count posted to DiscordBots.org!');
@@ -55,8 +61,8 @@ if (n.ver === 'production') {
     });
 }
 
-const dbURI = `mongodb://${n.db.user}:${n.db.password}@${n.db.host}:${n.db.port}/${n.db.name}?authSource=admin`;
-const dbURILog = `mongodb://${n.db.user}@${n.db.host}:${n.db.port}/${n.db.name}`;
+const dbURI = `mongodb://${settings.db.user}:${settings.db.password}@${settings.db.host}:${settings.db.port}/${settings.db.name}?authSource=admin`;
+const dbURILog = `mongodb://${settings.db.user}@${settings.db.host}:${settings.db.port}/${settings.db.name}`;
 
 const dbOtions = {
     useNewUrlParser: true,
@@ -102,7 +108,7 @@ fs.readdir('./commands/', async (err, files) => {
         let cmdName = file.split('.')[0];
         console.log(`Loaded command '${cmdName}'`);
         client.commands.set(cmdName, props);
-        props.conf.aliases.forEach(alias => {
+        props.help.aliases.forEach(alias => {
             client.aliases.set(alias, cmdName);
         });
     });
@@ -118,7 +124,6 @@ process.on('SIGINT', () => {
 
 process.on('unhandledRejection', (reason, p) => {
     console.log('Unhandled Rejection at:', p, 'reason:', reason);
-    // application specific logging, throwing an error, or other logic here
 });
 
-client.login(n.token);
+client.login(settings.token);

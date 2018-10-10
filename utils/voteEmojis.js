@@ -14,3 +14,13 @@ module.exports.arrowsEmojis = {
     0: '⬆',
     1: '⬇'
 };
+
+module.exports.halloweenEmojis = {
+    0: '🎃',
+    1: '☠'
+};
+
+module.exports.impEmojis = {
+    0: '😈',
+    1: '👿'
+};
