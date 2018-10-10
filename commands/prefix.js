@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
 const Settings = require('../models/settings.js');
 const { maintenanceMode } = require('../utils/errors.js');
-const { owner } = require('../config.json');
+const { owner } = settings;
 
 exports.run = async (client, message, args) => {
 
@@ -12,22 +12,17 @@ exports.run = async (client, message, args) => {
         return maintenanceMode(message.channel);
     }
 
-    Settings.findOne({
-        guildID: message.guild.id,
-    }, (err, res) => {
-        if (err) return console.log(err);
-
-        return message.channel.send(`Current prefix: \`${res.prefix}\``);
+    let gSettings = await Settings.findOne({ guildID: message.guild.id }).catch(err => {
+        console.log(err);
+        return message.channel.send(`Error querying the database for this guild's information: **${err.message}**.`);
     });
-};
 
-exports.conf = {
-    aliases: [],
-    status: 'true'
+    message.channel.send(`Current prefix: \`${gSettings.prefix}\``);
 };
 
 exports.help = {
     name: 'prefix',
+    aliases: [],
     description: 'View the current bot prefix',
     usage: 'prefix'
 };

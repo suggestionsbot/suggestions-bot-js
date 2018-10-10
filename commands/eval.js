@@ -1,5 +1,5 @@
 const Discord = require('discord.js');
-const { owner, prefix } = require('../config.json');
+const { owner, prefix } = settings;
 
 exports.run = async (client, message, args) => {
 
@@ -23,14 +23,11 @@ exports.run = async (client, message, args) => {
 
 };
 
-exports.conf = {
-    aliases: []
-};
-
 exports.help = {
     name: "eval",
-    description: "",
-    usage: ""
+    aliases: [],
+    description: "Run raw Javascript code",
+    usage: "eval <code>"
 };
 
 const clean = text => {

@@ -1,4 +1,4 @@
-const { owner } = require('../config.json');
+const { owner } = settings;
 const { maintenanceMode } = require('../utils/errors.js');
 
 exports.run = async (client, message, args) => {
@@ -14,13 +14,9 @@ exports.run = async (client, message, args) => {
 
 };
 
-exports.conf = {
-    aliases: [],
-    status: 'true'
-};
-
 exports.help = {
     name: 'ping',
+    aliases: [],
     description: 'View latency of the bot and API',
     usage: 'ping'
 };

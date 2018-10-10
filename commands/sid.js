@@ -3,7 +3,7 @@ const moment = require('moment');
 const Settings = require('../models/settings.js');
 const Suggestion = require('../models/suggestions.js');
 const { maintenanceMode } = require('../utils/errors.js');
-const { orange, owner } = require('../config.json');
+const { embedColor, owner } = settings;
 require('moment-duration-format');
 require('moment-timezone');
 
@@ -19,39 +19,44 @@ exports.run = async (client, message, args) => {
     let status = cmdStatus.get('status');
     if (status === 'off' && message.author.id !== owner)  return maintenanceMode(message.channel);
 
-    Settings.findOne({
-        guildID: message.guild.id,
-    }, async (err, res) => {
-        if (err) return console.log(err);
+    let gSettings = await Settings.findOne({
+        guildID: message.guild.id
+    }).catch(err => {
+        console.log(err);
+        return message.channel.send(`Error querying the database for this guild's information: **${err.message}**.`);
+    });
 
-        let id = args[0];
-        if (!id) return message.channel.send(`Usage: \`${res.prefix + cmdName} <id>\``).then(msg => msg.delete(5000)).catch(console.error);
+    let id = args[0];
+    if (!id) return message.channel.send(`Usage: \`${gSettings.prefix + cmdName} <id>\``).then(msg => msg.delete(5000)).catch(console.error);
 
-        Suggestion.findOne(
-            { $and: [
-                { guildID: message.guild.id },
-                { sID: id },
-            ]}
-        ,async (err, res) => {
+    let gSuggestions = await Suggestion.findOne(
+        { $and: [
+            { guildID: message.guild.id },
+            { sID: id },
+        ]
+    }).catch(err => {
+        console.log(err);
+        return message.channel.send(`Error querying the database for this suggestion: **${err.message}**.`);
+    });
 
-            if (res.length === 0) return message.channel.send('No suggestions data exists in this guild!').then(msg => msg.delete(3000)).catch(err => console.log(err));
-            if (res.sID === null) return message.channel.send(`The sID **${id}** does not exist in the database.`).then(msg => msg.delete(3000)).catch(err => console.log(err));
+    if (gSuggestions.length === 0) return message.channel.send('No suggestions data exists in this guild!').then(msg => msg.delete(3000)).catch(err => console.log(err));
+    if (gSuggestions.sID === null) return message.channel.send(`The sID **${id}** does not exist in the database.`).then(msg => msg.delete(3000)).catch(err => console.log(err));
 
-            const submittedOn = moment(res.time).utc().format('MM/DD/YY @ h:mm A (z)');
-            const updatedOn = moment(res.statusUpdated).utc().format('MM/DD/YY @ h:mm A (z)');
-            let username = res.username;
-            let userID = res.userID;
-            let suggestion = res.suggestion;
-            let updatedBy = res.staffMemberUsername;
-            let results = res.results;
+    const submittedOn = moment(gSuggestions.time).utc().format('MM/DD/YY @ h:mm A (z)');
+    const updatedOn = moment(gSuggestions.statusUpdated).utc().format('MM/DD/YY @ h:mm A (z)');
+    let username = gSuggestions.username;
+    let userID = gSuggestions.userID;
+    let suggestion = gSuggestions.suggestion;
+    let updatedBy = gSuggestions.staffMemberUsername;
+    let results = gSuggestions.results;
 
-            let embed = new Discord.RichEmbed()
-                .setAuthor(message.guild.name, message.guild.iconURL)
-                .setTitle(`Info for sID ${id}`)
-                .setFooter(`User ID: ${userID} | sID ${id}`);
+    let embed = new Discord.RichEmbed()
+        .setAuthor(message.guild.name, message.guild.iconURL)
+        .setTitle(`Info for sID ${id}`)
+        .setFooter(`User ID: ${userID} | sID ${id}`);
 
-            if (res.status === undefined) {
-                await embed.setDescription(`
+    if (gSuggestions.status === undefined) {
+        await embed.setDescription(`
                 **Submitter**
                 ${username}
             
@@ -60,14 +65,13 @@ exports.run = async (client, message, args) => {
         
                 **Submitted**
                 ${submittedOn}`);
-                await embed.setColor(orange);
+        await embed.setColor(embedColor);
+        return message.channel.send(embed);
+    }
 
-                return message.channel.send(embed);
-            }
+    if (gSuggestions.status === 'approved') {
 
-            if (res.status === 'approved') {
-
-                await embed.setDescription(`
+        await embed.setDescription(`
                 **Submitter**
                 ${username}
     
@@ -87,14 +91,12 @@ exports.run = async (client, message, args) => {
                 ${results}
                 
                 `);
-                await embed.setColor('#00e640');
+        await embed.setColor('#00e640');
+        return message.channel.send(embed);
+    }
 
-                return message.channel.send(embed);
-                
-            }
-
-            if (res.status === 'rejected') {
-                await embed.setDescription(`
+    if (gSuggestions.status === 'rejected') {
+        await embed.setDescription(`
                 **Submitter**
                 ${username}
     
@@ -114,23 +116,14 @@ exports.run = async (client, message, args) => {
                 ${results}
                 
                 `);
-                await embed.setColor('#cf000f');
-
-                return message.channel.send(embed);
-            }
-        });
-
-    });
-
-
-};
-
-exports.conf = {
-    aliases: []
+        await embed.setColor('#cf000f');
+        return message.channel.send(embed);
+    }
 };
 
 exports.help = {
     name: 'sid',
+    aliases: [],
     description: 'View the information of a specific suggestion by their sID',
     usage: 'sid <id>'
 };

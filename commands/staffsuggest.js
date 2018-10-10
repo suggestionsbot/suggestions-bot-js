@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 const Settings = require('../models/settings.js');
-const { orange, owner } = require('../config.json');
+const { embedColor, owner } = settings;
 const { noSuggestionsPerms, maintenanceMode } = require('../utils/errors.js');
 const moment = require('moment');
 require('moment-duration-format');
@@ -13,50 +13,47 @@ exports.run = async (client, message, args) => {
 
     const cmdName = client.commands.get('staffsuggest', 'help.name');
 
-        Settings.findOne({
-            guildID: message.guild.id,
-        }, (err, res) => {
-            if (err) return console.log(err);
+    let gSettings = await Settings.findOne({ guildID: message.guild.id }).catch(err => {
+        console.log(err);
+        return message.channel.send(`Error querying the database for this guild's information: **${err.message}**.`);
+    });
 
-            const roles = res.staffRoles;
+    const roles = gSettings.staffRoles;
 
-            const staffRoles = roles.map(el => {
-                return message.guild.roles.find(r => r.name === el.role || r.id === el.role);
-            });
+    const staffRoles = roles.map(el => {
+        return message.guild.roles.find(r => r.name === el.role || r.id === el.role);
+    });
 
-            let admins = [];
-            message.guild.members.forEach(collected => {
-                if (collected.hasPermission('MANAGE_GUILD') && !collected.user.bot) {
-                    
-                    admins.push(collected.id);
-                }
-            });
+    let admins = [];
+    message.guild.members.forEach(collected => {
+        if (collected.hasPermission('MANAGE_GUILD') && !collected.user.bot) { admins.push(collected.id); }
+    });
 
-            if (!staffRoles) return message.channel.send('No staff roles exist! Please create them or contact a server administrator to handle suggestions.').then(msg => {msg.delete(5000);}).catch(err => console.log(err));
-            
-            if (!admins.includes(message.member.id) && !message.member.roles.some(r => staffRoles.includes(r))) return noSuggestionsPerms(message.channel);
+    if (!staffRoles) return message.channel.send('No staff roles exist! Please create them or contact a server administrator to handle suggestions.').then(msg =>  msg.delete(5000)).catch(err => console.log(err));
 
-            const staffSuggestionsChannel = message.guild.channels.find(c => c.name === res.staffSuggestionsChannel) || message.guild.channels.find(c => c.toString() === res.staffSuggestionsChannel);
+    if (!admins.includes(message.member.id) && !message.member.roles.some(r => staffRoles.includes(r))) return noSuggestionsPerms(message.channel);
 
-            const sUser = message.member;
+    const staffSuggestionsChannel = message.guild.channels.find(c => c.name === gSettings.staffSuggestionsChannel) || message.guild.channels.find(c => c.toString() === gSettings.staffSuggestionsChannel);
 
-            const embed = new Discord.RichEmbed()
-                .setDescription(`Hey, ${sUser}. Your suggestion has been added in the ${staffSuggestionsChannel} channel to be voted on!`)
-                .setColor(orange)
-                .setAuthor(sUser.displayName)
-                .setFooter(`User ID: ${sUser.id}`)
-                .setTimestamp();
+    const sUser = message.member;
 
-            message.delete().catch(O_o => {});
+    const embed = new Discord.RichEmbed()
+        .setDescription(`Hey, ${sUser}. Your suggestion has been added in the ${staffSuggestionsChannel} channel to be voted on!`)
+        .setColor(embedColor)
+        .setAuthor(sUser.displayName)
+        .setFooter(`User ID: ${sUser.id}`)
+        .setTimestamp();
 
-            const suggestion = args.join(' ');
-            if (!suggestion) return message.channel.send(`Usage: \`${res.prefix + cmdName} <suggestion>\``).then(message => {message.delete(5000);}).catch(console.error);
+    message.delete().catch(O_o => {});
 
-            const submittedOn = moment(message.createdAt).tz('America/New_York').format('MM/DD/YY @ h:mm A (z)');
+    const suggestion = args.join(' ');
+    if (!suggestion) return message.channel.send(`Usage: \`${gSettings.prefix + cmdName} <suggestion>\``).then(msg => msg.delete(5000)).catch(console.error);
 
-            const sEmbed = new Discord.RichEmbed()
-                .setThumbnail(sUser.user.avatarURL)
-                .setDescription(`
+    const submittedOn = moment.utc(message.createdAt).format('MM/DD/YY @ h:mm A (z)');
+
+    const sEmbed = new Discord.RichEmbed()
+        .setThumbnail(sUser.user.avatarURL)
+        .setDescription(`
         **Submitter**
         ${sUser.user.tag}
 
@@ -66,45 +63,41 @@ exports.run = async (client, message, args) => {
         **Submitted**
         ${submittedOn}
         `)
-                .setColor(orange)
-                .setFooter(`User ID: ${sUser.id}`);
+        .setColor(embedColor)
+        .setFooter(`User ID: ${sUser.id}`);
 
-            let perms = message.guild.me.permissions;
-            if (!perms.has('EMBED_LINKS')) return message.channel.send('I can\'t embed links! Make sure I have this permission: Embed Links`').then(msg => msg.delete(5000));
-            if (!perms.has('ADD_REACTIONS')) return message.channel.send('I can\'t add reactions! Make sure I have this permission: Add Reactions`').then(msg => msg.delete(5000));
+    let perms = message.guild.me.permissions;
+    if (!perms.has('EMBED_LINKS')) return message.channel.send('I can\'t embed links! Make sure I have this permission: Embed Links`').then(msg => msg.delete(5000));
+    if (!perms.has('ADD_REACTIONS')) return message.channel.send('I can\'t add reactions! Make sure I have this permission: Add Reactions`').then(msg => msg.delete(5000));
 
-            message.channel.send(embed).then(message => {
-                message.delete(5000);
-            })
-            .catch(err => {
-                console.log(err);
-            });
+    const sendMsgs = staffSuggestionsChannel.permissionsFor(message.guild.me).has('SEND_MESSAGES', false);
+    const reactions = staffSuggestionsChannel.permissionsFor(message.guild.me).has('ADD_REACTIONS', false);
+    if (!sendMsgs) return message.channel.send(`I can't send messages in the ${staffSuggestionsChannel} channel! Make sure I have \`Send Messages\`.`);
+    if (!reactions) return message.channel.send(`I can't add reactions in the ${staffSuggestionsChannel} channel! Make sure I have \`Add Reactions\`.`);
 
-            staffSuggestionsChannel.send(sEmbed)
-                .then(async message => {
-                    await message.react(`✅`);
-                    await message.react(`❌`);
-                })
-                .catch(err => {
-                    console.log(err);
-                });
+    message.channel.send(embed).then(msg => msg.delete(5000)).catch(err => console.log(err));
 
-            console.log(`A new staff suggestion has been created in:
+    staffSuggestionsChannel.send(sEmbed)
+        .then(async msg => {
+            await msg.react(`✅`);
+            await msg.react(`❌`);
+        })
+        .catch(err => {
+            console.log(err);
+            message.channel.send(`An error occurred adding reactions to this suggestion: **${err.message}**.`);
+        });
+
+    console.log(`A new staff suggestion has been created:
         Author: ${sUser.user.tag} (ID: ${sUser.id})
         Suggestion: ${suggestion}
         Time: ${submittedOn}
         Channel: ${staffSuggestionsChannel.name}
         Guild: ${message.guild.name} (ID: ${message.guild.id})`);
-    });
-};
-
-exports.conf = {
-    aliases: [],
-    status: 'true'
 };
 
 exports.help = {
     name: 'staffsuggest',
+    aliases: [],
     description: 'Submit a new suggestion for staff members to vote',
     usage: 'staffsuggest <suggestion>'
 };
