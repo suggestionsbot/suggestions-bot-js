@@ -1,5 +1,5 @@
 const Discord = require('discord.js');
-const { embedColor, discord, owner, docs } = settings;
+const { embedColor, discord, owner, docs } = require('../config.js');
 
 exports.run = (client, message, args) => {
 

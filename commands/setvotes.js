@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const { defaultEmojis, thumbsEmojis, arrowsEmojis, halloweenEmojis, impEmojis } = require('../utils/voteEmojis');
 const Settings = require('../models/settings.js');
 const { noPerms, maintenanceMode } = require('../utils/errors.js');
-const { owner, embedColor } = settings;
+const { owner, embedColor } = require('../config.js');
 
 exports.run = async (client, message, args) => {
 

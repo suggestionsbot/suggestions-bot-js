@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const fs = require('fs');
 const moment = require('moment');
 const mongoose = require('mongoose');
-const { owner, prefix, embedColor } = settings;
+const { owner, prefix, embedColor } = require('../config.js');
 const Blacklist = require('../models/blacklist.js');
 
 let status = {

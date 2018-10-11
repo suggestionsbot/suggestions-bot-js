@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 const Settings = require('../models/settings.js');
-const { embedColor, owner } = settings;
+const { embedColor, owner } = require('../config.js');
 const { noSuggestionsPerms, maintenanceMode } = require('../utils/errors.js');
 const moment = require('moment');
 require('moment-duration-format');

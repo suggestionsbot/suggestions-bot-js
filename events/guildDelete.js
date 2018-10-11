@@ -3,7 +3,7 @@ const moment = require('moment');
 const Settings = require('../models/settings.js');
 const Suggestion = require('../models/suggestions.js');
 const Command = require('../models/commands.js');
-const { prefix } = settings;
+const { prefix, defaultSettings } = require('../config.js');
 
 module.exports = async (client, guild) => {
 

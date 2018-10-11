@@ -6,6 +6,9 @@ package-lock.json
 logs/
 *.log
 
+# Beta command
+commands/beta.js
+
 # Miscellaneous
 .tmp/
 .vscode/

@@ -1,5 +1,5 @@
 const Discord = require('discord.js');
-const { discord } = require('../config.json');
+const { discord } = require('../config.js');
 const fs = require('fs');
 const red = '#FF4500';
 

@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const mongoose = require('mongoose');
 const moment = require('moment');
 const Settings = require('../models/settings.js');
-const { prefix } = settings;
+const { prefix, defaultSettings } = require('../config.js');
 
 module.exports = async (client, guild) => {
 
