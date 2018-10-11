@@ -4,39 +4,14 @@ const Enmap = require('enmap');
 const mongoose = require('mongoose');
 require('dotenv-flow').config();
 
+const { token, dblToken, dbURI, dbURILog, ver } = require('./config.js');
+
 const client = new Discord.Client({
     disableEveryone: true,
     messageCacheMaxSize: 500,
     messageCacheLifetime: 120,
     messageSweepInterval: 60
 });
-
-settings = {
-    token: process.env.TOKEN,
-    dblToken: process.env.DBLTOKEN,
-    db : {
-        host: process.env.DB_HOST,
-        port: process.env.DB_PORT,
-        user: process.env.DB_USER,
-        password: process.env.DB_PASS,
-        name: process.env.DB_NAME
-    },
-    prefix: process.env.PREFIX,
-    suggestionsChannel: process.env.SUGGESTIONSCHANNEL,
-    suggestionsLogs: process.env.SUGGESTIONSLOGS,
-    owner: process.env.OWNER,
-    embedColor: process.env.DEFAULT_COLOR,
-    discord: process.env.DISCORD,
-    docs: process.env.DOCS,
-    invite: process.env.INVITE,
-    ver: process.env.VER
-};
-
-defaultSettings = {
-    prefix: settings.prefix,
-    suggestionsChannel: settings.suggestionsChannel,
-    suggestionsLogs: settings.suggestionsLogs
-};
 
 cmdStatus = {
     status: 'on',
@@ -47,10 +22,10 @@ client.commands = new Enmap();
 client.aliases = new Enmap();
 cmdStatus = new Enmap(); 
 
-if (settings.ver === 'production') {
+if (ver === 'production') {
 
     const DBL = require('dblapi.js');
-    const dbl = new DBL(settings.dblToken, client);
+    const dbl = new DBL(dblToken, client);
 
     dbl.on('posted', () => {
         console.log('Server count posted to DiscordBots.org!');
@@ -60,9 +35,6 @@ if (settings.ver === 'production') {
         console.log(e);
     });
 }
-
-const dbURI = `mongodb://${settings.db.user}:${settings.db.password}@${settings.db.host}:${settings.db.port}/${settings.db.name}?authSource=admin`;
-const dbURILog = `mongodb://${settings.db.user}@${settings.db.host}:${settings.db.port}/${settings.db.name}`;
 
 const dbOtions = {
     useNewUrlParser: true,
@@ -126,4 +98,4 @@ process.on('unhandledRejection', (reason, p) => {
     console.log('Unhandled Rejection at:', p, 'reason:', reason);
 });
 
-client.login(settings.token);
+client.login(token);

@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
 const Settings = require('../models/settings.js');
 const { noPerms, maintenanceMode } = require('../utils/errors.js');
-const { owner } = settings;
+const { owner } = require('../config.js');
 
 exports.run = async (client, message, args) => {
 

@@ -3,7 +3,7 @@ const fs = require('fs');
 const moment = require('moment');
 const Settings = require('../models/settings.js');
 const Suggestion = require('../models/suggestions.js');
-const { owner, embedColor } = settings;
+const { owner, embedColor } = require('../config.js');
 const { noBotPerms, noPerms, maintenanceMode } = require('../utils/errors.js');
 const { defaultEmojis, thumbsEmojis, arrowsEmojis } = require('../utils/voteEmojis');
 require('moment-duration-format');

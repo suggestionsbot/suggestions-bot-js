@@ -1,4 +1,4 @@
-const { prefix, ver } = settings;
+const { prefix, ver } = require('../config.js');
 require('dotenv-flow').config();
 
 const versions = {

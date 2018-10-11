@@ -1,5 +1,5 @@
 const Discord = require('discord.js');
-const { embedColor } = settings;
+const { embedColor } = require('../config.js');
 const moment = require('moment');
 require('moment-duration-format');
 

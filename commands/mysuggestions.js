@@ -3,7 +3,7 @@ const moment = require('moment');
 const Settings = require('../models/settings.js');
 const Suggestion = require('../models/suggestions.js');
 const {  maintenanceMode } = require('../utils/errors.js');
-const { embedColor, owner } = settings;
+const { embedColor, owner } = require('../config.js');
 require('moment-duration-format');
 require('moment-timezone');
 

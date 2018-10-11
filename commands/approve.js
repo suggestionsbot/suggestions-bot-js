@@ -3,7 +3,7 @@ const moment = require('moment');
 const Settings = require('../models/settings.js');
 const Suggestion = require('../models/suggestions.js');
 const { noSuggestionsPerms, noSuggestionsLogs, noPerms, maintenanceMode } = require('../utils/errors.js');
-const { owner } = settings;
+const { owner } = require('../config.js');
 require('moment-duration-format');
 require('moment-timezone');
 moment.suppressDeprecationWarnings = true;

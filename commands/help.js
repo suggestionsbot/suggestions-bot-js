@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 const Settings = require('../models/settings.js');
-const { owner, embedColor, discord, docs } = settings;
+const { owner, embedColor, discord, docs } = require('../config.js');
 const cmdSeconds = '5';
 
 exports.run = async (client, message, args) => {

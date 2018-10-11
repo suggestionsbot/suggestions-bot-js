@@ -1,4 +1,4 @@
-const { owner } = settings;
+const { owner } = require('../config.js');
 const { maintenanceMode } = require('../utils/errors.js');
 
 exports.run = async (client, message, args) => {
