@@ -11,6 +11,7 @@ const suggestionSchema = mongoose.Schema({
     time: String,
     status: String,
     statusUpdated: String,
+    statusReply: String,
     staffMemberID: String,
     staffMemberUsername: String,
     results: String
