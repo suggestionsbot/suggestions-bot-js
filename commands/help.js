@@ -16,7 +16,7 @@ exports.run = async (client, message, args) => {
         if (cmds[i] === 'maintenance') continue;
         if (cmds[i] === 'beta') continue;
         if (cmds[i] === 'eval') continue;
-        if (cmds[i] === 'blacklist') continue;
+        if (cmds[i] === 'gblacklist') continue;
         if (cmds[i] === 'lockchannel') continue;
 
         newCmds.push(cmds[i]);

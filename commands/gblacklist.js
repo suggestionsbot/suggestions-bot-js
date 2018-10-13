@@ -3,43 +3,22 @@ const fs = require('fs');
 const moment = require('moment');
 const mongoose = require('mongoose');
 const { owner, prefix, embedColor } = require('../config.js');
-const Settings = require('../models/settings.js');
 const Blacklist = require('../models/blacklist.js');
-const { noPerms, noSuggestionsPerms, maintenanceMode } = require('../utils/errors.js');
 
-const blStatus = {
+let status = {
     true: 'True',
     false: 'False'
 };
 
 exports.run = async (client, message, args) => {
 
+    if (message.author.id !== owner) return;
+
     await message.delete().catch(O_o=>{});
 
     let cmdName = client.commands.get('blacklist', 'help.name');
 
-    let gSettings = await Settings.findOne({
-        guildID: message.guild.id,
-    }).catch(err => {
-        console.log(err);
-        return message.channel.send(`Error querying the database for this guild's information: **${err.message}**.`);
-    });
-
-    const roles = gSettings.staffRoles;
-
-    const staffRoles = roles.map(el => {
-        return message.guild.roles.find(r => r.name === el.role || r.id === el.role);
-    });
-
-    let admins = [];
-    message.guild.members.forEach(collected => { if (collected.hasPermission('MANAGE_GUILD') && !collected.user.bot) return admins.push(collected.id); });
-
-    if (!admins.includes(message.member.id) && !message.member.roles.some(r => staffRoles.includes(r))) return noSuggestionsPerms(message.channel);
-
-    let status = cmdStatus.get('status');
-    if (status === 'off' && message.author.id !== owner)  return maintenanceMode(message.channel);
-
-    let gBlacklist = await Blacklist.find({ guildID: message.guild.id }).catch(err => {
+    let gBlacklist = await Blacklist.find().catch(err => {
         console.log(err);
         return message.channel.send(`Error querying the database for the bot's blacklist information: **${err.message}**.`);
     });
@@ -58,7 +37,7 @@ exports.run = async (client, message, args) => {
                 let caseUser = `${gBlacklist[i].userID}`;
                 let caseReason = gBlacklist[i].reason;
                 let caseIssuer = `${gBlacklist[i].issuerUsername} (${gBlacklist[i].issuerID})`;
-                let caseStatus = blStatus[gBlacklist[i].status];
+                let caseStatus = status[gBlacklist[i].status];
                 await blEmbed.addField(`Case #${caseNum}`, `**User:** ${caseUser}\n **Reason:** ${caseReason}\n **Issuer:** ${caseIssuer}\n **Status:** ${caseStatus}`);
                 active++;
             } catch (err) {
@@ -89,15 +68,14 @@ exports.run = async (client, message, args) => {
 
         const newBlacklist = await new Blacklist({
             _id: mongoose.Types.ObjectId(),
-            guildID: message.guild.id,
-            guildName: message.guild.name,
             userID: blUser,
             reason: reason,
             issuerID: message.author.id,
             issuerUsername: message.member.user.tag,
             time: moment(Date.now()),
             status: true,
-            case: caseNum
+            case: caseNum,
+            scope: 'global'
         });
 
         await newBlacklist.save().then(res => console.log('New Blacklist: \n ', res)).catch(err => console.log(err));

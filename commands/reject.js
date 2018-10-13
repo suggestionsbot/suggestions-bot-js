@@ -46,6 +46,7 @@ exports.run = async (client, message, args) => {
     if (!suggestionsLogs) return noSuggestionsLogs(message.channel);
 
     let id = args[0];
+    let reply = args.slice(1).join(' ');
     if (!id) return message.channel.send(`Usage: \`${gSettings.prefix + cmdName} <id>\``).then(msg => msg.delete(5000)).catch(console.error);
 
     let date = moment(Date.now()).format();
@@ -116,6 +117,31 @@ exports.run = async (client, message, args) => {
                 .setFooter(`sID: ${id}`)
                 .setTimestamp();
 
+            if (reply) {
+                dmEmbed.setDescription(`Hey, ${sUser}. Unfortunately, your suggestion has been rejected by <@${message.author.id}>!
+        
+                    Staff response: **${reply}**
+                                    
+                    Your suggestion ID (sID) for reference was **${id}**.
+                    `);
+
+                logsEmbed.setDescription(`
+                    **Results:**
+                    ${results.join(' ')}
+                    **Suggestion:**
+                    ${gSuggestions.suggestion}
+                    
+                    **Submitter:**
+                    <@${sUser.id}>
+        
+                    **Rejected By:**
+                    <@${message.author.id}>
+    
+                    **Response:**
+                    ${reply}
+                    `);
+            }
+
             let footer = embed.footer.text;
             if (footer.includes(id)) {
 
@@ -141,17 +167,22 @@ exports.run = async (client, message, args) => {
                         $set: {
                             status: 'rejected',
                             statusUpdated: date,
+                            statusReply: reply || null,
                             staffMemberID: message.member.id,
                             staffMemberUsername: message.member.user.tag,
                             results: results.join(' ')
                         }
                     })
-                    .then(console.log(`sID ${id} has been rejected in the guild ${message.guild.name} (${message.guild.id}).`))
+                    .then(() => {
+                        console.log(`sID ${id} has been rejected in the guild "${message.guild.name}" (${message.guild.id}).`);
+                        if (reply) console.log(`sID ${id} has been rejected in the guild "${message.guild.name}" (${message.guild.id}) with the response "${reply}".`);
+                    })
                     .catch(err => {
                         console.log(err);
                         message.delete(3000).catch(O_o => {});
                         message.channel.send(`Error updating suggest **${id}** in the database: **${err.message}**`);
                     });
+
                 return;
             }
         });

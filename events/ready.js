@@ -10,7 +10,7 @@ module.exports = async client => {
 
     await console.log(`Logged in as ${client.user.tag} (${client.user.id}) in ${client.guilds.size} server(s).`);
     await cmdStatus.set('status', 'on');
-    await console.log(`Commands status set to ${cmdStatus.get('status')}`);
+    await console.log(`Commands status set to ${cmdStatus.get('status')}.`);
     await console.log(`${versions[ver]} version of the bot loaded.`);
 
     const userSize = client.users.size.toLocaleString();
