@@ -49,12 +49,22 @@ module.exports = async (client, message) => {
 
     let blacklisted = await Blacklist.findOne({
         $and: [
+            { guildID: message.guild.id },
             { userID: message.author.id },
             { status: true }
         ]
     }).catch(err => console.log(err));
 
-    if (blacklisted) return console.log(`"${message.author.tag}" (${message.author.id}) in the guild "${message.guild.name}" (${message.guild.id}) tried to use the command "${cmd.help.name}", but is blacklisted. [${moment(message.createdAt)}]`);
+    let gBlacklisted = await Blacklist.findOne({
+        $and: [
+            { userID: message.author.id },
+            { scope: 'global' },
+            { status: true }
+        ]
+    }).catch(err => console.log(err));
+
+    if (blacklisted) return console.log(`"${message.author.tag}" (${message.author.id}) in the guild "${message.guild.name}" (${message.guild.id}) tried to use the command "${cmd.help.name}", but is blacklisted from using bot commands in this guild, "${message.guild.name}" (${message.guild.id}). [${moment(message.createdAt)}]`);
+    if (gBlacklisted) return console.log(`"${message.author.tag}" (${message.author.id}) in the guild "${message.guild.name}" (${message.guild.id}) tried to use the command "${cmd.help.name}", but is blacklisted from using bot commands globally. [${moment(message.createdAt)}]`);
 
     if (cmd && !cmdCooldown.has(message.author.id)) {
         const newCommand = await new Command({

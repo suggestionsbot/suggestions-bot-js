@@ -2,13 +2,15 @@ const Discord = require('discord.js');
 const mongoose = require('mongoose');
 const moment = require('moment');
 const Settings = require('../models/settings.js');
-const { prefix, defaultSettings } = require('../config.js');
+const { prefix, defaultSettings, ver } = require('../config.js');
 
 module.exports = async (client, guild) => {
 
-    // 480231440932667393 = Nerd Cave Development Discord
-    const logGuild = client.guilds.get('480231440932667393');
-    const logChannel = logGuild.channels.find(c => c.name === 'server_logs');
+    // // 480231440932667393 = Nerd Cave Development
+    // const logGuild = client.guilds.get('480231440932667393');
+    // const logChannel = logGuild.channels.find(c => c.name === 'server_logs');
+
+    
 
     const gOwnerID = guild.ownerID;
 
@@ -51,5 +53,22 @@ module.exports = async (client, guild) => {
     client.user.setActivity(`${userSize} users | ${prefix + cmdHelp}`, { type: 'WATCHING' })
         .catch(console.error);
 
-    logChannel.send(newServer);
+    switch (ver) {
+        // 345753533141876737 = Nerd Cave Testing
+        case 'development': {
+            const logGuild = client.guilds.get('345753533141876737');
+            const logChannel = logGuild.channels.find(c => c.name === 'server_logs');
+            logChannel.send(newServer);
+            break;
+        }
+        // 480231440932667393 = Nerd Cave Development
+        default: {
+            const logGuild = client.guilds.get('480231440932667393');
+            const logChannel = logGuild.channels.find(c => c.name === 'server_logs');
+            logChannel.send(newServer);
+            break;
+        }
+    }
+
+    
 };

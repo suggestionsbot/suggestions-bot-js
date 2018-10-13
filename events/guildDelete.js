@@ -3,7 +3,7 @@ const moment = require('moment');
 const Settings = require('../models/settings.js');
 const Suggestion = require('../models/suggestions.js');
 const Command = require('../models/commands.js');
-const { prefix, defaultSettings } = require('../config.js');
+const { prefix, defaultSettings, ver } = require('../config.js');
 
 module.exports = async (client, guild) => {
 
@@ -57,8 +57,25 @@ module.exports = async (client, guild) => {
     const cmdHelp = client.commands.get('help', 'help.name');
 
     client.user.setStatus('online');
-    client.user.setActivity(`${userSize} users | ${prefix + cmdHelp}`, { type: 'WATCHING' })
+    client.user.setActivity(`${userSize} users | ${prefix + cmdHelp}`, {
+            type: 'WATCHING'
+        })
         .catch(console.error);
 
-    logChannel.send(oldServer);
+    switch (guild.id) {
+        // 345753533141876737 = Nerd Cave Testing
+        case ver === 'development': {
+            const logGuild = client.guilds.get('345753533141876737');
+            const logChannel = logGuild.channels.find(c => c.name === 'server_logs');
+            logChannel.send(oldServer);
+            break;
+        }
+        // 480231440932667393 = Nerd Cave Development
+        default: {
+            const logGuild = client.guilds.get('480231440932667393');
+            const logChannel = logGuild.channels.find(c => c.name === 'server_logs');
+            logChannel.send(oldServer);
+            break;
+        }
+    }
 };
