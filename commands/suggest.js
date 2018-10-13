@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 const crypto = require('crypto');
 const { owner, embedColor, discord } = require('../config.js');
 const moment = require('moment');
+const { oneLine, stripIndents } = require('common-tags');
 const { noSuggestions, noBotPerms, maintenanceMode } = require('../utils/errors.js');
 const { defaultEmojis, thumbsEmojis, arrowsEmojis, halloweenEmojis, impEmojis } = require('../utils/voteEmojis');
 require('moment-duration-format');
@@ -70,7 +71,12 @@ exports.run = async (client, message, args) => {
     if (!sendMsgs) return message.channel.send(`I can't send messages in the ${suggestionsChannel} channel! Make sure I have \`Send Messages\`.`);
     if (!reactions) return message.channel.send(`I can't add reactions in the ${suggestionsChannel} channel! Make sure I have \`Add Reactions\`.`);
 
-    sUser.send(dmEmbed);
+    sUser.send(dmEmbed).catch(err => {
+        console.log(err);
+        message.channel.send(stripIndents`An error occurred DMing you your suggestion information: **${err.message}**. Please make sure you are able to receive messages from server members.
+        
+        For reference, your suggestion ID (sID) is **${id}**. Please wait for staff member to approve/reject your suggestion.`).then(msg => msg.delete(5000));
+    });
 
     suggestionsChannel.send(sEmbed)
         .then(async msg => {

@@ -155,7 +155,10 @@ exports.run = async (client, message, args) => {
                 message.channel.send(`Suggestion **${args[0]}** has been rejected.`).then(msg => msg.delete(5000)).catch(console.error);
                 sMessage.edit(rejectedEmbed).then(msg => msg.delete(5000));
                 suggestionsLogs.send(logsEmbed);
-                sUser.send(dmEmbed);
+                sUser.send(dmEmbed).catch(err => {
+                    console.log(err);
+                    message.channel.send(`An error occurred DMing **${sUser.displayName}** their suggestion information: **${err.message}**.`);
+                });
 
                 await Suggestion.findOneAndUpdate({
                         $and: [
