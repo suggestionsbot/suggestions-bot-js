@@ -39,7 +39,7 @@ exports.run = async (client, message, args) => {
     let status = cmdStatus.get('status');
     if (status === 'off' && message.author.id !== owner)  return maintenanceMode(message.channel);
 
-    let gBlacklist = await Blacklist.find().catch(err => {
+    let gBlacklist = await Blacklist.find({ guildID: message.guild.id }).catch(err => {
         console.log(err);
         return message.channel.send(`Error querying the database for the bot's blacklist information: **${err.message}**.`);
     });
