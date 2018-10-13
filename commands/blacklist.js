@@ -7,7 +7,7 @@ const Settings = require('../models/settings.js');
 const Blacklist = require('../models/blacklist.js');
 const { noPerms, noSuggestionsPerms, maintenanceMode } = require('../utils/errors.js');
 
-let status = {
+const blStatus = {
     true: 'True',
     false: 'False'
 };
@@ -58,7 +58,7 @@ exports.run = async (client, message, args) => {
                 let caseUser = `${gBlacklist[i].userID}`;
                 let caseReason = gBlacklist[i].reason;
                 let caseIssuer = `${gBlacklist[i].issuerUsername} (${gBlacklist[i].issuerID})`;
-                let caseStatus = status[gBlacklist[i].status];
+                let caseStatus = blStatus[gBlacklist[i].status];
                 await blEmbed.addField(`Case #${caseNum}`, `**User:** ${caseUser}\n **Reason:** ${caseReason}\n **Issuer:** ${caseIssuer}\n **Status:** ${caseStatus}`);
                 active++;
             } catch (err) {
