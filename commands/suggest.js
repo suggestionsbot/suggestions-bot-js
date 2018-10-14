@@ -126,7 +126,7 @@ exports.run = async (client, message, args) => {
         time: time
     });
 
-    await newSuggestion.save().then(res => console.log('New Suggestion: \n', res)).catch(err => {
+    await newSuggestion.save().then(res => console.log('New suggestion: \n', res)).catch(err => {
         console.log(err);
         return message.channel.send(`An error occurred saving this suggestion in the database: **${err.message}**.`);
     });
