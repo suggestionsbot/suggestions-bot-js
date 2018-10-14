@@ -22,6 +22,8 @@ client.commands = new Enmap();
 client.aliases = new Enmap();
 cmdStatus = new Enmap(); 
 
+client.logger = require('./utils/logger');
+
 if (ver === 'production') {
 
     const DBL = require('dblapi.js');
