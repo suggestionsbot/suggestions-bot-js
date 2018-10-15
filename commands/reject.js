@@ -64,6 +64,7 @@ exports.run = async (client, message, args) => {
     if (gSuggestions.status === 'rejected') return message.channel.send(`sID **${id}** has already been rejected. Cannot do this action again.`).then(msg => msg.delete(3000)).catch(err => console.log(err));
 
     const sUser = message.guild.members.get(gSuggestions.userID);
+    if (!sUser) message.channel.send(`**${gSuggestions.username}** is no longer in the guild, but their suggestion will still be rejected.`).then(msg => msg.delete(3000)).catch(console.error);
 
     let fetchedMessages = await suggestionsChannel.fetchMessages({
         limit: 100
@@ -108,7 +109,7 @@ exports.run = async (client, message, args) => {
                     ${gSuggestions.suggestion}
                             
                     **Submitter:**
-                    <@${sUser.id}>
+                    <@${gSuggestions.userID || sUser.id}>
         
                     **Rejected By:**
                     <@${message.author.id}>
@@ -132,7 +133,7 @@ exports.run = async (client, message, args) => {
                     ${gSuggestions.suggestion}
                     
                     **Submitter:**
-                    <@${sUser.id}>
+                    <@${gSuggestions.userID || sUser.id}>
         
                     **Rejected By:**
                     <@${message.author.id}>
