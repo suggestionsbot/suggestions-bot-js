@@ -63,6 +63,7 @@ exports.run = async (client, message, args) => {
     if (gSuggestions.status === 'approved') return message.channel.send(`sID **${id}** has already been approved. Cannot do this action again.`).then(msg => msg.delete(3000)).catch(err => console.log(err));
 
     const sUser = message.guild.members.get(gSuggestions.userID);
+    if (!sUser) message.channel.send(`**${gSuggestions.username}** is no longer in the guild, but their suggestion will still be approved.`).then(msg => msg.delete(3000)).catch(console.error);
 
     let fetchedMessages = await suggestionsChannel.fetchMessages({ limit: 100 }).catch(err => {
         console.log(err);
@@ -104,7 +105,7 @@ exports.run = async (client, message, args) => {
                     ${gSuggestions.suggestion}
         
                     **Submitter:**
-                    <@${sUser.id}>
+                    <@${gSuggestions.userID || sUser.id}>
         
                     **Approved By:**
                     <@${message.author.id}>
@@ -128,7 +129,7 @@ exports.run = async (client, message, args) => {
                     ${gSuggestions.suggestion}
                 
                     **Submitter:**
-                    <@${sUser.id}>
+                    <@${gSuggestions.userID || sUser.id}>
     
                     **Approved By:**
                     <@${message.author.id}>

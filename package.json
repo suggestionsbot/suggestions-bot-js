@@ -19,6 +19,7 @@
   },
   "homepage": "https://docs.thenerdcave.us",
   "dependencies": {
+    "chalk": "^2.4.1",
     "common-tags": "^1.8.0",
     "dblapi.js": "^2.2.0",
     "discord.js": "^11.4.2",
@@ -30,6 +31,6 @@
     "mongoose": "^5.2.14"
   },
   "devDependencies": {
-    "eslint": "^5.6.0"
+    "eslint": "^5.7.0"
   }
 }

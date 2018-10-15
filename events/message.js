@@ -29,7 +29,7 @@ module.exports = async (client, message) => {
     });
 
     const guildConf = gSettings || defaultSettings;
-
+    
     const prefixMention = new RegExp(`^<@!?${client.user.id}> `);
     const newPrefix = message.content.match(prefixMention) ? message.content.match(prefixMention)[0] : guildConf.prefix;
 
@@ -63,8 +63,8 @@ module.exports = async (client, message) => {
         ]
     }).catch(err => console.log(err));
 
-    if (blacklisted) return console.log(`"${message.author.tag}" (${message.author.id}) in the guild "${message.guild.name}" (${message.guild.id}) tried to use the command "${cmd.help.name}", but is blacklisted from using bot commands in this guild, "${message.guild.name}" (${message.guild.id}). [${moment(message.createdAt)}]`);
-    if (gBlacklisted) return console.log(`"${message.author.tag}" (${message.author.id}) in the guild "${message.guild.name}" (${message.guild.id}) tried to use the command "${cmd.help.name}", but is blacklisted from using bot commands globally. [${moment(message.createdAt)}]`);
+    if (blacklisted) return client.logger.warn(`"${message.author.tag}" (${message.author.id}) in the guild "${message.guild.name}" (${message.guild.id}) tried to use the command "${cmd.help.name}", but is blacklisted from using bot commands in this guild, "${message.guild.name}" (${message.guild.id}).`);
+    if (gBlacklisted) return client.logger.warn(`"${message.author.tag}" (${message.author.id}) in the guild "${message.guild.name}" (${message.guild.id}) tried to use the command "${cmd.help.name}", but is blacklisted from using bot commands globally.`);
 
     if (cmd && !cmdCooldown.has(message.author.id)) {
         const newCommand = await new Command({
@@ -85,6 +85,7 @@ module.exports = async (client, message) => {
             await cmdCooldown.add(message.author.id);
         }
         await newCommand.save().catch(err => console.log(err));
+        await client.logger.cmd(`"${message.member.user.tag}" (${message.author.id}) ran command "${cmd.help.name}" in the guild "${message.guild}" (${message.guild.id}).`);
     }
 
     setTimeout(() => {
