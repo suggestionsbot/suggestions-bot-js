@@ -1,8 +1,13 @@
-const { owner } = require('../config');
+const { owner, embedColor } = require('../config');
+const { RichEmbed } = require('discord.js');
 
 exports.run = async (client, message, args) => {
 
-	message.channel.send(`Its <@${owner}>'s birthday! (born on October 19, 1998 somewhere around 6AM.`).then(msg => msg.delete(5000)).catch(console.error);
+	let embed = new RichEmbed()
+		.setDescription(`Its <@${owner}>'s birthday! (born on October 19, 1998 somewhere around 6AM.`)
+		.setColor(embedColor);
+
+	message.channel.send(embed).then(msg => msg.delete(5000)).catch(console.error);
 
 };
 
