@@ -1,12 +1,12 @@
 const fs = require('fs');
-const Discord = require('discord.js');
+const { Client } = require('discord.js');
 const Enmap = require('enmap');
 const mongoose = require('mongoose');
 require('dotenv-flow').config();
 
-const { token, dblToken, dbURI, dbURILog, ver } = require('./config.js');
+const { dblToken, dbURI, dbURILog } = require('./config');
 
-const client = new Discord.Client({
+const client = new Client({
     disableEveryone: true,
     messageCacheMaxSize: 500,
     messageCacheLifetime: 120,
@@ -24,7 +24,7 @@ cmdStatus = new Enmap();
 
 client.logger = require('./utils/logger');
 
-if (ver === 'production') {
+if (process.env.NODE_ENV === 'production') {
 
     const DBL = require('dblapi.js');
     const dbl = new DBL(dblToken, client);
@@ -100,4 +100,4 @@ process.on('unhandledRejection', (reason, p) => {
     console.log('Unhandled Rejection at:', p, 'reason:', reason);
 });
 
-client.login(token);
+client.login();

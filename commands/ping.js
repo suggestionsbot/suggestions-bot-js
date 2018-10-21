@@ -1,5 +1,5 @@
-const { owner } = require('../config.js');
-const { maintenanceMode } = require('../utils/errors.js');
+const { owner } = require('../config');
+const { maintenanceMode } = require('../utils/errors');
 
 exports.run = async (client, message, args) => {
 

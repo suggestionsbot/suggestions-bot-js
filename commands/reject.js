@@ -1,9 +1,9 @@
-const Discord = require('discord.js');
+const { RichEmbed } = require('discord.js');
 const moment = require('moment');
-const Settings = require('../models/settings.js');
-const Suggestion = require('../models/suggestions.js');
-const { noSuggestionsPerms, noSuggestionsLogs, maintenanceMode } = require('../utils/errors.js');
-const { owner } = require('../config.js');
+const Settings = require('../models/settings');
+const Suggestion = require('../models/suggestions');
+const { noSuggestionsPerms, noSuggestionsLogs, maintenanceMode } = require('../utils/errors');
+const { owner } = require('../config');
 require('moment-duration-format');
 require('moment-timezone');
 
@@ -77,11 +77,11 @@ exports.run = async (client, message, args) => {
 
         msg.embeds.forEach(async embed => {
 
-            const rejectedEmbed = new Discord.RichEmbed(embed)
+            const rejectedEmbed = new RichEmbed(embed)
                 .setTitle('Suggestion Rejected')
                 .setColor('#cf000f');
 
-            const dmEmbed = new Discord.RichEmbed()
+            const dmEmbed = new RichEmbed()
                 .setDescription(`Hey, ${sUser}. Unfortunately, your suggestion has been rejected by <@${message.member.id}>.
                         
                         Your suggestion ID (sID) for reference was **${id}**.
@@ -99,7 +99,7 @@ exports.run = async (client, message, args) => {
                 return `${r} **: ${reactCount[c]-1 || '0'}** \n`;
             });
 
-            const logsEmbed = new Discord.RichEmbed()
+            const logsEmbed = new RichEmbed()
                 .setAuthor(message.guild.name, message.guild.iconURL)
                 .setDescription(`
                     **Results:**

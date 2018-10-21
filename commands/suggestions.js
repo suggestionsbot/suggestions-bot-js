@@ -1,8 +1,7 @@
-const Discord = require('discord.js');
-const Settings = require('../models/settings.js');
-const Suggestion = require('../models/suggestions.js');
-const {  maintenanceMode } = require('../utils/errors.js');
-const { embedColor, owner } = require('../config.js');
+const { RichEmbed } = require('discord.js');
+const Suggestion = require('../models/suggestions');
+const {  maintenanceMode } = require('../utils/errors');
+const { embedColor, owner } = require('../config');
 
 exports.run = async (client, message, args) => {
 
@@ -32,7 +31,7 @@ exports.run = async (client, message, args) => {
     const id = message.guild.id;
     const srvIcon = `https://cdn.discordapp.com/icons/${id}/${icon}.png?size=2048`;
 
-    const embed = new Discord.RichEmbed()
+    const embed = new RichEmbed()
         .setAuthor(message.guild.name, message.guild.iconURL)
         .setDescription(`
             **Suggestions Data**

@@ -1,12 +1,12 @@
-const Discord = require('discord.js');
-const Settings = require('../models/settings.js');
-const Suggestion = require('../models/suggestions.js');
+const { RichEmbed } = require('discord.js');
+const Settings = require('../models/settings');
+const Suggestion = require('../models/suggestions');
 const mongoose = require('mongoose');
 const crypto = require('crypto');
-const { owner, embedColor, discord } = require('../config.js');
+const { owner, embedColor } = require('../config');
 const moment = require('moment');
-const { oneLine, stripIndents } = require('common-tags');
-const { noSuggestions, noBotPerms, maintenanceMode } = require('../utils/errors.js');
+const { stripIndents } = require('common-tags');
+const { noSuggestions, noBotPerms, maintenanceMode } = require('../utils/errors');
 const { defaultEmojis, thumbsEmojis, arrowsEmojis, halloweenEmojis, impEmojis } = require('../utils/voteEmojis');
 require('moment-duration-format');
 require('moment-timezone');
@@ -36,7 +36,7 @@ exports.run = async (client, message, args) => {
     const id = crypto.randomBytes(20).toString('hex').slice(12, 20);
     let time = moment(Date.now());
 
-    const dmEmbed = new Discord.RichEmbed()
+    const dmEmbed = new RichEmbed()
         .setDescription(`Hey, ${sUser}. Your suggestion has been sent to the ${suggestionsChannel} channel to be voted on!
             
             Please wait until it gets approved or rejected by a staff member.
@@ -51,7 +51,7 @@ exports.run = async (client, message, args) => {
 
     const submittedOn = moment.utc(message.createdAt).format('MM/DD/YY @ h:mm A (z)');
 
-    const sEmbed = new Discord.RichEmbed()
+    const sEmbed = new RichEmbed()
         .setThumbnail(sUser.user.avatarURL)
         .setDescription(`
             **Submitter**

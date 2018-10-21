@@ -1,5 +1,5 @@
-const Discord = require('discord.js');
-const { embedColor, discord, invite, docs } = require('../config.js');
+const { RichEmbed } = require('discord.js');
+const { embedColor, discord, invite, docs } = require('../config');
 
 exports.run = async (client, message, args) => {
 
@@ -7,7 +7,7 @@ exports.run = async (client, message, args) => {
     if (!perms.has('ADD_REACTIONS')) return message.channel.send('I can\'t add reactions! Make sure I have this permission: `Add Reactions`').then(msg => msg.delete(5000));
     if (!perms.has('MANAGE_MESSAGES')) return message.channel.send('I can\'t delete messages! Make sure I have this permission: Manage Messages`').then(msg => msg.delete(5000));
     
-    const dmEmbed = new Discord.RichEmbed()
+    const dmEmbed = new RichEmbed()
         .setAuthor('Bot Invite Information', client.user.avatarURL)
         .setDescription(`Hello ${message.author},
         

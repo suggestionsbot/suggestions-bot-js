@@ -1,9 +1,8 @@
-const Discord = require('discord.js');
+const { RichEmbed } = require('discord.js');
 const moment = require('moment');
-const Settings = require('../models/settings.js');
-const Suggestion = require('../models/suggestions.js');
-const {  maintenanceMode } = require('../utils/errors.js');
-const { embedColor, owner } = require('../config.js');
+const Suggestion = require('../models/suggestions');
+const {  maintenanceMode } = require('../utils/errors');
+const { embedColor, owner } = require('../config');
 require('moment-duration-format');
 require('moment-timezone');
 
@@ -41,7 +40,7 @@ exports.run = async (client, message, args) => {
     const lastDate = moment(gSuggestions[0].time).utc().format('MM/DD/YY');
     const lastsID = gSuggestions[0].sID;
 
-    const embed = new Discord.RichEmbed()
+    const embed = new RichEmbed()
         .setAuthor(message.member.user.tag + ' | ' + message.guild.name, message.member.user.avatarURL)
         .setDescription(`
             **Suggestions Data for ${message.member.user.tag}**

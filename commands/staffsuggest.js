@@ -1,7 +1,7 @@
-const Discord = require('discord.js');
-const Settings = require('../models/settings.js');
-const { embedColor, owner } = require('../config.js');
-const { noSuggestionsPerms, maintenanceMode } = require('../utils/errors.js');
+const { RichEmbed } = require('discord.js');
+const Settings = require('../models/settings');
+const { embedColor, owner } = require('../config');
+const { noSuggestionsPerms, maintenanceMode } = require('../utils/errors');
 const moment = require('moment');
 require('moment-duration-format');
 require('moment-timezone');
@@ -37,7 +37,7 @@ exports.run = async (client, message, args) => {
 
     const sUser = message.member;
 
-    const embed = new Discord.RichEmbed()
+    const embed = new RichEmbed()
         .setDescription(`Hey, ${sUser}. Your suggestion has been added in the ${staffSuggestionsChannel} channel to be voted on!`)
         .setColor(embedColor)
         .setAuthor(sUser.displayName)
@@ -51,7 +51,7 @@ exports.run = async (client, message, args) => {
 
     const submittedOn = moment.utc(message.createdAt).format('MM/DD/YY @ h:mm A (z)');
 
-    const sEmbed = new Discord.RichEmbed()
+    const sEmbed = new RichEmbed()
         .setThumbnail(sUser.user.avatarURL)
         .setDescription(`
         **Submitter**

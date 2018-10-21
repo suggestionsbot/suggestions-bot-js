@@ -1,6 +1,6 @@
-const Discord = require('discord.js');
-const Settings = require('../models/settings.js');
-const { owner, embedColor, discord, docs } = require('../config.js');
+const { RichEmbed } = require('discord.js');
+const Settings = require('../models/settings');
+const { owner, embedColor, discord, docs } = require('../config');
 const cmdSeconds = '5';
 
 exports.run = async (client, message, args) => {
@@ -36,7 +36,7 @@ exports.run = async (client, message, args) => {
 
     const suggestionsChannel = message.guild.channels.find(c => c.name === channel) || message.guild.channels.find(c => c.toString() === channel) || 'None';
 
-    const helpEmbed = new Discord.RichEmbed()
+    const helpEmbed = new RichEmbed()
         .setTitle('Help Information')
         .setDescription(`View help information for ${client.user}.`)
         .addField('Current Prefix', prefix)
