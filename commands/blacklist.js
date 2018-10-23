@@ -1,11 +1,11 @@
-const Discord = require('discord.js');
+const { RichEmbed } = require('discord.js');
 const fs = require('fs');
 const moment = require('moment');
 const mongoose = require('mongoose');
-const { owner, prefix, embedColor } = require('../config.js');
-const Settings = require('../models/settings.js');
-const Blacklist = require('../models/blacklist.js');
-const { noPerms, noSuggestionsPerms, maintenanceMode } = require('../utils/errors.js');
+const { owner, prefix, embedColor } = require('../config');
+const Settings = require('../models/settings');
+const Blacklist = require('../models/blacklist');
+const { noSuggestionsPerms, maintenanceMode } = require('../utils/errors');
 
 const blStatus = {
     true: 'True',
@@ -46,7 +46,7 @@ exports.run = async (client, message, args) => {
 
     let caseNum = gBlacklist.length + 1;
 
-    let blEmbed = new Discord.RichEmbed().setTimestamp();
+    let blEmbed = new RichEmbed().setTimestamp();
 
     if (!args[0]) {
 
@@ -71,7 +71,7 @@ exports.run = async (client, message, args) => {
         await blEmbed.setColor(embedColor);
 
         if (gBlacklist.length === 0) return message.channel.send('There are no blacklisted users!').then(msg => msg.delete(5000)).catch(console.error);
-        if (active === 0) return message.channel.send('There are currently no active blacklisted users.').then(msg => msg.delete(5000)).catch(console.error);
+        if (active === 0) return message.channel.send(`There are currently no active blacklisted users. Use \`${prefix + cmdName}\` <help> for more information.`).then(msg => msg.delete(5000)).catch(console.error);
 
         return message.channel.send(blEmbed);
     }
@@ -112,7 +112,6 @@ exports.run = async (client, message, args) => {
     }
 
     if (args[0] === 'remove') {
-
         Blacklist.findOneAndUpdate({
                 $and: [
                     { userID: blUser },
@@ -125,7 +124,6 @@ exports.run = async (client, message, args) => {
             })
             .then(async () => {
                 await console.log(`${message.member.user.tag} ("${message.author.id}") has issued an unblacklist for the user ${blUser}.`);
-
                 await blEmbed.setTitle(`${client.user.username} | Blacklisted User Removed`);
                 await blEmbed.setColor('#d64541');
                 await blEmbed.addField('User ID', `${blUser}`, true);

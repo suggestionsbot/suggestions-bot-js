@@ -1,5 +1,6 @@
-const Discord = require('discord.js');
-const { embedColor } = require('../config.js');
+const { RichEmbed, version: discordVersion } = require('discord.js');
+const { embedColor } = require('../config');
+const { version } = require('../package.json');
 const moment = require('moment');
 require('moment-duration-format');
 
@@ -14,15 +15,16 @@ exports.run = (client, message, args) => {
     const guildSize = client.guilds.size.toLocaleString();
     const userSize = client.users.size.toLocaleString();
 
-    const embed = new Discord.RichEmbed()
+    const embed = new RichEmbed()
         .setAuthor(client.user.username, client.user.avatarURL)
         .setColor(embedColor)
         .addField('Guilds', guildSize, true)
         .addField('Users', userSize, true)
         .addField('Uptime', botUptime, true)
         .addField('Memory', `${Math.round(memUsage)} MB`, true)
-        .addField('Discord.js', `v${Discord.version}`, true)
+        .addField('Discord.js', `v${discordVersion}`, true)
         .addField('Node', `${process.version}`, true)
+        .setFooter(`Bot Version: v${version}`)
         .setTimestamp();
 
     if (status === 'off') {

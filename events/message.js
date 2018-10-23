@@ -1,9 +1,9 @@
 const moment = require('moment');
 const mongoose = require('mongoose');
-const Settings = require('../models/settings.js');
-const Blacklist = require('../models/blacklist.js');
-const Command = require('../models/commands.js');
-const { defaultSettings } = require('../config.js');
+const Settings = require('../models/settings');
+const Blacklist = require('../models/blacklist');
+const Command = require('../models/commands');
+const { defaultSettings } = require('../config');
 const cmdCooldown = new Set();
 const cmdTime = '5';
 

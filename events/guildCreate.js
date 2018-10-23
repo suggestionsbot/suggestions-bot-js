@@ -1,16 +1,11 @@
-const Discord = require('discord.js');
+const { RichEmbed } = require('discord.js');
 const mongoose = require('mongoose');
 const moment = require('moment');
-const Settings = require('../models/settings.js');
-const { prefix, defaultSettings, ver } = require('../config.js');
+const Settings = require('../models/settings');
+const { defaultSettings } = require('../config');
+const { botPresence } = require('../utils/utils');
 
 module.exports = async (client, guild) => {
-
-    // // 480231440932667393 = Nerd Cave Development
-    // const logGuild = client.guilds.get('480231440932667393');
-    // const logChannel = logGuild.channels.find(c => c.name === 'server_logs');
-
-    
 
     const gOwnerID = guild.ownerID;
 
@@ -21,7 +16,7 @@ module.exports = async (client, guild) => {
         return `${obj.user.username}#${obj.user.discriminator}`;
     }
 
-    let newServer = new Discord.RichEmbed()
+    let newServer = new RichEmbed()
         .setTitle('Added')
         .setDescription(`
             **ID:** \`${guild.id}\`
@@ -46,14 +41,9 @@ module.exports = async (client, guild) => {
     await newSettings.save().then(console.log(`Default settings saved for guild ${guild.name} (${guild.id})`)).catch(err => console.log(err));
     console.log(`${client.user.username} has joined a new guild: ${guild.name} (${guild.id})`); 
 
-    const userSize = client.users.size.toLocaleString();
-    const cmdHelp = client.commands.get('help', 'help.name');
+    botPresence(client);
 
-    client.user.setStatus('online');
-    client.user.setActivity(`${userSize} users | ${prefix + cmdHelp}`, { type: 'WATCHING' })
-        .catch(console.error);
-
-    switch (ver) {
+    switch (process.env.NODE_ENV) {
         // 345753533141876737 = Nerd Cave Testing
         case 'development': {
             const logGuild = client.guilds.get('345753533141876737');
@@ -69,6 +59,4 @@ module.exports = async (client, guild) => {
             break;
         }
     }
-
-    
 };

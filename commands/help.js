@@ -1,6 +1,6 @@
-const Discord = require('discord.js');
-const Settings = require('../models/settings.js');
-const { owner, embedColor, discord, docs } = require('../config.js');
+const { RichEmbed } = require('discord.js');
+const Settings = require('../models/settings');
+const { owner, embedColor, discord, docs } = require('../config');
 const cmdSeconds = '5';
 
 exports.run = async (client, message, args) => {
@@ -22,6 +22,24 @@ exports.run = async (client, message, args) => {
         newCmds.push(cmds[i]);
     }
 
+    let cmd = args[0];
+    if (cmd) {
+        if (!newCmds.includes(cmd)) return;
+
+        let cmdObj = client.commands.get(cmd) || client.commands.get(client.aliases.get(cmd));
+        let cmdHelp = cmdObj.help;
+
+        let cmdHelpEmbed = new RichEmbed()
+            .setTitle(`${cmdHelp.name} | Help Information`)
+            .setDescription(cmdHelp.description)
+            .addField('Usage', `\`${cmdHelp.usage}\``, true)
+            .setColor(embedColor);
+
+        if (cmdHelp.aliases.length) cmdHelpEmbed.addField('Aliases', `\`${cmdHelp.aliases.join(',')}\``, true);
+
+        return message.channel.send(cmdHelpEmbed);
+    }
+
     const helpCmds = newCmds.map(el => {
         return '`' + el + '`';
     });
@@ -36,7 +54,7 @@ exports.run = async (client, message, args) => {
 
     const suggestionsChannel = message.guild.channels.find(c => c.name === channel) || message.guild.channels.find(c => c.toString() === channel) || 'None';
 
-    const helpEmbed = new Discord.RichEmbed()
+    const helpEmbed = new RichEmbed()
         .setTitle('Help Information')
         .setDescription(`View help information for ${client.user}.`)
         .addField('Current Prefix', prefix)

@@ -1,9 +1,8 @@
-const Discord = require('discord.js');
-const fs = require('fs');
+const { RichEmbed } = require('discord.js');
 const moment = require('moment');
 const mongoose = require('mongoose');
-const { owner, prefix, embedColor } = require('../config.js');
-const Blacklist = require('../models/blacklist.js');
+const { owner, prefix, embedColor } = require('../config');
+const Blacklist = require('../models/blacklist');
 
 let status = {
     true: 'True',
@@ -25,7 +24,7 @@ exports.run = async (client, message, args) => {
 
     let caseNum = gBlacklist.length + 1;
 
-    let blEmbed = new Discord.RichEmbed().setTimestamp();
+    let blEmbed = new RichEmbed().setTimestamp();
 
     if (!args[0]) {
 

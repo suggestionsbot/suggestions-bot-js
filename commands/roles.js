@@ -1,7 +1,7 @@
-const Discord = require('discord.js');
-const Settings = require('../models/settings.js');
-const { noPerms, maintenanceMode } = require('../utils/errors.js');
-const { embedColor, owner } = require('../config.js');
+const { RichEmbed } = require('discord.js');
+const Settings = require('../models/settings');
+const { noPerms, maintenanceMode } = require('../utils/errors');
+const { embedColor, owner } = require('../config');
 
 exports.run = async (client, message, args) => {
     
@@ -42,7 +42,7 @@ exports.run = async (client, message, args) => {
 
     if (!admins.includes(message.member.id)) return noPerms(message, 'MANAGE_GUILD');
 
-    let embed = new Discord.RichEmbed()
+    let embed = new RichEmbed()
         .setColor(embedColor)
         .addField('Admins', adminPerms.join('\n'));
 

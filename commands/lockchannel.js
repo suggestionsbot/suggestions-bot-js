@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
-const Settings = require('../models/settings.js');
-const { noSuggestions, noBotPerms, maintenanceMode } = require('../utils/errors.js');
+const Settings = require('../models/settings');
+const { noSuggestions, noBotPerms, maintenanceMode } = require('../utils/errors');
 
 exports.run = async (client, message, args) => [
 

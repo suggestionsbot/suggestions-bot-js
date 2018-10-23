@@ -1,19 +1,21 @@
 {
   "name": "suggestions-bot",
-  "version": "2.2.2",
+  "version": "2.2.4",
   "description": "The only suggestions bot you'll ever need. Simple usage and management of suggestions for public and staff use.",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node ."
+    "start": "node .",
+    "test": "eslint .",
+    "lint": "eslint --fix .",
+    "prod": "set NODE_ENV=production&&npm start",
+    "dev": "set NODE_ENV=development&&nodemon"
   },
   "repository": {
     "type": "git",
     "url": "https://bitbucket.org/acollierr17/suggestions-bot.git"
   },
   "keywords": [],
-  "author": "xSinclare",
-  "license": "ISC",
+  "author": "acollierr17 <gamemaniac101@gmail.com>",
   "bugs": {
     "url": "https://discord.gg/g7wr8xb"
   },
@@ -24,11 +26,11 @@
     "dblapi.js": "^2.2.0",
     "discord.js": "^11.4.2",
     "dotenv-flow": "^0.1.0",
-    "enmap": "^4.2.0",
+    "enmap": "^4.3.2",
     "moment": "^2.22.2",
     "moment-duration-format": "^2.2.2",
     "moment-timezone": "^0.5.21",
-    "mongoose": "^5.2.14"
+    "mongoose": "^5.3.4"
   },
   "devDependencies": {
     "eslint": "^5.7.0"

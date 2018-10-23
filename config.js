@@ -1,7 +1,6 @@
 require('dotenv-flow').config();
 
 module.exports = {
-    token: process.env.TOKEN,
     dblToken: process.env.DBLTOKEN,
     db : {
         host: process.env.DB_HOST,

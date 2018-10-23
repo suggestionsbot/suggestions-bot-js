@@ -1,9 +1,9 @@
-const Discord = require('discord.js');
+const { RichEmbed } = require('discord.js');
 const moment = require('moment');
-const Settings = require('../models/settings.js');
-const Suggestion = require('../models/suggestions.js');
-const { maintenanceMode } = require('../utils/errors.js');
-const { embedColor, owner } = require('../config.js');
+const Settings = require('../models/settings');
+const Suggestion = require('../models/suggestions');
+const { maintenanceMode } = require('../utils/errors');
+const { embedColor, owner } = require('../config');
 require('moment-duration-format');
 require('moment-timezone');
 
@@ -50,7 +50,7 @@ exports.run = async (client, message, args) => {
     let updatedBy = gSuggestions.staffMemberUsername;
     let results = gSuggestions.results;
 
-    let embed = new Discord.RichEmbed()
+    let embed = new RichEmbed()
         .setAuthor(message.guild.name, message.guild.iconURL)
         .setTitle(`Info for sID ${id}`)
         .setFooter(`User ID: ${userID} | sID ${id}`);

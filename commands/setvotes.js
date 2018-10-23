@@ -1,8 +1,8 @@
-const Discord = require('discord.js');
+const { RichEmbed } = require('discord.js');
 const { defaultEmojis, thumbsEmojis, arrowsEmojis, halloweenEmojis, impEmojis } = require('../utils/voteEmojis');
-const Settings = require('../models/settings.js');
-const { noPerms, maintenanceMode } = require('../utils/errors.js');
-const { owner, embedColor } = require('../config.js');
+const Settings = require('../models/settings');
+const { noPerms, maintenanceMode } = require('../utils/errors');
+const { owner, embedColor } = require('../config');
 
 exports.run = async (client, message, args) => {
 
@@ -27,7 +27,7 @@ exports.run = async (client, message, args) => {
 
     if (!admins.includes(message.member.id)) return noPerms(message, 'MANAGE_GUILD');
 
-    let embed = new Discord.RichEmbed()
+    let embed = new RichEmbed()
         .setAuthor(message.guild.name, message.guild.iconURL)
         .setColor(embedColor)
         .setFooter(`Guild ID: ${message.guild.id}`)
