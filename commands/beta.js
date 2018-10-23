@@ -1,9 +1,9 @@
-const Discord = require('discord.js');
+const { RichEmbed } = require('discord.js');
 const fs = require('fs');
 const moment = require('moment');
 const Settings = require('../models/settings');
 const Suggestion = require('../models/suggestions');
-const { owner, embedColor } = require('../config');
+const { owner, embedColor, discord } = require('../config');
 const { noBotPerms, noPerms, maintenanceMode } = require('../utils/errors');
 const { defaultEmojis, thumbsEmojis, arrowsEmojis } = require('../utils/voteEmojis');
 require('moment-duration-format');

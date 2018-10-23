@@ -22,6 +22,24 @@ exports.run = async (client, message, args) => {
         newCmds.push(cmds[i]);
     }
 
+    let cmd = args[0];
+    if (cmd) {
+        if (!newCmds.includes(cmd)) return;
+
+        let cmdObj = client.commands.get(cmd) || client.commands.get(client.aliases.get(cmd));
+        let cmdHelp = cmdObj.help;
+
+        let cmdHelpEmbed = new RichEmbed()
+            .setTitle(`${cmdHelp.name} | Help Information`)
+            .setDescription(cmdHelp.description)
+            .addField('Usage', `\`${cmdHelp.usage}\``, true)
+            .setColor(embedColor);
+
+        if (cmdHelp.aliases.length) cmdHelpEmbed.addField('Aliases', `\`${cmdHelp.aliases.join(',')}\``, true);
+
+        return message.channel.send(cmdHelpEmbed);
+    }
+
     const helpCmds = newCmds.map(el => {
         return '`' + el + '`';
     });

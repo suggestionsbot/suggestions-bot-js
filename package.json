@@ -1,20 +1,21 @@
 {
   "name": "suggestions-bot",
-  "version": "2.2.3",
+  "version": "2.2.4",
   "description": "The only suggestions bot you'll ever need. Simple usage and management of suggestions for public and staff use.",
   "main": "app.js",
   "scripts": {
     "start": "node .",
     "test": "eslint .",
-    "lint": "eslint --fix ."
+    "lint": "eslint --fix .",
+    "prod": "set NODE_ENV=production&&npm start",
+    "dev": "set NODE_ENV=development&&nodemon"
   },
   "repository": {
     "type": "git",
     "url": "https://bitbucket.org/acollierr17/suggestions-bot.git"
   },
   "keywords": [],
-  "author": "xSinclare",
-  "license": "ISC",
+  "author": "acollierr17 <gamemaniac101@gmail.com>",
   "bugs": {
     "url": "https://discord.gg/g7wr8xb"
   },
