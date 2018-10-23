@@ -4,7 +4,8 @@ require('dotenv-flow').config();
 
 exports.run = async (client, message, args) => {
 
-    let g = client.guilds.get('480231440932667393') || client.guilds.get('345753533141876737');
+    // Find a better way to use both production and dev servers
+    let g = client.guilds.get('480231440932667393');
     let c = g.channels.find(c => c.name === 'updates');
     let lastUpdateID = c.lastMessageID;
     let lastUpdate = await c.fetchMessage(lastUpdateID);
