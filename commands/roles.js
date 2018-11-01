@@ -1,13 +1,13 @@
 const { RichEmbed } = require('discord.js');
 const Settings = require('../models/settings');
-const { noPerms, maintenanceMode } = require('../utils/errors');
+const { noPerms, maintenanceMode, noBotPerms } = require('../utils/errors');
 const { embedColor, owner } = require('../config');
 
 exports.run = async (client, message, args) => {
     
     let perms = message.guild.me.permissions;
-    if (!perms.has('MANAGE_MESSAGES')) return message.channel.send('I can\'t delete messages! Make sure I have this permission: Manage Messages`').then(msg => msg.delete(5000));
-    if (!perms.has('EMBED_LINKS')) return message.channel.send('I can\'t embed links! Make sure I have this permission: Embed Links`').then(msg => msg.delete(5000));
+    if (!perms.has('MANAGE_MESSAGES')) return noBotPerms(message, 'MANAGE_MESSAGES');
+    if (!perms.has('EMBED_LINKS')) return noBotPerms(message, 'EMBED_LINKS');
 
     await message.delete().catch(O_o => {});
 
@@ -23,9 +23,15 @@ exports.run = async (client, message, args) => {
 
     const roles = gSettings.staffRoles;
 
-    const staffRoles = roles.map(el => {
-        return '<@&' + el.role + '>';
+    let staffRoles = [];
+    roles.forEach(role => {
+        let gRole = message.guild.roles.find(r => r.id === role.role);
+        if (!gRole) return;
+
+        return staffRoles.push(gRole);
     });
+
+    staffRoles.sort((a, b) => b.position - a.position);
 
     let adminPerms;
     let admins = [];
@@ -46,13 +52,7 @@ exports.run = async (client, message, args) => {
         .setColor(embedColor)
         .addField('Admins', adminPerms.join('\n'));
 
-    for (let i = 0; i < 1; i++) {
-        try {
-            embed.addField('Staff Roles', staffRoles.join('\n'));
-        } catch (err) {
-            break;
-        }
-    }
+    if (staffRoles.length >= 1) embed.addField('Staff Roles', staffRoles.join('\n'));
 
     message.channel.send(embed);
 };

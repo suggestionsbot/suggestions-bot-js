@@ -1,32 +1,36 @@
 const { RichEmbed } = require('discord.js');
 const Settings = require('../models/settings');
 const { owner, embedColor, discord, docs } = require('../config');
+const { noBotPerms } = require('../utils/errors');
 const cmdSeconds = '5';
 
 exports.run = async (client, message, args) => {
 
     let perms = message.guild.me.permissions;
-    if (!perms.has('MANAGE_MESSAGES')) return message.channel.send('I can\'t delete messages! Make sure I have this permission: Manage Messages`').then(msg => msg.delete(5000));
-    if (!perms.has('EMBED_LINKS')) return message.channel.send('I can\'t embed links! Make sure I have this permission: `Embed Links`').then(msg => msg.delete(5000));
+    if (!perms.has('MANAGE_MESSAGES')) return noBotPerms(message, 'MANAGE_MESSAGES');
+    if (!perms.has('EMBED_LINKS')) return noBotPerms(message, 'EMBED_LINKS');
 
     let cmds = Array.from(client.commands.keys());
     let newCmds = [];
 
-    for (let i = 0; i < cmds.length; i++) {
-        if (cmds[i] === 'maintenance') continue;
-        if (cmds[i] === 'beta') continue;
-        if (cmds[i] === 'eval') continue;
-        if (cmds[i] === 'gblacklist') continue;
-        if (cmds[i] === 'lockchannel') continue;
+    let cmdName = client.commands.get('help', 'help.name');
 
-        newCmds.push(cmds[i]);
-    }
+    cmds.forEach(cmd => {
+        if (cmd === 'maintenance') return;
+        if (cmd === 'beta') return;
+        if (cmd === 'eval') return;
+        if (cmd === 'gblacklist') return;
+        if (cmd === 'lockchannel') return;
+        if (cmd === 'gsid') return;
+
+        newCmds.push(cmd);
+    });
 
     let cmd = args[0];
     if (cmd) {
-        if (!newCmds.includes(cmd)) return;
 
         let cmdObj = client.commands.get(cmd) || client.commands.get(client.aliases.get(cmd));
+        if (!cmdObj) return;
         let cmdHelp = cmdObj.help;
 
         let cmdHelpEmbed = new RichEmbed()
@@ -56,7 +60,7 @@ exports.run = async (client, message, args) => {
 
     const helpEmbed = new RichEmbed()
         .setTitle('Help Information')
-        .setDescription(`View help information for ${client.user}.`)
+        .setDescription(`View help information for ${client.user}. \n (Do \`${prefix + cmdName} <command>\` for specific help information).`)
         .addField('Current Prefix', prefix)
         .addField('Suggestions Channel', suggestionsChannel)
         .addField('Bot Commands', helpCmds.join(' | '))

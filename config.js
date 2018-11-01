@@ -19,7 +19,6 @@ module.exports = {
     invite: process.env.INVITE,
     dbURI: `mongodb://${process.env.DB_USER}:${process.env.DB_PASS}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}?authSource=admin`,
     dbURILog: `mongodb://${process.env.DB_USER}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}`,
-    ver: process.env.VER,
 };
 
 module.exports.defaultSettings = {

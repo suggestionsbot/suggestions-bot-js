@@ -1,13 +1,14 @@
 const { RichEmbed, version: discordVersion } = require('discord.js');
+const moment = require('moment');
 const { embedColor } = require('../config');
 const { version } = require('../package.json');
-const moment = require('moment');
+const { noBotPerms } = require('../utils/errors');
 require('moment-duration-format');
 
 exports.run = (client, message, args) => {
 
     let perms = message.guild.me.permissions;
-    if (!perms.has('EMBED_LINKS')) return message.channel.send('I can\'t embed links! Make sure I have this permission: Embed Links`').then(msg => msg.delete(5000));
+    if (!perms.has('EMBED_LINKS')) return noBotPerms(message, 'EMBED_LINKS');
 
     let status = cmdStatus.get('status');
     const botUptime = moment.duration(client.uptime).format(' D [days], H [hrs], m [mins], s [secs]');

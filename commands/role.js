@@ -1,11 +1,11 @@
 const Settings = require('../models/settings');
-const { noPerms, maintenanceMode } = require('../utils/errors');
+const { noPerms, maintenanceMode, noBotPerms } = require('../utils/errors');
 const { owner } = require('../config');
 
 exports.run = async (client, message, args) => {
 
     let perms = message.guild.me.permissions;
-    if (!perms.has('MANAGE_MESSAGES')) return message.channel.send('I can\'t delete messages! Make sure I have this permission: Manage Messages`').then(msg => msg.delete(5000));
+    if (!perms.has('MANAGE_MESSAGES')) return noBotPerms(message, 'MANAGE_MESSAGES');
 
     await message.delete().catch(O_o => {});
 
@@ -52,7 +52,7 @@ exports.run = async (client, message, args) => {
                 { $push: { staffRoles: value }
             }).catch(err => {
                 console.log(err);
-                message.channel.send(`Error setting a staff role: **${err.message}**.`);
+                return message.channel.send(`Error setting a staff role: **${err.message}**.`);
             });
 
             await message.channel.send(`<:nerdSuccess:490708616056406017> Added **${staffRole.name}** to the staff roles.`).then(msg => msg.delete(5000)).catch(console.error);
@@ -63,7 +63,7 @@ exports.run = async (client, message, args) => {
                 { $pull: { staffRoles: value }
             }).catch(err => {
                 console.log(err);
-                message.channel.send(`Error removing a staff role: **${err.message}**`);
+                return message.channel.send(`Error removing a staff role: **${err.message}**`);
             });
 
             await message.channel.send(`<:nerdSuccess:490708616056406017> Removed **${staffRole.name}** from the staff roles.`).then(msg => msg.delete(5000)).catch(console.error);

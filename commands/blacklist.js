@@ -5,7 +5,7 @@ const mongoose = require('mongoose');
 const { owner, prefix, embedColor } = require('../config');
 const Settings = require('../models/settings');
 const Blacklist = require('../models/blacklist');
-const { noSuggestionsPerms, maintenanceMode } = require('../utils/errors');
+const { noSuggestionsPerms, maintenanceMode, noBotPerms } = require('../utils/errors');
 
 const blStatus = {
     true: 'True',
@@ -13,6 +13,10 @@ const blStatus = {
 };
 
 exports.run = async (client, message, args) => {
+
+    let perms = message.guild.me.permissions;
+    if (!perms.has('MANAGE_MESSAGES')) return noBotPerms(message, 'MANAGE_MESSAGES');
+    if (!perms.has('EMBED_LINKS')) return noBotPerms(message, 'EMBED_LINKS');
 
     await message.delete().catch(O_o=>{});
 

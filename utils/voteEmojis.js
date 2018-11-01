@@ -1,26 +1,44 @@
 const Discord = require('discord.js');
 
-module.exports.defaultEmojis = {
+const defaultEmojis = {
     0: '✅',
     1: '❌'
 };
 
-module.exports.thumbsEmojis = {
+const thumbsEmojis = {
     0: '👍',
     1: '👎'
 };
 
-module.exports.arrowsEmojis = {
+const arrowsEmojis = {
     0: '⬆',
     1: '⬇'
 };
 
-module.exports.halloweenEmojis = {
-    0: '🎃',
-    1: '☠'
+// const halloweenEmojis = {
+//     0: '🎃',
+//     1: '☠'
+// };
+
+// const impEmojis = {
+//     0: '😈',
+//     1: '👿'
+// };
+
+const christmasEmojis = {
+    0: '🎄',
+    1: '🌲'
 };
 
-module.exports.impEmojis = {
-    0: '😈',
-    1: '👿'
+const jingleBellsEmojis = {
+    0: '🔔',
+    1: '🔕'
+};
+
+module.exports = {
+    defaultEmojis,
+    thumbsEmojis,
+    arrowsEmojis,
+    christmasEmojis,
+    jingleBellsEmojis
 };

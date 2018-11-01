@@ -4,8 +4,6 @@ const { owner } = require('../config');
 
 exports.run = async (client, message, args) => {
 
-    await message.delete().catch(O_o => {});
-
     let status = cmdStatus.get('status');
     if (status === 'off' && message.author.id !== owner) {
         return maintenanceMode(message.channel);
