@@ -63,7 +63,7 @@ exports.run = async (client, message, args) => {
     • Suggestions: ${suggestionsChannel.name || 'Not Set'}
     • Staff Suggestions: ${staffSuggestionsChannel.name || 'Not Set'}
     • Staff Roles: ${roles.map(role => role.name).join(', ') || 'Not Set'}
-    • Vote Emojis: ${voteEmojis || 'Not Set'}
+    • Vote Emojis: ${voteEmojis || 'Default'}
     `;
 
     message.channel.send(`\`\`\`${config}\`\`\``);
