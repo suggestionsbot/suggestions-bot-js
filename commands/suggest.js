@@ -6,8 +6,8 @@ const crypto = require('crypto');
 const { owner, embedColor } = require('../config');
 const moment = require('moment');
 const { stripIndents } = require('common-tags');
-const { noSuggestions, noBotPerms, maintenanceMode } = require('../utils/errors');
-const { defaultEmojis, thumbsEmojis, arrowsEmojis, halloweenEmojis, impEmojis } = require('../utils/voteEmojis');
+const { noSuggestions, noBotPerms, maintenanceMode, noChannelPerms } = require('../utils/errors');
+const { defaultEmojis, thumbsEmojis, arrowsEmojis, christmasEmojis, jingleBellsEmojis } = require('../utils/voteEmojis');
 require('moment-duration-format');
 require('moment-timezone');
 
@@ -68,8 +68,8 @@ exports.run = async (client, message, args) => {
 
     const sendMsgs = suggestionsChannel.permissionsFor(message.guild.me).has('SEND_MESSAGES', false);
     const reactions = suggestionsChannel.permissionsFor(message.guild.me).has('ADD_REACTIONS', false);
-    if (!sendMsgs) return message.channel.send(`I can't send messages in the ${suggestionsChannel} channel! Make sure I have \`Send Messages\`.`);
-    if (!reactions) return message.channel.send(`I can't add reactions in the ${suggestionsChannel} channel! Make sure I have \`Add Reactions\`.`);
+    if (!sendMsgs) return noChannelPerms(message, suggestionsChannel, 'SEND_MESSAGES');
+    if (!reactions) return noChannelPerms(message, suggestionsChannel, 'ADD_REACTIONS');
 
     sUser.send(dmEmbed).catch(err => {
         console.log(err);
@@ -98,15 +98,15 @@ exports.run = async (client, message, args) => {
                 }
             }
 
-            if (emojis === 'halloweenEmojis') {
-                for (let i in halloweenEmojis) {
-                    await msg.react(halloweenEmojis[i]);
+            if (emojis === 'christmasEmojis') {
+                for (let i in christmasEmojis) {
+                    await msg.react(christmasEmojis[i]);
                 }
             }
 
-            if (emojis === 'impEmojis') {
-                for (let i in impEmojis) {
-                    await msg.react(impEmojis[i]);
+            if (emojis === 'jingleBellsEmojis') {
+                for (let i in jingleBellsEmojis) {
+                    await msg.react(jingleBellsEmojis[i]);
                 }
             }
         })

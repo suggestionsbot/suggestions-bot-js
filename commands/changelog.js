@@ -1,8 +1,12 @@
 const { RichEmbed } = require('discord.js');
 const { embedColor, discord } = require('../config');
+const { noBotPerms } = require('../utils/errors');
 require('dotenv-flow').config();
 
 exports.run = async (client, message, args) => {
+
+    let perms = message.guild.me.permissions;
+    if (!perms.has('EMBED_LINKS')) return noBotPerms(message, 'EMBED_LINKS');
 
     let g = client.guilds.get('480231440932667393') || client.guilds.get('345753533141876737');
     let c = g.channels.find(c => c.name === 'updates');

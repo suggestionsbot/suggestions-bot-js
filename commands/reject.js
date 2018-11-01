@@ -2,7 +2,7 @@ const { RichEmbed } = require('discord.js');
 const moment = require('moment');
 const Settings = require('../models/settings');
 const Suggestion = require('../models/suggestions');
-const { noSuggestionsPerms, noSuggestionsLogs, maintenanceMode } = require('../utils/errors');
+const { noSuggestionsPerms, noSuggestionsLogs, maintenanceMode, noBotPerms } = require('../utils/errors');
 const { owner } = require('../config');
 require('moment-duration-format');
 require('moment-timezone');
@@ -12,7 +12,7 @@ exports.run = async (client, message, args) => {
     const cmdName = client.commands.get('reject', 'help.name');
 
     let perms = message.guild.me.permissions;
-    if (!perms.has('MANAGE_MESSAGES')) return message.channel.send('I can\'t delete messages! Make sure I have this permission: Manage Messages`').then(msg => msg.delete(5000));
+    if (!perms.has('MANAGE_MESSAGES')) return noBotPerms(message, 'MANAGE_MESSAGES');
 
     message.delete().catch(O_o=>{});
 

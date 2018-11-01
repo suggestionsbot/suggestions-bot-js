@@ -1,12 +1,16 @@
 const { RichEmbed } = require('discord.js');
 const Settings = require('../models/settings');
 const { embedColor, owner } = require('../config');
-const { noSuggestionsPerms, maintenanceMode } = require('../utils/errors');
+const { noSuggestionsPerms, maintenanceMode, noBotPerms, noChannelPerms } = require('../utils/errors');
 const moment = require('moment');
 require('moment-duration-format');
 require('moment-timezone');
 
 exports.run = async (client, message, args) => {
+
+    let perms = message.guild.me.permissions;
+    if (!perms.has('ADD_REACTIONS')) return noBotPerms(message, 'ADD_REACTIONS');
+    if (!perms.has('EMBED_LINKS')) return noBotPerms(message, 'EMBED_LINKS');
 
     let status = cmdStatus.get('status');
     if (status === 'off' && message.author.id !== owner)  return maintenanceMode(message.channel);
@@ -66,14 +70,10 @@ exports.run = async (client, message, args) => {
         .setColor(embedColor)
         .setFooter(`User ID: ${sUser.id}`);
 
-    let perms = message.guild.me.permissions;
-    if (!perms.has('EMBED_LINKS')) return message.channel.send('I can\'t embed links! Make sure I have this permission: Embed Links`').then(msg => msg.delete(5000));
-    if (!perms.has('ADD_REACTIONS')) return message.channel.send('I can\'t add reactions! Make sure I have this permission: Add Reactions`').then(msg => msg.delete(5000));
-
     const sendMsgs = staffSuggestionsChannel.permissionsFor(message.guild.me).has('SEND_MESSAGES', false);
     const reactions = staffSuggestionsChannel.permissionsFor(message.guild.me).has('ADD_REACTIONS', false);
-    if (!sendMsgs) return message.channel.send(`I can't send messages in the ${staffSuggestionsChannel} channel! Make sure I have \`Send Messages\`.`);
-    if (!reactions) return message.channel.send(`I can't add reactions in the ${staffSuggestionsChannel} channel! Make sure I have \`Add Reactions\`.`);
+    if (!sendMsgs) return noChannelPerms(message, staffSuggestionsChannel, 'SEND_MESSAGES');
+    if (!reactions) return noChannelPerms(message, staffSuggestionsChannel, 'ADD_REACTIONS');
 
     message.channel.send(embed).then(msg => msg.delete(5000)).catch(err => console.log(err));
 

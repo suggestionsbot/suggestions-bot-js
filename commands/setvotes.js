@@ -1,8 +1,8 @@
 const { RichEmbed } = require('discord.js');
-const { defaultEmojis, thumbsEmojis, arrowsEmojis, halloweenEmojis, impEmojis } = require('../utils/voteEmojis');
+const { defaultEmojis, thumbsEmojis, arrowsEmojis, christmasEmojis, jingleBellsEmojis } = require('../utils/voteEmojis');
 const Settings = require('../models/settings');
-const { noPerms, maintenanceMode } = require('../utils/errors');
-const { owner, embedColor } = require('../config');
+const { noPerms, maintenanceMode, noBotPerms } = require('../utils/errors');
+const { owner, embedColor, discord } = require('../config');
 
 exports.run = async (client, message, args) => {
 
@@ -12,8 +12,8 @@ exports.run = async (client, message, args) => {
     await message.delete().catch(O_o => {});
 
     let perms = message.guild.me.permissions;
-    if (!perms.has('MANAGE_MESSAGES')) return message.channel.send('I can\'t delete messages! Make sure I have this permission: Manage Messages`').then(msg => msg.delete(5000));
-    if (!perms.has('EMBED_LINKS')) return message.channel.send('I can\'t embed links! Make sure I have this permission: `Embed Links`').then(msg => msg.delete(5000));
+    if (!perms.has('MANAGE_MESSAGES')) return noBotPerms(message, 'MANAGE_MESSAGES');
+    if (!perms.has('EMBED_LINKS')) return noBotPerms(message, 'EMBED_LINKS');
 
     let gSettings = await Settings.findOne({ guildID: message.guild.id }).catch(err => {
         console.log(err);
@@ -78,10 +78,10 @@ exports.run = async (client, message, args) => {
     if (args[0] === '3') {
         Settings.findOneAndUpdate(
             { guildID: message.guild.id }, 
-            { $set: { voteEmojis: 'halloweenEmojis' }
+            { $set: { voteEmojis: 'christmasEmojis' }
             })
-            .then(console.log(`The default vote emojis in the guild ${message.guild.name} (${message.guild.id}) has been changed to ${Object.values(halloweenEmojis).join(' ')}.`))
-            .then(message.channel.send(`The default vote emojis have been changed to ${Object.values(halloweenEmojis).join(' ')}.`).then(msg => msg.delete(5000).catch(err => console.log(err))))
+            .then(console.log(`The default vote emojis in the guild ${message.guild.name} (${message.guild.id}) has been changed to ${Object.values(christmasEmojis).join(' ')}.`))
+            .then(message.channel.send(`The default vote emojis have been changed to ${Object.values(christmasEmojis).join(' ')}.`).then(msg => msg.delete(5000).catch(err => console.log(err))))
             .catch(err => {
                 console.log(err);
                 message.channel.send(`Error updating the default emoji set: **${err.message}**.`);
@@ -92,10 +92,10 @@ exports.run = async (client, message, args) => {
     if (args[0] === '4') {
         Settings.findOneAndUpdate(
             { guildID: message.guild.id }, 
-            { $set: { voteEmojis: 'impEmojis' }
+            { $set: { voteEmojis: 'jingleBellsEmojis' }
             })
-            .then(console.log(`The default vote emojis in the guild ${message.guild.name} (${message.guild.id}) has been changed to ${Object.values(impEmojis).join(' ')}.`))
-            .then(message.channel.send(`The default vote emojis have been changed to ${Object.values(impEmojis).join(' ')}.`).then(msg => msg.delete(5000).catch(err => console.log(err))))
+            .then(console.log(`The default vote emojis in the guild ${message.guild.name} (${message.guild.id}) has been changed to ${Object.values(jingleBellsEmojis).join(' ')}.`))
+            .then(message.channel.send(`The default vote emojis have been changed to ${Object.values(jingleBellsEmojis).join(' ')}.`).then(msg => msg.delete(5000).catch(err => console.log(err))))
             .catch(err => {
                 console.log(err);
                 message.channel.send(`Error updating the default emoji set: **${err.message}**.`);
@@ -114,11 +114,12 @@ exports.run = async (client, message, args) => {
 
             \`2\`: ${Object.values(arrowsEmojis).join(' ')}
 
-            \`3\`: ${Object.values(halloweenEmojis).join(' ')}
+            \`3\`: ${Object.values(christmasEmojis).join(' ')}
 
-            \`4\`: ${Object.values(impEmojis).join(' ')}
+            \`4\`: ${Object.values(jingleBellsEmojis).join(' ')}
 
             You can do \`${gSettings.prefix + cmdName} <id>\` to set the desired emojis.
+            Submit new emoji set suggestions any time by joining our Discord server: ${discord}
             `);
         return message.channel.send(embed);
     }
@@ -134,11 +135,12 @@ exports.run = async (client, message, args) => {
 
             \`2\`: ${Object.values(arrowsEmojis).join(' ')}
 
-            \`3\`: ${Object.values(halloweenEmojis).join(' ')}
+            \`3\`: ${Object.values(christmasEmojis).join(' ')}
 
-            \`4\`: ${Object.values(impEmojis).join(' ')}
+            \`4\`: ${Object.values(jingleBellsEmojis).join(' ')}
 
             You can do \`${gSettings.prefix + cmdName} <id>\` to set the desired emojis.
+            Submit new emoji set suggestions any time by joining our Discord server: ${discord}
             `);
         return message.channel.send(embed);
     }
@@ -154,16 +156,17 @@ exports.run = async (client, message, args) => {
 
             \`2\`: ${Object.values(arrowsEmojis).join(' ')} ***(Currently Using)***
 
-            \`3\`: ${Object.values(halloweenEmojis).join(' ')}
+            \`3\`: ${Object.values(christmasEmojis).join(' ')}
 
-            \`4\`: ${Object.values(impEmojis).join(' ')}
+            \`4\`: ${Object.values(jingleBellsEmojis).join(' ')}
 
             You can do \`${gSettings.prefix + cmdName} <id>\` to set the desired emojis.
+            Submit new emoji set suggestions any time by joining our Discord server: ${discord}
             `);
         return message.channel.send(embed);
     }
 
-    if (gSettings.voteEmojis === 'halloweenEmojis') {
+    if (gSettings.voteEmojis === 'christmasEmojis') {
         embed.setDescription(`
             **Voting Emojis**
             Choose from 3 different emoji sets to be used for voting in your guild.
@@ -174,16 +177,17 @@ exports.run = async (client, message, args) => {
 
             \`2\`: ${Object.values(arrowsEmojis).join(' ')} 
 
-            \`3\`: ${Object.values(halloweenEmojis).join(' ')} ***(Currently Using)***
+            \`3\`: ${Object.values(christmasEmojis).join(' ')} ***(Currently Using)***
 
-            \`4\`: ${Object.values(impEmojis).join(' ')}
+            \`4\`: ${Object.values(jingleBellsEmojis).join(' ')}
 
             You can do \`${gSettings.prefix + cmdName} <id>\` to set the desired emojis.
+            Submit new emoji set suggestions any time by joining our Discord server: ${discord}
             `);
         return message.channel.send(embed);
     }
 
-    if (gSettings.voteEmojis === 'impEmojis') {
+    if (gSettings.voteEmojis === 'jingleBellsEmojis') {
         embed.setDescription(`
             **Voting Emojis**
             Choose from 3 different emoji sets to be used for voting in your guild.
@@ -194,11 +198,12 @@ exports.run = async (client, message, args) => {
 
             \`2\`: ${Object.values(arrowsEmojis).join(' ')} 
 
-            \`3\`: ${Object.values(halloweenEmojis).join(' ')} 
+            \`3\`: ${Object.values(christmasEmojis).join(' ')} 
 
-            \`4\`: ${Object.values(impEmojis).join(' ')} ***(Currently Using)***
+            \`4\`: ${Object.values(jingleBellsEmojis).join(' ')} ***(Currently Using)***
 
             You can do \`${gSettings.prefix + cmdName} <id>\` to set the desired emojis.
+            Submit new emoji set suggestions any time by joining our Discord server: ${discord}
             `);
         return message.channel.send(embed);
     }

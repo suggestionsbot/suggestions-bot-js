@@ -9,7 +9,9 @@ require('moment-timezone');
 
 exports.run = async (client, message, args) => {
 
-    const cmdName = client.commands.get('sid', 'help.name');
+    if (message.author.id !== owner) return;
+
+    const cmdName = client.commands.get('gsid', 'help.name');
 
     let perms = message.guild.me.permissions;
     if (!perms.has('MANAGE_MESSAGES')) return noBotPerms(message, 'MANAGE_MESSAGES');
@@ -19,9 +21,7 @@ exports.run = async (client, message, args) => {
     let status = cmdStatus.get('status');
     if (status === 'off' && message.author.id !== owner)  return maintenanceMode(message.channel);
 
-    let gSettings = await Settings.findOne({
-        guildID: message.guild.id
-    }).catch(err => {
+    let gSettings = await Settings.findOne({ guildID: message.guild.id }).catch(err => {
         console.log(err);
         return message.channel.send(`Error querying the database for this guild's information: **${err.message}**.`);
     });
@@ -29,12 +29,7 @@ exports.run = async (client, message, args) => {
     let id = args[0];
     if (!id) return message.channel.send(`Usage: \`${gSettings.prefix + cmdName} <id>\``).then(msg => msg.delete(5000)).catch(console.error);
 
-    let gSuggestions = await Suggestion.findOne(
-        { $and: [
-            { guildID: message.guild.id },
-            { sID: id },
-        ]
-    }).catch(err => {
+    let gSuggestions = await Suggestion.findOne({ sID: id }).catch(err => {
         console.log(err);
         return message.channel.send(`Error querying the database for this suggestion: **${err.message}**.`);
     });
@@ -49,10 +44,15 @@ exports.run = async (client, message, args) => {
     let suggestion = gSuggestions.suggestion;
     let updatedBy = gSuggestions.staffMemberUsername;
     let results = gSuggestions.results;
+    let guildID = gSuggestions.guildID;
+
+    let guild = client.guilds.get(guildID) || await gSettings.findOne({ guildID: guildID }).catch(console.error);
+    if (!guild) return;
 
     let embed = new RichEmbed()
-        .setAuthor(message.guild.name, message.guild.iconURL)
+        .setAuthor(guild.name, guild.iconURL)
         .setTitle(`Info for sID ${id}`)
+        .setThumbnail(guild.iconURL)
         .setFooter(`User ID: ${userID} | sID ${id}`);
 
     if (gSuggestions.status === undefined) {
@@ -64,7 +64,9 @@ exports.run = async (client, message, args) => {
                 ${suggestion}
         
                 **Submitted**
-                ${submittedOn}`);
+                ${submittedOn}
+                
+                `);
         await embed.setColor(embedColor);
         return message.channel.send(embed);
     }
@@ -122,8 +124,8 @@ exports.run = async (client, message, args) => {
 };
 
 exports.help = {
-    name: 'sid',
+    name: 'gsid',
     aliases: [],
-    description: 'View the information of a specific suggestion by their sID',
-    usage: 'sid <id>'
+    description: 'View the information of a specific suggestion by their sID (globally for admin use)',
+    usage: 'gsid <id>'
 };

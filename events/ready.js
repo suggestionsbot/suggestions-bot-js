@@ -1,5 +1,4 @@
 const { RichEmbed } = require('discord.js');
-const { ver } = require('../config.js');
 const Settings = require('../models/settings');
 const Suggestion = require('../models/suggestions');
 const Command = require('../models/commands');
@@ -17,14 +16,14 @@ module.exports = async client => {
     await console.log(`Logged in as ${client.user.tag} (${client.user.id}) in ${client.guilds.size} server(s).`);
     await cmdStatus.set('status', 'on');
     await console.log(`Commands status set to ${cmdStatus.get('status')}.`);
-    await console.log(`${versions[ver]} version of the bot loaded.`);
+    await console.log(`${versions[process.env.NODE_ENV]} version of the bot loaded.`);
     await console.log(`Version ${version} of the bot loaded.`);
 
     botPresence(client);
 
     // If the bot was invited to a guild while it was offline, the "ready" event will
     // be emitted (ONLY IN PRODUCTION)
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV === 'production') {
         client.guilds.forEach(async g => {
             let gSettings = await Settings.findOne({ guildID: g.id }).catch(console.error);
             

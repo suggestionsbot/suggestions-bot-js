@@ -1,11 +1,12 @@
 const { RichEmbed } = require('discord.js');
 const { embedColor, discord, invite, docs } = require('../config');
+const { noBotPerms } = require('../utils/errors');
 
 exports.run = async (client, message, args) => {
 
     let perms = message.guild.me.permissions;
-    if (!perms.has('ADD_REACTIONS')) return message.channel.send('I can\'t add reactions! Make sure I have this permission: `Add Reactions`').then(msg => msg.delete(5000));
-    if (!perms.has('MANAGE_MESSAGES')) return message.channel.send('I can\'t delete messages! Make sure I have this permission: Manage Messages`').then(msg => msg.delete(5000));
+    if (!perms.has('ADD_REACTIONS')) return noBotPerms(message, 'ADD_REACTIONS');
+    if (!perms.has('EMBED_LINKS')) return noBotPerms(message, 'EMBED_LINKS');
     
     const dmEmbed = new RichEmbed()
         .setAuthor('Bot Invite Information', client.user.avatarURL)

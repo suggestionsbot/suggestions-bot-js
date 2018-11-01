@@ -5,7 +5,7 @@ const Settings = require('../models/settings');
 const Suggestion = require('../models/suggestions');
 const { owner, embedColor, discord } = require('../config');
 const { noBotPerms, noPerms, maintenanceMode } = require('../utils/errors');
-const { defaultEmojis, thumbsEmojis, arrowsEmojis } = require('../utils/voteEmojis');
+const { defaultEmojis, thumbsEmojis, arrowsEmojis, halloweenEmojis, impEmojis, christmasEmojis, jingleBellsEmojis } = require('../utils/voteEmojis');
 require('moment-duration-format');
 require('moment-timezone');
 
