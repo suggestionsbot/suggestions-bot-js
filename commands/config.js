@@ -3,6 +3,10 @@ const Settings = require('../models/settings');
 const { noPerms, maintenanceMode, noBotPerms } = require('../utils/errors');
 const { owner } = require('../config');
 
+const notSet = {
+    undefined: 'Not set'
+};
+
 const emojiSets = {
     defaultEmojis: 'Default',
     thumbsEmojis: 'Thumbs',
@@ -36,31 +40,33 @@ exports.run = async (client, message, args) => {
     let guildOwnerID = gSettings.guildOwnerID;
     let prefix = gSettings.prefix;
     let suggestionsChannel = message.guild.channels.find(c => c.name === gSettings.suggestionsChannel) || message.guild.channels.find(c => c.toString() === gSettings.suggestionsChannel);
-    let staffSuggestionsChannel = message.guild.channels.find(c => c.name === gSettings.staffSuggestionsChannel) || message.guild.channels.find(c => c.toString() === gSettings.staffSuggestionsChannel);
+    let staffSuggestionsChannel = message.guild.channels.find(c => c.name === gSettings.staffSuggestionsChannel) || message.guild.channels.find(c => c.toString() === gSettings.staffSuggestionsChannel) || '';
     let staffRoles = gSettings.staffRoles;
     let voteEmojis = gSettings.voteEmojis;
 
     let guildOwner = message.guild.members.get(guildOwnerID);
-    
+
     let roles = [];
-    staffRoles.forEach(role => {
-        let gRole = message.guild.roles.find(r => r.id === role.role);
-        if (!gRole) return;
+    if (staffRoles.length >= 1) {
+        staffRoles.forEach(role => {
+            let gRole = message.guild.roles.find(r => r.id === role.role);
+            if (!gRole) return;
+    
+            return roles.push(gRole);
+        });
+    }
 
-        return roles.push(gRole);
-    });
-
-    let config = `
+    let config = stripIndents`
     • Guild Name: ${guildName} (${guildID})
     • Guild Owner: ${guildOwner.user.tag} (${guildOwner.id})
     • Prefix: ${prefix}
-    • Suggestions: #${suggestionsChannel.name}
-    • Staff Suggestions: #${staffSuggestionsChannel.name}
-    • Staff Roles: ${roles.map(role => role.name).join(', ')}
-    • Vote Emojis: ${emojiSets[voteEmojis]}
+    • Suggestions: ${suggestionsChannel.name || 'Not Set'}
+    • Staff Suggestions: ${staffSuggestionsChannel.name || 'Not Set'}
+    • Staff Roles: ${roles.map(role => role.name).join(', ') || 'Not Set'}
+    • Vote Emojis: ${voteEmojis || 'Not Set'}
     `;
 
-    message.channel.send(stripIndents`\`\`\`${config}\`\`\``);
+    message.channel.send(`\`\`\`${config}\`\`\``);
 };
 
 exports.help = {
