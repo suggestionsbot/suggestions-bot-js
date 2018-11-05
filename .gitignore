@@ -1,0 +1,17 @@
+# Packages
+node_modules/
+package-lock.json
+
+# Log files
+logs/
+*.log
+
+# Beta command
+commands/beta.js
+
+# Miscellaneous
+.tmp/
+.vscode/
+.eslintrc.json
+nodemon.json
+data/
