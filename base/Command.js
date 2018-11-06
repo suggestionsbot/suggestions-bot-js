@@ -6,12 +6,13 @@ module.exports = class Command {
         usage = null,
         enabled = true,
         guildOnly = false,
+        staffOnly = false,
         adminOnly = false,
         ownerOnly = false,
         aliases = new Array()
     }) {
         this.client = client;
-        this.conf = { enabled, guildOnly, adminOnly, ownerOnly, aliases };
+        this.conf = { enabled, guildOnly, staffOnly, adminOnly, ownerOnly, aliases };
         this.help = { name, description, category, usage };
     }
 };

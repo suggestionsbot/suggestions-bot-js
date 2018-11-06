@@ -6,8 +6,10 @@ const readdir = promisify(require('fs').readdir);
 const klaw = require('klaw');
 const path = require('path');
 const mongoose = require('mongoose');
+const { stripIndents } = require('common-tags');
 const Settings = require('./models/settings');
 const Suggestion = require('./models/suggestions');
+const Blacklist = require('./models/blacklist');
 require('dotenv-flow').config();
 
 class Suggestions extends Client {
@@ -69,7 +71,7 @@ class Suggestions extends Client {
     // getSettings merges the client defaults with the guild settings in MongoDB
     async getSettings(guild) {
 
-        let gSettings = await Settings.findOne({ guildID: guild.id }).catch(err => this.client.logger.error(err));
+        let gSettings = await Settings.findOne({ guildID: guild.id }).catch(err => this.logger.error(err));
 
         const guildData = gSettings || {};
 
@@ -80,7 +82,7 @@ class Suggestions extends Client {
     // than the defaults. This allows me to write fewer lines of code!
     async writeSettings(guild, newSettings) {
 
-        let gSettings = await Settings.findOne({ guildID: guild.id }).catch(err => this.client.logger.error(err));
+        let gSettings = await Settings.findOne({ guildID: guild.id }).catch(err => this.logger.error(err));
 
         const defaults = this.config.defaultSettings;
         let settings = gSettings;
@@ -89,12 +91,12 @@ class Suggestions extends Client {
             if (defaults[key] !== newSettings[key]) settings[key] = newSettings[key];
             else return;
         }
-        return await Settings.findOneAndUpdate(settings).catch(err => this.client.logger.error(err));
+        return await Settings.findOneAndUpdate(settings).catch(err => this.logger.error(err));
     }
 
     // this method allows a single suggestion in a guild to be queried
     async getGuildSuggestion(guild, sID) {
-        let gSuggestion = await Suggestion.findOne({ guildID: guild.id, sID: sID }).catch(err => this.clieng.logger.error(err));
+        let gSuggestion = await Suggestion.findOne({ guildID: guild.id, sID: sID }).catch(err => this.logger.error(err));
 
         const guildSuggestion = gSuggestion || {};
         return guildSuggestion;
@@ -102,13 +104,45 @@ class Suggestions extends Client {
 
     // this method allows for a single suggestion to be queried, regardless of the guild (for administrative use)
     async getGlobalSuggestion(sID) {
-        let gSuggestion = await Suggestion.findOne({ sID: sID }).catch(err => this.client.logger.error(err));
+        let gSuggestion = await Suggestion.findOne({ sID: sID }).catch(err => this.logger.error(err));
 
         const globalSuggestion = gSuggestion || {};
         return globalSuggestion;
     }
 
-     /*
+    // this method gets a guild's blacklist from the database
+    async getGuildBlacklist(guild) {
+        let gBlacklist = await Blacklist.find({ guildID: guild.id }).catch(err => this.logger.error(err));
+
+        const guildBlacklist = gBlacklist || {};
+        return guildBlacklist;
+    }
+
+    // this method gets the global blacklist from the database
+    async getGlobalBlacklist() {
+        let gBlacklist = await Blacklist.find().catch(err => this.logger.error(err));
+
+        const guildBlacklist = gBlacklist || {};
+        return guildBlacklist;
+    }
+
+    // this method gets the guild's suggestions from the database
+    async getGuildSuggestions(guild) {
+        let gSuggestions = await Suggestion.find({ guildID: guild.id }).catch(err => this.logger.error(err));
+
+        const guildSuggestions = gSuggestions || {};
+        return guildSuggestions;
+    }
+
+    // this method gets the global suggestions from the database
+    async getGlobalSuggestions() {
+        let gSuggestions = await Suggestion.find().catch(err => this.logger.error(err));
+
+        let globalSuggestions = gSuggestions || {};
+        return globalSuggestions;
+    }
+
+    /*
     SINGLE-LINE AWAITMESSAGE
     A simple way to grab a single reply, from the user that initiated
     the command. Useful to get "precisions" on certain things...
@@ -198,15 +232,15 @@ mongoose.set('useFindAndModify', false);
 mongoose.Promise = global.Promise;
 
 mongoose.connection.on('connected', () => {
-    console.log('Mongoose connection successfully open at ' + client.config.dbURILog);
+    client.logger.log('Mongoose connection successfully open at ' + client.config.dbURILog);
 });
 
 mongoose.connection.on('err', err => {
-    console.log('Mongoose connection error: ' + err);
+    client.logger.log('Mongoose connection error: ' + err);
 });
 
 mongoose.connection.on('disconnected', () => {
-    console.log('Mongoose connection disconnected');
+    client.logger.log('Mongoose connection disconnected');
 });
 
 
@@ -238,6 +272,6 @@ process.on('uncaughtException', (err) => {
   process.exit(1);
 });
 
-process.on('unhandledRejection', (reason, p) => {
-	console.log('Unhandled Rejection at:', p, 'Reason:', reason);
+process.on('unhandledRejection', error => {
+	client.logger.error(stripIndents`Unhandled Rejection: ${error}`);
 });

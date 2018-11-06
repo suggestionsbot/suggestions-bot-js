@@ -4,7 +4,7 @@ module.exports = class EvalCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'eval',
-            category: 'Admin',
+            category: 'Bot Owner',
             description: 'Run raw Javascript code via the bot.',
             usage: 'eval <code>',
             ownerOnly: true

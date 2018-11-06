@@ -54,6 +54,7 @@ module.exports = class {
         const cmd = this.client.commands.get(command) || this.client.commands.get(this.client.aliases.get(command));
         if (!cmd) return;
 
+        // update these to use the new methods in app.js
         let blacklisted = await Blacklist.findOne({
             $and: [
                 { guildID: message.guild.id },
