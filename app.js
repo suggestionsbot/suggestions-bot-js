@@ -21,7 +21,7 @@ class Suggestions extends Client {
         this.commands = new Collection();
         this.aliases = new Collection();
 
-        this.logger = require('./utils/Logger');
+        this.logger = require('./utils/logger');
 
         this.wait = require('util').promisify(setTimeout);
     }
