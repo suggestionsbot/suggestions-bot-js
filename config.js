@@ -19,6 +19,10 @@ module.exports = {
     invite: process.env.INVITE,
     dbURI: `mongodb://${process.env.DB_USER}:${process.env.DB_PASS}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}?authSource=admin`,
     dbURILog: `mongodb://${process.env.DB_USER}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}`,
+    suggestionColors: {
+        approved: '#00e640',
+        rejected: '#cf000f'
+    }
 };
 
 module.exports.defaultSettings = {

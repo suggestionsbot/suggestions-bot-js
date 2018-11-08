@@ -1,11 +1,11 @@
 const Command = require('../../base/Command');
 
-module.exports = class PrefixCommand extends Command {
+module.exports = class Prefix extends Command {
     constructor(client) {
         super(client, {
             name: 'prefix',
-            category: 'General',
-            description: 'View the current bot prefix.'
+            category: 'Suggestions',
+            description: 'View the current bot prefix in this guild.'
         });
     }
 
@@ -16,7 +16,6 @@ module.exports = class PrefixCommand extends Command {
             return message.channel.send(`Error querying the database for this guild's information: **${err.message}**.`);
         });
 
-        message.channel.send(`Current prefix: \`${gSettings.prefix}\``);
-        
+        return message.channel.send(`Current prefix: \`${gSettings.prefix}\``);
     }
 };

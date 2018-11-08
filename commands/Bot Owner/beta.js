@@ -1,13 +1,11 @@
 const Command = require('../../base/Command');
-const { stripIndents } = require('common-tags');
 
-module.exports = class Ping extends Command {
+module.exports = class Beta extends Command {
     constructor(client) {
         super(client, {
             name: 'beta',
             category: 'Bot Owner',
             description: 'A beta command for testing.',
-            enabled: true,
             ownerOnly: true
         });
     }

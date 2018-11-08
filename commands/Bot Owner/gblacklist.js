@@ -13,11 +13,11 @@ const blStatus = {
 module.exports = class BlacklistCmd extends Command {
     constructor(client) {
         super(client, {
-            name: 'blacklist',
-            category: 'Admin',
-            description: 'Add or remove a user from the bot blacklist (guild-only).',
+            name: 'gblacklist',
+            category: 'Bot Owner',
+            description: 'Add or remove a user from the bot blacklist (globally).',
             usage: 'blacklist <add/remove> <user ID> <reason>',
-            adminOnly: true
+            ownerOnly: true
         });
     }
 
@@ -37,7 +37,10 @@ module.exports = class BlacklistCmd extends Command {
             return message.channel.send(`Error querying the database for this guild's information: **${err.message}**.`);
         });
 
-        let gBlacklist = await this.client.getGuildBlacklist(message.guild);
+        let gBlacklist = await this.client.getGlobalBlacklist().catch(err => {
+            this.client.logger.error(err);
+            return message.channel.send(`Error querying the database for the bot's blacklist information: **${err.message}**.`);
+        });
 
         let caseNum = gBlacklist.length + 1;
 
@@ -93,7 +96,8 @@ module.exports = class BlacklistCmd extends Command {
                     issuerUsername: message.member.user.tag,
                     time: moment(Date.now()),
                     status: true,
-                    case: caseNum
+                    case: caseNum,
+                    scope: 'global'
                 });
 
                 await newBlacklist.save().then(res => this.client.logger.log('New Blacklist: \n ', res)).catch(err => this.client.logger.error(err));

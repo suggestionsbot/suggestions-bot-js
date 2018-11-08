@@ -37,8 +37,8 @@ module.exports = class SuggestCommand extends Command {
 
         let { prefix, suggestionsChannel } = gSettings;
 
-        const sUser = message.member;
-        const sChannel = message.guild.channels.find(c => c.name === suggestionsChannel) || message.guild.channels.find(c => c.toString() === suggestionsChannel);
+        const sUser = message.author;
+        const sChannel = message.guild.channels.find(c => c.name === suggestionsChannel) || message.guild.channels.find(c => c.toString() === suggestionsChannel) || message.guild.channels.get(suggestionsChannel);
         if (!sChannel) return noSuggestions(message.channel);
 
         let emojis = gSettings.voteEmojis;
@@ -62,17 +62,17 @@ module.exports = class SuggestCommand extends Command {
         const submittedOn = moment.utc(message.createdAt).format('MM/DD/YY @ h:mm A (z)');
 
         const sEmbed = new RichEmbed()
-            .setThumbnail(sUser.user.avatarURL)
+            .setThumbnail(sUser.avatarURL)
             .setDescription(`
             **Submitter**
-            ${sUser.user.tag}
+            ${sUser.tag}
     
             **Suggestion**
             ${suggestion}
     
             **Submitted**
             ${submittedOn}
-        `)
+            `)
             .setColor(embedColor)
             .setFooter(`User ID: ${sUser.id} | sID: ${id}`);
 
@@ -136,12 +136,12 @@ module.exports = class SuggestCommand extends Command {
             time: time
         });
 
-        await newSuggestion.save().then(res => this.client.logger.log('New suggestion: \n', res)).catch(err => {
+        await newSuggestion.save().then(res => this.client.logger.log(`New suggestion: \n ${res}`)).catch(err => {
             this.client.logger.error(err);
             return message.channel.send(`An error occurred saving this suggestion in the database: **${err.message}**.`);
         });
         await message.react('✉');
         await message.delete(3000).catch(O_o => {});
-
+        return;
     }
 };

@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const moment = require('moment');
 const Blacklist = require('../models/blacklist');
 const Command = require('../models/commands');
-const { noPerms } = require('../utils/errors');
+const { noPerms, noSuggestionsPerms } = require('../utils/errors');
 const cmdCooldown = new Set();
 const cmdTime = 5;
 
@@ -36,6 +36,9 @@ module.exports = class {
         const prefixMention = new RegExp(`^<@!?${this.client.user.id}> `);
         const newPrefix = message.content.match(prefixMention) ? message.content.match(prefixMention)[0] : guildConf.prefix;
 
+        const getPrefix = new RegExp(`^<@!?${this.client.user.id}>( |)$`);
+        if (message.content.match(getPrefix)) return message.channel.send(`My prefix in this guild is \`${guildConf.prefix}\``);
+
         if (message.author.bot) return;
         if (message.content.indexOf(newPrefix) !== 0) return;
 
@@ -43,7 +46,7 @@ module.exports = class {
 
         if (cmdCooldown.has(message.author.id)) {
             await message.delete();
-            return message.reply(`slow down there! You need to wait ${cmdTime} second(s) before issuing another command.`).then(msg => msg.delete(2500)).catch(err => console.log(err));
+            return message.reply(`slow down there! You need to wait ${cmdTime} second(s) before issuing another command.`).then(msg => msg.delete(2500)).catch(err => this.client.logger.error(err));
         }
 
         const args = message.content.slice(newPrefix.length).trim().split(/ +/g);
@@ -54,14 +57,14 @@ module.exports = class {
         const cmd = this.client.commands.get(command) || this.client.commands.get(this.client.aliases.get(command));
         if (!cmd) return;
 
-        // update these to use the new methods in app.js
+        // update these to use the new methods in app.js?
         let blacklisted = await Blacklist.findOne({
             $and: [
                 { guildID: message.guild.id },
                 { userID: message.author.id },
                 { status: true }
             ]
-        }).catch(err => console.log(err));
+        }).catch(err => this.client.logger.error(err));
     
         let gBlacklisted = await Blacklist.findOne({
             $and: [
@@ -69,14 +72,15 @@ module.exports = class {
                 { scope: 'global' },
                 { status: true }
             ]
-        }).catch(err => console.log(err));
+        }).catch(err => this.client.logger.error(err));
 
         if (blacklisted) return this.client.logger.warn(`"${message.author.tag}" (${message.author.id}) in the guild "${message.guild.name}" (${message.guild.id}) tried to use the command "${cmd.help.name}", but is blacklisted from using bot commands in this guild, "${message.guild.name}" (${message.guild.id}).`);
         if (gBlacklisted) return this.client.logger.warn(`"${message.author.tag}" (${message.author.id}) in the guild "${message.guild.name}" (${message.guild.id}) tried to use the command "${cmd.help.name}", but is blacklisted from using bot commands globally.`);
 
-        if (cmd && !cmd.conf.enabled) return message.channel.send('This command is currently disabled!').then(msg => msg.delete(3000)).catch(console.error);
+        if (cmd && !cmd.conf.enabled) return message.channel.send('This command is currently disabled!').then(msg => msg.delete(3000)).catch(err => this.client.logger.error(err));
         if (cmd && cmd.conf.ownerOnly && message.author.id !== this.client.config.owner) return;
         if (cmd && cmd.conf.adminOnly && !admins.includes(message.author.id)) return noPerms(message, 'MANAGE_GUILD');
+        if (cmd && cmd.conf.staffOnly && !admins.includes(message.author.id) && !message.member.roles.some(r => staffRoles.includes(r))) return noSuggestionsPerms(message);
 
         if (cmd && !cmdCooldown.has(message.author.id)) {
 
@@ -98,7 +102,7 @@ module.exports = class {
                 await cmdCooldown.add(message.author.id);
             }
 
-            await newCommand.save().catch(err => console.log(err));
+            await newCommand.save().catch(err => this.client.logger.error(err));
             this.client.logger.log(`${message.member.user.tag} (${message.member.id}) ran command ${cmd.help.name}`, 'cmd');
         }
 

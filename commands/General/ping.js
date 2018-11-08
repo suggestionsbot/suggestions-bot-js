@@ -16,7 +16,7 @@ module.exports = class Ping extends Command {
             const msg = await message.channel.send('🏓 Ping!');
             return msg.edit(`Pong! Latency is \`${msg.createdTimestamp - message.createdTimestamp}ms\`. API Latency is \`${Math.round(this.client.ping)}ms\`.`);
         } catch (e) {
-            console.log(e);
+            this.client.logger.error(e);
             return message.channel.send(`Error running this command: **${e.message}**.`);
         }
     }

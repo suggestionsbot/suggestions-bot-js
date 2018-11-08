@@ -16,7 +16,7 @@ module.exports = class EvalCommand extends Command {
         const cmdUsage = this.help.usage;
         const prefix = await this.client.getSettings(message.guild).then(res => res.prefix);
         const code = args.join(' ');
-        if (!code) return message.channel.send(`Usage: \`${prefix + cmdUsage}\``).then(msg => msg.delete(3000)).catch(console.error);
+        if (!code) return message.channel.send(`Usage: \`${prefix + cmdUsage}\``).then(msg => msg.delete(3000)).catch(err => this.client.logger.error(err));
 
         try {
             const evaled = eval(code);

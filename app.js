@@ -91,16 +91,25 @@ class Suggestions extends Client {
             if (defaults[key] !== newSettings[key]) settings[key] = newSettings[key];
             else return;
         }
+
         return await Settings.findOneAndUpdate(settings).catch(err => this.logger.error(err));
     }
 
     // this method allows a single suggestion in a guild to be queried
     async getGuildSuggestion(guild, sID) {
-        let gSuggestion = await Suggestion.findOne({ guildID: guild.id, sID: sID }).catch(err => this.logger.error(err));
+        let gSuggestion = await Suggestion.findOne({ $and: [{ guildID: guild.id, sID: sID }] }).catch(err => this.logger.error(err));
 
         const guildSuggestion = gSuggestion || {};
         return guildSuggestion;
     }
+
+    // this method updates a single suggestion in a guild in the database
+    // async updateGuildSuggeston(guild, sID, newUpdates) {
+    //     let gSuggestion = await Suggestion.findOne({ $and: [{ guildID: guild.id, sID: sID }] }).catch(err => this.client.logger.error(err));
+
+    //     const guildSuggestion = gSuggestion || {};
+    //     return guildSuggestion;
+    // }
 
     // this method allows for a single suggestion to be queried, regardless of the guild (for administrative use)
     async getGlobalSuggestion(sID) {
@@ -120,7 +129,7 @@ class Suggestions extends Client {
 
     // this method gets the global blacklist from the database
     async getGlobalBlacklist() {
-        let gBlacklist = await Blacklist.find().catch(err => this.logger.error(err));
+        let gBlacklist = await Blacklist.find({scope: 'global' }).catch(err => this.logger.error(err));
 
         const guildBlacklist = gBlacklist || {};
         return guildBlacklist;
@@ -136,10 +145,27 @@ class Suggestions extends Client {
 
     // this method gets the global suggestions from the database
     async getGlobalSuggestions() {
-        let gSuggestions = await Suggestion.find().catch(err => this.logger.error(err));
+        let gSuggestions = await Suggestion.find({}).catch(err => this.logger.error(err));
 
         let globalSuggestions = gSuggestions || {};
         return globalSuggestions;
+    }
+
+    // this method gets a guild member's suggestions in a guild from the database
+    async getGuildMemberSuggestions(guild, member) {
+        let gSuggestions = await Suggestion
+            .find({ $and: [{ guildID: guild.id, userID: member.id }] })
+            .sort({ time: -1 })
+            .catch(err => this.logger.error(err));
+
+        const memberSuggstions = gSuggestions || {};
+        return memberSuggstions;
+    }
+
+    // this method checks if an object is empty
+    async isEmpty(obj) {
+        for (let key in obj) return false;
+        return true;
     }
 
     /*
@@ -266,7 +292,7 @@ Array.prototype.random = function () {
 // These 2 process methods will catch exceptions and give *more details* about the error and stack trace.
 process.on('uncaughtException', (err) => {
     const msg = err.stack.replace(new RegExp(`${__dirname}/`, 'g'), './');
-    console.error('Uncaught Exception: ', msg);
+    client.logger.error(`Uncaught Exception: \n ${msg}`);
     // Always best practice to let the code crash on uncaught exceptions. 
     // Because you should be catching them anyway.
   process.exit(1);

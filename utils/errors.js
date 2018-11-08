@@ -68,6 +68,16 @@ const noSuggestions = channel => {
     channel.send(embed).then(m => m.delete(5000)).catch(err => console.log(err));
 };
 
+const noStaffSuggestions = channel => {
+
+    let embed = new Discord.RichEmbed()
+        .setTitle('Error')
+        .setDescription('A staff suggestions channel does not exist! Please create one or contact a server administrator.')
+        .setColor(colors.red);
+        
+    channel.send(embed).then(m => m.delete(5000)).catch(err => console.log(err));
+};
+
 const noSuggestionsLogs = channel => {
 
     let embed = new Discord.RichEmbed()
@@ -96,5 +106,6 @@ module.exports = {
     noSuggestions,
     noSuggestionsPerms,
     noSuggestionsLogs,
+    noStaffSuggestions,
     maintenanceMode
 };
