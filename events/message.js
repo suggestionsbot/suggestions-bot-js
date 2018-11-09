@@ -15,23 +15,16 @@ module.exports = class {
 
         if (!message.guild) return;
 
-        let gSettings = await this.client.getSettings(message.guild);
+        let gSettings = await this.client.getSettings(message.guild).catch(err => this.client.logger.error(err));
+        
+        const guildConf = gSettings || this.client.config.defaultSettings;
 
-        let admins = [];
-        message.guild.members.forEach(collected => {
-            if (collected.hasPermission('MANAGE_GUILD') && !collected.user.bot) {
-                admins.push(collected.id);
-            }
-        });
-
-        const roles = gSettings.staffRoles;
+        const roles = guildConf.staffRoles;
         if (!roles) return;
 
         const staffRoles = roles.map(el => {
             return message.guild.roles.find(r => r.name === el.role || r.id === el.role);
         });
-
-        const guildConf = gSettings || this.client.config.defaultSettings;
 
         const prefixMention = new RegExp(`^<@!?${this.client.user.id}> `);
         const newPrefix = message.content.match(prefixMention) ? message.content.match(prefixMention)[0] : guildConf.prefix;
@@ -79,8 +72,8 @@ module.exports = class {
 
         if (cmd && !cmd.conf.enabled) return message.channel.send('This command is currently disabled!').then(msg => msg.delete(3000)).catch(err => this.client.logger.error(err));
         if (cmd && cmd.conf.ownerOnly && message.author.id !== this.client.config.owner) return;
-        if (cmd && cmd.conf.adminOnly && !admins.includes(message.author.id)) return noPerms(message, 'MANAGE_GUILD');
-        if (cmd && cmd.conf.staffOnly && !admins.includes(message.author.id) && !message.member.roles.some(r => staffRoles.includes(r))) return noSuggestionsPerms(message);
+        if (cmd && cmd.conf.adminOnly && !message.member.hasPermission('MANAGE_GUILD')) return noPerms(message, 'MANAGE_GUILD');
+        if (cmd && cmd.conf.staffOnly && !message.member.hasPermission('MANAGE_GUILD') && !message.member.roles.some(r => staffRoles.includes(r))) return noSuggestionsPerms(message);
 
         if (cmd && !cmdCooldown.has(message.author.id)) {
 
@@ -91,19 +84,19 @@ module.exports = class {
                 guildOwnerID: message.guild.ownerID,
                 command: cmd.help.name,
                 channel: message.channel.name,
-                username: message.member.user.tag,
-                userID: message.member.id,
+                username: message.author.tag,
+                userID: message.author.id,
                 time: moment(Date.now())
             });
 
             cmd.run(message, args);
 
-            if (!admins.includes(message.author.id) && !message.member.roles.some(r => staffRoles.includes(r))) {
+            if (!message.member.hasPermission('MANAGE_GUILD') && !message.member.roles.some(r => staffRoles.includes(r))) {
                 await cmdCooldown.add(message.author.id);
             }
 
             await newCommand.save().catch(err => this.client.logger.error(err));
-            this.client.logger.log(`${message.member.user.tag} (${message.member.id}) ran command ${cmd.help.name}`, 'cmd');
+            this.client.logger.log(`${message.author.tag} (${message.author.id}) ran command ${cmd.help.name}`, 'cmd');
         }
 
         setTimeout(() => {

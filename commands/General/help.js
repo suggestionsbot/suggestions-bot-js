@@ -26,7 +26,7 @@ module.exports = class HelpCommand extends Command {
             suggestionsChannel
         } = gSettings;
 
-        suggestionsChannel = message.guild.channels.find(c => c.name === gSettings.suggestionsChannel) || message.guild.channels.find(c => c.toString() === gSettings.suggestionsChannel) || message.guild.channels.get(gSettings.suggestionsChannel);
+        suggestionsChannel = message.guild.channels.find(c => c.name === gSettings.suggestionsChannel) || message.guild.channels.find(c => c.toString() === gSettings.suggestionsChannel) || message.guild.channels.get(gSettings.suggestionsChannel) || '';
 
         const roles = staffRoles.map(el => {
             return message.guild.roles.find(r => r.name === el.role || r.id === el.role);
@@ -36,6 +36,8 @@ module.exports = class HelpCommand extends Command {
         if (!perms.has('EMBED_LINKS')) return noBotPerms(message, 'EMBED_LINKS');
 
         let cmdName = this.help.name;
+        let cmdSetChannel = await this.client.commands.get('setchannel');
+        let setChannelUsage = cmdSetChannel.help.usage;
 
         let cmds = this.client.commands;
         let cmd = args[0];
@@ -67,7 +69,7 @@ module.exports = class HelpCommand extends Command {
             .setTitle('Help Information')
             .setDescription(`View help information for ${this.client.user}. \n (Do \`${prefix + cmdName} <command>)\` for specific help information).`)
             .addField('Current Prefix', prefix)
-            .addField('Suggestions Channel', suggestionsChannel.toString())
+            .addField('Suggestions Channel', suggestionsChannel.toString() || message.member.hasPermission('MANAGE_GUILD') ? `***Not set. Use*** \`${prefix + setChannelUsage}\`` : '***Not set. Contact a server administrator.***')
             .addField('User Commands', userCmds.join(' | '));
             if (message.member.hasPermission('MANAGE_GUILD') && message.member.roles.some(r => roles.includes(r))) helpEmbed.addField('Staff Commands', staffCmds.join(' | '));
             if (message.member.hasPermission('MANAGE_GUILD')) helpEmbed.addField('Admin Commands', adminCmds.join(' | '));
