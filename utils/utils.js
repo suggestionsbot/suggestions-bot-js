@@ -1,9 +1,10 @@
 const { prefix } = require('../config.js');
 require('dotenv-flow').config();
 
-module.exports.botPresence = (client) =>  {
+module.exports.botPresence = async (client) =>  {
     const userSize = client.users.size.toLocaleString();
-    const cmdHelp = client.commands.get('help', 'help.name');
+    const cmdHelpObj = await client.commands.get('help', 'help.name');
+    const cmdHelp = cmdHelpObj.help.name;
 
     if (process.env.NODE_ENV === 'production') {
         client.user.setStatus('online');
