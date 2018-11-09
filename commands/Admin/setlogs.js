@@ -33,7 +33,7 @@ module.exports = class SetLogs extends Command {
 
         await this.client.writeSettings(message.guild, { suggestionsLogs: verified.id }).catch(err => {
             this.client.logger.log(err);
-            message.channel.send(`Error setting the suggestions logs channel: **${err.message}**.`);
+            return message.channel.send(`Error setting the suggestions logs channel: **${err.message}**.`);
         });
 
         return await message.channel.send(`Suggestions logs channel has been changed to: ${verified.toString()}`);

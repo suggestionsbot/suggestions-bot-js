@@ -96,7 +96,10 @@ module.exports = class BlacklistCmd extends Command {
                     case: caseNum
                 });
 
-                await newBlacklist.save().then(res => this.client.logger.log('New Blacklist: \n ', res)).catch(err => this.client.logger.error(err));
+                await newBlacklist.save().then(res => this.client.logger.log('New Blacklist: \n ', res)).catch(err => {
+                    this.client.logger.error(err);
+                    return message.channel.send(`There was an error adding this user to the blacklist: **${err.message}**.`);
+                });
                 await this.client.logger.log(`${message.member.user.tag} ("${message.author.id}") has issued a blacklist to the user ${blUser}. [${moment(message.createdAt)}]`);
                 await blEmbed.setTitle(`${this.client.user.username} | Blacklisted User Added`);
                 await blEmbed.setColor('#00e640');
@@ -127,7 +130,10 @@ module.exports = class BlacklistCmd extends Command {
     
                     await message.channel.send(blEmbed).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err));
                 })
-                .catch(err => this.client.logger.error(err));
+                .catch(err => {
+                    this.client.logger.error(err);
+                    return message.channel.send(`There was an error removing this user from the blacklist: **${err.message}**.`);
+                });
                 break;
             }
             default:

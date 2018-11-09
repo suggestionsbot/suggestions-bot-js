@@ -1,5 +1,6 @@
 const Command = require('../../base/Command');
 const { noBotPerms } = require('../../utils/errors');
+const Settings = require('../../models/settings');
 
 module.exports = class SetPrefix extends Command {
     constructor(client) {
@@ -30,8 +31,10 @@ module.exports = class SetPrefix extends Command {
 
         await this.client.writeSettings(message.guild, { prefix: args[0] }).catch(err => {
             this.client.logger.error(err);
-            message.channel.send(`Error setting the bot prefix: **${err.message}**.`);
+            return message.channel.send(`Error setting the bot prefix: **${err.message}**.`);
         });
+
+        // await Settings.findOneAndUpdate({ guildID: message.guild.id }, { prefix: args[0] }).catch(console.error);
 
         return await message.channel.send(`Bot prefix has been changed to: \`${args[0]}\``);
     }

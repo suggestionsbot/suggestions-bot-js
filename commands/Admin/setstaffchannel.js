@@ -33,7 +33,7 @@ module.exports = class SetStaffChannel extends Command {
 
         await this.client.writeSettings(message.guild, { staffSuggestionsChannel: verified.id }).catch(err => {
             this.client.logger.log(err);
-            message.channel.send(`Error setting the staff suggestions channel: **${err.message}**.`);
+            return message.channel.send(`Error setting the staff suggestions channel: **${err.message}**.`);
         });
 
         return await message.channel.send(`Staff suggestions channel has been changed to: ${verified.toString()}`);
