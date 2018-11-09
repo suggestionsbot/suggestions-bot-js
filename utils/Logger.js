@@ -1,5 +1,6 @@
 const chalk = require("chalk");
 const moment = require("moment");
+// need to add this to commit file with name change?
 
 class Logger {
   static log (content, type = "log") {
