@@ -31,7 +31,7 @@ module.exports = class HelpCommand extends Command {
         const roles = staffRoles.map(el => {
             return message.guild.roles.find(r => r.name === el.role || r.id === el.role);
         });
-
+        
         let perms = message.guild.me.permissions;
         if (!perms.has('EMBED_LINKS')) return noBotPerms(message, 'EMBED_LINKS');
 
@@ -58,7 +58,7 @@ module.exports = class HelpCommand extends Command {
             return message.channel.send(cmdHelpEmbed);
         }
 
-        const userCmds = cmds.filter(cmd => cmd.conf.ownerOnly === false && cmd.conf.adminOnly === false).map(cmd => '`' + cmd.help.name + '`');
+        const userCmds = cmds.filter(cmd => cmd.conf.ownerOnly === false && cmd.conf.adminOnly === false && cmd.conf.staffOnly === false).map(cmd => '`' + cmd.help.name + '`');
         const staffCmds = cmds.filter(cmd => cmd.conf.staffOnly === true).map(cmd => '`' + cmd.help.name + '`');
         const adminCmds = cmds.filter(cmd => cmd.conf.adminOnly === true).map(cmd => '`' + cmd.help.name + '`');
         const ownerCmds = cmds.filter(cmd => cmd.conf.ownerOnly === true).map(cmd => '`' + cmd.help.name + '`');

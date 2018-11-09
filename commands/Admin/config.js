@@ -68,8 +68,8 @@ module.exports = class Config extends Command {
         • Guild Owner: ${guildOwner.user.tag} (${guildOwner.id})
         • Prefix: ${prefix}
         • Suggestions: ${suggestionsChannel.name}
-        • Staff Suggestions: ${staffSuggestionsChannel.name || 'Not set'}
         • Suggestions Logs: ${suggestionsLogs.name || 'Not Set'}
+        • Staff Suggestions: ${staffSuggestionsChannel.name || 'Not set'}
         • Staff Roles: ${roles.map(role => role.name).join(', ') || 'None set'}
         • Vote Emojis: ${emojiSets[voteEmojis] || 'Default'}
         • Total Suggestions: ${gSuggestions.length || 'None'}

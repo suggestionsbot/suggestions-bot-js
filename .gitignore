@@ -7,7 +7,7 @@ logs/
 *.log
 
 # Beta command
-commands/beta.js
+commands/Bot\ Owner/beta.js
 
 # Miscellaneous
 .tmp/

@@ -238,6 +238,20 @@ const init = async () => {
 
 init();
 
+if (process.env.NODE_ENV === 'production') {
+
+    const DBL = require('dblapi.js');
+    const dbl = new DBL(client.config.dblToken, client);
+
+    dbl.on('posted', () => {
+        console.log('Server count posted to DiscordBots.org!');
+    });
+    
+    dbl.on('error', e => {
+        console.log(e);
+    });
+}
+
 client.on('disconnect', () => client.logger.warn('Bot is disconnecting...'))
     .on('reconnecting', () => client.logger.log('Bot reconnecting...', 'log'))
     .on('error', e => client.logger.error(e))
