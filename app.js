@@ -85,6 +85,7 @@ class Suggestions extends Client {
         let gSettings = await Settings.findOne({ guildID: guild.id }).catch(err => this.logger.error(err));
 
         let settings = gSettings;
+        // maybe check if settings object is empty, return an error?
         if (typeof settings != 'object') settings = {};
         for (const key in newSettings) {
             if (gSettings[key] !== newSettings[key]) settings[key] = newSettings[key];
