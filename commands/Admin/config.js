@@ -59,15 +59,15 @@ module.exports = class Config extends Command {
         
         let roles = message.guild.roles.filter(role => staffRoles.map(role => role.role).includes(role.id));
 
-        suggestionsChannel = message.guild.channels.find(c => c.name === suggestionsChannel) || (message.guild.channels.find(c => c.toString() === suggestionsChannel)) || (message.guild.channels.get(suggestionsChannel));
-        suggestionsLogs = message.guild.channels.find(c => c.name === suggestionsLogs) || message.guild.channels.find(c => c.toString() === suggestionsLogs) || message.guild.channels.get(suggestionsLogs);
+        suggestionsChannel = message.guild.channels.find(c => c.name === suggestionsChannel) || (message.guild.channels.find(c => c.toString() === suggestionsChannel)) || (message.guild.channels.get(suggestionsChannel)) || '';
+        suggestionsLogs = message.guild.channels.find(c => c.name === suggestionsLogs) || message.guild.channels.find(c => c.toString() === suggestionsLogs) || message.guild.channels.get(suggestionsLogs) || '';
         staffSuggestionsChannel = message.guild.channels.find(c => c.name === staffSuggestionsChannel) || (message.guild.channels.find(c => c.toString() === staffSuggestionsChannel)) || (message.guild.channels.find(c => c.id === staffSuggestionsChannel)) || '';
 
         let config = stripIndents`
         • Guild Name: ${guildName} (${guildID})
         • Guild Owner: ${guildOwner.user.tag} (${guildOwner.id})
         • Prefix: ${prefix}
-        • Suggestions: ${suggestionsChannel.name}
+        • Suggestions: ${suggestionsChannel.name || 'Not set'}
         • Suggestions Logs: ${suggestionsLogs.name || 'Not Set'}
         • Staff Suggestions: ${staffSuggestionsChannel.name || 'Not set'}
         • Staff Roles: ${roles.map(role => role.name).join(', ') || 'None set'}
