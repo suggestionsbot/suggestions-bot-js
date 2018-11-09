@@ -33,7 +33,7 @@ module.exports = class SetChannel extends Command {
 
         await this.client.writeSettings(message.guild, { suggestionsChannel: verified.id }).catch(err => {
             this.client.logger.log(err);
-            message.channel.send(`Error setting the suggestions channel: **${err.message}**.`);
+            return message.channel.send(`Error setting the suggestions channel: **${err.message}**.`);
         });
 
         return await message.channel.send(`Suggestions channel has been changed to: ${verified.toString()}`);

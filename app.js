@@ -79,20 +79,19 @@ class Suggestions extends Client {
     }
 
     // writeSettings overrides, or adds, any configuration item that is different
-    // than the defaults. This allows me to write fewer lines of code!
+    // than the current guild schema. This allows me to write fewer lines of code!
     async writeSettings(guild, newSettings) {
 
         let gSettings = await Settings.findOne({ guildID: guild.id }).catch(err => this.logger.error(err));
 
-        const defaults = this.config.defaultSettings;
         let settings = gSettings;
         if (typeof settings != 'object') settings = {};
         for (const key in newSettings) {
-            if (defaults[key] !== newSettings[key]) settings[key] = newSettings[key];
+            if (gSettings[key] !== newSettings[key]) settings[key] = newSettings[key];
             else return;
         }
 
-        return await Settings.findOneAndUpdate(settings).catch(err => this.logger.error(err));
+        return await Settings.findOneAndUpdate({ guildID: guild.id }, settings).catch(err => this.logger.error(err));
     }
 
     // this method allows a single suggestion in a guild to be queried
