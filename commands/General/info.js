@@ -1,4 +1,5 @@
 const { RichEmbed } = require('discord.js');
+const { oneLineTrim } = require('common-tags');
 const Command = require('../../base/Command');
 const { noBotPerms } = require('../../utils/errors');
 const { version, description } = require('../../package.json');
@@ -30,7 +31,10 @@ module.exports = class InfoCommand extends Command {
             .addField('Support Discord', discord)
             .addField('Documentation', docs)
             .addField('Bot Version', version)
-            .setFooter('© 2018 The Nerd Cave');
+            .addField('A Special Note', oneLineTrim`RIP to a legend Stan Lee, a man who has changed the face 
+            of Marvel Comics and comics in general. Young or old, the characters and worlds he created has 
+            impacted so many in a positive way. This is a special thanks to him and his work.`)
+            .setFooter('© 2018 Nerd Cave Development');
 
         return message.channel.send(embed);
     }

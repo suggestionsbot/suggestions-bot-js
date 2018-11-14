@@ -34,8 +34,6 @@ module.exports = class SetPrefix extends Command {
             return message.channel.send(`Error setting the bot prefix: **${err.message}**.`);
         });
 
-        // await Settings.findOneAndUpdate({ guildID: message.guild.id }, { prefix: args[0] }).catch(console.error);
-
         return await message.channel.send(`Bot prefix has been changed to: \`${args[0]}\``);
     }
 };

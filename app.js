@@ -6,7 +6,6 @@ const readdir = promisify(require('fs').readdir);
 const klaw = require('klaw');
 const path = require('path');
 const mongoose = require('mongoose');
-const { stripIndents } = require('common-tags');
 const Settings = require('./models/settings');
 const Suggestion = require('./models/suggestions');
 const Blacklist = require('./models/blacklist');
@@ -33,11 +32,11 @@ class Suggestions extends Client {
     including the index.js load loop, and the reload function, these 2 ensure
     that unloading happens in a consistent manner across the board.
     */
-    loadCommand(cmdPath, name) {
+    loadCommand(cmdPath, cmdName) {
         try {
-            const props = new (require(`${cmdPath}${path.sep}${name}`))(this);
+            const props = new (require(`${cmdPath}${path.sep}${cmdName}`))(this);
             this.logger.log(`Loading Command: ${props.help.name}. 👌`, 'log');
-            props.conf.location = path;
+            props.conf.location = cmdPath;
             if (props.init) props.init(this);
             this.commands.set(props.help.name, props);
             props.conf.aliases.forEach(alias => {
@@ -45,20 +44,20 @@ class Suggestions extends Client {
             });
             return;
         } catch (e) {
-            return `Unable to load command ${name}: ${e}`;   
+            return `Unable to load command ${cmdName}: ${e}`;   
         }
     }
 
-    async unloadCommand(cmdPath, name) {
+    async unloadCommand(cmdPath, cmdName) {
         let command;
-        if (this.commands.has(name)) command = this.commands.get(name);
-        else command = this.commands.get(this.aliases.get(name));
+        if (this.commands.has(cmdName)) command = this.commands.get(cmdName);
+        else command = this.commands.get(this.aliases.get(cmdName));
 
-        if (!command) return `The command \`${name}\` doesn't seem to exist, nor is it an alias. Try again!`;
+        if (!command) return `The command \`${cmdName}\` doesn't seem to exist, nor is it an alias. Try again!`;
 
         if (command.shutdown) await command.shutdown(this);
 
-        delete require.cache[require.resolve(`${cmdPath}${path.sep}${name}.js`)];
+        delete require.cache[require.resolve(`${cmdPath}${path.sep}${cmdName}.js`)];
         return;
     }
 
@@ -85,6 +84,7 @@ class Suggestions extends Client {
         let gSettings = await Settings.findOne({ guildID: guild.id }).catch(err => this.logger.error(err));
 
         let settings = gSettings;
+        // maybe check if settings object is empty, return an error?
         if (typeof settings != 'object') settings = {};
         for (const key in newSettings) {
             if (gSettings[key] !== newSettings[key]) settings[key] = newSettings[key];
@@ -312,5 +312,5 @@ process.on('uncaughtException', (err) => {
 });
 
 process.on('unhandledRejection', error => {
-	client.logger.error(stripIndents`Unhandled Rejection: ${error}`);
+	client.logger.error(`Unhandled Rejection: \n ${error}`);
 });
