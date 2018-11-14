@@ -60,7 +60,7 @@ module.exports = class GsID extends Command {
         let embed = new RichEmbed()
             .setAuthor(guild.name, guild.iconURL)
             .setTitle(`Info for sID ${args[0]}`)
-            .setFooter(`User ID: ${userID} | sID ${args[0]}`);
+            .setFooter(`User ID: ${userID} | sID ${args[0]} | Excelsior!`);
 
         switch (status) {
             case undefined:

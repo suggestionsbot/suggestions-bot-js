@@ -26,6 +26,9 @@ module.exports = class SuggestCommand extends Command {
 
         const cmdUsage = this.help.usage;
 
+        let id = crypto.randomBytes(20).toString('hex').slice(12, 20);
+        let time = moment(Date.now());
+
         let perms = message.guild.me.permissions;
         if (!perms.has('EMBED_LINKS')) return noBotPerms(message, 'EMBED_LINKS');
         if (!perms.has('ADD_REACTIONS')) return noBotPerms(message, 'ADD_REACTIONS');
@@ -33,6 +36,11 @@ module.exports = class SuggestCommand extends Command {
         let gSettings = await this.client.getSettings(message.guild).catch(err => {
             this.client.logger.error(err);
             return message.channel.send(`Error querying the database for this guild's information: **${err.message}**.`);
+        });
+
+        let verifySuggestion = await this.client.getGlobalSuggestion(id).catch(err => {
+            this.client.logger.error(err);
+            return message.channel.send(`Error querying the database for this guild's suggestions: **${err.message}**.`);
         });
 
         let { prefix, suggestionsChannel } = gSettings;
@@ -43,8 +51,8 @@ module.exports = class SuggestCommand extends Command {
 
         let emojis = gSettings.voteEmojis;
 
-        const id = crypto.randomBytes(20).toString('hex').slice(12, 20);
-        let time = moment(Date.now());
+        // If the sID exists globally, this will force a new one to be generated
+        if (verifySuggestion) id = crypto.randomBytes(20).toString('hex').slice(12, 20);
 
         const dmEmbed = new RichEmbed()
             .setDescription(`Hey, ${sUser}. Your suggestion has been sent to the ${sChannel} channel to be voted on!
@@ -52,6 +60,8 @@ module.exports = class SuggestCommand extends Command {
                 Please wait until it gets approved or rejected by a staff member.
             
                 Your suggestion ID (sID) for reference is **${id}**.
+
+                'Nuff Said!
             `)
             .setColor(embedColor)
             .setTimestamp();
@@ -74,7 +84,7 @@ module.exports = class SuggestCommand extends Command {
             ${submittedOn}
             `)
             .setColor(embedColor)
-            .setFooter(`User ID: ${sUser.id} | sID: ${id}`);
+            .setFooter(`User ID: ${sUser.id} | sID: ${id} | Excelsior`);
 
         const sendMsgs = sChannel.permissionsFor(message.guild.me).has('SEND_MESSAGES', false);
         const reactions = sChannel.permissionsFor(message.guild.me).has('ADD_REACTIONS', false);

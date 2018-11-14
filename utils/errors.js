@@ -40,7 +40,7 @@ const noPerms = (message, perm) => {
 };
 
 const noBotPerms = (message, perm) => {
-    message.channel.send(`I am missing a permission! \`${permissions[perm]} (${perm})\``).then(msg => msg.delete(5000));
+    message.channel.send(`I am missing some permissions! \`${permissions[perm]} (${perm})\``).then(msg => msg.delete(5000));
 };
 
 const noSuggestionsPerms = async message => {

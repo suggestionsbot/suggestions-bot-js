@@ -1,3 +1,4 @@
+const hastebin = require('hastebin-gen');
 const Command = require('../../base/Command');
 
 module.exports = class EvalCommand extends Command {
@@ -23,10 +24,18 @@ module.exports = class EvalCommand extends Command {
             const clean = await this.client.clean(this.client, evaled);
             // 6 graves, and 2 characters for "js"
             const MAX_CHARS = 3 + 2 + clean.length + 3;
-            if (MAX_CHARS > 2000) message.channel.send('Output exceeded 2000 characters. Sending as a file.', { files: [{ attachment: Buffer.from(clean), name: 'output.txt.' }] });
+            if (MAX_CHARS > 2000) {
+                const haste = await hastebin(Buffer.from(clean), 'js');
+                return message.channel.send('Output exceeded 2000 characters. DMing you the Hastebin.')
+                    .then(msg => {
+                        message.author.send(`<${haste}>`);
+                        msg.react('📧').then(() => msg.delete(5000));
+                    })
+                    .catch(err => this.client.logger.error(err));
+            }
             return message.channel.send(clean, { code: 'js' });
         } catch (err) {
-            message.channel.send(await this.client.clean(this.client, err), { code: 'xl' });
+            message.channel.send(await this.client.clean(this.client, err), { code: 'bash' });
         }
     }
 };

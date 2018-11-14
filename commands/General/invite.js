@@ -38,8 +38,8 @@ module.exports = class InviteCommand extends Command {
             .setColor(embedColor)
             .setTimestamp();
 
-    await message.react('📧').then(message.delete(2500));
-    await message.member.send(dmEmbed).catch(err => {
+        await message.react('📧').then(message.delete(2500));
+        await message.member.send(dmEmbed).catch(err => {
         this.client.logger.error(err);
         return message.reply('you have DMs disabled! I could not send you the invite link. Enable them to receive the bot invite link.');
     });
