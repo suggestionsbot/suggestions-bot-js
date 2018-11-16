@@ -10,7 +10,7 @@ module.exports.botPresence = async (client) =>  {
             'Discord Bots': this.client.guilds.get('110373943822540800').memberCount || 0
         };
     
-        const userSize = client.users.size.toLocaleString() - sum(excludedGuilds).toLocaleString();
+        const userSize = (client.users.size - sum(excludedGuilds)).toLocaleString();
         const cmdHelpObj = await client.commands.get('help', 'help.name');
         const cmdHelp = cmdHelpObj.help.name;
 

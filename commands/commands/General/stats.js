@@ -19,14 +19,15 @@ module.exports = class StatsCommand extends Command {
         let { embedColor } = this.client.config;
 
         const excludedGuilds = {
-            'Discord Bot List': this.client.guilds.get('345753533141876737').memberCount || 0,
-            'Discord Bots': this.client.guilds.get('110373943822540800').memberCount || 0
+            // 'Discord Bot List': this.client.guilds.get('345753533141876737').memberCount || 0,
+            // 'Discord Bots': this.client.guilds.get('110373943822540800').memberCount || 0
+            '0': message.guild.memberCount
         };
         
         const botUptime = moment.duration(this.client.uptime).format(' D [days], H [hrs], m [mins], s [secs]');
         const memUsage = (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2);
         const guildSize = this.client.guilds.size.toLocaleString();
-        const userSize = this.client.users.size.toLocaleString() - sum(excludedGuilds).toLocaleString();
+        const userSize = (this.client.users.size.toLocaleString() - sum(excludedGuilds)).toLocaleString();
     
         const embed = new RichEmbed()
             .setAuthor(this.client.user.username, this.client.user.avatarURL)
