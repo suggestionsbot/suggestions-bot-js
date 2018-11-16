@@ -5,17 +5,17 @@ module.exports.botPresence = async (client) =>  {
 
     if (process.env.NODE_ENV === 'production') {
 
-        const excludedGuilds = {
-            'Discord Bot List': client.guilds.get('345753533141876737').memberCount || 0,
-            'Discord Bots': client.guilds.get('110373943822540800').memberCount || 0
-        };
+        // const excludedGuilds = {
+        //     'Discord Bot List': client.guilds.get('345753533141876737').memberCount || 0,
+        //     'Discord Bots': client.guilds.get('110373943822540800').memberCount || 0
+        // };
     
-        const userSize = (client.users.size - sum(excludedGuilds)).toLocaleString();
+        // const userSize = (client.users.size - sum(excludedGuilds)).toLocaleString();
         const cmdHelpObj = await client.commands.get('help', 'help.name');
         const cmdHelp = cmdHelpObj.help.name;
 
         client.user.setStatus('online');
-        client.user.setActivity(`${userSize} users | ${prefix + cmdHelp}`, { type: 'WATCHING' })
+        client.user.setActivity(`your suggestions | ${prefix + cmdHelp}`, { type: 'WATCHING' })
             .catch(console.error);
     } else {
         client.user.setStatus('dnd');
