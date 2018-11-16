@@ -39,7 +39,7 @@ module.exports = class {
             if (!gSettings && g) await this.client.emit('guildCreate', g);
 
             // if there's a new guild owner, update the database upon the ready event
-            if (gSettings && gSettings.guildOwnerID !== g.ownerID) await this.client.writeSettings(g.id, { guildOwnerID: g.ownerID }).catch(err => this.client.logger.error(err));
+            // if (gSettings && gSettings.guildOwnerID !== g.ownerID) await this.client.writeSettings(g.id, { guildOwnerID: g.ownerID }).catch(err => this.client.logger.error(err));
         });
 
         // Need to figure out a more efficient way of doing this I feel. Emitting the
