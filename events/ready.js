@@ -34,13 +34,12 @@ module.exports = class {
     // be emitted (ONLY IN PRODUCTION)
     if (process.env.NODE_ENV === 'production') {
         this.client.guilds.forEach(async g => {
-            let gSettings = await Settings.findOne({ guildID: g.id }).catch(err=> this.client.logger.error(err));
+            let gSettings = await this.client.getSettings({ guildID: g.id }).catch(err=> this.client.logger.error(err));
             
             if (!gSettings && g) await this.client.emit('guildCreate', g);
 
             // if there's a new guild owner, update the database upon the ready event
-            if (gSettings.guildOwnerID !== g.ownerID) await this.client.writeSettings(g.id, { guildOwnerID: g.ownerID }).catch(err => this.client.logger.error(err));
-            
+            if (gSettings && gSettings.guildOwnerID !== g.ownerID) await this.client.writeSettings(g.id, { guildOwnerID: g.ownerID }).catch(err => this.client.logger.error(err));
         });
 
         // Need to figure out a more efficient way of doing this I feel. Emitting the
