@@ -26,7 +26,7 @@ module.exports = class StatsCommand extends Command {
         const botUptime = moment.duration(this.client.uptime).format(' D [days], H [hrs], m [mins], s [secs]');
         const memUsage = (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2);
         const guildSize = this.client.guilds.size.toLocaleString();
-        const userSize = (this.client.users.size.toLocaleString() - sum(excludedGuilds)).toLocaleString();
+        const userSize = (this.client.users.size - sum(excludedGuilds)).toLocaleString();
     
         const embed = new RichEmbed()
             .setAuthor(this.client.user.username, this.client.user.avatarURL)
