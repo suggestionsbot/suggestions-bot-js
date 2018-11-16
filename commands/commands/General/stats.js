@@ -19,9 +19,8 @@ module.exports = class StatsCommand extends Command {
         let { embedColor } = this.client.config;
 
         const excludedGuilds = {
-            // 'Discord Bot List': this.client.guilds.get('345753533141876737').memberCount || 0,
-            // 'Discord Bots': this.client.guilds.get('110373943822540800').memberCount || 0
-            '0': message.guild.memberCount
+            'Discord Bot List': this.client.guilds.get('345753533141876737').memberCount || 0,
+            'Discord Bots': this.client.guilds.get('110373943822540800').memberCount || 0
         };
         
         const botUptime = moment.duration(this.client.uptime).format(' D [days], H [hrs], m [mins], s [secs]');
