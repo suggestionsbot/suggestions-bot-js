@@ -6,6 +6,7 @@ const readdir = promisify(require('fs').readdir);
 const klaw = require('klaw');
 const path = require('path');
 const mongoose = require('mongoose');
+const { oneLine } = require('common-tags');
 const Settings = require('./models/settings');
 const Suggestion = require('./models/suggestions');
 const Blacklist = require('./models/blacklist');
@@ -215,7 +216,7 @@ const client = new Suggestions();
 
 const init = async () => {
 
-    klaw('./commands').on('data', (item) => {
+    klaw('./commands/commands').on('data', (item) => {
         const cmdFile = path.parse(item.path);
         if (!cmdFile.ext || cmdFile.ext !== '.js') return;
         const response = client.loadCommand(cmdFile.dir, `${cmdFile.name}${cmdFile.ext}`);
@@ -226,7 +227,7 @@ const init = async () => {
     client.logger.log(`Loading a total of ${evtFiles.length} events.`, 'log');
     evtFiles.forEach(file => {
         const evtName = file.split('.')[0];
-        client.logger.log(`Loading Event: ${evtName}`);
+        client.logger.log(`Loading Event: ${evtName}. 👌`);
         const event = new (require(`./events/${file}`))(client);
         client.on(evtName, (...args) => event.run(...args));
         delete require.cache[require.resolve(`./events/${file}`)];
@@ -254,7 +255,13 @@ if (process.env.NODE_ENV === 'production') {
 client.on('disconnect', () => client.logger.warn('Bot is disconnecting...'))
     .on('reconnecting', () => client.logger.log('Bot reconnecting...', 'log'))
     .on('error', e => client.logger.error(e))
-    .on('warn', info => client.logger.warn(info));
+    .on('warn', info => client.logger.warn(info))
+    .on('commandBlocked', (cmd, reason) => {
+        client.logger.warn(oneLine`
+            Command ${cmd ? `${cmd.help.category}:${cmd.help.name}` : ''}
+            blocked; ${reason}
+        `);
+    });
 
 const dbOtions = {
     useNewUrlParser: true,
@@ -311,6 +318,7 @@ process.on('uncaughtException', (err) => {
   process.exit(1);
 });
 
-process.on('unhandledRejection', error => {
-	client.logger.error(`Unhandled Rejection: \n ${error}`);
+process.on('unhandledRejection', err => {
+    const msg = err.stack.replace(new RegExp(`${__dirname}/`, 'g'), './');
+	client.logger.error(`Unhandled Rejection: \n ${msg}`);
 });

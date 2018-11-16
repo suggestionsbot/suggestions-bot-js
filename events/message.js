@@ -1,10 +1,10 @@
 const mongoose = require('mongoose');
 const moment = require('moment');
+const { oneLine } = require('common-tags');
 const Blacklist = require('../models/blacklist');
 const Command = require('../models/commands');
 const { noPerms, noSuggestionsPerms } = require('../utils/errors');
-const cmdCooldown = new Set();
-const cmdTime = 5;
+const permissions = require('../utils/perms');
 
 module.exports = class {
     constructor(client) {
@@ -36,11 +36,6 @@ module.exports = class {
         if (message.content.indexOf(newPrefix) !== 0) return;
 
         if (!message.channel.permissionsFor(message.guild.me).missing('SEND_MESSAGES')) return;
-
-        if (cmdCooldown.has(message.author.id)) {
-            await message.delete();
-            return message.reply(`slow down there! You need to wait ${cmdTime} second(s) before issuing another command.`).then(msg => msg.delete(2500)).catch(err => this.client.logger.error(err));
-        }
 
         const args = message.content.slice(newPrefix.length).trim().split(/ +/g);
         const command = args.shift().toLowerCase();
@@ -75,32 +70,46 @@ module.exports = class {
         if (cmd && cmd.conf.adminOnly && !message.member.hasPermission('MANAGE_GUILD')) return noPerms(message, 'MANAGE_GUILD');
         if (cmd && cmd.conf.staffOnly && !message.member.hasPermission('MANAGE_GUILD') && !message.member.roles.some(r => staffRoles.includes(r))) return noSuggestionsPerms(message);
 
-        if (cmd && !cmdCooldown.has(message.author.id)) {
+        const newCommand = await new Command({
+            _id: mongoose.Types.ObjectId(),
+            guildID: message.guild.id,
+            guildName: message.guild.name,
+            guildOwnerID: message.guild.ownerID,
+            command: cmd.help.name,
+            channel: message.channel.name,
+            username: message.author.tag,
+            userID: message.author.id,
+            time: moment(Date.now())
+        });
 
-            const newCommand = await new Command({
-                _id: mongoose.Types.ObjectId(),
-                guildID: message.guild.id,
-                guildName: message.guild.name,
-                guildOwnerID: message.guild.ownerID,
-                command: cmd.help.name,
-                channel: message.channel.name,
-                username: message.author.tag,
-                userID: message.author.id,
-                time: moment(Date.now())
-            });
+        // check bot permissions
+        if (message.channel.type === 'text' && cmd.conf.botPermissions) {
+            const missing = message.channel.permissionsFor(message.guild.me).missing(cmd.conf.botPermissions);
+            if (missing.length > 0) {
+                this.client.emit('commandBlocked', cmd, `botPermissions: ${missing.join(', ')}`);
+                if (missing.length === 1) return message.reply(`I need the \`${permissions[missing[0]]}\` permission for the \`${cmd.help.name}\` command to work.`).then(msg => msg.delete(5000));
+                return message.reply(oneLine`
+                    I need the following permissions for the \`${cmd.help.name}\` command to work:
+                    ${missing.map(p => `\`${permissions[p]}\``).join(', ')}
+                `);
 
-            cmd.run(message, args);
-
-            if (!message.member.hasPermission('MANAGE_GUILD') && !message.member.roles.some(r => staffRoles.includes(r))) {
-                await cmdCooldown.add(message.author.id);
             }
-
-            await newCommand.save().catch(err => this.client.logger.error(err));
-            this.client.logger.log(`${message.author.tag} (${message.author.id}) ran command ${cmd.help.name}`, 'cmd');
         }
 
-        setTimeout(() => {
-            cmdCooldown.delete(message.author.id);
-        }, cmdTime * 1000);
+        // rate limiting
+        const throttle = cmd.throttle(message.author.id);
+        if (throttle && throttle.usages + 1 > cmd.conf.throttling.usages) {
+            const remaining = (throttle.start + (cmd.conf.throttling.duration * 1000) - Date.now()) / 1000;
+            this.client.emit('commandBlocked', cmd, 'throttling');
+            return message.reply(
+                `You may not use the \`${cmd.help.name}\` command again for another ${remaining.toFixed(1)} seconds.`
+            );
+        }
+
+        if (throttle) throttle.usages++;
+        cmd.run(message, args);
+
+        await newCommand.save().catch(err => this.client.logger.error(err));
+        this.client.logger.log(`${message.author.tag} (${message.author.id}) ran command ${cmd.help.name}`, 'cmd');
     }
 };
