@@ -39,10 +39,6 @@ const noPerms = (message, perm) => {
     message.channel.send(embed).then(m => m.delete(5000)).catch(err => console.log(err));
 };
 
-const noBotPerms = (message, perm) => {
-    message.channel.send(`I am missing some permissions! \`${permissions[perm]} (${perm})\``).then(msg => msg.delete(5000));
-};
-
 const noSuggestionsPerms = async message => {
 
     let embed = new Discord.RichEmbed()
@@ -101,7 +97,6 @@ const maintenanceMode = channel => {
 
 module.exports = {
     noPerms,
-    noBotPerms,
     noChannelPerms,
     noSuggestions,
     noSuggestionsPerms,

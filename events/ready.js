@@ -30,20 +30,23 @@ module.exports = class {
 
         botPresence(this.client);
 
-        // If the bot was invited to a guild while it was offline, the "ready" event will
+    // If the bot was invited to a guild while it was offline, the "ready" event will
     // be emitted (ONLY IN PRODUCTION)
     if (process.env.NODE_ENV === 'production') {
         this.client.guilds.forEach(async g => {
             let gSettings = await Settings.findOne({ guildID: g.id }).catch(err=> this.client.logger.error(err));
             
             if (!gSettings && g) await this.client.emit('guildCreate', g);
+
+            // if there's a new guild owner, update the database upon the ready event
+            if (gSettings.guildOwnerID !== g.ownerID) this.client.writeSettings(g.id, { guildOwnerID: g.ownerID });
             
         });
 
         // Need to figure out a more efficient way of doing this I feel. Emitting the
         // "guildDelete" event doesn't seem the best way to do things because the guild
         // doesn't actually exist!
-        let gSettings = await Settings.find().catch(err=> this.client.logger.error(err));
+        let gSettings = await Settings.find({}).catch(err=> this.client.logger.error(err));
         gSettings.map(async e => {
             let g = this.client.guilds.get(e.guildID);
             if (!g) {
