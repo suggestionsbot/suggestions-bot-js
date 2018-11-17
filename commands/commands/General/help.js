@@ -18,7 +18,10 @@ module.exports = class HelpCommand extends Command {
         let embedColor = config.embedColor;
         let discord = config.discord;
         let docs = config.docs;
-        let gSettings = await this.client.getSettings(message.guild);
+        let gSettings = await this.client.getSettings(message.guild).catch(err => {
+            this.client.logger.error(err);
+            return message.channel.send(`Error querying the database for this guild's information: **${err.message}**.`);
+        });
 
         let {
             prefix,
@@ -26,7 +29,7 @@ module.exports = class HelpCommand extends Command {
             suggestionsChannel
         } = gSettings;
 
-        suggestionsChannel = message.guild.channels.find(c => c.name === gSettings.suggestionsChannel) || message.guild.channels.find(c => c.toString() === gSettings.suggestionsChannel) || message.guild.channels.get(gSettings.suggestionsChannel) || '';
+        suggestionsChannel = message.guild.channels.find(c => c.name === suggestionsChannel) || message.guild.channels.find(c => c.toString() === suggestionsChannel) || message.guild.channels.get(suggestionsChannel) || '';
 
         const roles = staffRoles.map(el => {
             return message.guild.roles.find(r => r.name === el.role || r.id === el.role);
@@ -66,7 +69,7 @@ module.exports = class HelpCommand extends Command {
             .setTitle('Help Information')
             .setDescription(`View help information for ${this.client.user}. \n (Do \`${prefix + cmdName} <command>)\` for specific help information).`)
             .addField('Current Prefix', prefix)
-            .addField('Suggestions Channel', suggestionsChannel.toString() || message.member.hasPermission('MANAGE_GUILD') ? `***Not set. Use*** \`${prefix + setChannelUsage}\`` : '***Not set. Contact a server administrator.***')
+            .addField('Suggestions Channel', suggestionsChannel.toString() || (message.member.hasPermission('MANAGE_GUILD') && !suggestionsChannel ? `***Not set. Use*** \`${prefix + setChannelUsage}\`` : '***Not set. Contact a server administrator.***'))
             .addField('User Commands', userCmds.join(' | '));
             if (message.member.hasPermission('MANAGE_GUILD') && message.member.roles.some(r => roles.includes(r))) helpEmbed.addField('Staff Commands', staffCmds.join(' | '));
             if (message.member.hasPermission('MANAGE_GUILD')) helpEmbed.addField('Admin Commands', adminCmds.join(' | '));
