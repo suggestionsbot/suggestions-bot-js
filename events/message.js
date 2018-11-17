@@ -35,7 +35,7 @@ module.exports = class {
         if (message.author.bot) return;
         if (message.content.indexOf(newPrefix) !== 0) return;
 
-        if (!message.channel.permissionsFor(message.guild.me).missing('SEND_MESSAGES')) return;
+        if (!message.channel.permissionsFor(this.client.user).missing('SEND_MESSAGES')) return;
 
         const args = message.content.slice(newPrefix.length).trim().split(/ +/g);
         const command = args.shift().toLowerCase();
@@ -84,7 +84,7 @@ module.exports = class {
 
         // check bot permissions
         if (message.channel.type === 'text' && cmd.conf.botPermissions) {
-            const missing = message.channel.permissionsFor(message.guild.me).missing(cmd.conf.botPermissions);
+            const missing = message.channel.permissionsFor(this.client.user).missing(cmd.conf.botPermissions);
             if (missing.length > 0) {
                 this.client.emit('commandBlocked', cmd, `botPermissions: ${missing.join(', ')}`);
                 if (missing.length === 1) return message.reply(`I need the \`${permissions[missing[0]]}\` permission for the \`${cmd.help.name}\` command to work.`).then(msg => msg.delete(5000));
@@ -92,7 +92,6 @@ module.exports = class {
                     I need the following permissions for the \`${cmd.help.name}\` command to work:
                     ${missing.map(p => `\`${permissions[p]}\``).join(', ')}
                 `);
-
             }
         }
 
