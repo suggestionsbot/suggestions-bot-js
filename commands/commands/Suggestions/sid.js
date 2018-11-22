@@ -4,7 +4,7 @@ const Command = require('../../Command');
 require('moment-duration-format');
 require('moment-timezone');
 
-module.exports = class SID extends Command {
+module.exports = class SIDCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'sid',

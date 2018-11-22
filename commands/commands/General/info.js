@@ -26,11 +26,7 @@ module.exports = class InfoCommand extends Command {
             .addField('Bot Author', `<@${owner}>`)
             .addField('Support Discord', discord)
             .addField('Documentation', docs)
-            .addField('Bot Version', version)
-            .addField('A Special Note', oneLineTrim`RIP to a legend Stan Lee, a man who has changed the face 
-            of Marvel Comics and comics in general. Young or old, the characters and worlds he created has 
-            impacted so many in a positive way. This is a special thanks to him and his work.`)
-            .setFooter('© 2018 Nerd Cave Development');
+            .addField('Bot Version', version);
 
         return message.channel.send(embed);
     }

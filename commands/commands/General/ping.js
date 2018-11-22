@@ -1,6 +1,6 @@
 const Command = require('../../Command');
 
-module.exports = class Ping extends Command {
+module.exports = class PingCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'ping',

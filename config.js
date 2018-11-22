@@ -13,7 +13,7 @@ module.exports = {
     suggestionsChannel: process.env.SUGGESTIONSCHANNEL,
     suggestionsLogs: process.env.SUGGESTIONSLOGS,
     owner: process.env.OWNER,
-    embedColor: '#ED1D24',
+    embedColor: process.env.DEFAULT_COLOR,
     discord: process.env.DISCORD,
     docs: process.env.DOCS,
     invite: process.env.INVITE,

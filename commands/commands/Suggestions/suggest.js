@@ -62,8 +62,6 @@ module.exports = class SuggestCommand extends Command {
                 Please wait until it gets approved or rejected by a staff member.
             
                 Your suggestion ID (sID) for reference is **${id}**.
-
-                'Nuff Said!
             `)
             .setColor(embedColor)
             .setFooter(`Guild ID: ${message.guild.id} | sID: ${id}`)
@@ -87,7 +85,7 @@ module.exports = class SuggestCommand extends Command {
             ${submittedOn}
             `)
             .setColor(embedColor)
-            .setFooter(`User ID: ${sUser.id} | sID: ${id} | Excelsior!`);
+            .setFooter(`User ID: ${sUser.id} | sID: ${id}!`);
 
         const sendMsgs = sChannel.permissionsFor(message.guild.me).has('SEND_MESSAGES', false);
         const reactions = sChannel.permissionsFor(message.guild.me).has('ADD_REACTIONS', false);

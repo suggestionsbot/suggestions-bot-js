@@ -9,7 +9,7 @@ const emojiSets = {
     jingleBellsEmojis: 'Bells'
 };
 
-module.exports = class Config extends Command {
+module.exports = class ConfigCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'config',

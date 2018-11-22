@@ -2,7 +2,7 @@ const { RichEmbed } = require('discord.js');
 const { defaultEmojis, thumbsEmojis, arrowsEmojis, christmasEmojis, jingleBellsEmojis } = require('../../../utils/voteEmojis');
 const Command = require('../../Command');
 
-module.exports = class SetVotes extends Command {
+module.exports = class SetVotesCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'setvotes',

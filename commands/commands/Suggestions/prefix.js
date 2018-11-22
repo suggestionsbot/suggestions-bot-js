@@ -1,6 +1,6 @@
 const Command = require('../../Command');
 
-module.exports = class Prefix extends Command {
+module.exports = class PrefixCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'prefix',

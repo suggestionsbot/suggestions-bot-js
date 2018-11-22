@@ -1,6 +1,6 @@
 const Command = require('../../Command');
 
-module.exports = class SetLogs extends Command {
+module.exports = class SetLogsCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'setlogs',

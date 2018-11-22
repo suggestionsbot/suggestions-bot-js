@@ -1,7 +1,7 @@
 const Command = require('../../Command');
 const Settings = require('../../../models/settings');
 
-module.exports = class Role extends Command {
+module.exports = class RoleCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'role',
