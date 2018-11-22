@@ -5,7 +5,7 @@ const { noBotPerms } = require('../../../utils/errors');
 require('moment-duration-format');
 require('moment-timezone');
 
-module.exports = class GsID extends Command {
+module.exports = class GsIDCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'gsid',

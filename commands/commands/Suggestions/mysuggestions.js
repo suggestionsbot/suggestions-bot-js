@@ -4,7 +4,7 @@ const Command = require('../../Command');
 require('moment-duration-format');
 require('moment-timezone');
 
-module.exports = class MySuggestions extends Command {
+module.exports = class MySuggestionsCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'mysuggestions',

@@ -1,7 +1,7 @@
 const Command = require('../../Command');
 const { noBotPerms } = require('../../../utils/errors');
 
-module.exports = class SetPrefix extends Command {
+module.exports = class SetPrefixCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'setprefix',

@@ -1,7 +1,7 @@
 const Command = require('../../Command');
 const { noBotPerms } = require('../../../utils/errors');
 
-module.exports = class Channel extends Command {
+module.exports = class ChannelCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'channel',

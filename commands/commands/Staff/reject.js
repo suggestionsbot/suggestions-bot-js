@@ -7,7 +7,7 @@ require('moment-duration-format');
 require('moment-timezone');
 moment.suppressDeprecationWarnings = true;
 
-module.exports = class Reject extends Command {
+module.exports = class RejectCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'reject',
@@ -69,6 +69,7 @@ module.exports = class Reject extends Command {
 
         fetchedMessages.forEach(async msg => {
             let embed = msg.embeds[0];
+            if (!embed) return;
 
             const approvedEmbed = new RichEmbed(embed)
                 .setTitle('Suggestion Rejected')

@@ -176,9 +176,9 @@ class Suggestions extends Client {
     const response = await client.awaitReply(msg, "Favourite Color?");
     msg.reply(`Oh, I really love ${response} too!`);
     */
-    async awaitReply(message, question, limit = 60000) {
+    async awaitReply(message, question, embed, limit = 60000) {
         const filter = msg => msg.author.id = message.author.id;
-        await message.channel.send(question);
+        await message.channel.send(question, embed || '');
         try {
             const collected = await message.channel.awaitMessages(filter, {
                 max: 1,

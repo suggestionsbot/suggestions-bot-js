@@ -7,7 +7,7 @@ require('moment-duration-format');
 require('moment-timezone');
 moment.suppressDeprecationWarnings = true;
 
-module.exports = class Approve extends Command {
+module.exports = class ApproveCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'approve',
@@ -69,6 +69,7 @@ module.exports = class Approve extends Command {
 
         fetchedMessages.forEach(async msg => {
             let embed = msg.embeds[0];
+            if (!embed) return;
 
             const approvedEmbed = new RichEmbed(embed)
                 .setTitle('Suggestion Approved')

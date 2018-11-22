@@ -6,7 +6,7 @@ const { noChannelPerms, noStaffSuggestions } = require('../../../utils/errors');
 require('moment-duration-format');
 require('moment-timezone');
 
-module.exports = class StaffSuggest extends Command {
+module.exports = class StaffSuggestCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'staffsuggest',

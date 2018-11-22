@@ -1,6 +1,6 @@
 const Command = require('../../Command');
 
-module.exports = class SetStaffChannel extends Command {
+module.exports = class SetStaffChannelCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'setstaffchannel',

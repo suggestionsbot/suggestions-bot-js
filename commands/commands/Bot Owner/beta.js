@@ -1,6 +1,6 @@
 const Command = require('../../Command');
 
-module.exports = class Beta extends Command {
+module.exports = class BetaCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'beta',
@@ -11,6 +11,6 @@ module.exports = class Beta extends Command {
     }
 
     async run(message, args) {
-
+    
     }
 };

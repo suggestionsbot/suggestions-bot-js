@@ -9,7 +9,7 @@ const blStatus = {
     false: 'False'
 };
 
-module.exports = class BlacklistCmd extends Command {
+module.exports = class BlacklistCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'blacklist',

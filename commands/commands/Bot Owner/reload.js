@@ -2,7 +2,7 @@ const Command = require('../../Command');
 const { noBotPerms } = require('../../../utils/errors');
 require('dotenv-flow').config();
 
-module.exports = class Reload extends Command {
+module.exports = class ReloadCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'reload',
