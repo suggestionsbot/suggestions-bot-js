@@ -32,8 +32,8 @@ module.exports = class ChangelogCommand extends Command {
             let update = embed.description;
             let date = embed.fields[0].value;
 
-            let prefix = '**+**';
-            let ver = '1.6.4';
+            let prefix = '**>**';
+            let ver = version;
             if (!update.includes(ver)) return;
             let rawUpdate = update.toString().split('\n');
             let updates = rawUpdate.filter(u => u.startsWith(prefix));
