@@ -26,7 +26,7 @@ module.exports = class {
 
         if (!reaction) {
             const emoji = new Emoji(this.client.guilds.get(data.guild_id), data.emoji);
-            reaction = new MessageReaction(message, emoji, 1, data.user_id === client.user.id); // eslint-disable-line
+            reaction = new MessageReaction(message, emoji, 1, data.user_id === this.client.user.id); // eslint-disable-line
         }
 
         this.client.emit(events[event.t], reaction, user);
