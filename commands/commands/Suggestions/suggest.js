@@ -85,7 +85,7 @@ module.exports = class SuggestCommand extends Command {
             ${submittedOn}
             `)
             .setColor(embedColor)
-            .setFooter(`User ID: ${sUser.id} | sID: ${id}!`);
+            .setFooter(`User ID: ${sUser.id} | sID: ${id}`);
 
         const sendMsgs = sChannel.permissionsFor(message.guild.me).has('SEND_MESSAGES', false);
         const reactions = sChannel.permissionsFor(message.guild.me).has('ADD_REACTIONS', false);
