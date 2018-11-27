@@ -53,7 +53,7 @@ module.exports = class SIDCommand extends Command {
         let embed = new RichEmbed()
             .setAuthor(message.guild.name, message.guild.iconURL)
             .setTitle(`Info for sID ${args[0]}`)
-            .setFooter(`User ID: ${userID} | sID ${args[0]} | Face front, true believer!`);
+            .setFooter(`User ID: ${userID} | sID ${args[0]}`);
 
         switch (status) {
             case undefined:

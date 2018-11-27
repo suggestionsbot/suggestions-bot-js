@@ -92,14 +92,14 @@ module.exports = class BlacklistCommand extends Command {
                     case: caseNum
                 });
 
-                await newBlacklist.save().then(res => this.client.logger.log('New Blacklist: \n ', res)).catch(err => {
+                await newBlacklist.save().then(res => this.client.logger.log(`New Blacklist: \n ${res}`)).catch(err => {
                     this.client.logger.error(err);
                     return message.channel.send(`There was an error adding this user to the blacklist: **${err.message}**.`);
                 });
                 await this.client.logger.log(`${message.member.user.tag} ("${message.author.id}") has issued a blacklist to the user ${blUser}. [${moment(message.createdAt)}]`);
                 await blEmbed.setTitle(`${this.client.user.username} | Blacklisted User Added`);
                 await blEmbed.setColor('#00e640');
-                await blEmbed.addField('User ID', `${blUser}`, true);
+                await blEmbed.addField('User ID', blUser, true);
                 await blEmbed.addField('Reason', reason, true);
                 await blEmbed.addField('Issuer', `${message.member.user.tag} (${message.author.id})`);
 
