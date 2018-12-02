@@ -14,7 +14,9 @@ const suggestionSchema = mongoose.Schema({
     statusReply: String,
     staffMemberID: String,
     staffMemberUsername: String,
-    results: String
+    results: String,
+    note: String,
+    noteAdded: String
 });
 
 module.exports = mongoose.model('Suggestion', suggestionSchema);

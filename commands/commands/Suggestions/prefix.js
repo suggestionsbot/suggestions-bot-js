@@ -11,11 +11,13 @@ module.exports = class PrefixCommand extends Command {
 
     async run(message, args) {
 
-        let gSettings = await this.client.getSettings(message.guild).catch(err => {
+        let gSettings = {};
+        try {
+            gSettings = await this.client.getSettings(message.guild);
+            return message.channel.send(`Current prefix: \`${gSettings.prefix}\``);
+        } catch (err) {
             this.client.logger.error(err);
-            return message.channel.send(`Error querying the database for this guild's information: **${err.message}**.`);
-        });
-
-        return message.channel.send(`Current prefix: \`${gSettings.prefix}\``);
+            message.channel.send(err.message);
+        }
     }
 };
