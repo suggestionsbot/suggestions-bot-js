@@ -1,6 +1,6 @@
 {
   "name": "suggestions-bot",
-  "version": "2.3.6",
+  "version": "2.3.7",
   "description": "The only suggestions bot you'll ever need. Simple usage and management of suggestions for public and staff use.",
   "main": "app.js",
   "scripts": {
@@ -29,7 +29,7 @@
     "moment": "^2.22.2",
     "moment-duration-format": "^2.2.2",
     "moment-timezone": "^0.5.23",
-    "mongoose": "^5.3.13",
+    "mongoose": "^5.3.14",
     "reaction-core": "^2.1.0"
   },
   "devDependencies": {

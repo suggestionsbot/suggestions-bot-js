@@ -74,8 +74,7 @@ module.exports = class HelpCommand extends Command {
             if (message.member.hasPermission('MANAGE_GUILD') && message.member.roles.some(r => roles.includes(r))) helpEmbed.addField('Staff Commands', staffCmds.join(' | '));
             if (message.member.hasPermission('MANAGE_GUILD')) helpEmbed.addField('Admin Commands', adminCmds.join(' | '));
             if (message.author.id === owner) helpEmbed.addField('Owner Commands', ownerCmds.join(' | '));
-            helpEmbed.addField('Command Cooldown', `A 5 second(s) is in place on bot commands except for users with the \`MANAGE_GUILD\` permission or users with a bot staff role.`)
-            .addField('Documentation', docs)
+            helpEmbed.addField('Documentation', docs)
             .addField('Found an issue?', `Please report any issues to <@${owner}> via the Support Discord: ${discord}.`)
             .setColor(embedColor);
 

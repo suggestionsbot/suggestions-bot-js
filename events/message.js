@@ -15,16 +15,15 @@ module.exports = class {
 
         if (!message.guild) return;
 
-        let gSettings = await this.client.getSettings(message.guild).catch(err => this.client.logger.error(err));
-        
-        const guildConf = gSettings || this.client.config.defaultSettings;
+        let gSettings = {};
 
-        const roles = guildConf.staffRoles;
-        if (!roles) return;
+        try {
+            gSettings = await this.client.getSettings(message.guild);
+        } catch (err) {
+            this.client.logger.error(err);
+        }
 
-        const staffRoles = roles.map(el => {
-            return message.guild.roles.find(r => r.name === el.role || r.id === el.role);
-        });
+        let guildConf = gSettings;
 
         const prefixMention = new RegExp(`^<@!?${this.client.user.id}> `);
         const newPrefix = message.content.match(prefixMention) ? message.content.match(prefixMention)[0] : guildConf.prefix;
@@ -64,6 +63,10 @@ module.exports = class {
 
         if (blacklisted) return this.client.logger.warn(`"${message.author.tag}" (${message.author.id}) in the guild "${message.guild.name}" (${message.guild.id}) tried to use the command "${cmd.help.name}", but is blacklisted from using bot commands in this guild, "${message.guild.name}" (${message.guild.id}).`);
         if (gBlacklisted) return this.client.logger.warn(`"${message.author.tag}" (${message.author.id}) in the guild "${message.guild.name}" (${message.guild.id}) tried to use the command "${cmd.help.name}", but is blacklisted from using bot commands globally.`);
+
+        let roles = guildConf.staffRoles;
+        let staffRoles = [];
+        if (roles) staffRoles = roles.map(role => message.guild.roles.find(r => r.name === role.role || r.id === role.role));
 
         if (cmd && !cmd.conf.enabled) return message.channel.send('This command is currently disabled!').then(msg => msg.delete(3000)).catch(err => this.client.logger.error(err));
         if (cmd && cmd.conf.ownerOnly && message.author.id !== this.client.config.owner) return;

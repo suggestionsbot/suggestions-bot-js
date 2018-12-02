@@ -10,6 +10,7 @@ const { oneLine } = require('common-tags');
 const Settings = require('./models/settings');
 const Suggestion = require('./models/suggestions');
 const Blacklist = require('./models/blacklist');
+const ErrorHandler = require('./utils/handlers');
 require('dotenv-flow').config();
 
 class Suggestions extends Client {
@@ -70,12 +71,12 @@ class Suggestions extends Client {
 
     // getSettings merges the client defaults with the guild settings in MongoDB
     async getSettings(guild) {
+        
+        let gSettings = await Settings.findOne({ guildID: guild.id }) || this.config.defaultSettings;
+        let check = await this.isEmpty(gSettings);
 
-        let gSettings = await Settings.findOne({ guildID: guild.id }).catch(err => this.logger.error(err));
-
-        const guildData = gSettings || {};
-
-        return guildData;
+        if (!check) return gSettings;
+        else throw ErrorHandler.NoGuildSettings;
     }
 
     // writeSettings overrides, or adds, any configuration item that is different
@@ -244,11 +245,11 @@ if (process.env.NODE_ENV === 'production') {
     const dbl = new DBL(client.config.dblToken, client);
 
     dbl.on('posted', () => {
-        console.log('Server count posted to DiscordBots.org!');
+        client.logger.log('Server count posted to DiscordBots.org!');
     });
     
     dbl.on('error', e => {
-        console.log(e);
+        client.logger.error(e);
     });
 }
 
@@ -319,6 +320,6 @@ process.on('uncaughtException', (err) => {
 });
 
 process.on('unhandledRejection', err => {
-    const msg = err.stack.replace(new RegExp(`${__dirname}/`, 'g'), './');
+    let msg = err.stack.replace(new RegExp(`${__dirname}/`, 'g'), './');
 	client.logger.error(`Unhandled Rejection: \n ${msg}`);
 });

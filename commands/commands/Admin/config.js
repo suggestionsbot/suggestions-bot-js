@@ -25,20 +25,33 @@ module.exports = class ConfigCommand extends Command {
         
         await message.delete().catch(O_o=>{});
 
-        let gSettings = await this.client.getSettings(message.guild).catch(err => {
-            this.client.logger.error(err);
-            return message.channel.send(`Error querying the database for this guild's information: **${err.message}**.`);
-        });
+        let gSettings = {};
+        let gBlacklists = {};
+        let gSuggestions = {};
 
-        let gBlacklists = await this.client.getGuildBlacklist(message.guild).catch(err => {
-            this.client.logger.error(err);
-            return message.channel.send(`Error querying the database for this guild's blacklisted users: **${err.message}**.`);
-        });
+        try {
+            gSettings = await this.client.getSettings(message.guild);
+            gBlacklists = await this.client.getGuildBlacklist(message.guild);
+            gSuggestions = await this.client.getGuildSuggestions(message.guild);
+        } catch (err) {
+            this.client.logger.error(err.stack);
+            return message.channel.send(err.message);
+        }
 
-        let gSuggestions = await this.client.getGuildSuggestions(message.guild).catch(err => {
-            this.client.logger.error(err);
-            return message.channel.send(`Error querying the database for this guild's suggestions: **${err.message}**.`);
-        });
+        // let gSettings = await this.client.getSettings(message.guild).catch(err => {
+        //     this.client.logger.error(err);
+        //     return message.channel.send(`Error querying the database for this guild's information: **${err.message}**.`);
+        // });
+
+        // let gBlacklists = await this.client.getGuildBlacklist(message.guild).catch(err => {
+        //     this.client.logger.error(err);
+        //     return message.channel.send(`Error querying the database for this guild's blacklisted users: **${err.message}**.`);
+        // });
+
+        // let gSuggestions = await this.client.getGuildSuggestions(message.guild).catch(err => {
+        //     this.client.logger.error(err);
+        //     return message.channel.send(`Error querying the database for this guild's suggestions: **${err.message}**.`);
+        // });
 
         let {
             guildID,
@@ -54,11 +67,16 @@ module.exports = class ConfigCommand extends Command {
 
         const guildOwner = message.guild.members.get(guildOwnerID);
         
-        let roles = message.guild.roles.filter(role => staffRoles.map(role => role.role).includes(role.id));
-
-        suggestionsChannel = message.guild.channels.find(c => c.name === suggestionsChannel) || (message.guild.channels.find(c => c.toString() === suggestionsChannel)) || (message.guild.channels.get(suggestionsChannel)) || '';
-        suggestionsLogs = message.guild.channels.find(c => c.name === suggestionsLogs) || message.guild.channels.find(c => c.toString() === suggestionsLogs) || message.guild.channels.get(suggestionsLogs) || '';
-        staffSuggestionsChannel = message.guild.channels.find(c => c.name === staffSuggestionsChannel) || (message.guild.channels.find(c => c.toString() === staffSuggestionsChannel)) || (message.guild.channels.find(c => c.id === staffSuggestionsChannel)) || '';
+        let roles = [];
+        try {
+            roles = message.guild.roles.filter(role => staffRoles.map(role => role.role).includes(role.id));
+            suggestionsChannel = message.guild.channels.find(c => c.name === suggestionsChannel) || (message.guild.channels.find(c => c.toString() === suggestionsChannel)) || (message.guild.channels.get(suggestionsChannel)) || '';
+            suggestionsLogs = message.guild.channels.find(c => c.name === suggestionsLogs) || message.guild.channels.find(c => c.toString() === suggestionsLogs) || message.guild.channels.get(suggestionsLogs) || '';
+            staffSuggestionsChannel = message.guild.channels.find(c => c.name === staffSuggestionsChannel) || (message.guild.channels.find(c => c.toString() === staffSuggestionsChannel)) || (message.guild.channels.find(c => c.id === staffSuggestionsChannel)) || '';
+        } catch (err) {
+            this.client.logger.error(err.stack);
+            return message.channel.send(err.message);
+        }
 
         let config = stripIndents`
         • Guild Name: ${guildName} (${guildID})
