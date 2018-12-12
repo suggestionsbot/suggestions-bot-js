@@ -264,7 +264,7 @@ client.on('disconnect', () => client.logger.warn('Bot is disconnecting...'))
         `);
     });
 
-const dbOtions = {
+const dbOptions = {
     useNewUrlParser: true,
     autoIndex: false,
     reconnectTries: Number.MAX_VALUE,
@@ -274,12 +274,12 @@ const dbOtions = {
     family: 4
 };
 
-mongoose.connect(client.config.dbURI, dbOtions);
+mongoose.connect(process.env.MONGO_URI, dbOptions);
 mongoose.set('useFindAndModify', false);
 mongoose.Promise = global.Promise;
 
 mongoose.connection.on('connected', () => {
-    client.logger.log('Mongoose connection successfully open at ' + client.config.dbURILog);
+    client.logger.log('Mongoose connection successfully opened!');
 });
 
 mongoose.connection.on('err', err => {
