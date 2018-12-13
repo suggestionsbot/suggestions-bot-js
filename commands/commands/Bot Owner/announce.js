@@ -39,15 +39,31 @@ module.exports = class AnnounceCommand extends Command {
             });
             
             let dmErrorCount = 0;
+            let dmSuccessCount = 0;
+            let ignoredGuilds = [
+                '264445053596991498',
+                '110373943822540800',
+                '450100127256936458',
+                '454933217666007052',
+                '330777295952543744',
+                '374071874222686211',
+            ];
+
             await this.client.guilds.forEach(g => {
+                
                 let owner = g.owner;
+                if (ignoredGuilds.includes(g.id)) return;
     
-                return owner.send(announceEmbed).catch(err => {
+                owner.send(announceEmbed).catch(err => {
                     dmErrorCount++;
                     this.client.logger.error(err);
                     return message.channel.send(`Could not DM **${dmErrorCount}** user(s) as their DMs were locked.`);
                 });
+                
+                dmSuccessCount++;
             });
+
+            return message.channel.send(`Successfully messaged **${dmSuccessCount}** user(s).`);
         } else {
             this.client.logger.log('oof');
             message.channel.send('Could not confirm your announcement. Cancelling...').then(msg => msg.delete(3000)).catch(err => this.client.logger.error(err));

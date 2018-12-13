@@ -279,11 +279,11 @@ mongoose.set('useFindAndModify', false);
 mongoose.Promise = global.Promise;
 
 mongoose.connection.on('connected', () => {
-    client.logger.log('Mongoose connection successfully opened!');
+    client.logger.log('Mongoose connection successfully opened!', 'ready');
 });
 
 mongoose.connection.on('err', err => {
-    client.logger.log('Mongoose connection error: ' + err);
+    client.logger.error(`Mongoose connection error: \n ${err}`);
 });
 
 mongoose.connection.on('disconnected', () => {
