@@ -55,6 +55,29 @@ module.exports = class SIDCommand extends Command {
             .setTitle(`Info for sID ${args[0]}`)
             .setFooter(`User ID: ${userID} | sID ${args[0]}`);
 
+        // let votes = [];
+        // results.forEach(result => {
+        //     if (result.emoji === 'nerdSuccess') result.emoji = '<:nerdSuccess:490708616056406017>';
+        //     if (result.emoji === 'nerdError') result.emoji = '<:nerdError:522929743507488795>';
+        
+        //     let resultObj = {
+        //         emoji: result.emoji,
+        //         count: `**${result.count}**`
+        //     };
+        //     let viewResult = Object.keys(resultObj).map((key, index) => {
+        //        return resultObj[key];
+        //     }).join(' ');
+        //     votes.push(viewResult);
+        // });
+        
+        // results = results[0];
+
+        // let a = Object.keys(results).reduce((res, v) => {
+        //     return res.concat(results[v]);
+        // }, []); 
+
+        // this.client.logger.log(a.join(''));
+
         switch (status) {
             case undefined:
                 embed.setDescription(`
@@ -111,7 +134,7 @@ module.exports = class SIDCommand extends Command {
                 ${staffMemberUsername}
 
                 **Results**
-                ${results}
+                ${/*results*/ results}
             
                 `);
                 embed.setColor('#cf000f');

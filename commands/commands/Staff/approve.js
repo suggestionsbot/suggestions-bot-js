@@ -88,10 +88,24 @@ module.exports = class ApproveCommand extends Command {
             let reactions = embed.message.reactions;    
             let reactName = reactions.map(e => e._emoji.name);
             let reactCount = reactions.map(e => e.count);
-            
+
+            // let votes;
+
             let results = reactName.map((r, c) => {
                 return `${r} **: ${reactCount[c]-1 || '0'}** \n`;
             });
+
+            // let results = reactName.map((r, c) => {
+            //     return votes = {
+            //         emoji: r,
+            //         count: reactCount[c] - 1 || 0
+            //     };
+            // });
+
+            // let m = results.forEach(result => {
+            //     if (result.emoji === 'nerdSuccess') result.emoji = '<:nerdSuccess:490708616056406017>';
+            //     if (result.emoji === 'nerdError') result.emoji = '<:nerdError:522929743507488795>';
+            // });
 
             const logsEmbed = new RichEmbed()
                 .setAuthor(message.guild.name, message.guild.iconURL)
@@ -168,7 +182,7 @@ module.exports = class ApproveCommand extends Command {
                             staffMemberID: message.author.id,
                             staffMemberUsername: message.author.tag,
                             results: results.join(' ')
-                    }
+                    },
                 }).then(() => {
                     this.client.logger.log(`sID ${id} has been approved in the guild "${message.guild.name}" (${message.guild.id}).`);
                     if (reply) this.client.logger.log(`sID ${id} has been approved in the guild "${message.guild.name}" (${message.guild.id}) with the response "${reply}".`);
