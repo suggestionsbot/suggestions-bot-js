@@ -6,7 +6,7 @@ module.exports = class RolesCommand extends Command {
         super(client, {
             name: 'roles',
             category: 'Admin',
-            description: 'View the current staff roles for the bot.',
+            description: 'View the current staff roles and guild admins for the bot.',
             aliases: ['staffroles', 'viewroles', 'viewrole'],
             adminOnly: true,
             botPermissions: ['MANAGE_MESSAGES', 'EMBED_LINKS']

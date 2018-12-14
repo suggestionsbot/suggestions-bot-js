@@ -13,7 +13,7 @@ module.exports = class RejectCommand extends Command {
             name: 'reject',
             category: 'Staff',
             description: 'Reject a submitted suggestion via the suggestion ID (sID).',
-            usage: 'reject <sID>',
+            usage: 'reject <sID> [response]',
             staffOnly: true,
             botPermissions: ['MANAGE_MESSAGES']
         });

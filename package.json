@@ -1,6 +1,6 @@
 {
   "name": "suggestions-bot",
-  "version": "2.3.7",
+  "version": "2.3.8",
   "description": "The only suggestions bot you'll ever need. Simple usage and management of suggestions for public and staff use.",
   "main": "app.js",
   "scripts": {

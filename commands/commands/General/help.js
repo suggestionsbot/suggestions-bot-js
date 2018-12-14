@@ -60,10 +60,10 @@ module.exports = class HelpCommand extends Command {
             return message.channel.send(cmdHelpEmbed);
         }
 
-        const userCmds = cmds.filter(cmd => cmd.conf.ownerOnly === false && cmd.conf.adminOnly === false && cmd.conf.staffOnly === false).map(cmd => '`' + cmd.help.name + '`');
-        const staffCmds = cmds.filter(cmd => cmd.conf.staffOnly === true).map(cmd => '`' + cmd.help.name + '`');
-        const adminCmds = cmds.filter(cmd => cmd.conf.adminOnly === true).map(cmd => '`' + cmd.help.name + '`');
-        const ownerCmds = cmds.filter(cmd => cmd.conf.ownerOnly === true).map(cmd => '`' + cmd.help.name + '`');
+        const userCmds = cmds.filter(cmd => cmd.conf.ownerOnly === false && cmd.conf.adminOnly === false && cmd.conf.staffOnly === false).map(cmd => cmd.help.name).sort().map(cmd => '`'+ cmd + '`');
+        const staffCmds = cmds.filter(cmd => cmd.conf.staffOnly === true).map(cmd => cmd.help.name).sort().map(cmd => '`'+ cmd + '`');
+        const adminCmds = cmds.filter(cmd => cmd.conf.adminOnly === true).map(cmd => cmd.help.name).sort().map(cmd => '`'+ cmd + '`');
+        const ownerCmds = cmds.filter(cmd => cmd.conf.ownerOnly === true).map(cmd => cmd.help.name).sort().map(cmd => '`'+ cmd + '`');
 
         const helpEmbed = new RichEmbed()
             .setTitle('Help Information')
@@ -77,9 +77,6 @@ module.exports = class HelpCommand extends Command {
             helpEmbed.addField('Documentation', docs)
             .addField('Found an issue?', `Please report any issues to <@${owner}> via the Support Discord: ${discord}.`)
             .setColor(embedColor);
-
-        
-        
 
         await message.channel.send(helpEmbed);
 

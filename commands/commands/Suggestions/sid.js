@@ -10,7 +10,7 @@ module.exports = class SIDCommand extends Command {
             name: 'sid',
             category: 'Suggestions',
             description: 'View the information of a specific guild suggestion by their sID.',
-            usage: 'sid <id>',
+            usage: 'sid <sID>',
             botPermissions: ['MANAGE_MESSAGES']
         });
     }

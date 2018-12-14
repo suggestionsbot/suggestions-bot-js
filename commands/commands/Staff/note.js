@@ -26,11 +26,6 @@ module.exports = class NoteCommand extends Command {
 
         message.delete().catch(O_o => {});
 
-        // let gSettings = await this.client.getSettings(message.guild).catch(err => {
-            // this.client.logger.error(err);
-            // return message.channel.send(`Error querying the database for this guild's information: **${err.message}**.`);
-        // });
-
         let gSettings = {};
         try {
             gSettings = await this.client.getSettings(message.guild);
@@ -77,9 +72,7 @@ module.exports = class NoteCommand extends Command {
                 let embed = msg.embeds[0];
                 if (!embed) return;
 
-                const suggestion = new RichEmbed(embed)
-                    .addField('Staff Note', note)
-                    .addField('Staff Member', `${message.author} (${message.author.id})`);
+                const suggestion = new RichEmbed(embed);
 
                 const dmEmbed = new RichEmbed()
                     .setAuthor(message.guild, message.guild.iconURL)
@@ -92,6 +85,21 @@ module.exports = class NoteCommand extends Command {
                     .setColor(embedColor)
                     .setFooter(`Guild ID: ${message.guild.id} | sID: ${id}`)
                     .setTimestamp();
+
+                if (embed.fields.length && embed.fields[0].name === 'Staff Note') {
+                    suggestion.fields[0].value = note;
+                    suggestion.fields[1].value = `${message.author} (${message.author.id})`;
+
+                    dmEmbed.setDescription(`Hey, ${sUser}. ${message.author} has updated a note on your suggestion:
+
+                    Staff note: **${note}**
+                                
+                    Your suggestion ID (sID) for reference was **${id}**.
+                    `);
+                } else {
+                    suggestion.addField('Staff Note', note);
+                    suggestion.addField('Staff Member', `${message.author} (${message.author.id})`);
+                }
 
                 let footer = embed.footer.text;
 

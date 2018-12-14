@@ -13,7 +13,7 @@ module.exports = class ApproveCommand extends Command {
             name: 'approve',
             category: 'Staff',
             description: 'Approve a submitted suggestion via the suggestion ID (sID).',
-            usage: 'approve <sID>',
+            usage: 'approve <sID> [response]',
             staffOnly: true,
             botPermissions: ['MANAGE_MESSAGES']
         });

@@ -103,7 +103,9 @@ module.exports = class SuggestCommand extends Command {
             .then(async msg => {
                 if (emojis === 'defaultEmojis' || !emojis) {
                     for (let i in defaultEmojis) {
-                        await msg.react(defaultEmojis[i]);
+                        await msg.react(defaultEmojis[i]
+                            .replace('<', '')
+                            .replace('>', ''));
                     }
                 }
 
