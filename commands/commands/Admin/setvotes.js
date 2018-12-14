@@ -186,6 +186,7 @@ module.exports = class SetVotesCommand extends Command {
             `);
             return message.channel.send(embed);
         }
+
         return;
     }
 };

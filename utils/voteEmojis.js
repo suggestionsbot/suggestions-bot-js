@@ -1,8 +1,6 @@
-const Discord = require('discord.js');
-
 const defaultEmojis = {
-    0: '✅',
-    1: '❌'
+    0: '<:nerdSuccess:490708616056406017>',
+    1: '<:nerdError:522929743507488795>'
 };
 
 const thumbsEmojis = {
@@ -14,16 +12,6 @@ const arrowsEmojis = {
     0: '⬆',
     1: '⬇'
 };
-
-// const halloweenEmojis = {
-//     0: '🎃',
-//     1: '☠'
-// };
-
-// const impEmojis = {
-//     0: '😈',
-//     1: '👿'
-// };
 
 const christmasEmojis = {
     0: '🎄',
