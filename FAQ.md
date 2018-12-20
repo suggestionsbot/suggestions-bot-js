@@ -20,7 +20,7 @@ The only suggestions bot you'll ever need. Simple usage and management of sugges
 
 #### BOT LIST SITES:
 - [https://discordbots.org/bot/474051954998509571](https://discordbots.org/bot/474051954998509571)
-- [https://bots.discord.pw/bots/474051954998509571](https://bots.discord.pw/bots/474051954998509571)
+- [https://discord.bots.gg/bots/474051954998509571](https://discord.bots.gg/bots/474051954998509571)
 - [https://discordbotlist.com/bots/474051954998509571](https://discordbotlist.com/bots/474051954998509571)
 - [https://divinediscordbots.com/bots/474051954998509571](https://divinediscordbots.com/bots/474051954998509571)
 - [https://botlist.space/bot/474051954998509571](https://botlist.space/bot/474051954998509571)

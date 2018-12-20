@@ -91,15 +91,32 @@ module.exports = class RejectCommand extends Command {
             let reactCount = reactions.map(e => e.count);
             
             let results = reactName.map((r, c) => {
-                return `${r} **: ${reactCount[c]-1 || '0'}** \n`;
+                return {
+                    emoji: r,
+                    count: reactCount[c] - 1 || 0
+                };
             });
+
+            const nerdSuccess = this.client.guilds.get('345753533141876737').emojis.find(e => e.name === 'nerdSuccess');
+            const nerdError = this.client.guilds.get('345753533141876737').emojis.find(e => e.name === 'nerdError');
+
+            results.forEach(result => {
+                if (result.emoji === 'nerdSuccess') result.emoji = nerdSuccess.toString();
+                if (result.emoji === 'nerdError') result.emoji = nerdError.toString();
+            });
+
+            let newResults = Array.from(results);
+
+            let view = newResults.map(r => {
+                return `${r.emoji} **: ${r.count}**`;
+            }).join('\n');
 
             const logsEmbed = new RichEmbed()
                 .setAuthor(message.guild.name, message.guild.iconURL)
                 .setDescription(`
                     **Results:**
         
-                    ${results.join(' ')}
+                    ${view}
                     **Suggestion:**
                     ${suggestion}
         
@@ -123,7 +140,8 @@ module.exports = class RejectCommand extends Command {
 
                 logsEmbed.setDescription(`
                 **Results:**
-                ${results.join(' ')}
+                ${view}
+
                 **Suggestion:**
                 ${suggestion}
                     
@@ -168,7 +186,7 @@ module.exports = class RejectCommand extends Command {
                             statusReply: reply || null,
                             staffMemberID: message.author.id,
                             staffMemberUsername: message.author.tag,
-                            results: results.join(' ')
+                            newResults
                     }
                 }).then(() => {
                     this.client.logger.log(`sID ${id} has been rejected in the guild "${message.guild.name}" (${message.guild.id}).`);

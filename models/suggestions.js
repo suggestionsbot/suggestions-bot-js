@@ -15,6 +15,7 @@ const suggestionSchema = mongoose.Schema({
     staffMemberID: String,
     staffMemberUsername: String,
     results: String,
+    newResults: [{ emoji: String, count: Number }],
     note: String,
     noteAdded: String
 });

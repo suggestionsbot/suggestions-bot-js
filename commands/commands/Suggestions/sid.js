@@ -43,6 +43,7 @@ module.exports = class SIDCommand extends Command {
             suggestion,
             staffMemberUsername,
             results,
+            newResults,
             status,
             statusUpdated
         } = sID;
@@ -54,6 +55,13 @@ module.exports = class SIDCommand extends Command {
             .setAuthor(message.guild.name, message.guild.iconURL)
             .setTitle(`Info for sID ${args[0]}`)
             .setFooter(`User ID: ${userID} | sID ${args[0]}`);
+
+        let nResults = [];
+        if (newResults && newResults.length > 1) {
+            newResults.forEach(r => {
+                nResults.push(`${r.emoji} **${r.count}**`);
+            });
+        }
 
         switch (status) {
             case undefined:
@@ -87,7 +95,7 @@ module.exports = class SIDCommand extends Command {
                 ${staffMemberUsername}
 
                 **Results**
-                ${results}
+                ${nResults.join('\n') || results}
             
                 `);
                 embed.setColor('#00e640');
@@ -111,7 +119,7 @@ module.exports = class SIDCommand extends Command {
                 ${staffMemberUsername}
 
                 **Results**
-                ${results}
+                ${nResults.join('\n') || results}
             
                 `);
                 embed.setColor('#cf000f');
