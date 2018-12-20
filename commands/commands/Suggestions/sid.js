@@ -43,6 +43,7 @@ module.exports = class SIDCommand extends Command {
             suggestion,
             staffMemberUsername,
             results,
+            newResults,
             status,
             statusUpdated
         } = sID;
@@ -55,13 +56,12 @@ module.exports = class SIDCommand extends Command {
             .setTitle(`Info for sID ${args[0]}`)
             .setFooter(`User ID: ${userID} | sID ${args[0]}`);
 
-        const nerdSuccess = this.client.guilds.get('345753533141876737').emojis.find(e => e.name === 'nerdSuccess');
-        const nerdError = this.client.guilds.get('345753533141876737').emojis.find(e => e.name === 'nerdError');
-    
-        console.log(typeof results[0]);
-        
-
-        return;
+        let nResults = [];
+        if (newResults && newResults.length > 1) {
+            newResults.forEach(r => {
+                nResults.push(`${r.emoji} **${r.count}**`);
+            });
+        }
 
         switch (status) {
             case undefined:
@@ -95,7 +95,7 @@ module.exports = class SIDCommand extends Command {
                 ${staffMemberUsername}
 
                 **Results**
-                ${view}
+                ${nResults.join('\n') || results}
             
                 `);
                 embed.setColor('#00e640');
@@ -119,7 +119,7 @@ module.exports = class SIDCommand extends Command {
                 ${staffMemberUsername}
 
                 **Results**
-                ${view}
+                ${nResults.join('\n') || results}
             
                 `);
                 embed.setColor('#cf000f');

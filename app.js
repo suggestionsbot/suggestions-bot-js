@@ -241,16 +241,18 @@ init();
 
 if (process.env.NODE_ENV === 'production') {
 
-    const DBL = require('dblapi.js');
-    const dbl = new DBL(client.config.dblToken, client);
+    // const DBL = require('dblapi.js');
+    // const dbl = new DBL(client.config.dblToken, client);
 
-    dbl.on('posted', () => {
-        client.logger.log('Server count posted to DiscordBots.org!');
-    });
+    // dbl.on('posted', () => {
+    //     client.logger.log('Server count posted to DiscordBots.org!');
+    // });
     
-    dbl.on('error', e => {
-        client.logger.error(e);
-    });
+    // dbl.on('error', e => {
+    //     client.logger.error(e);
+    // });
+
+    require('./utils/voting')(client);
 }
 
 client.on('disconnect', () => client.logger.warn('Bot is disconnecting...'))

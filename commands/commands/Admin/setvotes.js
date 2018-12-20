@@ -82,7 +82,7 @@ module.exports = class SetVotesCommand extends Command {
         }
 
 
-        if (!gSettings.voteEmojis || gSettings.voteEmojis === 'defaultEmojis') {
+        if (!args[0] && (!gSettings.voteEmojis || gSettings.voteEmojis === 'defaultEmojis')) {
             embed.setDescription(`
             **Voting Emojis**
             Choose from 5 different emoji sets to be used for voting in your guild.
@@ -103,7 +103,7 @@ module.exports = class SetVotesCommand extends Command {
             return message.channel.send(embed);
         }
 
-        if (gSettings.voteEmojis === 'thumbsEmojis') {
+        if (!args[0] && gSettings.voteEmojis === 'thumbsEmojis') {
             embed.setDescription(`
             **Voting Emojis**
             Choose from 5 different emoji sets to be used for voting in your guild.
@@ -124,7 +124,7 @@ module.exports = class SetVotesCommand extends Command {
             return message.channel.send(embed);
         }
 
-        if (gSettings.voteEmojis === 'arrowsEmojis') {
+        if (!args[0] && gSettings.voteEmojis === 'arrowsEmojis') {
             embed.setDescription(`
             **Voting Emojis**
             Choose from 5 different emoji sets to be used for voting in your guild.
@@ -145,7 +145,7 @@ module.exports = class SetVotesCommand extends Command {
             return message.channel.send(embed);
     }
 
-        if (gSettings.voteEmojis === 'christmasEmojis') {
+        if (!args[0] && gSettings.voteEmojis === 'christmasEmojis') {
             embed.setDescription(`
             **Voting Emojis**
             Choose from 5 different emoji sets to be used for voting in your guild.
@@ -166,7 +166,7 @@ module.exports = class SetVotesCommand extends Command {
             return message.channel.send(embed);
         }
 
-        if (gSettings.voteEmojis === 'jingleBellsEmojis') {
+        if (!args[0] && gSettings.voteEmojis === 'jingleBellsEmojis') {
             embed.setDescription(`
             **Voting Emojis**
             Choose from 5 different emoji sets to be used for voting in your guild.

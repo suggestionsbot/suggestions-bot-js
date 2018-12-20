@@ -13,11 +13,7 @@ module.exports = class HelpCommand extends Command {
     }
 
     async run(message, args) {
-        let config = this.client.config;
-        let owner = config.owner;
-        let embedColor = config.embedColor;
-        let discord = config.discord;
-        let docs = config.docs;
+        let { owner, embedColor, discord, docs } = this.client.config;
         let gSettings = await this.client.getSettings(message.guild).catch(err => {
             this.client.logger.error(err);
             return message.channel.send(`Error querying the database for this guild's information: **${err.message}**.`);
