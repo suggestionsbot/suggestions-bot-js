@@ -27,6 +27,11 @@ class Suggestions extends Client {
         this.wait = require('util').promisify(setTimeout);
     }
 
+    /*
+        At some point, separate all these functions and such into their own stores for
+        organization and portability for the future.
+    */
+
     /* 
     COMMAND LOAD AND UNLOAD
   
@@ -238,22 +243,6 @@ const init = async () => {
 };
 
 init();
-
-if (process.env.NODE_ENV === 'production') {
-
-    // const DBL = require('dblapi.js');
-    // const dbl = new DBL(client.config.dblToken, client);
-
-    // dbl.on('posted', () => {
-    //     client.logger.log('Server count posted to DiscordBots.org!');
-    // });
-    
-    // dbl.on('error', e => {
-    //     client.logger.error(e);
-    // });
-
-    require('./utils/voting')(client);
-}
 
 client.on('disconnect', () => client.logger.warn('Bot is disconnecting...'))
     .on('reconnecting', () => client.logger.log('Bot reconnecting...', 'log'))

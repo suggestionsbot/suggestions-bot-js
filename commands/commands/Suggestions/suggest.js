@@ -6,7 +6,7 @@ const crypto = require('crypto');
 const moment = require('moment');
 const { stripIndents } = require('common-tags');
 const { noSuggestions, noChannelPerms } = require('../../../utils/errors');
-const { defaultEmojis, thumbsEmojis, arrowsEmojis, christmasEmojis, jingleBellsEmojis } = require('../../../utils/voteEmojis');
+const voteEmojis = require('../../../utils/voteEmojis');
 require('moment-duration-format');
 require('moment-timezone');
 
@@ -101,37 +101,23 @@ module.exports = class SuggestCommand extends Command {
 
         sChannel.send(sEmbed)
             .then(async msg => {
-                if (emojis === 'defaultEmojis' || !emojis) {
-                    for (let i in defaultEmojis) {
-                        await msg.react(defaultEmojis[i]
-                            .replace('<', '')
-                            .replace('>', ''));
-                    }
-                }
+                voteEmojis.forEach(set => {
+                    let emojiSet = set.emojis;
 
-                if (emojis === 'thumbsEmojis') {
-                    for (let i in thumbsEmojis) {
-                        await msg.react(thumbsEmojis[i]);
+                    if (!emojis) {
+                        emojiSet.forEach(async e => {
+                            await msg.react(e
+                                .replace('<', '')
+                                .replace('>', ''));
+                        });
                     }
-                }
 
-                if (emojis === 'arrowsEmojis') {
-                    for (let i in arrowsEmojis) {
-                        await msg.react(arrowsEmojis[i]);
+                    if (emojis === set.name) {
+                        emojiSet.forEach(async e => {
+                            await msg.react(e);
+                        });
                     }
-                }
-
-                if (emojis === 'christmasEmojis') {
-                    for (let i in christmasEmojis) {
-                        await msg.react(christmasEmojis[i]);
-                    }
-                }
-
-                if (emojis === 'jingleBellsEmojis') {
-                    for (let i in jingleBellsEmojis) {
-                        await msg.react(jingleBellsEmojis[i]);
-                    }
-                }
+                });
             })
             .catch(err => {
                 this.client.logger.error(err);

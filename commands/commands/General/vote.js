@@ -34,8 +34,6 @@ module.exports = class VoteCommand extends Command {
             `)
             .setColor(embedColor);
 
-        message.channel.send(voteEmbed);
-
-        return;
+        return message.channel.send(voteEmbed);
     }
 };

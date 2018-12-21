@@ -32,12 +32,13 @@ module.exports = {
     voteSites: [
         { name: 'Discord Bot List (DiscordBots.org)', link: 'https://discordbots.org/bot/474051954998509571' },
         { name: 'Discord Bots', link: 'https://discord.bots.gg/bots/474051954998509571' },
-        { name: 'Discord Bot List (DiscordBotList.com', link: 'https://discordbotlist.com/bots/474051954998509571' },
+        { name: 'Discord Bot List (DiscordBotList.com)', link: 'https://discordbotlist.com/bots/474051954998509571' },
         { name: 'Divine Discord Bot List', link: 'https://divinediscordbots.com/bots/474051954998509571' },
         { name: 'botlist.space', link: 'https://botlist.space/bot/474051954998509571' },
         { name: 'Discord Bot List by Terminal.ink', link: 'https://ls.terminal.ink/bots/474051954998509571', },
         { name: 'Bots For Discord', link: 'https://botsfordiscord.com/bots/474051954998509571' }
-    ]
+    ],
+    patreon: process.env.PATREON
 };
 
 module.exports.defaultSettings = {
