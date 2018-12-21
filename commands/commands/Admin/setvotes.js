@@ -1,5 +1,5 @@
 const { RichEmbed } = require('discord.js');
-const { defaultEmojis, thumbsEmojis, arrowsEmojis, christmasEmojis, jingleBellsEmojis } = require('../../../utils/voteEmojis');
+const voteEmojis = require('../../../utils/voteEmojis');
 const Command = require('../../Command');
 
 module.exports = class SetVotesCommand extends Command {
@@ -33,157 +33,54 @@ module.exports = class SetVotesCommand extends Command {
             .setFooter(`Guild ID: ${message.guild.id}`)
             .setTimestamp();
 
-        switch (args[0]) {
-            case '0': 
-                await this.client.writeSettings(message.guild, { voteEmojis: 'defaultEmojis' }).catch(err => {
-                    this.client.logger.error(err);
-                    return message.channel.send(`Error updating the default emoji set: **${err.message}**.`);
-                });
+        let setID = parseInt(args[0]);
+        
+        if (args[0]) {
 
-                this.client.logger.log(`The default vote emojis in the guild ${message.guild.name} (${message.guild.id}) has been changed to ${Object.values(defaultEmojis).join(' ')}.`);
-                message.channel.send(`The default vote emojis have been changed to ${Object.values(defaultEmojis).join(' ')}.`).then(msg => msg.delete(5000).catch(err => this.client.logger.error(err)));
-                break;
-            case '1':
-                await this.client.writeSettings(message.guild, { voteEmojis: 'thumbsEmojis' }).catch(err => {
-                    this.client.logger.error(err);
-                    return message.channel.send(`Error updating the default emoji set: **${err.message}**.`);
-                });
+            if (args[0] && (setID > voteEmojis.length - 1)) {
+                return message.channel.send(`**${setID}** is not a valid emoji set id!`)
+                    .then(msg => msg.delete(3000).catch(err => this.client.logger.error(err)));
+            }
 
-                this.client.logger.log(`The default vote emojis in the guild ${message.guild.name} (${message.guild.id}) has been changed to ${Object.values(thumbsEmojis).join(' ')}.`);
-                message.channel.send(`The default vote emojis have been changed to ${Object.values(thumbsEmojis).join(' ')}.`).then(msg => msg.delete(5000).catch(err => this.client.logger.error(err)));
-                break;
-            case '2':
-                await this.client.writeSettings(message.guild, { voteEmojis: 'arrowsEmojis' }).catch(err => {
-                    this.client.logger.error(err);
-                    return message.channel.send(`Error updating the default emoji set: **${err.message}**.`);
-                });
+            for (let i = 0; i < voteEmojis.length; i++) {
+                if (args[0] && (setID === voteEmojis[i].id)) {
+                    this.client.writeSettings(message.guild, {
+                        voteEmojis: voteEmojis[i].name
+                    }).catch(err => {
+                        this.client.logger.error(err);
+                        return message.channel.send(`Error updating the default emoji set: **${err.message}**.`);
+                    });
 
-                this.client.logger.log(`The default vote emojis in the guild ${message.guild.name} (${message.guild.id}) has been changed to ${Object.values(arrowsEmojis).join(' ')}.`);
-                message.channel.send(`The default vote emojis have been changed to ${Object.values(arrowsEmojis).join(' ')}.`).then(msg => msg.delete(5000).catch(err => this.client.logger.error(err)));
-                break;
-            case '3':
-                await this.client.writeSettings(message.guild, { voteEmojis: 'christmasEmojis' }).catch(err => {
-                    this.client.logger.error(err);
-                    return message.channel.send(`Error updating the default emoji set: **${err.message}**.`);
-                });
-
-                this.client.logger.log(`The default vote emojis in the guild ${message.guild.name} (${message.guild.id}) has been changed to ${Object.values(christmasEmojis).join(' ')}.`);
-                message.channel.send(`The default vote emojis have been changed to ${Object.values(christmasEmojis).join(' ')}.`).then(msg => msg.delete(5000).catch(err => this.client.logger.error(err)));
-                break;
-            case '4':
-                await this.client.writeSettings(message.guild, { voteEmojis: 'jingleBellsEmojis' }).catch(err => {
-                    this.client.logger.error(err);
-                    return message.channel.send(`Error updating the default emoji set: **${err.message}**.`);
-                });
-
-                this.client.logger.log(`The default vote emojis in the guild ${message.guild.name} (${message.guild.id}) has been changed to ${Object.values(jingleBellsEmojis).join(' ')}.`);
-                message.channel.send(`The default vote emojis have been changed to ${Object.values(jingleBellsEmojis).join(' ')}.`).then(msg => msg.delete(5000).catch(err => this.client.logger.error(err)));
-                break;
+                    this.client.logger.log(`The default vote emojis in the guild ${message.guild.name} (${message.guild.id}) has been changed to ${voteEmojis[i].emojis.join(' ')}.`);
+                    return message.channel.send(`The default vote emojis have been changed to ${voteEmojis[i].emojis.join(' ')}.`).then(msg => msg.delete(5000).catch(err => this.client.logger.error(err)));
+                } 
+            }
         }
 
+        let view = '';
+        let emojiSets = [];
+        voteEmojis.forEach(set => {
+            let emojiSet = set.emojis;
 
-        if (!args[0] && (!gSettings.voteEmojis || gSettings.voteEmojis === 'defaultEmojis')) {
+            view = `\`${set.id}\`: ${emojiSet.join(' ')}`;
+            if (gSettings.voteEmojis === set.name) {
+                view = `\`${set.id}\`: ${emojiSet.join(' ')} ***(Currently Using)***`;
+            }
+
+            emojiSets.push(view);
+        });
+
+        if (!args[0]) {
             embed.setDescription(`
             **Voting Emojis**
-            Choose from 5 different emoji sets to be used for voting in your guild.
-            
-            \`0\`: ${Object.values(defaultEmojis).join(' ')} ***(Currently Using)***
+            Choose from ${voteEmojis.length} different emoji sets to be used for voting in your guild.
 
-            \`1\`: ${Object.values(thumbsEmojis).join(' ')}
-
-            \`2\`: ${Object.values(arrowsEmojis).join(' ')}
-
-            \`3\`: ${Object.values(christmasEmojis).join(' ')}
-
-            \`4\`: ${Object.values(jingleBellsEmojis).join(' ')}
+            ${emojiSets.join('\n\n')}
 
             You can do \`${gSettings.prefix + usage}\` to set the desired emojis.
             Submit new emoji set suggestions any time by joining our Discord server: ${discord}
             `);
-            return message.channel.send(embed);
-        }
 
-        if (!args[0] && gSettings.voteEmojis === 'thumbsEmojis') {
-            embed.setDescription(`
-            **Voting Emojis**
-            Choose from 5 different emoji sets to be used for voting in your guild.
-            
-            \`0\`: ${Object.values(defaultEmojis).join(' ')}
-
-            \`1\`: ${Object.values(thumbsEmojis).join(' ')} ***(Currently Using)***
-
-            \`2\`: ${Object.values(arrowsEmojis).join(' ')}
-
-            \`3\`: ${Object.values(christmasEmojis).join(' ')}
-
-            \`4\`: ${Object.values(jingleBellsEmojis).join(' ')}
-
-            You can do \`${gSettings.prefix + usage}\` to set the desired emojis.
-            Submit new emoji set suggestions any time by joining our Discord server: ${discord}
-            `);
-            return message.channel.send(embed);
-        }
-
-        if (!args[0] && gSettings.voteEmojis === 'arrowsEmojis') {
-            embed.setDescription(`
-            **Voting Emojis**
-            Choose from 5 different emoji sets to be used for voting in your guild.
-            
-            \`0\`: ${Object.values(defaultEmojis).join(' ')}
-
-            \`1\`: ${Object.values(thumbsEmojis).join(' ')}
-
-            \`2\`: ${Object.values(arrowsEmojis).join(' ')} ***(Currently Using)***
-
-            \`3\`: ${Object.values(christmasEmojis).join(' ')}
-
-            \`4\`: ${Object.values(jingleBellsEmojis).join(' ')}
-
-            You can do \`${gSettings.prefix + usage}\` to set the desired emojis.
-            Submit new emoji set suggestions any time by joining our Discord server: ${discord}
-            `);
-            return message.channel.send(embed);
-    }
-
-        if (!args[0] && gSettings.voteEmojis === 'christmasEmojis') {
-            embed.setDescription(`
-            **Voting Emojis**
-            Choose from 5 different emoji sets to be used for voting in your guild.
-            
-            \`0\`: ${Object.values(defaultEmojis).join(' ')}
-
-            \`1\`: ${Object.values(thumbsEmojis).join(' ')}
-
-            \`2\`: ${Object.values(arrowsEmojis).join(' ')} 
-
-            \`3\`: ${Object.values(christmasEmojis).join(' ')} ***(Currently Using)***
-
-            \`4\`: ${Object.values(jingleBellsEmojis).join(' ')}
-
-            You can do \`${gSettings.prefix + usage}\` to set the desired emojis.
-            Submit new emoji set suggestions any time by joining our Discord server: ${discord}
-            `);
-            return message.channel.send(embed);
-        }
-
-        if (!args[0] && gSettings.voteEmojis === 'jingleBellsEmojis') {
-            embed.setDescription(`
-            **Voting Emojis**
-            Choose from 5 different emoji sets to be used for voting in your guild.
-            
-            \`0\`: ${Object.values(defaultEmojis).join(' ')}
-
-            \`1\`: ${Object.values(thumbsEmojis).join(' ')}
-
-            \`2\`: ${Object.values(arrowsEmojis).join(' ')} 
-
-            \`3\`: ${Object.values(christmasEmojis).join(' ')} 
-
-            \`4\`: ${Object.values(jingleBellsEmojis).join(' ')} ***(Currently Using)***
-
-            You can do \`${gSettings.prefix + usage}\` to set the desired emojis.
-            Submit new emoji set suggestions any time by joining our Discord server: ${discord}
-            `);
             return message.channel.send(embed);
         }
 

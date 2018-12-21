@@ -2,7 +2,8 @@ const { stripIndents } = require('common-tags');
 const Command = require('../../Command');
 
 const emojiSets = {
-    defaultEmojis: 'Default',
+    defaultEmojis: 'Defaults',
+    oldDefaults: 'Old Defaults',
     thumbsEmojis: 'Thumbs',
     arrowsEmojis: 'Arrows',
     christmasEmojis: 'Christmas',
@@ -37,21 +38,6 @@ module.exports = class ConfigCommand extends Command {
             this.client.logger.error(err.stack);
             return message.channel.send(err.message);
         }
-
-        // let gSettings = await this.client.getSettings(message.guild).catch(err => {
-        //     this.client.logger.error(err);
-        //     return message.channel.send(`Error querying the database for this guild's information: **${err.message}**.`);
-        // });
-
-        // let gBlacklists = await this.client.getGuildBlacklist(message.guild).catch(err => {
-        //     this.client.logger.error(err);
-        //     return message.channel.send(`Error querying the database for this guild's blacklisted users: **${err.message}**.`);
-        // });
-
-        // let gSuggestions = await this.client.getGuildSuggestions(message.guild).catch(err => {
-        //     this.client.logger.error(err);
-        //     return message.channel.send(`Error querying the database for this guild's suggestions: **${err.message}**.`);
-        // });
 
         let {
             guildID,

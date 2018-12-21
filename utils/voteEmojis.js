@@ -1,32 +1,40 @@
-const defaultEmojis = {
-    0: '<:nerdSuccess:490708616056406017>',
-    1: '<:nerdError:522929743507488795>'
-};
+const voteEmojis = [
+    {
+        id: 0,
+        name: 'defaultEmojis',
+        fullName: 'Defaults',
+        emojis: ['<:nerdSuccess:490708616056406017>', '<:nerdError:522929743507488795>']
+    },
+    {
+        id: 1,
+        name: 'oldDefaults',
+        fullName: 'Old Defaults',
+        emojis: ['✅', '❌']
+    },
+    {
+        id: 2,
+        name: 'thumbsEmojis',
+        fullName: 'Thumbs',
+        emojis: ['👍', '👎']
+    },
+    {
+        id: 3,
+        name: 'arrowsEmojis',
+        fullName: 'Arrows',
+        emojis: ['⬆', '⬇']
+    },
+    {
+        id: 4,
+        name: 'christmasEmojis',
+        fullName: 'Christmas',
+        emojis: ['🎄', '🌲']
+    },
+    {
+        id: 5,
+        name: 'jingleBellsEmojis',
+        fullName: 'Bells',
+        emojis: ['🔔', '🔕']
+    }
+];
 
-const thumbsEmojis = {
-    0: '👍',
-    1: '👎'
-};
-
-const arrowsEmojis = {
-    0: '⬆',
-    1: '⬇'
-};
-
-const christmasEmojis = {
-    0: '🎄',
-    1: '🌲'
-};
-
-const jingleBellsEmojis = {
-    0: '🔔',
-    1: '🔕'
-};
-
-module.exports = {
-    defaultEmojis,
-    thumbsEmojis,
-    arrowsEmojis,
-    christmasEmojis,
-    jingleBellsEmojis
-};
+module.exports = voteEmojis;

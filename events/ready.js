@@ -33,6 +33,10 @@ module.exports = class {
     // If the bot was invited to a guild while it was offline, the "ready" event will
     // be emitted (ONLY IN PRODUCTION)
     if (process.env.NODE_ENV === 'production') {
+
+        // handle posting stats to bot lists
+        require('./utils/voting')(this.client);
+
         this.client.guilds.forEach(async g => {
             let gSettings = await this.client.getSettings({ guildID: g.id }).catch(err=> this.client.logger.error(err));
             

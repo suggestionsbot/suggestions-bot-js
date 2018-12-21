@@ -1,6 +1,6 @@
 {
   "name": "suggestions-bot",
-  "version": "2.3.9",
+  "version": "2.4.0",
   "description": "The only suggestions bot you'll ever need. Simple usage and management of suggestions for public and staff use.",
   "main": "app.js",
   "scripts": {
@@ -26,10 +26,10 @@
     "dotenv-flow": "^0.1.0",
     "hastebin-gen": "^1.3.1",
     "klaw": "^2.1.1",
-    "moment": "^2.22.2",
+    "moment": "^2.23.0",
     "moment-duration-format": "^2.2.2",
     "moment-timezone": "^0.5.23",
-    "mongoose": "^5.3.16",
+    "mongoose": "^5.4.0",
     "node-fetch": "^2.3.0",
     "reaction-core": "^2.1.0"
   },
