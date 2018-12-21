@@ -104,8 +104,9 @@ module.exports = class SuggestCommand extends Command {
                 voteEmojis.forEach(set => {
                     let emojiSet = set.emojis;
 
-                    if (!emojis) {
-                        emojiSet.forEach(async e => {
+                    if (!emojis || emojis === 'defaultEmojis') {
+                        if (set.name !== 'defaultEmojis') return;
+                        return emojiSet.forEach(async e => {
                             await msg.react(e
                                 .replace('<', '')
                                 .replace('>', ''));
@@ -113,7 +114,7 @@ module.exports = class SuggestCommand extends Command {
                     }
 
                     if (emojis === set.name) {
-                        emojiSet.forEach(async e => {
+                        return emojiSet.forEach(async e => {
                             await msg.react(e);
                         });
                     }
