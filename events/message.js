@@ -68,10 +68,10 @@ module.exports = class {
         let staffRoles = [];
         if (roles) staffRoles = roles.map(role => message.guild.roles.find(r => r.name === role.role || r.id === role.role));
 
-        if (cmd && !cmd.conf.enabled) return message.channel.send('This command is currently disabled!').then(msg => msg.delete(3000)).catch(err => this.client.logger.error(err));
-        if (cmd && cmd.conf.ownerOnly && message.author.id !== this.client.config.owner) return;
-        if (cmd && cmd.conf.adminOnly && !message.member.hasPermission('MANAGE_GUILD')) return noPerms(message, 'MANAGE_GUILD');
-        if (cmd && cmd.conf.staffOnly && !message.member.hasPermission('MANAGE_GUILD') && !message.member.roles.some(r => staffRoles.includes(r))) return noSuggestionsPerms(message);
+        if (!cmd.conf.enabled) return message.channel.send('This command is currently disabled!').then(msg => msg.delete(3000)).catch(err => this.client.logger.error(err));
+        if (cmd.conf.ownerOnly && message.author.id !== this.client.config.owner) return;
+        if (cmd.conf.adminOnly && !message.member.hasPermission('MANAGE_GUILD')) return noPerms(message, 'MANAGE_GUILD');
+        if (cmd.conf.staffOnly && !message.member.hasPermission('MANAGE_GUILD') && !message.member.roles.some(r => staffRoles.includes(r))) return noSuggestionsPerms(message);
 
         const newCommand = await new Command({
             _id: mongoose.Types.ObjectId(),

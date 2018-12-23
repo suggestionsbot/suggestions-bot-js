@@ -60,7 +60,7 @@ module.exports = class GBlacklistCommand extends Command {
             }
     
             await blEmbed.setTitle(`${this.client.user.username} | Blacklisted User`);
-            await blEmbed.setDescription(`These users are currently blacklisted from using any of the bot commands in this guild. Use \`${gSettings.prefix + usage} help\` for command information.`);
+            await blEmbed.setDescription(`These users are currently blacklisted from using any of the bot commands globally. Use \`${gSettings.prefix + usage} help\` for command information.`);
             await blEmbed.setColor(embedColor);
     
             if (gBlacklist.length === 0) return message.channel.send(`There are no blacklisted users! Use \`${gSettings.prefix + name} <help>\` for more information.`).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err));

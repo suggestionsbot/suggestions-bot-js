@@ -21,15 +21,18 @@ module.exports = class HelpCommand extends Command {
 
         let {
             prefix,
-            staffRoles,
+            staffRoles: roles,
             suggestionsChannel
         } = gSettings;
 
         suggestionsChannel = message.guild.channels.find(c => c.name === suggestionsChannel) || message.guild.channels.find(c => c.toString() === suggestionsChannel) || message.guild.channels.get(suggestionsChannel) || '';
 
-        const roles = staffRoles.map(el => {
-            return message.guild.roles.find(r => r.name === el.role || r.id === el.role);
-        });
+        // const roles = staffRoles.map(el => {
+        //     return message.guild.roles.find(r => r.name === el.role || r.id === el.role);
+        // });
+
+        let staffRoles = [];
+        if (roles) staffRoles = roles.map(role => message.guild.roles.find(r => r.name === role.role || r.id === role.role));
 
         let cmdName = this.help.name;
         let cmdSetChannel = await this.client.commands.get('setchannel');
@@ -56,7 +59,7 @@ module.exports = class HelpCommand extends Command {
             return message.channel.send(cmdHelpEmbed);
         }
 
-        const userCmds = cmds.filter(cmd => cmd.conf.ownerOnly === false && cmd.conf.adminOnly === false && cmd.conf.staffOnly === false).map(cmd => cmd.help.name).sort().map(cmd => '`'+ cmd + '`');
+        const generalCmds = cmds.filter(cmd => cmd.conf.ownerOnly === false && cmd.conf.adminOnly === false && cmd.conf.staffOnly === false).map(cmd => cmd.help.name).sort().map(cmd => '`'+ cmd + '`');
         const staffCmds = cmds.filter(cmd => cmd.conf.staffOnly === true).map(cmd => cmd.help.name).sort().map(cmd => '`'+ cmd + '`');
         const adminCmds = cmds.filter(cmd => cmd.conf.adminOnly === true).map(cmd => cmd.help.name).sort().map(cmd => '`'+ cmd + '`');
         const ownerCmds = cmds.filter(cmd => cmd.conf.ownerOnly === true).map(cmd => cmd.help.name).sort().map(cmd => '`'+ cmd + '`');
@@ -66,8 +69,8 @@ module.exports = class HelpCommand extends Command {
             .setDescription(`View help information for ${this.client.user}. \n (Do \`${prefix + cmdName} <command>)\` for specific help information).`)
             .addField('Current Prefix', prefix)
             .addField('Suggestions Channel', suggestionsChannel.toString() || (message.member.hasPermission('MANAGE_GUILD') && !suggestionsChannel ? `***Not set. Use*** \`${prefix + setChannelUsage}\`` : '***Not set. Contact a server administrator.***'))
-            .addField('User Commands', userCmds.join(' | '));
-            if (message.member.hasPermission('MANAGE_GUILD') && message.member.roles.some(r => roles.includes(r))) helpEmbed.addField('Staff Commands', staffCmds.join(' | '));
+            .addField('General Commands', generalCmds.join(' | '));
+            if (message.member.hasPermission('MANAGE_GUILD') || message.member.roles.some(r => staffRoles.includes(r))) helpEmbed.addField('Staff Commands', staffCmds.join(' | '));
             if (message.member.hasPermission('MANAGE_GUILD')) helpEmbed.addField('Admin Commands', adminCmds.join(' | '));
             if (message.author.id === owner) helpEmbed.addField('Owner Commands', ownerCmds.join(' | '));
             helpEmbed.addField('Documentation', docs)

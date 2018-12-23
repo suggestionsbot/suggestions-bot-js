@@ -1,25 +1,31 @@
 const fetch = require('node-fetch');
 const DBL = require('dblapi.js');
 
-module.exports = (client) => {
+module.exports = async (client) => {
 
     const tokens = client.config.botLists;
 
-    // Discord Bots (discordbots.org)
-    const dbl = new DBL(tokens.dblToken, client);
+    setTimeout(voteUtils, 180000);
 
-    dbl.on('posted', () => {
-        client.logger.info('Server count posted to DiscordBots.org!');
-    });
-    
-    dbl.on('error', e => {
-        client.logger.error(e);
-    });
+    async function voteUtils() {
+        // Discord Bots (discordbots.org)
+        const dbl = new DBL(tokens.dblToken, client, {
+            statsInterval: 0
+        });
 
-    // Discord Bot List (discord.bots.gg)
-    setTimeout(async () => {
+        dbl.on('posted', () => {
+            client.logger.log('Server count posted to DiscordBots.org!');
+        });
+
+        dbl.on('error', e => {
+            client.logger.error(e);
+        });
+
+        // Discord Bot List (discord.bots.gg)
         try {
-            let data = { guildCount: client.guilds.size };
+            let data = {
+                guildCount: client.guilds.size
+            };
             let posted = await fetch(`https://discord.bots.gg/api/v1/bots/${client.user.id}/stats`, {
                 method: 'POST',
                 headers: {
@@ -30,16 +36,16 @@ module.exports = (client) => {
             });
 
             if (!posted.ok) throw new Error(posted.statusText);
-            else this.client.logger.log('Server count posted to discord.bots.gg!'); 
+            else this.client.logger.log('Server count posted to discord.bots.gg!');
         } catch (err) {
             return client.logger.error(`Error posting to discord.bots.gg: ${err.message}`);
         }
-    }, 180000);
 
-    // Discord Bot List (discordbotlist.com)
-    setTimeout(async () => {
+        // Discord Bot List (discordbotlist.com)
         try {
-            let data = { guilds: client.guilds.size };
+            let data = {
+                guilds: client.guilds.size
+            };
             let posted = await fetch(`https://discordbotlist.com/api/bots/${client.user.id}/stats`, {
                 method: 'POST',
                 headers: {
@@ -50,15 +56,15 @@ module.exports = (client) => {
             });
 
             if (!posted.ok) throw new Error(posted.statusText);
-            else this.client.logger.log('Server count posted to discordbotlist.com!'); 
+            else this.client.logger.log('Server count posted to discordbotlist.com!');
         } catch (err) {
             return client.logger.error(`Error posting to discordbotlist.com: ${err.message}`);
         }
-    }, 180000);
 
-    // Divine Discord Bot List (divinediscordbots.com)
-    setTimeout(async () => {
-        let data = { server_count: client.guilds.size };
+        // Divine Discord Bot List (divinediscordbots.com)
+        let data = {
+            server_count: client.guilds.size
+        };
         try {
             let posted = await fetch(`https://divinediscordbots.com/api/bots/${client.user.id}/stats`, {
                 method: 'POST',
@@ -70,16 +76,16 @@ module.exports = (client) => {
             });
 
             if (!posted.ok) throw new Error(posted.statusText);
-            else this.client.logger.log('Server count posted to divinediscordbots.com!'); 
+            else this.client.logger.log('Server count posted to divinediscordbots.com!');
         } catch (err) {
             return client.logger.error(`Error posting to divinediscordbots.com: ${err.message}`);
         }
-    }, 18000);
 
-    // botlist.space
-    setTimeout(async () => {
+        // botlist.space
         try {
-            let data = { server_count: client.guilds.size };
+            let data = {
+                server_count: client.guilds.size
+            };
             let posted = await fetch(`https://botlist.space/api/bots/${client.user.id}`, {
                 method: 'POST',
                 headers: {
@@ -88,18 +94,16 @@ module.exports = (client) => {
                 },
                 body: JSON.stringify(data)
             });
-            
+
             if (!posted.ok) throw new Error(posted.statusText);
-            else this.client.logger.log('Server count posted to botlist.space!'); 
+            else this.client.logger.log('Server count posted to botlist.space!');
         } catch (err) {
             return client.logger.error(`Error posting to botlist.space: ${err.message}`);
         }
-    }, 180000);
 
-    // Discord Bot List by Terminal.ink (ls.terminal.ink)
-    setTimeout(async () => {
+        // Discord Bot List by Terminal.ink (ls.terminal.ink)
         try {
-            let data = {  };
+            let data = {};
             let posted = await fetch(`https://ls.terminal.ink/api/v2/bots/${client.user.id}`, {
                 method: 'POST',
                 headers: {
@@ -110,16 +114,16 @@ module.exports = (client) => {
             });
 
             if (!posted.ok) throw new Error(posted.statusText);
-            else this.client.logger.log('Server count posted to ls.terminal.ink!');  
+            else this.client.logger.log('Server count posted to ls.terminal.ink!');
         } catch (err) {
             return client.logger.error(`Error posting to ls.terminal.ink: ${err.message}`);
         }
-    }, 180000);
 
-    // Bots For Discord (botsfordiscord.com)
-    setTimeout(async () => {
+        // Bots For Discord (botsfordiscord.com)
         try {
-            let data = { server_count: client.guilds.size };
+            let data = {
+                server_count: client.guilds.size
+            };
             let posted = await fetch(`https://botsfordiscord.com/api/bot/${client.user.id}`, {
                 method: 'POST',
                 headers: {
@@ -130,10 +134,10 @@ module.exports = (client) => {
             });
 
             if (!posted.ok) throw new Error(posted.statusText);
-            else client.logger.log('Server count posted to botsfordiscord.com!'); 
-            
+            else client.logger.log('Server count posted to botsfordiscord.com!');
+
         } catch (err) {
             return client.logger.error(`Error posting to botsfordiscord.com: ${err.message}`);
         }
-    }, 180000);
+    }
 };
