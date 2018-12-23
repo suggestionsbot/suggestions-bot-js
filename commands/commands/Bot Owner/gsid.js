@@ -48,6 +48,7 @@ module.exports = class GsIDCommand extends Command {
             suggestion,
             updatedBy,
             results,
+            newResults,
             status,
             statusUpdated,
             guildID
@@ -62,6 +63,13 @@ module.exports = class GsIDCommand extends Command {
             .setAuthor(guild.name, guild.iconURL)
             .setTitle(`Info for sID ${args[0]}`)
             .setFooter(`User ID: ${userID} | sID ${args[0]}`);
+
+        let nResults = [];
+        if (newResults && newResults.length > 1) {
+            newResults.forEach(r => {
+                nResults.push(`${r.emoji} **${r.count}**`);
+            });
+        }
 
         switch (status) {
             case undefined:
@@ -95,7 +103,7 @@ module.exports = class GsIDCommand extends Command {
                 ${updatedBy}
 
                 **Results**
-                ${results}
+                ${nResults.join('\n') || results}
             
                 `);
                 embed.setColor('#00e640');
@@ -119,7 +127,7 @@ module.exports = class GsIDCommand extends Command {
                 ${updatedBy}
 
                 **Results**
-                ${results}
+                ${nResults.join('\n') || results}
             
                 `);
                 embed.setColor('#cf000f');
