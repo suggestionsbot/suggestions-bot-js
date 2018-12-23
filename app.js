@@ -244,8 +244,6 @@ const init = async () => {
 
 init();
 
-// require('./utils/voting')(client);
-
 client.on('disconnect', () => client.logger.warn('Bot is disconnecting...'))
     .on('reconnecting', () => client.logger.log('Bot reconnecting...', 'log'))
     .on('error', e => client.logger.error(e))
