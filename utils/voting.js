@@ -5,7 +5,7 @@ module.exports = async (client) => {
 
     const tokens = client.config.botLists;
 
-    setTimeout(voteUtils, 180000);
+    setInterval(voteUtils, 180000);
 
     async function voteUtils() {
         // Discord Bots (discordbots.org)
@@ -26,7 +26,7 @@ module.exports = async (client) => {
             let data = {
                 guildCount: client.guilds.size
             };
-            let posted = await fetch(`https://discord.bots.gg/api/v1/bots/${client.user.id}/stats`, {
+            let posted = await fetch(`https://discord.bots.gg/api/v1/bots/474051954998509571/stats`, {
                 method: 'POST',
                 headers: {
                     'Authorization': tokens.botsggToken,
@@ -36,7 +36,7 @@ module.exports = async (client) => {
             });
 
             if (!posted.ok) throw new Error(posted.statusText);
-            else this.client.logger.log('Server count posted to discord.bots.gg!');
+            else client.logger.log('Server count posted to discord.bots.gg!');
         } catch (err) {
             return client.logger.error(`Error posting to discord.bots.gg: ${err.message}`);
         }
@@ -56,7 +56,7 @@ module.exports = async (client) => {
             });
 
             if (!posted.ok) throw new Error(posted.statusText);
-            else this.client.logger.log('Server count posted to discordbotlist.com!');
+            else client.logger.log('Server count posted to discordbotlist.com!');
         } catch (err) {
             return client.logger.error(`Error posting to discordbotlist.com: ${err.message}`);
         }
@@ -76,7 +76,7 @@ module.exports = async (client) => {
             });
 
             if (!posted.ok) throw new Error(posted.statusText);
-            else this.client.logger.log('Server count posted to divinediscordbots.com!');
+            else client.logger.log('Server count posted to divinediscordbots.com!');
         } catch (err) {
             return client.logger.error(`Error posting to divinediscordbots.com: ${err.message}`);
         }
@@ -96,7 +96,7 @@ module.exports = async (client) => {
             });
 
             if (!posted.ok) throw new Error(posted.statusText);
-            else this.client.logger.log('Server count posted to botlist.space!');
+            else client.logger.log('Server count posted to botlist.space!');
         } catch (err) {
             return client.logger.error(`Error posting to botlist.space: ${err.message}`);
         }
@@ -114,7 +114,7 @@ module.exports = async (client) => {
             });
 
             if (!posted.ok) throw new Error(posted.statusText);
-            else this.client.logger.log('Server count posted to ls.terminal.ink!');
+            else client.logger.log('Server count posted to ls.terminal.ink!');
         } catch (err) {
             return client.logger.error(`Error posting to ls.terminal.ink: ${err.message}`);
         }
