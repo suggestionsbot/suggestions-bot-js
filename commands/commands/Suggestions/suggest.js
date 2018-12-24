@@ -101,22 +101,24 @@ module.exports = class SuggestCommand extends Command {
 
         sChannel.send(sEmbed)
             .then(async msg => {
-                voteEmojis.forEach(set => {
+                voteEmojis.forEach(async set => {
                     let emojiSet = set.emojis;
 
                     if (!emojis || emojis === 'defaultEmojis') {
                         if (set.name !== 'defaultEmojis') return;
-                        return emojiSet.forEach(async e => {
-                            await msg.react(e
+                        for (let i = 0; i < emojiSet.length; i++) {
+                            await msg.react(emojiSet[i]
                                 .replace('<', '')
                                 .replace('>', ''));
-                        });
+                        }
+                        return;
                     }
 
                     if (emojis === set.name) {
-                        return emojiSet.forEach(async e => {
-                            await msg.react(e);
-                        });
+                        for (let i = 0; i < emojiSet.length; i++) {
+                            await msg.react(emojiSet[i]);
+                        }
+                        return;
                     }
                 });
             })
