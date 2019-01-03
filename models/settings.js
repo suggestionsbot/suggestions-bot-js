@@ -12,7 +12,8 @@ const settingsSchema = mongoose.Schema({
     staffRoles: [{role: String}],
     cmdStatus: String,
     voteEmojis: String,
-    lockStatus: String
+    lockStatus: String,
+    responseRequired: Boolean
 });
 
 module.exports = mongoose.model('Settings', settingsSchema);

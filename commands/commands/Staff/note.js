@@ -102,6 +102,12 @@ module.exports = class NoteCommand extends Command {
                 }
 
                 let footer = embed.footer.text;
+                let staffNote = {
+                    note,
+                    staffMemberID: message.author.id,
+                    staffMemberUsername: message.author.tag,
+                    noteAdded: date
+                };
 
                 if (footer.includes(id)) {
 
@@ -120,12 +126,9 @@ module.exports = class NoteCommand extends Command {
                             { sID: id }
                         ]},
                         {
-                            $set: {
-                                note: note,
-                                noteAdded: date,
-                                staffMemberID: message.author.id,
-                                staffMemberUsername: message.author.tag
-                        }
+                            $push: {
+                                notes: staffNote
+                            }
                     }).then(() => {
                         this.client.logger.log(`sID ${id} had a note added by ${message.author.tag} (${message.author.id}) "${message.guild.name}" (${message.guild.id}).`);
                     })   

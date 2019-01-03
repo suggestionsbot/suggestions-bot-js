@@ -72,7 +72,7 @@ module.exports = class HelpCommand extends Command {
             .addField('General Commands', generalCmds.join(' | '));
             if (message.member.hasPermission('MANAGE_GUILD') || message.member.roles.some(r => staffRoles.includes(r))) helpEmbed.addField('Staff Commands', staffCmds.join(' | '));
             if (message.member.hasPermission('MANAGE_GUILD')) helpEmbed.addField('Admin Commands', adminCmds.join(' | '));
-            if (message.author.id === owner) helpEmbed.addField('Owner Commands', ownerCmds.join(' | '));
+            if (this.client.isOwner(message.author.id)) helpEmbed.addField('Owner Commands', ownerCmds.join(' | '));
             helpEmbed.addField('Documentation', docs)
             .addField('Found an issue?', `Please report any issues to <@${owner}> via the Support Discord: ${discord}.`)
             .setColor(embedColor);
