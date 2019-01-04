@@ -70,6 +70,11 @@ module.exports = class SetVotesCommand extends Command {
             emojiSets.push(view);
         });
 
+        if (!gSettings.voteEmojis) {
+            let str = emojiSets[0].concat(' ', '***(Currently Using)***');
+            emojiSets[0] = str;
+        }
+
         if (!args[0]) {
             embed.setDescription(`
             **Voting Emojis**

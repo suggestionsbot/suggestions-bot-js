@@ -167,7 +167,7 @@ class Suggestions extends Client {
         const memberSuggstions = gSuggestions || {};
         return memberSuggstions;
     }
-
+    
     // this method checks if an object is empty
     async isEmpty(obj) {
         for (let key in obj) return false;
@@ -215,6 +215,29 @@ class Suggestions extends Client {
             .replace(client.token, 'mfa.VkO_2G4Qv3T--NO--lWetW_tjND--TOKEN--QFTm6YGtzq9PH--4U--tG0');
 
         return text;
+    }
+
+    // this method checks if the user ID is a bot owner or not
+    isOwner(id) {
+        if (id === client.config.owner) return true;
+        else return false;
+    }
+
+    // this method checks if responses for approving/rejecting suggestions are required or not
+    async isResponseRequired(guild) {
+        let gSettings = {};
+        try {
+            gSettings = await this.getSettings(guild);
+        } catch (err) {
+            this.logger.error(err);
+        }
+
+        let required = false;
+
+        if (gSettings.responseRequired) required = true;
+        else required = false;
+
+        return required;
     }
 }
 

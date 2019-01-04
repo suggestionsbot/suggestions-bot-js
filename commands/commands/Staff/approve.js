@@ -50,6 +50,12 @@ module.exports = class ApproveCommand extends Command {
 
         if (await this.client.isEmpty(sID)) return message.channel.send(`Could not find the suggestion with the sID **${args[0]}** in the guild database.`).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err));
 
+        if (await this.client.isResponseRequired(message.guild) && !reply) {
+            return message.channel.send(`A response is required for approving this suggestion. Usage: \`${gSettings.prefix + usage}\``)
+                .then(msg => msg.delete(5000))
+                .catch(err => this.client.logger.error(err));
+        }
+
         let {
             userID,
             username,

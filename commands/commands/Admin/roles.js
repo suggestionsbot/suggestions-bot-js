@@ -27,6 +27,7 @@ module.exports = class RolesCommand extends Command {
         const { staffRoles } = gSettings;
 
         let roles = message.guild.roles.filter(role => staffRoles.map(role => role.role).includes(role.id));
+        roles.sort((a, b) => b.position - a.position);
 
         let adminPerms;
         let admins = [];
