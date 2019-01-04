@@ -222,6 +222,23 @@ class Suggestions extends Client {
         if (id === client.config.owner) return true;
         else return false;
     }
+
+    // this method checks if responses for approving/rejecting suggestions are required or not
+    async isResponseRequired(guild) {
+        let gSettings = {};
+        try {
+            gSettings = await this.getSettings(guild);
+        } catch (err) {
+            this.logger.error(err);
+        }
+
+        let required = false;
+
+        if (gSettings.responseRequired) required = true;
+        else required = false;
+
+        return required;
+    }
 }
 
 const client = new Suggestions();

@@ -10,6 +10,11 @@ const emojiSets = {
     jingleBellsEmojis: 'Bells'
 };
 
+const responses = {
+    true: 'True',
+    false: 'False'
+};
+
 module.exports = class ConfigCommand extends Command {
     constructor(client) {
         super(client, {
@@ -48,7 +53,8 @@ module.exports = class ConfigCommand extends Command {
             suggestionsLogs,
             staffSuggestionsChannel,
             staffRoles,
-            voteEmojis
+            voteEmojis,
+            responseRequired
         } = gSettings;
 
         const guildOwner = message.guild.members.get(guildOwnerID);
@@ -74,8 +80,9 @@ module.exports = class ConfigCommand extends Command {
         • Staff Roles: ${roles.map(role => role.name).join(', ') || 'None set'}
         • Vote Emojis: ${emojiSets[voteEmojis] || 'Default'}
         • Total Suggestions: ${gSuggestions.length || 'None'}
-        • Total Blacklists: ${gBlacklists.length || 'None'}`;
-
+        • Total Blacklists: ${gBlacklists.length || 'None'}
+        • Responses Required: ${responses[gSettings.responseRequired] || 'False'}`;
+        
         return message.channel.send(config, { code: 'asciidoc' });
     }
 };
