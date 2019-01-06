@@ -5,7 +5,7 @@ module.exports = class SetResponsesCommand extends Command {
         super(client, {
             name: 'setresponses',
             category: 'Admin',
-            description: 'Set if a response is required or not for approving/rejecting suggestions.',
+            description: 'Set if a response is required or not for rejecting suggestions.',
             adminOnly: true,
             botPermissions: ['MANAGE_MESSAGES'],
             usage: 'setresponses <true/false>'
@@ -29,7 +29,7 @@ module.exports = class SetResponsesCommand extends Command {
             case 'true':
                 try {
                     await this.client.writeSettings(message.guild, { responseRequired: true });
-                    message.channel.send('Responses required set to `true`. This means a response **is required** when using the `approve` or `reject` commands.').then(msg => msg.delete(5000));
+                    message.channel.send('Responses required set to `true`. This means a response **is required** when using the `reject` command.').then(msg => msg.delete(5000));
                 } catch (err) {
                     this.client.logger.error(err);
                     return message.channel.send(`Error setting required responses: **${err.message}**.`);
@@ -38,7 +38,7 @@ module.exports = class SetResponsesCommand extends Command {
             case 'false':
                 try {
                     await this.client.writeSettings(message.guild, { responseRequired: false });
-                    message.channel.send('Responses required set to `false`. This means a response **is not required** when using the `approve` or `reject` commands.').then(msg => msg.delete(5000));
+                    message.channel.send('Responses required set to `false`. This means a response **is not required** when using the `reject` command.').then(msg => msg.delete(5000));
                 } catch (err) {
                     this.client.logger.error(err);
                     return message.channel.send(`Error setting required responses: **${err.message}**.`);
