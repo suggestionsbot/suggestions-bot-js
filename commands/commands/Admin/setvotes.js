@@ -20,8 +20,8 @@ module.exports = class SetVotesCommand extends Command {
 
         await message.delete().catch(O_o => {});
 
-        let gSettings = await this.client.getSettings(message.guild).catch(err => {
-            this.client.logger.error(err);
+        let gSettings = await this.client.settings.getSettings(message.guild).catch(err => {
+            this.client.logger.error(err.stack);
             return message.channel.send(`Error querying the database for this guild's information: **${err.message}**.`);
         });
 
@@ -39,20 +39,20 @@ module.exports = class SetVotesCommand extends Command {
 
             if (args[0] && (setID > voteEmojis.length - 1)) {
                 return message.channel.send(`**${setID}** is not a valid emoji set id!`)
-                    .then(msg => msg.delete(3000).catch(err => this.client.logger.error(err)));
+                    .then(msg => msg.delete(3000).catch(err => this.client.logger.error(err.stack)));
             }
 
             for (let i = 0; i < voteEmojis.length; i++) {
                 if (args[0] && (setID === voteEmojis[i].id)) {
-                    this.client.writeSettings(message.guild, {
+                    this.client.settings.writeSettings(message.guild, {
                         voteEmojis: voteEmojis[i].name
                     }).catch(err => {
-                        this.client.logger.error(err);
+                        this.client.logger.error(err.stack);
                         return message.channel.send(`Error updating the default emoji set: **${err.message}**.`);
                     });
 
                     this.client.logger.log(`The default vote emojis in the guild ${message.guild.name} (${message.guild.id}) has been changed to ${voteEmojis[i].emojis.join(' ')}.`);
-                    return message.channel.send(`The default vote emojis have been changed to ${voteEmojis[i].emojis.join(' ')}.`).then(msg => msg.delete(5000).catch(err => this.client.logger.error(err)));
+                    return message.channel.send(`The default vote emojis have been changed to ${voteEmojis[i].emojis.join(' ')}.`).then(msg => msg.delete(5000).catch(err => this.client.logger.error(err.stack)));
                 } 
             }
         }

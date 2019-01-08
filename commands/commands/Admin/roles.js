@@ -19,8 +19,8 @@ module.exports = class RolesCommand extends Command {
 
         await message.delete().catch(O_o => {});
 
-        let gSettings = await this.client.getSettings(message.guild).catch(err => {
-            this.client.logger.error(err);
+        let gSettings = await this.client.settings.getSettings(message.guild).catch(err => {
+            this.client.logger.error(err.stack);
             return message.channel.send(`Error querying the database for this guild's information: **${err.message}**.`);
         });
 

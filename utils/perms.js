@@ -28,7 +28,6 @@ const permissions = {
     'MANAGE_ROLES': 'Manage Roles',
     'MANAGE_WEBHOOKS': 'Manage Webhooks',
     'MANAGE_EMOJIS': 'Mange Emojis',
-
 };
 
 module.exports = permissions;

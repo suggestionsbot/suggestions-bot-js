@@ -24,12 +24,13 @@ module.exports = class MySuggestionsCommand extends Command {
 
         const sUser = message.mentions.users.first() || message.author;
 
-        let gSuggestions = await this.client.getGuildMemberSuggestions(message.guild, sUser).catch(err => {
-            this.client.logger.error(err);
+        let gSuggestions = await this.client.suggestions.getGuildMemberSuggestions(message.guild, sUser).catch(err => {
+            this.client.logger.error(err.stack);
             return message.channel.send(`Error querying the database for your suggestions: **${err.message}**.`);
         });
+        let sortedSuggestions = gSuggestions.sort((a, b) => b._id.getTimestamp() - a._id.getTimestamp());
 
-        if (gSuggestions.length === 0) return message.channel.send(`No suggestions data exists for **${sUser.tag}** in this guild!`).then(msg => msg.delete(3000)).catch(err => this.client.logger.error(err));
+        if (gSuggestions.length === 0) return message.channel.send(`No suggestions data exists for **${sUser.tag}** in this guild!`).then(msg => msg.delete(3000)).catch(err => this.client.logger.error(err.stack));
 
         let approved = 0;
         let rejected = 0;
@@ -43,26 +44,17 @@ module.exports = class MySuggestionsCommand extends Command {
         if (approved >= 1) suggestions.push(`Approved: \`${approved}\``);
         if (rejected >= 1) suggestions.push(`Rejected: \`${rejected}\``);
 
-        const lastDate = moment(new Date(gSuggestions[0].time)).format('MM/DD/YY');
-        const lastsID = gSuggestions[0].sID;
-        const lastSuggestion = `${lastsID} (${lastDate})`;
+        const lastSuggestion = sortedSuggestions[0];
+
+        const lastDate = moment(new Date(lastSuggestion.time)).format('MM/DD/YY');
+        const lastsID = lastSuggestion.sID;
+        const lastSuggestionInfo = `${lastsID} (${lastDate})`;
 
         const createdOn = moment.utc(message.guild.createdAt).format('MM/DD/YY @ h:mm A (z)');
         const joinedOn = moment.utc(message.guild.members.get(sUser.id).joinedAt).format('MM/DD/YY @ h:mm A (z)');
 
         const embed = new RichEmbed()
             .setAuthor(sUser.tag + ' | ' + message.guild.name, sUser.avatarURL)
-            // .setDescription(`
-            // **Suggestions Data**
-
-            // **Total:** ${gSuggestions.length}
-
-            // **Approved:** ${approved}
-
-            // **Rejected:** ${rejected}
-
-            // **Last Suggestion:** ${lastsID} (${lastDate})
-            // `)
             .setColor(embedColor)
             .setThumbnail(sUser.avatarURL)
             .addField('User', `${sUser} \`[${sUser.id}]\``)
@@ -72,7 +64,7 @@ module.exports = class MySuggestionsCommand extends Command {
 
         if (gSuggestions.length >= 1) {
             embed.addField('Suggestions', suggestions.join('\n'));
-            embed.addField('Last Suggestion (sID)', lastSuggestion);
+            embed.addField('Last Suggestion (sID)', lastSuggestionInfo);
         }
 
         return message.channel.send(embed);

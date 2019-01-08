@@ -34,13 +34,13 @@ module.exports = class SuggestCommand extends Command {
         let id = crypto.randomBytes(20).toString('hex').slice(12, 20);
         let time = moment(Date.now());
 
-        let gSettings = await this.client.getSettings(message.guild).catch(err => {
-            this.client.logger.error(err);
+        let gSettings = await this.client.settings.getSettings(message.guild).catch(err => {
+            this.client.logger.error(err.stack);
             return message.channel.send(`Error querying the database for this guild's information: **${err.message}**.`);
         });
 
-        let verifySuggestion = await this.client.getGlobalSuggestion(id).catch(err => {
-            this.client.logger.error(err);
+        let verifySuggestion = await this.client.suggestions.getGlobalSuggestion(id).catch(err => {
+            this.client.logger.error(err.stack);
             return message.channel.send(`Error querying the database for this guild's suggestions: **${err.message}**.`);
         });
 
@@ -68,7 +68,7 @@ module.exports = class SuggestCommand extends Command {
             .setTimestamp();
 
         const suggestion = args.join(' ');
-        if (!suggestion) return message.channel.send(`Usage: \`${prefix + cmdUsage}\``).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err));
+        if (!suggestion) return message.channel.send(`Usage: \`${prefix + cmdUsage}\``).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
 
         const submittedOn = moment.utc(message.createdAt).format('MM/DD/YY @ h:mm A (z)');
 
@@ -93,7 +93,7 @@ module.exports = class SuggestCommand extends Command {
         if (!reactions) return noChannelPerms(message, sChannel, 'ADD_REACTIONS');
 
         sUser.send(dmEmbed).catch(err => {
-            this.client.logger.error(err);
+            this.client.logger.error(err.stack);
             message.channel.send(stripIndents `An error occurred DMing you your suggestion information: **${err.message}**. Please make sure you are able to receive messages from server members.
         
         For reference, your suggestion ID (sID) is **${id}**. Please wait for staff member to approve/reject your suggestion.`).then(msg => msg.delete(5000));
@@ -123,7 +123,7 @@ module.exports = class SuggestCommand extends Command {
                 });
             })
             .catch(err => {
-                this.client.logger.error(err);
+                this.client.logger.error(err.stack);
                 return message.channel.send(`An error occurred adding reactions to this suggestion: **${err.message}**.`);
             });
 
@@ -139,7 +139,7 @@ module.exports = class SuggestCommand extends Command {
         });
 
         await newSuggestion.save().then(res => this.client.logger.log(`New suggestion: \n ${res}`)).catch(err => {
-            this.client.logger.error(err);
+            this.client.logger.error(err.stack);
             return message.channel.send(`An error occurred saving this suggestion in the database: **${err.message}**.`);
         });
         await message.react('✉');

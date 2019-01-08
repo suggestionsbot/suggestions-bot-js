@@ -26,7 +26,7 @@ module.exports = async (client) => {
             let data = {
                 guildCount: client.guilds.size
             };
-            let posted = await fetch(`https://discord.bots.gg/api/v1/bots/474051954998509571/stats`, {
+            let posted = await fetch(`https://discord.bots.gg/api/v1/bots/${client.user.id}/stats`, {
                 method: 'POST',
                 headers: {
                     'Authorization': tokens.botsggToken,

@@ -28,12 +28,12 @@ module.exports = class BlacklistCommand extends Command {
     
         await message.delete().catch(O_o=>{});
 
-        let gSettings = await this.client.getSettings(message.guild).catch(err => {
-            this.client.logger.error(err);
+        let gSettings = await this.client.settings.getSettings(message.guild).catch(err => {
+            this.client.logger.error(err.stack);
             return message.channel.send(`Error querying the database for this guild's information: **${err.message}**.`);
         });
 
-        let gBlacklist = await this.client.getGuildBlacklist(message.guild);
+        let gBlacklist = await this.client.blacklists.getGuildBlacklist(message.guild);
 
         let caseNum = gBlacklist.length + 1;
 
@@ -58,26 +58,26 @@ module.exports = class BlacklistCommand extends Command {
             }
     
             await blEmbed.setTitle(`${this.client.user.username} | Blacklisted User`);
-            await blEmbed.setDescription(`These users are currently blacklisted from using any of the bot commands in this guild. Use \`${gSettings.prefix + usage} help\` for command information.`);
+            await blEmbed.setDescription(`These users are currently blacklisted from using any of the bot commands in this guild. Use \`${gSettings.prefix + name} help\` for command information.`);
             await blEmbed.setColor(embedColor);
     
-            if (gBlacklist.length === 0) return message.channel.send(`There are no blacklisted users! Use \`${gSettings.prefix + name} <help>\` for more information.`).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err));
-            if (active === 0) return message.channel.send(`There are currently no active blacklisted users. Use \`${gSettings.prefix + name} <help>\` for more information.`).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err));
+            if (gBlacklist.length === 0) return message.channel.send(`There are no blacklisted users! Use \`${gSettings.prefix + name} <help>\` for more information.`).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
+            if (active === 0) return message.channel.send(`There are currently no active blacklisted users. Use \`${gSettings.prefix + name} <help>\` for more information.`).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
     
             return message.channel.send(blEmbed);
         }
 
-        if (args[0] === 'help') return message.channel.send(`Usage: \`${gSettings.prefix + usage}\``).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err));
+        if (args[0] === 'help') return message.channel.send(`Usage: \`${gSettings.prefix + usage}\``).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
 
         let blacklisted = args[1];
         let reason = args.slice(2).join(' ');
         const userIDCheck = /^\d+$/;
-        if (!userIDCheck.test(blacklisted)) return message.channel.send('You must supply a user ID.').then(msg => msg.delete(3000)).catch(err => this.client.logger.error(err));
+        if (!userIDCheck.test(blacklisted)) return message.channel.send('You must supply a user ID.').then(msg => msg.delete(3000)).catch(err => this.client.logger.error(err.stack));
         const blUser = blacklisted.match(userIDCheck)[0];
 
         switch(args[0]) {
             case 'add': {
-                if (!reason) return message.channel.send('Please provide a reason!').then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err));
+                if (!reason) return message.channel.send('Please provide a reason!').then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
 
                 const newBlacklist = await new Blacklist({
                     _id: mongoose.Types.ObjectId(),
@@ -93,7 +93,7 @@ module.exports = class BlacklistCommand extends Command {
                 });
 
                 await newBlacklist.save().then(res => this.client.logger.log(`New Blacklist: \n ${res}`)).catch(err => {
-                    this.client.logger.error(err);
+                    this.client.logger.error(err.stack);
                     return message.channel.send(`There was an error adding this user to the blacklist: **${err.message}**.`);
                 });
                 await this.client.logger.log(`${message.member.user.tag} ("${message.author.id}") has issued a blacklist to the user ${blUser}. [${moment(message.createdAt)}]`);
@@ -103,7 +103,7 @@ module.exports = class BlacklistCommand extends Command {
                 await blEmbed.addField('Reason', reason, true);
                 await blEmbed.addField('Issuer', `${message.member.user.tag} (${message.author.id})`);
 
-                message.channel.send(blEmbed).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err));
+                message.channel.send(blEmbed).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
                 break;
             }
             case 'remove': {
@@ -124,16 +124,16 @@ module.exports = class BlacklistCommand extends Command {
                     await blEmbed.addField('User ID', `${blUser}`, true);
                     await blEmbed.addField('Issuer', `${message.member.user.tag} (${message.author.id})`);
     
-                    await message.channel.send(blEmbed).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err));
+                    await message.channel.send(blEmbed).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
                 })
                 .catch(err => {
-                    this.client.logger.error(err);
+                    this.client.logger.error(err.stack);
                     return message.channel.send(`There was an error removing this user from the blacklist: **${err.message}**.`);
                 });
                 break;
             }
             default:
-                message.channel.send(`Usage: \`${gSettings.prefix + usage}\``).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err));
+                message.channel.send(`Usage: \`${gSettings.prefix + usage}\``).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
                 break;
         }
         return;

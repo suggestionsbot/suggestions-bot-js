@@ -22,19 +22,19 @@ module.exports = class SIDCommand extends Command {
 
         message.delete().catch(O_o => {});
 
-        let gSettings = await this.client.getSettings(message.guild).catch(err => {
-            this.client.logger.error(err);
+        let gSettings = await this.client.settings.getSettings(message.guild).catch(err => {
+            this.client.logger.error(err.stack);
             return message.channel.send(`Error querying the database for this guild's information: **${err.message}**.`);
         });
 
-        if (!args[0]) return message.channel.send(`Usage: \`${gSettings.prefix + usage}\``).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err));
+        if (!args[0]) return message.channel.send(`Usage: \`${gSettings.prefix + usage}\``).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
 
-        let sID = await this.client.getGuildSuggestion(message.guild, args[0]).catch(err => {
-            this.client.logger.error(err);
+        let sID = await this.client.suggestions.getGuildSuggestion(message.guild, args[0]).catch(err => {
+            this.client.logger.error(err.stack);
             return message.channel.send(`Error querying the database for this suggestion: **${err.message}**.`);
         });
 
-        if (await this.client.isEmpty(sID)) return message.channel.send(`Could not find the suggestion with the sID **${args[0]}** in the guild database.`).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err));
+        if (await this.client.isEmpty(sID)) return message.channel.send(`Could not find the suggestion with the sID **${args[0]}** in the guild database.`).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
         
         let { 
             time,

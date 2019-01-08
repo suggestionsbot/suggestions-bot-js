@@ -26,12 +26,12 @@ module.exports = class ApproveCommand extends Command {
 
         message.delete().catch(O_o => {});
 
-        let gSettings = await this.client.getSettings(message.guild).catch(err => {
-            this.client.logger.error(err);
+        let gSettings = await this.client.settings.getSettings(message.guild).catch(err => {
+            this.client.logger.error(err.stack);
             return message.channel.send(`Error querying the database for this guild's information: **${err.message}**.`);
         });
 
-        if (!gSettings.staffRoles) return message.channel.send('No staff roles exist! Please create them or contact a server administrator to handle suggestions.').then(msg =>  msg.delete(5000)).catch(err => this.client.logger.error(err));
+        if (!gSettings.staffRoles) return message.channel.send('No staff roles exist! Please create them or contact a server administrator to handle suggestions.').then(msg =>  msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
 
         const suggestionsChannel = message.guild.channels.find(c => c.name === gSettings.suggestionsChannel) || (message.guild.channels.find(c => c.toString() === gSettings.suggestionsChannel)) || (message.guild.channels.get(gSettings.suggestionsChannel));
         const suggestionsLogs = message.guild.channels.find(c => c.name === gSettings.suggestionsLogs) || (message.guild.channels.find(c => c.toString() === gSettings.suggestionsLogs)) || (message.guild.channels.get(gSettings.suggestionsLogs));
@@ -39,16 +39,16 @@ module.exports = class ApproveCommand extends Command {
 
         let id = args[0];
         let reply = args.slice(1).join(' ');
-        if (!id) return message.channel.send(`Usage: \`${gSettings.prefix + usage}\``).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err));
+        if (!id) return message.channel.send(`Usage: \`${gSettings.prefix + usage}\``).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
 
         let date = moment(Date.now()).format();
 
-        let sID = await this.client.getGuildSuggestion(message.guild, id).catch(err => {
-            this.client.logger.error(err);
+        let sID = await this.client.suggestions.getGuildSuggestion(message.guild, id).catch(err => {
+            this.client.logger.error(err.stack);
             return message.channel.send(`Error querying the database for this guild's suggestions: **${err.message}**.`);
         });
 
-        if (await this.client.isEmpty(sID)) return message.channel.send(`Could not find the suggestion with the sID **${args[0]}** in the guild database.`).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err));
+        if (await this.client.isEmpty(sID)) return message.channel.send(`Could not find the suggestion with the sID **${args[0]}** in the guild database.`).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
 
         let {
             userID,
@@ -57,13 +57,13 @@ module.exports = class ApproveCommand extends Command {
             status
         } = sID;
 
-        if (status === 'approved') return message.channel.send(`sID **${id}** has already been approved. Cannot do this action again.`).then(msg => msg.delete(3000)).catch(err => this.client.logger.error(err));
+        if (status === 'approved') return message.channel.send(`sID **${id}** has already been approved. Cannot do this action again.`).then(msg => msg.delete(3000)).catch(err => this.client.logger.error(err.stack));
 
         const sUser = message.guild.members.get(userID);
-        if (!sUser) message.channel.send(`**${username}** is no longer in the guild, but their suggestion will still be approved.`).then(msg => msg.delete(3000)).catch(err => this.client.logger.error(err));
+        if (!sUser) message.channel.send(`**${username}** is no longer in the guild, but their suggestion will still be approved.`).then(msg => msg.delete(3000)).catch(err => this.client.logger.error(err.stack));
 
         let fetchedMessages = await suggestionsChannel.fetchMessages({ limit: 100 }).catch(err => {
-            this.client.logger.error(err);
+            this.client.logger.error(err.stack);
             return message.channel.send(`There was an error fetching messages from the ${suggestionsChannel}: **${err.message}**.`);
         });
 
@@ -168,7 +168,7 @@ module.exports = class ApproveCommand extends Command {
                 sMessage.edit(approvedEmbed).then(msg => msg.delete(5000));
                 suggestionsLogs.send(logsEmbed);
                 sUser.send(dmEmbed).catch(err => {
-                    this.client.logger.error(err);
+                    this.client.logger.error(err.stack);
                     message.channel.send(`An error occurred DMing **${sUser.displayName}** their suggestion information: **${err.message}**.`);
                 });
 
@@ -192,7 +192,7 @@ module.exports = class ApproveCommand extends Command {
                     if (reply) this.client.logger.log(`sID ${id} has been approved in the guild "${message.guild.name}" (${message.guild.id}) with the response "${reply}".`);
                 })   
                 .catch(err => {
-                    this.client.logger.error(err);
+                    this.client.logger.error(err.stack);
                     message.delete(3000).catch(O_o => {});
                     message.channel.send(`Error updating this suggestion in the database: **${err.message}**`);
                 });

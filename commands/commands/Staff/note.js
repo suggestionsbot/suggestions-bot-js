@@ -28,9 +28,9 @@ module.exports = class NoteCommand extends Command {
 
         let gSettings = {};
         try {
-            gSettings = await this.client.getSettings(message.guild);
+            gSettings = await this.client.settings.getSettings(message.guild);
         } catch (err) {
-            this.client.logger.error(err);
+            this.client.logger.error(err.stack);
             return message.channel.send(`Error querying the database for this guild's information: **${err.message}**.`);
         }
 
@@ -38,16 +38,16 @@ module.exports = class NoteCommand extends Command {
 
         let id = args[0];
         let note = args.slice(1).join(' ');
-        if (!id && !note) return message.channel.send(`Usage: \`${gSettings.prefix + usage}\``).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err));
+        if (!id && !note) return message.channel.send(`Usage: \`${gSettings.prefix + usage}\``).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
 
         let date = moment(Date.now()).format();
 
-        let sID = await this.client.getGuildSuggestion(message.guild, id).catch(err => {
-            this.client.logger.error(err);
+        let sID = await this.client.suggestions.getGuildSuggestion(message.guild, id).catch(err => {
+            this.client.logger.error(err.stack);
             return message.channel.send(`Error querying the database for this guild's suggestions: **${err.message}**.`);
         });
 
-        if (await this.client.isEmpty(sID)) return message.channel.send(`Could not find the suggestion with the sID **${args[0]}** in the guild database.`).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err));
+        if (await this.client.isEmpty(sID)) return message.channel.send(`Could not find the suggestion with the sID **${args[0]}** in the guild database.`).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
 
         let {
             userID,
@@ -55,13 +55,13 @@ module.exports = class NoteCommand extends Command {
             status
         } = sID;
 
-        if (status === 'approved' || status === 'rejected') return message.channel.send(`sID **${id}** has already been approved or rejected. Cannot do this action again.`).then(msg => msg.delete(3000)).catch(err => this.client.logger.error(err));
+        if (status === 'approved' || status === 'rejected') return message.channel.send(`sID **${id}** has already been approved or rejected. Cannot do this action again.`).then(msg => msg.delete(3000)).catch(err => this.client.logger.error(err.stack));
 
         const sUser = message.guild.members.get(userID);
-        if (!sUser) message.channel.send(`**${username}** is no longer in the guild, but a note will still be added to the suggestion.`).then(msg => msg.delete(3000)).catch(err => this.client.logger.error(err));
+        if (!sUser) message.channel.send(`**${username}** is no longer in the guild, but a note will still be added to the suggestion.`).then(msg => msg.delete(3000)).catch(err => this.client.logger.error(err.stack));
 
         let fetchedMessages = await suggestionsChannel.fetchMessages({ limit: 100 }).catch(err => {
-            this.client.logger.error(err);
+            this.client.logger.error(err.stack);
             return message.channel.send(`There was an error fetching messages from the ${suggestionsChannel}: **${err.message}**.`);
         });
 
@@ -116,7 +116,7 @@ module.exports = class NoteCommand extends Command {
                     message.channel.send(`Added a note to **${id}**: **${note}**.`).then(msg => msg.delete(5000));
                     sMessage.edit(suggestion);
                     sUser.send(dmEmbed).catch(err => {
-                        this.client.logger.error(err);
+                        this.client.logger.error(err.stack);
                         message.channel.send(`An error occurred DMing **${sUser.displayName}** their suggestion note: **${err.message}**.`);
                     });
 
@@ -133,14 +133,14 @@ module.exports = class NoteCommand extends Command {
                         this.client.logger.log(`sID ${id} had a note added by ${message.author.tag} (${message.author.id}) "${message.guild.name}" (${message.guild.id}).`);
                     })   
                     .catch(err => {
-                        this.client.logger.error(err);
+                        this.client.logger.error(err.stack);
                         message.delete(3000).catch(O_o => {});
                         return message.channel.send(`Error updating this suggestion in the database: **${err.message}**`);
                     });
                 }
             });
         } catch (err) {
-            this.client.logger.error(err);
+            this.client.logger.error(err.stack);
             message.delete(3000).catch(O_o => {});
             message.channel.send(`Error adding a note to this suggestion in the database: **${err.message}**`);
         }

@@ -5,12 +5,13 @@ const { promisify } = require('util');
 const readdir = promisify(require('fs').readdir);
 const klaw = require('klaw');
 const path = require('path');
-const mongoose = require('mongoose');
 const { oneLine } = require('common-tags');
-const Settings = require('./models/settings');
-const Suggestion = require('./models/suggestions');
-const Blacklist = require('./models/blacklist');
 const ErrorHandler = require('./utils/handlers');
+const Mongoose = require('./utils/mongoose');
+
+// Stores for handling various functions
+const { BlacklistsStore, SuggestionsStore, SettingsStore } = require('./stores');
+
 require('dotenv-flow').config();
 
 class Suggestions extends Client {
@@ -25,12 +26,15 @@ class Suggestions extends Client {
         this.logger = require('./utils/logger');
 
         this.wait = require('util').promisify(setTimeout);
-    }
 
-    /*
-        At some point, separate all these functions and such into their own stores for
-        organization and portability for the future.
-    */
+        this.suggestions = new SuggestionsStore(this);
+
+        this.settings = new SettingsStore(this);
+
+        this.blacklists = new BlacklistsStore(this);
+
+        this.mongoose = new Mongoose(this);
+    }
 
     /* 
     COMMAND LOAD AND UNLOAD
@@ -66,106 +70,6 @@ class Suggestions extends Client {
 
         delete require.cache[require.resolve(`${cmdPath}${path.sep}${cmdName}.js`)];
         return;
-    }
-
-    /* SETTINGS FUNCTIONS
-    These functions are used by any and all location in the bot that wants to either
-    read the current *complete* guild settings (default + overrides, merged) or that
-    wants to change settings for a specific guild.
-    */
-
-    // getSettings merges the client defaults with the guild settings in MongoDB
-    async getSettings(guild) {
-        
-        let gSettings = await Settings.findOne({ guildID: guild.id }) || this.config.defaultSettings;
-        let check = await this.isEmpty(gSettings);
-
-        if (!check) return gSettings;
-        else throw ErrorHandler.NoGuildSettings;
-    }
-
-    // writeSettings overrides, or adds, any configuration item that is different
-    // than the current guild schema. This allows me to write fewer lines of code!
-    async writeSettings(guild, newSettings) {
-
-        let gSettings = await Settings.findOne({ guildID: guild.id }).catch(err => this.logger.error(err));
-
-        let settings = gSettings;
-        // maybe check if settings object is empty, return an error?
-        if (typeof settings != 'object') settings = {};
-        for (const key in newSettings) {
-            if (gSettings[key] !== newSettings[key]) settings[key] = newSettings[key];
-            else return;
-        }
-
-        return await Settings.findOneAndUpdate({ guildID: guild.id }, settings).catch(err => this.logger.error(err));
-    }
-
-    // this method allows a single suggestion in a guild to be queried
-    async getGuildSuggestion(guild, sID) {
-        let gSuggestion = await Suggestion.findOne({ $and: [{ guildID: guild.id, sID: sID }] }).catch(err => this.logger.error(err));
-
-        const guildSuggestion = gSuggestion || {};
-        return guildSuggestion;
-    }
-
-    // this method updates a single suggestion in a guild in the database
-    // async updateGuildSuggeston(guild, sID, newUpdates) {
-    //     let gSuggestion = await Suggestion.findOne({ $and: [{ guildID: guild.id, sID: sID }] }).catch(err => this.client.logger.error(err));
-
-    //     const guildSuggestion = gSuggestion || {};
-    //     return guildSuggestion;
-    // }
-
-    // this method allows for a single suggestion to be queried, regardless of the guild (for administrative use)
-    async getGlobalSuggestion(sID) {
-        let gSuggestion = await Suggestion.findOne({ sID: sID }).catch(err => this.logger.error(err));
-
-        const globalSuggestion = gSuggestion || {};
-        return globalSuggestion;
-    }
-
-    // this method gets a guild's blacklist from the database
-    async getGuildBlacklist(guild) {
-        let gBlacklist = await Blacklist.find({ guildID: guild.id }).catch(err => this.logger.error(err));
-
-        const guildBlacklist = gBlacklist || {};
-        return guildBlacklist;
-    }
-
-    // this method gets the global blacklist from the database
-    async getGlobalBlacklist() {
-        let gBlacklist = await Blacklist.find({scope: 'global' }).catch(err => this.logger.error(err));
-
-        const guildBlacklist = gBlacklist || {};
-        return guildBlacklist;
-    }
-
-    // this method gets the guild's suggestions from the database
-    async getGuildSuggestions(guild) {
-        let gSuggestions = await Suggestion.find({ guildID: guild.id }).catch(err => this.logger.error(err));
-
-        const guildSuggestions = gSuggestions || {};
-        return guildSuggestions;
-    }
-
-    // this method gets the global suggestions from the database
-    async getGlobalSuggestions() {
-        let gSuggestions = await Suggestion.find({}).catch(err => this.logger.error(err));
-
-        let globalSuggestions = gSuggestions || {};
-        return globalSuggestions;
-    }
-
-    // this method gets a guild member's suggestions in a guild from the database
-    async getGuildMemberSuggestions(guild, member) {
-        let gSuggestions = await Suggestion
-            .find({ $and: [{ guildID: guild.id, userID: member.id }] })
-            .sort({ time: -1 })
-            .catch(err => this.logger.error(err));
-
-        const memberSuggstions = gSuggestions || {};
-        return memberSuggstions;
     }
     
     // this method checks if an object is empty
@@ -224,27 +128,26 @@ class Suggestions extends Client {
     }
 
     // this method checks if responses for approving/rejecting suggestions are required or not
-    async isResponseRequired(guild) {
-        let gSettings = {};
-        try {
-            gSettings = await this.getSettings(guild);
-        } catch (err) {
-            this.logger.error(err);
-        }
+    // async isResponseRequired(guild) {
+    //     let gSettings = {};
+    //     try {
+    //         gSettings = await this.settings.getSettings(guild);
+    //     } catch (err) {
+    //         this.logger.error(err.stack);
+    //     }
 
-        let required = false;
+    //     let required = false;
 
-        if (gSettings.responseRequired) required = true;
-        else required = false;
+    //     if (gSettings.responseRequired) required = true;
+    //     else required = false;
 
-        return required;
-    }
+    //     return required;
+    // }
 }
 
 const client = new Suggestions();
 
-const init = async () => {
-
+(async () => {
     klaw('./commands/commands').on('data', (item) => {
         const cmdFile = path.parse(item.path);
         if (!cmdFile.ext || cmdFile.ext !== '.js') return;
@@ -263,47 +166,40 @@ const init = async () => {
     });
 
     client.login();
-};
+    client.mongoose.init(); // initialize connection to the database
+})();
 
-init();
-
-client.on('disconnect', () => client.logger.warn('Bot is disconnecting...'))
-    .on('reconnecting', () => client.logger.log('Bot reconnecting...', 'log'))
-    .on('error', e => client.logger.error(e))
-    .on('warn', info => client.logger.warn(info))
-    .on('commandBlocked', (cmd, reason) => {
-        client.logger.warn(oneLine`
+client.on('disconnect', () => client.logger.warn('Bot is disconnecting...'));
+client.on('reconnecting', () => client.logger.log('Bot reconnecting...', 'log'));
+client.on('error', e => client.logger.error(e));
+client.on('warn', info => client.logger.warn(info));
+client.on('commandBlocked', (cmd, reason) => {
+    client.logger.warn(oneLine `
             Command ${cmd ? `${cmd.help.category}:${cmd.help.name}` : ''}
             blocked; ${reason}
         `);
-    });
-
-const dbOptions = {
-    useNewUrlParser: true,
-    autoIndex: false,
-    reconnectTries: Number.MAX_VALUE,
-    reconnectInterval: 500,
-    poolSize: 5,
-    connectTimeoutMS: 10000,
-    family: 4
-};
-
-mongoose.connect(process.env.MONGO_URI, dbOptions);
-mongoose.set('useFindAndModify', false);
-mongoose.Promise = global.Promise;
-
-mongoose.connection.on('connected', () => {
-    client.logger.log('Mongoose connection successfully opened!', 'ready');
 });
-
-mongoose.connection.on('err', err => {
-    client.logger.error(`Mongoose connection error: \n ${err}`);
+client.on('userBlacklisted', (user, guild, cmd, global = false) => {
+    if (global) {
+        client.logger.warn(oneLine `
+            User "${user ? `${user.tag} (${user.id})` : ''}"
+             in the 
+            Guild "${guild ? `${guild.name} (${guild.id})` : ''}"
+             tried to use the
+            Command "${cmd ? `${cmd.help.category}:${cmd.help.name}` : ''}",
+             but is blacklisted from using bot commands globally.
+        `);
+    } else {
+        client.logger.warn(oneLine `
+            User "${user ? `${user.tag} (${user.id})` : ''}"
+             in the 
+            Guild "${guild ? `${guild.name} (${guild.id})` : ''}"
+             tried to use the
+            Command "${cmd ? `${cmd.help.category}:${cmd.help.name}` : ''}",
+             but is blacklisted from using bot commands in the guild.
+        `);
+    }
 });
-
-mongoose.connection.on('disconnected', () => {
-    client.logger.log('Mongoose connection disconnected');
-});
-
 
 /* MISCELLANEOUS NON-CRITICAL FUNCTIONS */
 

@@ -38,27 +38,27 @@ module.exports = class {
             require('../utils/voting')(this.client);
 
             this.client.guilds.forEach(async g => {
-                let gSettings = await this.client.getSettings({
+                let gSettings = await this.client.settings.getSettings({
                     guildID: g.id
-                }).catch(err => this.client.logger.error(err));
+                }).catch(err => this.client.logger.error(err.stack));
 
                 if (!gSettings && g) await this.client.emit('guildCreate', g);
 
                 // if there's a new guild owner, update the database upon the ready event
-                // if (gSettings && gSettings.guildOwnerID !== g.ownerID) await this.client.writeSettings(g.id, { guildOwnerID: g.ownerID }).catch(err => this.client.logger.error(err));
+                // if (gSettings && gSettings.guildOwnerID !== g.ownerID) await this.client.writeSettings(g.id, { guildOwnerID: g.ownerID }).catch(err => this.client.logger.error(err.stack));
             });
 
             // Need to figure out a more efficient way of doing this I feel. Emitting the
             // "guildDelete" event doesn't seem the best way to do things because the guild
             // doesn't actually exist!
-            let gSettings = await Settings.find({}).catch(err => this.client.logger.error(err));
+            let gSettings = await Settings.find({}).catch(err => this.client.logger.error(err.stack));
             gSettings.map(async e => {
                 let g = this.client.guilds.get(e.guildID);
                 if (!g) {
                     await Settings.findOneAndDelete({
                         guildID: e.guildID
                     }, err => {
-                        if (err) this.client.logger.error(err);
+                        if (err) this.client.logger.error(err.stack);
 
                         this.client.logger.log(`Settings data deleted for guild ${e.guildName} (${e.guildID})`);
                     });
@@ -66,7 +66,7 @@ module.exports = class {
                     await Suggestion.deleteMany({
                         guildID: e.guildID
                     }, err => {
-                        if (err) this.client.logger.error(err);
+                        if (err) this.client.logger.error(err.stack);
 
                         this.client.logger.log(`Suggestions data deleted for guild ${e.guildName} (${e.guildID})`);
                     });
@@ -74,7 +74,7 @@ module.exports = class {
                     await Command.deleteMany({
                         guildID: e.guildID
                     }, err => {
-                        if (err) this.client.logger.error(err);
+                        if (err) this.client.logger.error(err.stack);
 
                         this.client.logger.log(`Command data deleted for guild ${e.guildName} (${e.guildID})`);
 
