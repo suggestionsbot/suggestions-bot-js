@@ -32,10 +32,11 @@ module.exports = class GuildInfoCommand extends Command {
         const createdOn = moment.utc(message.guild.createdAt).format('MM/DD/YY @ h:mm A (z)');
         const joinedOn = moment.utc(bot.joinedAt).format('MM/DD/YY @ h:mm A (z)');
 
-        let gSuggestions = await this.client.getGuildSuggestions(message.guild).catch(err => {
+        let gSuggestions = await this.client.suggestions.getGuildSuggestions(message.guild).catch(err => {
             this.client.logger.error(err);
             return message.channel.send(`Error querying the database for this guild's suggestions: **${err.message}**.`);
         });
+        let sortedSuggestions = gSuggestions.sort((a, b) => b._id.getTimestamp() - a._id.getTimestamp());
 
         let approved = 0;
         let rejected = 0;
@@ -49,9 +50,11 @@ module.exports = class GuildInfoCommand extends Command {
         if (approved >= 1) suggestions.push(`Approved: \`${approved}\``);
         if (rejected >= 1) suggestions.push(`Rejected: \`${rejected}\``);
 
-        const lastDate = moment(new Date(gSuggestions[0].time)).format('MM/DD/YY');
-        const lastsID = gSuggestions[0].sID;
-        const lastSuggestion = `${lastsID} (${lastDate})`;
+        const lastSuggestion = sortedSuggestions[0];
+
+        const lastDate = moment(new Date(lastSuggestion.time)).format('MM/DD/YY');
+        const lastsID = lastSuggestion.sID;
+        const lastSuggestionInfo = `${lastsID} (${lastDate})`;
 
         const serverEmbed = new RichEmbed()
             .setTitle(message.guild)
@@ -66,7 +69,7 @@ module.exports = class GuildInfoCommand extends Command {
 
         if (gSuggestions.length >= 1) {
             serverEmbed.addField('Suggestions', suggestions.join('\n'));
-            serverEmbed.addField('Last Suggestion (sID)', lastSuggestion);
+            serverEmbed.addField('Last Suggestion (sID)', lastSuggestionInfo);
         }
 
         return message.channel.send(serverEmbed);

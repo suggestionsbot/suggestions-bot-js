@@ -25,8 +25,8 @@ module.exports = class StaffSuggestCommand extends Command {
 
         await message.delete().catch(O_o => {});
 
-        let gSettings = await this.client.getSettings(message.guild).catch(err => {
-            this.client.logger.error(err);
+        let gSettings = await this.client.settings.getSettings(message.guild).catch(err => {
+            this.client.logger.error(err.stack);
             return message.channel.send(`Error querying the database for this guild's information: **${err.message}**.`);
         });
         
@@ -34,7 +34,7 @@ module.exports = class StaffSuggestCommand extends Command {
         const sChannel = message.guild.channels.find(c => c.name === gSettings.staffSuggestionsChannel) || message.guild.channels.find(c => c.toString() === gSettings.staffSuggestionsChannel) || message.guild.channels.get(gSettings.staffSuggestionsChannel);
         if (!sChannel) return noStaffSuggestions(message.channel);
 
-        if (!gSettings.staffRoles) return message.channel.send('No staff roles exist! Please create them or contact a server administrator to handle suggestions.').then(msg =>  msg.delete(5000)).catch(err => this.client.logger.error(err));
+        if (!gSettings.staffRoles) return message.channel.send('No staff roles exist! Please create them or contact a server administrator to handle suggestions.').then(msg =>  msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
 
         const embed = new RichEmbed()
             .setDescription(`Hey, ${sUser}. Your suggestion has been added in the ${sChannel.toString()} channel to be voted on!`)
@@ -44,7 +44,7 @@ module.exports = class StaffSuggestCommand extends Command {
             .setTimestamp();
 
         const suggestion = args.join(' ');
-        if (!suggestion) return message.channel.send(`Usage: \`${gSettings.prefix + usage}\``).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err));
+        if (!suggestion) return message.channel.send(`Usage: \`${gSettings.prefix + usage}\``).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
 
         const submittedOn = moment.utc(message.createdAt).format('MM/DD/YY @ h:mm A (z)');
 
@@ -68,7 +68,7 @@ module.exports = class StaffSuggestCommand extends Command {
         if (!sendMsgs) return noChannelPerms(message, sChannel, 'SEND_MESSAGES');
         if (!reactions) return noChannelPerms(message, sChannel, 'ADD_REACTIONS');
 
-        message.channel.send(embed).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err));
+        message.channel.send(embed).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
 
         this.client.logger.log(stripIndents`A new staff suggestion has been created:
         Author: ${sUser.tag} (ID: ${sUser.id})
@@ -83,7 +83,7 @@ module.exports = class StaffSuggestCommand extends Command {
                 await msg.react(`❌`);
             })
             .catch(err => {
-                this.client.logger.error(err);
+                this.client.logger.error(err.stack);
                 return message.channel.send(`An error occurred adding reactions to this suggestion: **${err.message}**.`);
             });
     }

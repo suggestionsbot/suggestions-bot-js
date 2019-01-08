@@ -21,13 +21,13 @@ module.exports = class SetTimezoneCommand extends Command {
 
         let gSettings = {};
         try {
-            gSettings = await this.client.getSettings(message.guild);
+            gSettings = await this.client.settings.getSettings(message.guild);
         } catch (err) {
-            this.client.logger.error(err);
+            this.client.logger.error(err.stack);
             return message.channel.send(`Error querying the database for this guild's information: **${err.message}**.`);
         }
 
-        if (!args[0]) return message.channel.send(`Usage: \`${gSettings.prefix + usage}\``).then(m => m.delete(5000)).catch(err => this.client.logger.error(err));
+        if (!args[0]) return message.channel.send(`Usage: \`${gSettings.prefix + usage}\``).then(m => m.delete(5000)).catch(err => this.client.logger.error(err.stack));
 
 
         return;

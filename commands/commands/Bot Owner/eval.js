@@ -15,9 +15,9 @@ module.exports = class EvalCommand extends Command {
     async run(message, args) {
 
         const cmdUsage = this.help.usage;
-        const prefix = await this.client.getSettings(message.guild).then(res => res.prefix);
+        const prefix = await this.client.settings.getSettings(message.guild).then(res => res.prefix);
         const code = args.join(' ');
-        if (!code) return message.channel.send(`Usage: \`${prefix + cmdUsage}\``).then(msg => msg.delete(3000)).catch(err => this.client.logger.error(err));
+        if (!code) return message.channel.send(`Usage: \`${prefix + cmdUsage}\``).then(msg => msg.delete(3000)).catch(err => this.client.logger.error(err.stack));
 
         try {
             const evaled = eval(code);
@@ -31,7 +31,7 @@ module.exports = class EvalCommand extends Command {
                         message.author.send(`<${haste}>`);
                         msg.react('📧').then(() => msg.delete(5000));
                     })
-                    .catch(err => this.client.logger.error(err));
+                    .catch(err => this.client.logger.error(err.stack));
             }
             return message.channel.send(clean, { code: 'js' });
         } catch (err) {

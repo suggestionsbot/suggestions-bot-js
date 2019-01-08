@@ -36,9 +36,9 @@ module.exports = class ConfigCommand extends Command {
         let gSuggestions = {};
 
         try {
-            gSettings = await this.client.getSettings(message.guild);
-            gBlacklists = await this.client.getGuildBlacklist(message.guild);
-            gSuggestions = await this.client.getGuildSuggestions(message.guild);
+            gSettings = await this.client.settings.getSettings(message.guild);
+            gBlacklists = await this.client.blacklists.getGuildBlacklist(message.guild);
+            gSuggestions = await this.client.suggestions.getGuildSuggestions(message.guild);
         } catch (err) {
             this.client.logger.error(err.stack);
             return message.channel.send(err.message);
@@ -81,7 +81,7 @@ module.exports = class ConfigCommand extends Command {
         • Vote Emojis: ${emojiSets[voteEmojis] || 'Default'}
         • Total Suggestions: ${gSuggestions.length || 'None'}
         • Total Blacklists: ${gBlacklists.length || 'None'}
-        • Responses Required: ${responses[gSettings.responseRequired] || 'False'}`;
+        • Responses Required: ${responses[responseRequired] || 'False'}`;
         
         return message.channel.send(config, { code: 'asciidoc' });
     }

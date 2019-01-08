@@ -29,25 +29,25 @@ module.exports = class {
             .setTimestamp();
     
         await Settings.findOneAndDelete({ guildID: guild.id }, err => {
-            if (err) this.client.logger.error(err);
+            if (err) this.client.logger.error(err.stack);
             
             this.client.logger.log(`Settings data deleted for guild ${guild.name} (${guild.id})`);
         });
     
         await Suggestion.deleteMany({ guildID: guild.id }, err => {
-            if (err) this.client.logger.error(err);
+            if (err) this.client.logger.error(err.stack);
     
             this.client.logger.log(`Suggestions data deleted for guild ${guild.name} (${guild.id})`);
         });
     
         await Command.deleteMany({ guildID: guild.id }, err => {
-            if (err) this.client.logger.error(err);
+            if (err) this.client.logger.error(err.stack);
     
             this.client.logger.log(`Command data deleted for guild ${guild.name} (${guild.id})`);
         });
 
         await Blacklist.deleteMany({ guildID: guild.id }, err => {
-            if (err) this.client.logger.error(err);
+            if (err) this.client.logger.error(err.stack);
         });
         
         this.client.logger.log(`${this.client.user.username} has left a guild: ${guild.name} (${guild.id})`);

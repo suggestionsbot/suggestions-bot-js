@@ -16,7 +16,7 @@ module.exports = class ReloadCommand extends Command {
 
     async run(message, args) {
 
-        if (process.env.NODE_ENV === 'production') return message.channel.send('This command can only be used in a development environment!').then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err));
+        if (process.env.NODE_ENV === 'production') return message.channel.send('This command can only be used in a development environment!').then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
 
         const usage = this.help.usage;
 
@@ -25,15 +25,15 @@ module.exports = class ReloadCommand extends Command {
 
         message.delete().catch(O_o => {});
 
-        let gSettings = await this.client.getSettings(message.guild).catch(err => {
-            this.client.logger.error(err);
+        let gSettings = await this.client.settings.getSettings(message.guild).catch(err => {
+            this.client.logger.error(err.stack);
             return message.channel.send(`Error querying the database for this guild's information: **${err.message}**.`);
         });
 
-        if (!args[0]) return message.channel.send(`Usage: \`${gSettings.prefix + usage}\``).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err));
+        if (!args[0]) return message.channel.send(`Usage: \`${gSettings.prefix + usage}\``).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
 
         const cmd = this.client.commands.get(args[0]) || this.client.commands.get(this.client.aliases.get(args[0]));
-        if (!cmd) return message.channel.send(`The command \`${args[0]}\` does not exist.`).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err));
+        if (!cmd) return message.channel.send(`The command \`${args[0]}\` does not exist.`).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
 
         let response = await this.client.unloadCommand(cmd.conf.location, cmd.help.name);
         if (response) {

@@ -21,7 +21,7 @@ module.exports = class AnnounceCommand extends Command {
         const { embedColor, discord, docs } = this.client.config;
 
         let announcement = await this.client.awaitReply(message, 'What would you like to say?');
-        if (announcement === 'cancel') return message.channel.send('Cancelled input.').then(msg => msg.delete(3000)).catch(err => this.client.logger.error(err));
+        if (announcement === 'cancel') return message.channel.send('Cancelled input.').then(msg => msg.delete(3000)).catch(err => this.client.logger.error(err.stack));
 
         const announceEmbed = new RichEmbed()
             .setAuthor(this.client.user.username, this.client.user.avatarURL)
@@ -34,7 +34,7 @@ module.exports = class AnnounceCommand extends Command {
         let confirmation = await this.client.awaitReply(message, `Here is a preview of the announcement. If this is what you want, just type \`confirm\` to send.`, { embed: announceEmbed });
         if (confirmation === 'confirm') {
             await message.channel.bulkDelete(5).catch(err => {
-                this.client.logger.error(err);
+                this.client.logger.error(err.stack);
                 return message.channel.send(`An error occurred: **${err.message}**`);
             });
             
@@ -56,7 +56,7 @@ module.exports = class AnnounceCommand extends Command {
     
                 owner.send(announceEmbed).catch(err => {
                     dmErrorCount++;
-                    this.client.logger.error(err);
+                    this.client.logger.error(err.stack);
                     return message.channel.send(`Could not DM **${dmErrorCount}** user(s) as their DMs were locked.`);
                 });
                 
@@ -66,9 +66,9 @@ module.exports = class AnnounceCommand extends Command {
             return message.channel.send(`Successfully messaged **${dmSuccessCount}** user(s).`);
         } else {
             this.client.logger.log('oof');
-            message.channel.send('Could not confirm your announcement. Cancelling...').then(msg => msg.delete(3000)).catch(err => this.client.logger.error(err));
+            message.channel.send('Could not confirm your announcement. Cancelling...').then(msg => msg.delete(3000)).catch(err => this.client.logger.error(err.stack));
             return await message.channel.bulkDelete(6).catch(err => {
-                this.client.logger.error(err);
+                this.client.logger.error(err.stack);
                 return message.channel.send(`An error occurred: **${err.message}**`);
             });
         }

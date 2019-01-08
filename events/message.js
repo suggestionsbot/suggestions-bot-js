@@ -18,9 +18,9 @@ module.exports = class {
         let gSettings = {};
 
         try {
-            gSettings = await this.client.getSettings(message.guild);
+            gSettings = await this.client.settings.getSettings(message.guild);
         } catch (err) {
-            this.client.logger.error(err);
+            this.client.logger.error(err.stack);
         }
 
         let guildConf = gSettings;
@@ -45,30 +45,33 @@ module.exports = class {
         if (!cmd) return;
 
         // update these to use the new methods in app.js?
-        let blacklisted = await Blacklist.findOne({
-            $and: [
-                { guildID: message.guild.id },
-                { userID: message.author.id },
-                { status: true }
-            ]
-        }).catch(err => this.client.logger.error(err));
+        // let blacklisted = await Blacklist.findOne({
+        //     $and: [
+        //         { guildID: message.guild.id },
+        //         { userID: message.author.id },
+        //         { status: true }
+        //     ]
+        // }).catch(err => this.client.logger.error(err.stack));
     
-        let gBlacklisted = await Blacklist.findOne({
-            $and: [
-                { userID: message.author.id },
-                { scope: 'global' },
-                { status: true }
-            ]
-        }).catch(err => this.client.logger.error(err));
+        // let gBlacklisted = await Blacklist.findOne({
+        //     $and: [
+        //         { userID: message.author.id },
+        //         { scope: 'global' },
+        //         { status: true }
+        //     ]
+        // }).catch(err => this.client.logger.error(err.stack));
 
-        if (blacklisted) return this.client.logger.warn(`"${message.author.tag}" (${message.author.id}) in the guild "${message.guild.name}" (${message.guild.id}) tried to use the command "${cmd.help.name}", but is blacklisted from using bot commands in this guild, "${message.guild.name}" (${message.guild.id}).`);
-        if (gBlacklisted) return this.client.logger.warn(`"${message.author.tag}" (${message.author.id}) in the guild "${message.guild.name}" (${message.guild.id}) tried to use the command "${cmd.help.name}", but is blacklisted from using bot commands globally.`);
+        const blacklisted = await this.client.blacklists.checkGuildBlacklist(message.guild, message.author);
+        const gBlacklisted = await this.client.blacklists.checkGlobalBlacklist(message.author);
+
+        if (blacklisted) return this.client.emit('userBlacklisted', message.author, message.guild, cmd);
+        if (gBlacklisted) return this.client.emit('userBlacklisted', message.author, message.guild, cmd, gBlacklisted.status);
 
         let roles = guildConf.staffRoles;
         let staffRoles = [];
         if (roles) staffRoles = roles.map(role => message.guild.roles.find(r => r.name === role.role || r.id === role.role));
 
-        if (!cmd.conf.enabled) return message.channel.send('This command is currently disabled!').then(msg => msg.delete(3000)).catch(err => this.client.logger.error(err));
+        if (!cmd.conf.enabled) return message.channel.send('This command is currently disabled!').then(msg => msg.delete(3000)).catch(err => this.client.logger.error(err.stack));
         if (cmd.conf.ownerOnly && !this.client.isOwner(message.author.id)) return;
         if (cmd.conf.adminOnly && !message.member.hasPermission('MANAGE_GUILD')) return noPerms(message, 'MANAGE_GUILD');
         if (cmd.conf.staffOnly && !message.member.hasPermission('MANAGE_GUILD') && !message.member.roles.some(r => staffRoles.includes(r))) return noSuggestionsPerms(message);
@@ -111,7 +114,7 @@ module.exports = class {
         if (throttle) throttle.usages++;
         cmd.run(message, args);
 
-        await newCommand.save().catch(err => this.client.logger.error(err));
+        await newCommand.save().catch(err => this.client.logger.error(err.stack));
         this.client.logger.log(`${message.author.tag} (${message.author.id}) ran command ${cmd.help.name}`, 'cmd');
     }
 };

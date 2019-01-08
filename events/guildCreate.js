@@ -44,7 +44,7 @@ module.exports = class {
             suggestionsLogs: suggestionsLogs
         });
 
-        await newSettings.save().then(this.client.logger.log(`Default settings saved for guild ${guild.name} (${guild.id})`)).catch(err => this.client.logger.error(err));
+        newSettings.save().then(this.client.logger.log(`Default settings saved for guild ${guild.name} (${guild.id})`)).catch(err => this.client.logger.error(err.stack));
         this.client.logger.log(`${this.client.user.username} has joined a new guild: ${guild.name} (${guild.id})`);
 
         botPresence(this.client);
