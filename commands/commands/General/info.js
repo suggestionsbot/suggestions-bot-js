@@ -26,7 +26,8 @@ module.exports = class InfoCommand extends Command {
             .addField('Bot Author', `<@${owner}>`)
             .addField('Support Discord', discord)
             .addField('Documentation', docs)
-            .addField('Bot Version', version);
+            .addField('Bot Version', version)
+            .setFooter('© 2019 The Nerd Cave');
 
         return message.channel.send(embed);
     }
