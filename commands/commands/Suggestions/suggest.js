@@ -1,7 +1,5 @@
 const Command = require('../../Command');
 const { RichEmbed } = require('discord.js');
-const Suggestion = require('../../../models/suggestions');
-const mongoose = require('mongoose');
 const crypto = require('crypto');
 const moment = require('moment');
 const { stripIndents } = require('common-tags');
@@ -127,23 +125,25 @@ module.exports = class SuggestCommand extends Command {
                 return message.channel.send(`An error occurred adding reactions to this suggestion: **${err.message}**.`);
             });
 
-        const newSuggestion = await new Suggestion({
-            _id: mongoose.Types.ObjectId(),
+        const newSuggestion = {
             guildName: message.guild.name,
             guildID: message.guild.id,
-            username: message.author.tag,
+            username: sUser.tag,
             userID: sUser.id,
-            suggestion: suggestion,
+            suggestion,
             sID: id,
-            time: time
-        });
+            time
+        };
 
-        await newSuggestion.save().then(res => this.client.logger.log(`New suggestion: \n ${res}`)).catch(err => {
+        try {
+            await this.client.suggestions.submitGuildSuggestion(newSuggestion);
+            await message.react('✉');
+            await message.delete(3000).catch(O_o => {});
+        } catch (err) {
             this.client.logger.error(err.stack);
             return message.channel.send(`An error occurred saving this suggestion in the database: **${err.message}**.`);
-        });
-        await message.react('✉');
-        await message.delete(3000).catch(O_o => {});
+        }
+        
         return;
     }
 };

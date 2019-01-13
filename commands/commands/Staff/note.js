@@ -1,8 +1,6 @@
 const { RichEmbed } = require('discord.js');
 const moment = require('moment');
 const Command = require('../../Command');
-const Suggestion = require('../../../models/suggestions');
-const { noSuggestionsLogs } = require('../../../utils/errors');
 require('moment-duration-format');
 require('moment-timezone');
 moment.suppressDeprecationWarnings = true;
@@ -120,23 +118,21 @@ module.exports = class NoteCommand extends Command {
                         message.channel.send(`An error occurred DMing **${sUser.displayName}** their suggestion note: **${err.message}**.`);
                     });
 
-                    Suggestion.findOneAndUpdate({
-                        $and: [
+                    const suggestionNote = {
+                        query: [
                             { guildID: message.guild.id },
                             { sID: id }
-                        ]},
-                        {
-                            $push: {
-                                notes: staffNote
-                            }
-                    }).then(() => {
-                        this.client.logger.log(`sID ${id} had a note added by ${message.author.tag} (${message.author.id}) "${message.guild.name}" (${message.guild.id}).`);
-                    })   
-                    .catch(err => {
+                        ],
+                        note: staffNote
+                    };
+
+                    try {
+                        await this.client.suggestions.addGuildSuggestionNote(suggestionNote);
+                    } catch (err) {
                         this.client.logger.error(err.stack);
                         message.delete(3000).catch(O_o => {});
-                        return message.channel.send(`Error updating this suggestion in the database: **${err.message}**`);
-                    });
+                        message.channel.send(`Error updating this suggestion in the database: **${err.message}**`);
+                    }
                 }
             });
         } catch (err) {

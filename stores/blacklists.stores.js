@@ -1,4 +1,5 @@
-const Blacklist = require('../models/blacklist');
+const mongoose = require('mongoose');
+const { Blacklist } = require('../models');
 const ErrorHandler = require('../utils/handlers');
 
 module.exports = class BlacklistsStore {
@@ -68,5 +69,32 @@ module.exports = class BlacklistsStore {
 
         const guildBlacklist = gBlacklist || {};
         return guildBlacklist;
+    }
+
+    // this method adds a new user blacklist to the guild blacklists
+    async addUserBlacklist(user) {
+        let submitted = user;
+        let defaults = { _id: mongoose.Types.ObjectId() };
+        let merged = Object.assign(defaults, submitted);
+
+        const newBlacklist = await new Blacklist(merged);
+        return newBlacklist.save().then(res => {
+            if (submitted.scope === 'global') return this.client.logger.log(`New global blacklist: \n ${res}`);
+            else return this.client.logger.log(`New blacklist: \n ${res}`);
+        });
+    }
+
+    // this method lifts a user blacklist in the database
+    async removeUserBlacklist(user) {
+        let { query, status } = user;
+        let guildMemberBlacklist = await Blacklist.findOne({ $and: query }).sort({ case: -1 });
+        let { issuerUsername, issuerID, userID, scope } = guildMemberBlacklist;
+        let updatedData = status;
+
+        await guildMemberBlacklist.updateOne(updatedData);
+        this.client.logger.log(`${issuerUsername} ("${issuerID}") has issued an unblacklist for the user ${userID}.`);
+
+        if (scope === 'global') return this.client.logger.log(`${issuerUsername} ("${issuerID}") has issued a global unblacklist for the user ${userID}.`);
+        else return this.client.logger.log(`${issuerUsername} ("${issuerID}") has issued an unblacklist for the user ${userID}.`);
     }
 };

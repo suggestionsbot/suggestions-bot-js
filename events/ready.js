@@ -1,7 +1,4 @@
 const { RichEmbed } = require('discord.js');
-const Settings = require('../models/settings');
-const Suggestion = require('../models/suggestions');
-const Command = require('../models/commands');
 const { version } = require('../package.json');
 const { botPresence } = require('../utils/utils');
 require('dotenv-flow').config();
@@ -36,51 +33,35 @@ module.exports = class {
 
             // handle posting stats to bot lists
             require('../utils/voting')(this.client);
-
+// 
             this.client.guilds.forEach(async g => {
-                let gSettings = await this.client.settings.getSettings({
-                    guildID: g.id
-                }).catch(err => this.client.logger.error(err.stack));
-
-                if (!gSettings && g) await this.client.emit('guildCreate', g);
-
-                // if there's a new guild owner, update the database upon the ready event
-                // if (gSettings && gSettings.guildOwnerID !== g.ownerID) await this.client.writeSettings(g.id, { guildOwnerID: g.ownerID }).catch(err => this.client.logger.error(err.stack));
+                try {
+                    let gSettings = await this.client.settings.getSettings(g);
+                    if (!gSettings._id) await this.client.emit('guildCreate', g); // must check for _id as that indicates the document exists in mongodb
+                    
+                    if (gSettings.guildOwnerID !== g.ownerID) await this.client.settings.writeSettings(g, { guildOwnerID: g.ownerID });
+                    if (gSettings.guildName !== g.name) await this.client.settings.writeSettings(g, { guildName: g.name });
+                } catch (err) {
+                    this.client.logger.error(err.stack);
+                }
             });
-
-            // Need to figure out a more efficient way of doing this I feel. Emitting the
-            // "guildDelete" event doesn't seem the best way to do things because the guild
-            // doesn't actually exist!
-            let gSettings = await Settings.find({}).catch(err => this.client.logger.error(err.stack));
-            gSettings.map(async e => {
+            
+            
+            let allSettings;
+            try {
+                allSettings = await this.client.settings.getAllSettings();
+            } catch (err) {
+                this.client.logger.error(err.stack);
+            }
+            
+            allSettings.map(async e => {
                 let g = this.client.guilds.get(e.guildID);
                 if (!g) {
-                    await Settings.findOneAndDelete({
-                        guildID: e.guildID
-                    }, err => {
-                        if (err) this.client.logger.error(err.stack);
-
-                        this.client.logger.log(`Settings data deleted for guild ${e.guildName} (${e.guildID})`);
-                    });
-
-                    await Suggestion.deleteMany({
-                        guildID: e.guildID
-                    }, err => {
-                        if (err) this.client.logger.error(err.stack);
-
-                        this.client.logger.log(`Suggestions data deleted for guild ${e.guildName} (${e.guildID})`);
-                    });
-
-                    await Command.deleteMany({
-                        guildID: e.guildID
-                    }, err => {
-                        if (err) this.client.logger.error(err.stack);
-
-                        this.client.logger.log(`Command data deleted for guild ${e.guildName} (${e.guildID})`);
-
-                    });
-
-                    this.client.logger.log(`${this.client.user.username} has left a guild (bot was offline): ${e.guildName} (${e.guildID})`);
+                    try {
+                        await this.client.settings.removeGuildData(e);
+                    } catch (err) {
+                        this.client.logger.error(err);
+                    }
 
                     botPresence(this.client);
 
@@ -90,27 +71,25 @@ module.exports = class {
                         **ID:** \`${e.guildID}\`
                         **Name:** \`${e.guildName}\`
                         **Owner:** <@${e.guildOwnerID}>
-                    `)
+                        `)
                         .setColor('#FF4500')
                         .setTimestamp();
 
                     switch (process.env.NODE_ENV) {
                         // 345753533141876737 = Nerd Cave Testing
-                        case 'development':
-                            {
-                                const logGuild = this.client.guilds.get('345753533141876737');
-                                const logChannel = logGuild.channels.find(c => c.name === 'server_logs');
-                                logChannel.send(oldServer);
-                                break;
-                            }
-                            // 480231440932667393 = Nerd Cave Development
-                        default:
-                            {
-                                const logGuild = this.client.guilds.get('480231440932667393');
-                                const logChannel = logGuild.channels.find(c => c.name === 'server_logs');
-                                logChannel.send(oldServer);
-                                break;
-                            }
+                        case 'development': {
+                            const logGuild = this.client.guilds.get('345753533141876737');
+                            const logChannel = logGuild.channels.find(c => c.name === 'server_logs');
+                            logChannel.send(oldServer);
+                            break;
+                        }
+                        // 480231440932667393 = Nerd Cave Development
+                        default: {
+                            const logGuild = this.client.guilds.get('480231440932667393');
+                            const logChannel = logGuild.channels.find(c => c.name === 'server_logs');
+                            logChannel.send(oldServer);
+                            break;
+                        }
                     }
                 }
             });

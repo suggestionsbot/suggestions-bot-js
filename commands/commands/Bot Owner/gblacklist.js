@@ -81,8 +81,7 @@ module.exports = class GBlacklistCommand extends Command {
             case 'add': {
                 if (!reason) return message.channel.send('Please provide a reason!').then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
 
-                const newBlacklist = await new Blacklist({
-                    _id: mongoose.Types.ObjectId(),
+                const newBlacklist = {
                     guildID: message.guild.id,
                     guildName: message.guild.name,
                     userID: blUser,
@@ -93,40 +92,45 @@ module.exports = class GBlacklistCommand extends Command {
                     status: true,
                     case: caseNum,
                     scope: 'global'
-                });
+                };
 
-                await newBlacklist.save().then(res => this.client.logger.log('New Blacklist: \n ', res)).catch(err => this.client.logger.error(err.stack));
-                await this.client.logger.log(`${message.member.user.tag} ("${message.author.id}") has issued a blacklist to the user ${blUser}. [${moment(message.createdAt)}]`);
-                await blEmbed.setTitle(`${this.client.user.username} | Blacklisted User Added`);
-                await blEmbed.setColor('#00e640');
-                await blEmbed.addField('User ID', `${blUser}`, true);
-                await blEmbed.addField('Reason', reason, true);
-                await blEmbed.addField('Issuer', `${message.member.user.tag} (${message.author.id})`);
+                blEmbed.setTitle(`${this.client.user.username} | Blacklisted User Added`);
+                blEmbed.setColor('#00e640');
+                blEmbed.addField('User ID', blUser, true);
+                blEmbed.addField('Reason', reason, true);
+                blEmbed.addField('Issuer', `${message.member.user.tag} (${message.author.id})`);
 
-                message.channel.send(blEmbed).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
+                try {
+                    await this.client.blacklists.addUserBlacklist(newBlacklist);
+                    message.channel.send(blEmbed).then(msg => msg.delete(5000));
+                } catch (err) {
+                    this.client.logger.error(err.stack);
+                    return message.channel.send(`There was an error adding this user to the blacklist: **${err.message}**.`);
+                }
                 break;
             }
             case 'remove': {
-                Blacklist.findOneAndUpdate({
-                    $and: [
+
+                const removeBlacklist = {
+                    query: [
                         { userID: blUser },
                         { status: true }
-                    ]},
-                     { $set: { status: false }
-                })
-                .sort({
-                    case: -1
-                })
-                .then(async () => {
-                    await this.client.logger.log(`${message.member.user.tag} ("${message.author.id}") has issued an unblacklist for the user ${blUser}.`);
-                    await blEmbed.setTitle(`${this.client.user.username} | Blacklisted User Removed`);
-                    await blEmbed.setColor('#d64541');
-                    await blEmbed.addField('User ID', `${blUser}`, true);
-                    await blEmbed.addField('Issuer', `${message.member.user.tag} (${message.author.id})`);
-    
-                    await message.channel.send(blEmbed).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
-                })
-                .catch(err => this.client.logger.error(err.stack));
+                    ],
+                    status: { status: false }
+                };
+
+                blEmbed.setTitle(`${this.client.user.username} | Blacklisted User Removed`);
+                blEmbed.setColor('#d64541');
+                blEmbed.addField('User ID', `${blUser}`, true);
+                blEmbed.addField('Issuer', `${message.member.user.tag} (${message.author.id})`);
+
+                try {
+                    await this.client.blacklists.removeUserBlacklist(removeBlacklist);
+                    message.channel.send(blEmbed).then(msg => msg.delete(5000));
+                } catch (err) {
+                    this.client.logger.error(err.stack);
+                    return message.channel.send(`There was an error removing this user from the blacklist: **${err.message}**.`);
+                }
                 break;
             }
             default:

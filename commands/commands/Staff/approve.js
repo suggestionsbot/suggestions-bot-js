@@ -1,7 +1,6 @@
 const { RichEmbed } = require('discord.js');
 const moment = require('moment');
 const Command = require('../../Command');
-const Suggestion = require('../../../models/suggestions');
 const { noSuggestionsLogs } = require('../../../utils/errors');
 require('moment-duration-format');
 require('moment-timezone');
@@ -172,30 +171,26 @@ module.exports = class ApproveCommand extends Command {
                     message.channel.send(`An error occurred DMing **${sUser.displayName}** their suggestion information: **${err.message}**.`);
                 });
 
-                // find a better way to implement this method in app.js
-                await Suggestion.findOneAndUpdate({
-                    $and: [
+                const approveSuggestion = {
+                    query: [
                         { guildID: message.guild.id },
                         { sID: id }
-                    ]},
-                    {
-                        $set: {
-                            status: 'approved',
-                            statusUpdated: date,
-                            statusReply: reply || null,
-                            staffMemberID: message.author.id,
-                            staffMemberUsername: message.author.tag,
-                            newResults
-                    },
-                }).then(() => {
-                    this.client.logger.log(`sID ${id} has been approved in the guild "${message.guild.name}" (${message.guild.id}).`);
-                    if (reply) this.client.logger.log(`sID ${id} has been approved in the guild "${message.guild.name}" (${message.guild.id}) with the response "${reply}".`);
-                })   
-                .catch(err => {
+                    ],
+                    status: 'approved',
+                    statusUpdated: date,
+                    statusReply: reply || null,
+                    staffMemberID: message.author.id,
+                    staffMemberUsername: message.author.tag,
+                    newResults
+                };
+
+                try {
+                    await this.client.suggestions.handleGuildSuggestion(approveSuggestion);
+                } catch (err) {
                     this.client.logger.error(err.stack);
                     message.delete(3000).catch(O_o => {});
                     message.channel.send(`Error updating this suggestion in the database: **${err.message}**`);
-                });
+                }
             }
             return;
         });

@@ -1,9 +1,5 @@
 const { RichEmbed } = require('discord.js');
 const moment = require('moment');
-const Settings = require('../models/settings');
-const Suggestion = require('../models/suggestions');
-const Command = require('../models/commands');
-const Blacklist = require('../models/blacklist');
 const { botPresence } = require('../utils/utils');
 
 module.exports = class {
@@ -27,31 +23,13 @@ module.exports = class {
             `)
             .setColor('#FF4500')
             .setTimestamp();
-    
-        await Settings.findOneAndDelete({ guildID: guild.id }, err => {
-            if (err) this.client.logger.error(err.stack);
-            
-            this.client.logger.log(`Settings data deleted for guild ${guild.name} (${guild.id})`);
-        });
-    
-        await Suggestion.deleteMany({ guildID: guild.id }, err => {
-            if (err) this.client.logger.error(err.stack);
-    
-            this.client.logger.log(`Suggestions data deleted for guild ${guild.name} (${guild.id})`);
-        });
-    
-        await Command.deleteMany({ guildID: guild.id }, err => {
-            if (err) this.client.logger.error(err.stack);
-    
-            this.client.logger.log(`Command data deleted for guild ${guild.name} (${guild.id})`);
-        });
 
-        await Blacklist.deleteMany({ guildID: guild.id }, err => {
-            if (err) this.client.logger.error(err.stack);
-        });
+        try {
+            await this.client.settings.removeGuildData(guild);
+        } catch (err) {
+            this.client.logger.error(err.stack);
+        }
         
-        this.client.logger.log(`${this.client.user.username} has left a guild: ${guild.name} (${guild.id})`);
-    
         botPresence(this.client);
     
         switch (process.env.NODE_ENV) {
