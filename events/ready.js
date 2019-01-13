@@ -33,11 +33,14 @@ module.exports = class {
 
             // handle posting stats to bot lists
             require('../utils/voting')(this.client);
-
+// 
             this.client.guilds.forEach(async g => {
                 try {
                     let gSettings = await this.client.settings.getSettings(g);
                     if (!gSettings._id) await this.client.emit('guildCreate', g); // must check for _id as that indicates the document exists in mongodb
+                    
+                    if (gSettings.guildOwnerID !== g.ownerID) await this.client.settings.writeSettings(g, { guildOwnerID: g.ownerID });
+                    if (gSettings.guildName !== g.name) await this.client.settings.writeSettings(g, { guildName: g.name });
                 } catch (err) {
                     this.client.logger.error(err.stack);
                 }

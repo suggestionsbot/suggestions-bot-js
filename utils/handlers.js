@@ -9,7 +9,7 @@ class ErrorHandler {
     }
 }
 
-const NoGuildSettings = new ErrorHandler('NoGuildSettings', 'Could not retrivew guild information from the database.');
+const NoGuildSettings = new ErrorHandler('NoGuildSettings', 'Could not retrive guild information from the database.');
 
 
 

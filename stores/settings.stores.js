@@ -35,6 +35,8 @@ module.exports = class SettingsStore {
             else return;
         }
 
+        this.client.logger.log(`Guild "${guild.name}" (${guild.id}) updated settings: \n ${JSON.stringify(newSettings)}`);
+
         return await Settings.findOneAndUpdate({ guildID: guild.id }, settings).catch(err => this.logger.error(err));
     }
 
@@ -107,6 +109,7 @@ module.exports = class SettingsStore {
         return this.client.logger.log(`${this.client.user.username} has left a guild: ${guild.name || guild.guildName } (${guild.id || guild.guildID})`);
     }
 
+    // gets all documents in the settings collection
     async getAllSettings() {
         return await Settings.find({});
     }

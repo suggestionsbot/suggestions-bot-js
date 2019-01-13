@@ -1,9 +1,0 @@
-{
-    "apps": [
-        {
-            "name": "suggestions-bot",
-            "script": "npm",
-            "args": ["run", "prod"]
-        }
-    ]
-}
