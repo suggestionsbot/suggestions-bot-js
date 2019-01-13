@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 const moment = require('moment');
 const { oneLine } = require('common-tags');
-const Blacklist = require('../models/blacklist');
 const Command = require('../models/commands');
 const { noPerms, noSuggestionsPerms } = require('../utils/errors');
 const permissions = require('../utils/perms');
@@ -43,23 +42,6 @@ module.exports = class {
 
         const cmd = this.client.commands.get(command) || this.client.commands.get(this.client.aliases.get(command));
         if (!cmd) return;
-
-        // update these to use the new methods in app.js?
-        // let blacklisted = await Blacklist.findOne({
-        //     $and: [
-        //         { guildID: message.guild.id },
-        //         { userID: message.author.id },
-        //         { status: true }
-        //     ]
-        // }).catch(err => this.client.logger.error(err.stack));
-    
-        // let gBlacklisted = await Blacklist.findOne({
-        //     $and: [
-        //         { userID: message.author.id },
-        //         { scope: 'global' },
-        //         { status: true }
-        //     ]
-        // }).catch(err => this.client.logger.error(err.stack));
 
         const blacklisted = await this.client.blacklists.checkGuildBlacklist(message.guild, message.author);
         const gBlacklisted = await this.client.blacklists.checkGlobalBlacklist(message.author);
@@ -114,7 +96,7 @@ module.exports = class {
         if (throttle) throttle.usages++;
         cmd.run(message, args);
 
-        await newCommand.save().catch(err => this.client.logger.error(err.stack));
+        newCommand.save().catch(err => this.client.logger.error(err.stack));
         this.client.logger.log(`${message.author.tag} (${message.author.id}) ran command ${cmd.help.name}`, 'cmd');
     }
 };

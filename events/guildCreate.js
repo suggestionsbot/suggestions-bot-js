@@ -34,19 +34,21 @@ module.exports = class {
             .setColor('#2ecc71')
             .setTimestamp();
 
-        const newSettings = new Settings({
-            _id: mongoose.Types.ObjectId(),
+        const newSettings = {
             guildID: guild.id,
             guildName: guild.name,
             guildOwnerID: guild.ownerID,
             prefix: prefix,
             suggestionsChannel: suggestionsChannel,
             suggestionsLogs: suggestionsLogs
-        });
+        };
 
-        newSettings.save().then(this.client.logger.log(`Default settings saved for guild ${guild.name} (${guild.id})`)).catch(err => this.client.logger.error(err.stack));
-        this.client.logger.log(`${this.client.user.username} has joined a new guild: ${guild.name} (${guild.id})`);
-
+        try {
+            await this.client.settings.createGuildSettings(newSettings);
+        } catch (err) {
+            return this.client.logger.error(err.stack);
+        }
+        
         botPresence(this.client);
 
         switch (process.env.NODE_ENV) {

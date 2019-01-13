@@ -1,4 +1,5 @@
-const Suggestion = require('../models/suggestions');
+const mongoose = require('mongoose');
+const { Suggestion } = require('../models');
 const ErrorHandler = require('../utils/handlers');
 
 module.exports = class SuggestionsStore {
@@ -13,14 +14,6 @@ module.exports = class SuggestionsStore {
         const guildSuggestion = gSuggestion || {};
         return guildSuggestion;
     }
-
-    // this method updates a single suggestion in a guild in the database
-    // async updateGuildSuggeston(guild, sID, newUpdates) {
-    //     let gSuggestion = await Suggestion.findOne({ $and: [{ guildID: guild.id, sID: sID }] }).catch(err => this.client.logger.error(err));
-
-    //     const guildSuggestion = gSuggestion || {};
-    //     return guildSuggestion;
-    // }
 
     // this method allows for a single suggestion to be queried, regardless of the guild (for administrative use)
     async getGlobalSuggestion(sID) {
@@ -63,7 +56,7 @@ module.exports = class SuggestionsStore {
         try {
             gSettings = await this.client.settings.getSettings(guild);
         } catch (err) {
-            this.logger.error(err.stack);
+            this.client.logger.error(err.stack);
         }
 
         let required = false;
@@ -72,5 +65,66 @@ module.exports = class SuggestionsStore {
         else required = false;
 
         return required;
+    }
+
+    // handles the creation of a suggestion in the database
+    async submitGuildSuggestion(suggestion) {
+        let submitted = suggestion;
+        let defaults = { _id: mongoose.Types.ObjectId() };
+        let merged = Object.assign(defaults, submitted);
+
+        const newSuggestion = await new Suggestion(merged);
+        return newSuggestion.save().then(res => this.client.logger.log(`New suggestion: \n ${res}`));
+    }
+
+    // handles the approval/rejection of a suggestion in the database
+    async handleGuildSuggestion(suggestion) {
+        let { 
+            query,
+            status,
+            statusUpdated,
+            statusReply,
+            staffMemberID,
+            staffMemberUsername,
+            newResults
+         } = suggestion;
+
+        let guildSuggestion = await Suggestion.findOne({ $and: query });
+        let { guildID, guildName, sID } = guildSuggestion;
+        let updatedData = {
+            status,
+            statusUpdated,
+            statusReply,
+            staffMemberID,
+            staffMemberUsername,
+            newResults
+        };
+
+        await guildSuggestion.updateOne(updatedData);
+        switch (status) {
+            case 'approved':
+                this.client.logger.log(`sID ${sID} has been approved in the guild "${guildName}" (${guildID}).`);
+                if (statusReply) this.client.logger.log(`sID ${sID} has been approved in the guild "${guildName}" (${guildID}) with the response "${statusReply}".`);
+                break;
+            case 'rejected':
+                this.client.logger.log(`sID ${sID} has been rejected in the guild "${guildName}" (${guildID}).`);
+                if (statusReply) this.client.logger.log(`sID ${sID} has been rejected in the guild "${guildName}" (${guildID}) with the response "${statusReply}".`);
+                break;
+            default:
+                break;
+        }
+        return;
+    }
+
+    // handles adding notes to a suggestion in the database
+    async addGuildSuggestionNote(suggestion) {
+        let { query, note } = suggestion;
+        let { staffMemberID, staffMemberUsername } = note;
+        let guildSuggestion = await Suggestion.findOne({ $and: query });
+        let { guildID, guildName, sID } = guildSuggestion;
+        let updatedData = { notes: note };
+
+        await guildSuggestion.updateOne({ $push: updatedData });
+        return this.client.logger.log(`sID ${sID} had a note added by ${staffMemberUsername} (${staffMemberID}) "${guildName}" (${guildID}).`);
     }
 };

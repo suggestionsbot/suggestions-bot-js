@@ -1,5 +1,4 @@
 const Command = require('../../Command');
-const Settings = require('../../../models/settings');
 
 module.exports = class RoleCommand extends Command {
     constructor(client) {
@@ -18,7 +17,7 @@ module.exports = class RoleCommand extends Command {
 
         await message.delete().catch(O_o => {});
 
-        let gSettings = await this.client.settings.getSettings(message.guild).catch(err => {
+        let { prefix, staffRoles } = await this.client.settings.getSettings(message.guild).catch(err => {
             this.client.logger.error(err.stack);
             return message.channel.send(`Error querying the database for this guild's information: **${err.message}**.`);
         });
@@ -28,35 +27,49 @@ module.exports = class RoleCommand extends Command {
         let role = args.slice(1).join(' ');
         let staffRole = message.guild.roles.find(r => r.toString() === role) || message.guild.roles.find(r => r.name === role);
 
-        if (!role) return message.channel.send(`Usage: \`${gSettings.prefix + usage}\``).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
+        if (!role) return message.channel.send(`Usage: \`${prefix + usage}\``).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
         if (!staffRole) return message.channel.send('This role doesn\'t exist in this guild!');
 
-        let value = { role: staffRole.id };
-        // update these to use the new methods in app.js
+        let updateRole = {
+            query: { guildID: message.guild.id },
+            staffRoles: { role: staffRole.id },
+            added: false
+        };
+
         switch (args[0]) {
             case 'add':
-                await Settings.findOneAndUpdate(
-                    { guildID: message.guild.id }, 
-                    { $push: { staffRoles: value }
-                }).catch(err => {
+                try {
+                    for (let i = 0; i < staffRoles.length; i++) {
+                        if (staffRoles[i].role === staffRole.id) {
+                            return message.channel.send(`The role **${staffRole.name}** already exists in the database! Cancelling...`).then(m => m.delete(5000));
+                        }
+                    }
+
+                    updateRole = Object.assign(updateRole, { added: true });
+                    await this.client.settings.updateGuildStaffRoles(updateRole);
+                    message.channel.send(`<:nerdSuccess:490708616056406017> Added **${staffRole.name}** to the staff roles.`).then(msg => msg.delete(5000));
+                } catch (err) {
                     this.client.logger.error(err.stack);
                     return message.channel.send(`Error setting a staff role: **${err.message}**.`);
-                });
-
-                await message.channel.send(`<:nerdSuccess:490708616056406017> Added **${staffRole.name}** to the staff roles.`).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
+                }
                 break;
             case 'remove':
-                await Settings.findOneAndUpdate(
-                    { guildID: message.guild.id },
-                    { $pull: { staffRoles: value }
-                }).catch(err => {
+                for (let i = 0; i < staffRoles.length; i++) {
+                    if (staffRoles[i].role !== staffRole.id) {
+                        return message.channel.send(`The role **${staffRole.name}** does not exist in the database! Cancelling...`).then(m => m.delete(5000));
+                    }
+                }
+                
+                try {
+                    await this.client.settings.updateGuildStaffRoles(updateRole);
+                    message.channel.send(`<:nerdSuccess:490708616056406017> Removed **${staffRole.name}** from the staff roles.`).then(msg => msg.delete(5000));
+                } catch (err) {
                     this.client.logger.error(err.stack);
                     return message.channel.send(`Error removing a staff role: **${err.message}**`);
-                });
-    
-                await message.channel.send(`<:nerdSuccess:490708616056406017> Removed **${staffRole.name}** from the staff roles.`).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
+                }
                 break;
             default:
+                break;
         }
         return;
     }
