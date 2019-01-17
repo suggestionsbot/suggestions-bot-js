@@ -45,8 +45,7 @@ Server owners can change the default prefix and suggestions channel of the Sugge
 If there is ever an error or bug or you wish to suggest something new to the bot, then you may join our Support Discord (just click [here](https://discord.gg/g7wr8xb)!). Follow the single super-easy step once you join and then head over to the `#support` channel if you need help, `#bug_reports` if found a bug or simply discuss and post a suggestion the same way you would submit a new suggestion as described above!
 
 #### Future Features
-- Add your own reactions?
 - Leave suggestions in the Support Discord
 
 *You can also mention the bot in place of the prefix to use commands!*
-  Read the website for more information and unlock the full usage of the bot! [https://docs.thenerdcave.us/](https://docs.thenerdcave.us/)
+  Read the website for more information and unlock the full usage of the bot! [https://suggestionsbot.com](https://suggestionsbot.com)

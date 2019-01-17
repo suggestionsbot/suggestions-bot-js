@@ -16,7 +16,7 @@
 The only suggestions bot you'll ever need. Simple usage and management of suggestions for public and staff use.
 
 #### WEBSITE:
-[https://docs.thenerdcave.us/](https://docs.thenerdcave.us/)
+[https://suggestionsbot.com/](https://suggestionsbot.com)
 
 #### BOT LIST SITES:
 - [https://discordbots.org/bot/474051954998509571](https://discordbots.org/bot/474051954998509571)
