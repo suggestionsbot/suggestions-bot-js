@@ -23,7 +23,6 @@ module.exports = class StatsCommand extends Command {
             'Discord Bots': this.client.guilds.get('110373943822540800').memberCount || 0,
             'Discord Bot List (2)': this.client.guilds.get('450100127256936458').memberCount || 0,
             'Divine Discord Bot List': this.client.guilds.get('454933217666007052').memberCount || 0,
-            '>terminal_': this.client.guilds.get('330777295952543744').memberCount || 0,
             'Bots For Discord': this.client.guilds.get('374071874222686211').memberCount || 0,
             
         };

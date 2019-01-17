@@ -38,11 +38,10 @@ module.exports = {
         { name: 'Discord Bot List by Terminal.ink', link: 'https://ls.terminal.ink/bots/474051954998509571', },
         { name: 'Bots For Discord', link: 'https://botsfordiscord.com/bots/474051954998509571' }
     ],
-    patreon: process.env.PATREON
-};
-
-module.exports.defaultSettings = {
-    prefix: process.env.PREFIX,
-    suggestionsChannel: process.env.SUGGESTIONSCHANNEL,
-    suggestionsLogs: process.env.SUGGESTIONSLOGS
+    patreon: process.env.PATREON,
+    defaultSettings: {
+        prefix: this.prefix,
+        suggestionsChannel: this.suggestionsChannel,
+        suggestionsLogs: this.suggestionsLogs
+    }
 };
