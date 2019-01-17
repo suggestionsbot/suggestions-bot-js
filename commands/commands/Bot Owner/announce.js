@@ -20,6 +20,18 @@ module.exports = class AnnounceCommand extends Command {
 
         const { embedColor, discord, docs } = this.client.config;
 
+        if (args[0] === 'help') {
+            let options = [
+                { name: '{{owner}}', description: 'Parameter for the guild owner.' }
+            ];
+
+            let help = options.map(o => `${o.name}: ${o.description}`).join('\n');
+
+            return message.channel.send(help, { code: 'asciidoc' })
+                .then(m => m.delete(5000))
+                .catch(err => this.client.logger.error(err.stack));
+        }
+
         let announcement = await this.client.awaitReply(message, 'What would you like to say?');
         if (announcement === 'cancel') return message.channel.send('Cancelled input.').then(msg => msg.delete(3000)).catch(err => this.client.logger.error(err.stack));
 
@@ -49,13 +61,15 @@ module.exports = class AnnounceCommand extends Command {
             ];
 
             try {
-                this.client.guilds.forEach(async g => {
+                await this.client.guilds.forEach(async g => {
                     let owner = g.owner;
                     if (ignoredGuilds.includes(g.id)) return;
 
-                    await this.client.wait(2500);
+                    let updatedAnnouncement = announcement.replace('{{owner}}', owner.user.toString());
+                    announceEmbed.setDescription(updatedAnnouncement);
                     owner.send(announceEmbed);
                     dmSuccessCount++;
+                    await this.client.wait(2500);
                 });
             } catch (err) {
                 dmErrorCount++;
