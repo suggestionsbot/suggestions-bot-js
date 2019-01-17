@@ -10,7 +10,7 @@ module.exports = class NoteCommand extends Command {
         super(client, {
             name: 'note',
             category: 'Staff',
-            description: 'Add a note to a submitted suggestion.',
+            description: 'Add a new note to a submitted suggestion.',
             usage: 'note <sID> <note>',
             staffOnly: true,
             botPermissions: ['MANAGE_MESSAGES']

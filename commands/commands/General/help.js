@@ -27,10 +27,6 @@ module.exports = class HelpCommand extends Command {
 
         suggestionsChannel = message.guild.channels.find(c => c.name === suggestionsChannel) || message.guild.channels.find(c => c.toString() === suggestionsChannel) || message.guild.channels.get(suggestionsChannel) || '';
 
-        // const roles = staffRoles.map(el => {
-        //     return message.guild.roles.find(r => r.name === el.role || r.id === el.role);
-        // });
-
         let staffRoles = [];
         if (roles) staffRoles = roles.map(role => message.guild.roles.find(r => r.name === role.role || r.id === role.role));
 
@@ -52,7 +48,9 @@ module.exports = class HelpCommand extends Command {
                 .setTitle(`${cmdHelp.name} | Help Information`)
                 .setDescription(cmdHelp.description)
                 .addField('Category', `\`${cmdHelp.category}\``, true)
-                .setColor(embedColor);
+                .setColor(embedColor)
+                .setFooter('<> = Required | [] = Optional')
+                .setTimestamp();
             if (cmdHelp.usage !== null) cmdHelpEmbed.addField('Usage', `\`${cmdHelp.usage}\``, true);
             if (cmdConf.aliases.length) cmdHelpEmbed.addField('Aliases', `\`${cmdConf.aliases.join(', ')}\``, true);
 
@@ -67,14 +65,14 @@ module.exports = class HelpCommand extends Command {
         const helpEmbed = new RichEmbed()
             .setTitle('Help Information')
             .setDescription(`View help information for ${this.client.user}. \n (Do \`${prefix + cmdName} <command>)\` for specific help information).`)
-            .addField('Current Prefix', prefix)
-            .addField('Suggestions Channel', suggestionsChannel.toString() || (message.member.hasPermission('MANAGE_GUILD') && !suggestionsChannel ? `***Not set. Use*** \`${prefix + setChannelUsage}\`` : '***Not set. Contact a server administrator.***'))
-            .addField('General Commands', generalCmds.join(' | '));
-            if (message.member.hasPermission('MANAGE_GUILD') || message.member.roles.some(r => staffRoles.includes(r))) helpEmbed.addField('Staff Commands', staffCmds.join(' | '));
-            if (message.member.hasPermission('MANAGE_GUILD')) helpEmbed.addField('Admin Commands', adminCmds.join(' | '));
-            if (this.client.isOwner(message.author.id)) helpEmbed.addField('Owner Commands', ownerCmds.join(' | '));
-            helpEmbed.addField('Documentation', docs)
-            .addField('Found an issue?', `Please report any issues to <@${owner}> via the Support Discord: ${discord}.`)
+            .addField('📣 Current Prefix', prefix)
+            .addField('💬 Suggestions Channel', suggestionsChannel.toString() || (message.member.hasPermission('MANAGE_GUILD') && !suggestionsChannel ? `***Not set. Use*** \`${prefix + setChannelUsage}\`` : '***Not set. Contact a server administrator.***'))
+            .addField('🤖 General Commands', generalCmds.join(' | '));
+            if (message.member.hasPermission('MANAGE_GUILD') || message.member.roles.some(r => staffRoles.includes(r))) helpEmbed.addField('🗄 Staff Commands', staffCmds.join(' | '));
+            if (message.member.hasPermission('MANAGE_GUILD')) helpEmbed.addField('🛡 Admin Commands', adminCmds.join(' | '));
+            if (this.client.isOwner(message.author.id)) helpEmbed.addField('🔒 Owner Commands', ownerCmds.join(' | '));
+            helpEmbed.addField('🔖 Documentation', docs)
+            .addField('❗ Found an issue?', `Please report any issues to <@${owner}> via the Support Discord: ${discord}.`)
             .setColor(embedColor);
 
         await message.channel.send(helpEmbed);

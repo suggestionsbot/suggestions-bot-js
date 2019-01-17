@@ -149,12 +149,12 @@ const client = new Suggestions();
     });
 
     client.login();
-    client.mongoose.init(); // initialize connection to the database
+    client.mongodose.init(); // initialize connection to the database
 })();
 
 client.on('disconnect', () => client.logger.warn('Bot is disconnecting...'));
 client.on('reconnecting', () => client.logger.log('Bot reconnecting...', 'log'));
-client.on('error', e => client.logger.error(e));
+client.on('error', e => client.logger.error(e.stack));
 client.on('warn', info => client.logger.warn(info));
 client.on('commandBlocked', (cmd, reason) => {
     client.logger.warn(oneLine `

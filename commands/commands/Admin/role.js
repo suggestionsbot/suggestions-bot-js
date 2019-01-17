@@ -5,7 +5,7 @@ module.exports = class RoleCommand extends Command {
         super(client, {
             name: 'role',
             category: 'Admin',
-            description: 'Add or remove staff roles for managing suggestions',
+            description: 'Add or remove staff roles for managing suggestions.',
             usage: 'role <add/remove> <role>',
             aliases: ['staffrole'],
             adminOnly: true,

@@ -1,6 +1,3 @@
-const { oneLine } = require('common-tags');
-const { permissions } = require('../utils/perms');
-
 module.exports = class Command {
     constructor(client, {
         name = null,

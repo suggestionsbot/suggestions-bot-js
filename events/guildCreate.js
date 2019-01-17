@@ -11,7 +11,7 @@ module.exports = class {
 
     async run(guild) {
 
-        const { prefix, suggestionsChannel, suggestionsLogs } = this.client.config.defaultSettings;
+        const { defaultSettings: { prefix, suggestionsChannel, suggestionsLogs} } = this.client.config;
 
         const gOwnerID = guild.ownerID;
 

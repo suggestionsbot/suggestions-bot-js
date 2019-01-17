@@ -41,33 +41,30 @@ module.exports = class AnnounceCommand extends Command {
             let dmErrorCount = 0;
             let dmSuccessCount = 0;
             let ignoredGuilds = [
-                '264445053596991498',
+                '264445053596991498', 
                 '110373943822540800',
                 '450100127256936458',
                 '454933217666007052',
-                '330777295952543744',
                 '374071874222686211',
             ];
 
-            await this.client.guilds.forEach(g => {
-                
-                let owner = g.owner;
-                if (ignoredGuilds.includes(g.id)) return;
-    
-                owner.send(announceEmbed).catch(err => {
-                    dmErrorCount++;
-                    this.client.logger.error(err.stack);
-                    return message.channel.send(`Could not DM **${dmErrorCount}** user(s) as their DMs were locked.`);
-                });
-                
-                dmSuccessCount++;
-            });
+            try {
+                this.client.guilds.forEach(async g => {
+                    let owner = g.owner;
+                    if (ignoredGuilds.includes(g.id)) return;
 
-            return message.channel.send(`Successfully messaged **${dmSuccessCount}** user(s).`);
+                    await this.client.wait(2500);
+                    owner.send(announceEmbed);
+                    dmSuccessCount++;
+                });
+            } catch (err) {
+                dmErrorCount++;
+            }
+
+            return message.channel.send(`Successfully messaged **${dmSuccessCount}** user(s).${dmErrorCount > 1 ? ` However, I was not able to DM **${dmErrorCount}** user(s)!` : ''}`);
         } else {
-            this.client.logger.log('oof');
             message.channel.send('Could not confirm your announcement. Cancelling...').then(msg => msg.delete(3000)).catch(err => this.client.logger.error(err.stack));
-            return await message.channel.bulkDelete(6).catch(err => {
+            return message.channel.bulkDelete(6).catch(err => {
                 this.client.logger.error(err.stack);
                 return message.channel.send(`An error occurred: **${err.message}**`);
             });
