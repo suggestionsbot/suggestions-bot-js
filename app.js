@@ -149,7 +149,7 @@ const client = new Suggestions();
     });
 
     client.login();
-    client.mongodose.init(); // initialize connection to the database
+    client.mongoose.init(); // initialize connection to the database
 })();
 
 client.on('disconnect', () => client.logger.warn('Bot is disconnecting...'));
