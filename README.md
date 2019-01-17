@@ -29,7 +29,7 @@ Allow staff members in your Discord to manage suggestions via approving and reje
 *By default, users with the `MANAGE_GUILD` permission can manage suggestions.*
 
 #### Staff Suggestions
-Allow zero interference with user suggestions allowing staff members to suggest and vote on matter internally with no interruptions. Read more on about this via our [Staff Suggestions](https://docs.thenerdcave.us/staff-suggestions)'s page in the documentation.
+Allow zero interference with user suggestions allowing staff members to suggest and vote on matter internally with no interruptions. Read more on about this via our [Staff Suggestions](https://docs.suggestionsbot.com/docs/staff-suggestions.html)'s page in the documentation.
 
 #### Custom Configuration
 Server owners can change the default prefix and suggestions channel of the Suggestions along with a wider range of configuration. Here are a few:
