@@ -24,7 +24,6 @@ module.exports = class StatsCommand extends Command {
             'Discord Bot List (2)': this.client.guilds.get('450100127256936458').memberCount || 0,
             'Divine Discord Bot List': this.client.guilds.get('454933217666007052').memberCount || 0,
             'Bots For Discord': this.client.guilds.get('374071874222686211').memberCount || 0,
-            
         };
         
         const botUptime = moment.duration(this.client.uptime).format(' D [days], H [hrs], m [mins], s [secs]');

@@ -29,7 +29,7 @@ Allow staff members in your Discord to manage suggestions via approving and reje
 *By default, users with the `MANAGE_GUILD` permission can manage suggestions.*
 
 #### Staff Suggestions
-Allow zero interference with user suggestions allowing staff members to suggest and vote on matter internally with no interruptions. Read more on about this via our [Staff Suggestions](https://docs.thenerdcave.us/staff-suggestions)'s page in the documentation.
+Allow zero interference with user suggestions allowing staff members to suggest and vote on matter internally with no interruptions. Read more on about this via our [Staff Suggestions](https://docs.suggestionsbot.com/docs/staff-suggestions.html)'s page in the documentation.
 
 #### Custom Configuration
 Server owners can change the default prefix and suggestions channel of the Suggestions along with a wider range of configuration. Here are a few:
@@ -45,8 +45,7 @@ Server owners can change the default prefix and suggestions channel of the Sugge
 If there is ever an error or bug or you wish to suggest something new to the bot, then you may join our Support Discord (just click [here](https://discord.gg/g7wr8xb)!). Follow the single super-easy step once you join and then head over to the `#support` channel if you need help, `#bug_reports` if found a bug or simply discuss and post a suggestion the same way you would submit a new suggestion as described above!
 
 #### Future Features
-- Add your own reactions?
 - Leave suggestions in the Support Discord
 
 *You can also mention the bot in place of the prefix to use commands!*
-  Read the website for more information and unlock the full usage of the bot! [https://docs.thenerdcave.us/](https://docs.thenerdcave.us/)
+  Read the website for more information and unlock the full usage of the bot! [https://suggestionsbot.com](https://suggestionsbot.com)
