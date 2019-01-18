@@ -15,11 +15,11 @@ module.exports = class SettingsStore {
 
     // getSettings gets the guild settings in MongoDB
     async getSettings(guild) {
-        let gSettings = await Settings.findOne({ guildID: guild.id }) || this.client.config.defaultSettings;
-        let check = await this.client.isEmpty(gSettings);
+        let gSettings = await Settings.findOne({ guildID: guild.id });
+        
 
-        if (!check) return gSettings;
-        else throw ErrorHandler.NoGuildSettings;
+        if (gSettings._id) return gSettings;
+        else return this.client.config.defaultSettings;
     }
 
     // writeSettings overrides, or adds, any configuration item that is different
