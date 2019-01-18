@@ -1,6 +1,6 @@
 {
   "name": "suggestions-bot",
-  "version": "2.4.8",
+  "version": "2.4.9",
   "description": "The only suggestions bot you'll ever need. Simple usage and management of suggestions for public and staff use.",
   "main": "app.js",
   "scripts": {
@@ -17,7 +17,7 @@
   "bugs": {
     "url": "https://discord.gg/g7wr8xb"
   },
-  "homepage": "https://docs.thenerdcave.us",
+  "homepage": "https://suggestionsbot.com",
   "dependencies": {
     "chalk": "^2.4.1",
     "common-tags": "^1.8.0",

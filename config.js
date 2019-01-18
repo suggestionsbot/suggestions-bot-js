@@ -40,8 +40,8 @@ module.exports = {
     ],
     patreon: process.env.PATREON,
     defaultSettings: {
-        prefix: this.prefix,
-        suggestionsChannel: this.suggestionsChannel,
-        suggestionsLogs: this.suggestionsLogs
+        prefix: process.env.PREFIX,
+        suggestionsChannel: process.env.SUGGESTIONSCHANNEL,
+        suggestionsLogs: process.env.SUGGESTIONSLOGS,
     }
 };
