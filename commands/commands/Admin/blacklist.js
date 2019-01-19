@@ -96,7 +96,7 @@ module.exports = class BlacklistCommand extends Command {
                 blEmbed.addField('Issuer', `${message.member.user.tag} (${message.author.id})`);
 
                 try {
-                    await this.client.blacklists.addUserBlacklisat(newBlacklist);
+                    await this.client.blacklists.addUserBlacklist(newBlacklist);
                     message.channel.send(blEmbed).then(msg => msg.delete(5000));
                 } catch (err) {
                     this.client.logger.error(err.stack);
