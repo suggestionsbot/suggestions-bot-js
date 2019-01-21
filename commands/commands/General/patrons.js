@@ -19,7 +19,8 @@ module.exports = class PatronsCommand extends Command {
         let patrons = [
             'Jack Kelly',
             'Kyle',
-            'Noah Altman'
+            'Noah Altman',
+            'Josh Walker'
         ];
 
         const patronsEmbed = new RichEmbed()

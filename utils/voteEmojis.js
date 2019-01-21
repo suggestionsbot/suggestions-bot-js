@@ -3,37 +3,37 @@ const voteEmojis = [
         id: 0,
         name: 'defaultEmojis',
         fullName: 'Defaults',
-        emojis: ['<:nerdSuccess:490708616056406017>', '<:nerdError:522929743507488795>']
+        emojis: {
+            'nerdSuccess': '<:nerdSuccess:490708616056406017>',
+            'nerdError': '<:nerdError:522929743507488795>'
+        }
     },
     {
         id: 1,
         name: 'oldDefaults',
         fullName: 'Old Defaults',
-        emojis: ['✅', '❌']
+        emojis: {
+            'white_check_mark': '✅',
+            'x': '❌'
+        }
     },
     {
         id: 2,
         name: 'thumbsEmojis',
         fullName: 'Thumbs',
-        emojis: ['👍', '👎']
+        emojis: {
+            'thumbsup': '👍',
+            'thumbsdown': '👎'
+        }
     },
     {
         id: 3,
         name: 'arrowsEmojis',
         fullName: 'Arrows',
-        emojis: ['⬆', '⬇']
-    },
-    {
-        id: 4,
-        name: 'christmasEmojis',
-        fullName: 'Christmas',
-        emojis: ['🎄', '🌲']
-    },
-    {
-        id: 5,
-        name: 'jingleBellsEmojis',
-        fullName: 'Bells',
-        emojis: ['🔔', '🔕']
+        emojis: {
+            'arrow_up': '⬆',
+            'arrow_down': '⬇',
+        }
     }
 ];
 

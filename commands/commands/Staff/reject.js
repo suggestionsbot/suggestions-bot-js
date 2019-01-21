@@ -120,8 +120,8 @@ module.exports = class RejectCommand extends Command {
                 .setAuthor(message.guild.name, message.guild.iconURL)
                 .setDescription(`
                     **Results:**
-        
                     ${view}
+                    
                     **Suggestion:**
                     ${suggestion}
         

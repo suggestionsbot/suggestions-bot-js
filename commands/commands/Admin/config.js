@@ -5,9 +5,7 @@ const emojiSets = {
     defaultEmojis: 'Defaults',
     oldDefaults: 'Old Defaults',
     thumbsEmojis: 'Thumbs',
-    arrowsEmojis: 'Arrows',
-    christmasEmojis: 'Christmas',
-    jingleBellsEmojis: 'Bells'
+    arrowsEmojis: 'Arrows'
 };
 
 const responses = {

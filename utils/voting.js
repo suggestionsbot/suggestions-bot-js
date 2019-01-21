@@ -5,34 +5,32 @@ module.exports = async (client) => {
 
     const tokens = client.config.botLists;
 
-    setInterval(voteUtils, 180000);
+    setInterval(voteUtils, 300000);
+
+    // Discord Bots (discordbots.org)
+    const dbl = new DBL(tokens.dblToken, client, { statsInterval: 300000 });
+
+    dbl.on('posted', () => {
+        client.logger.log('Server count posted to DiscordBots.org!');
+    });
+
+    dbl.on('error', e => {
+        client.logger.error(e);
+    });
 
     async function voteUtils() {
-        // Discord Bots (discordbots.org)
-        const dbl = new DBL(tokens.dblToken, client, {
-            statsInterval: 0
-        });
-
-        dbl.on('posted', () => {
-            client.logger.log('Server count posted to DiscordBots.org!');
-        });
-
-        dbl.on('error', e => {
-            client.logger.error(e);
-        });
-
         // Discord Bot List (discord.bots.gg)
         try {
-            let data = {
-                guildCount: client.guilds.size
-            };
+            let data = { guildCount: client.guilds.size };
+            let body = JSON.stringify(data);
+
             let posted = await fetch(`https://discord.bots.gg/api/v1/bots/${client.user.id}/stats`, {
                 method: 'POST',
                 headers: {
                     'Authorization': tokens.botsggToken,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(data)
+                body: body
             });
 
             if (!posted.ok) throw new Error(posted.statusText);
@@ -43,16 +41,16 @@ module.exports = async (client) => {
 
         // Discord Bot List (discordbotlist.com)
         try {
-            let data = {
-                guilds: client.guilds.size
-            };
+            let data = { guilds: client.guilds.size };
+            let body = JSON.stringify(data);
+
             let posted = await fetch(`https://discordbotlist.com/api/bots/${client.user.id}/stats`, {
                 method: 'POST',
                 headers: {
-                    'Authorization': tokens.dbl2Token,
+                    'Authorization': `Bot ${tokens.dbl2Token}`,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(data)
+                body: body
             });
 
             if (!posted.ok) throw new Error(posted.statusText);
@@ -62,9 +60,9 @@ module.exports = async (client) => {
         }
 
         // Divine Discord Bot List (divinediscordbots.com)
-        let data = {
-            server_count: client.guilds.size
-        };
+        let data = { server_count: client.guilds.size };
+        let body = JSON.stringify(data);
+
         try {
             let posted = await fetch(`https://divinediscordbots.com/api/bots/${client.user.id}/stats`, {
                 method: 'POST',
@@ -72,7 +70,7 @@ module.exports = async (client) => {
                     'Authorization': tokens.ddbToken,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(data)
+                body: body
             });
 
             if (!posted.ok) throw new Error(posted.statusText);
@@ -83,16 +81,16 @@ module.exports = async (client) => {
 
         // botlist.space
         try {
-            let data = {
-                server_count: client.guilds.size
-            };
+            let data = { server_count: client.guilds.size };
+            let body = JSON.stringify(data);
+
             let posted = await fetch(`https://botlist.space/api/bots/${client.user.id}`, {
                 method: 'POST',
                 headers: {
                     'Authorization': tokens.blsToken,
                     'Content-type': 'application/json'
                 },
-                body: JSON.stringify(data)
+                body: body
             });
 
             if (!posted.ok) throw new Error(posted.statusText);
@@ -103,14 +101,16 @@ module.exports = async (client) => {
 
         // Discord Bot List by Terminal.ink (ls.terminal.ink)
         try {
-            let data = {};
+            let data = { bot: { count: client.guilds.size }};
+            let body = JSON.stringify(data);
+
             let posted = await fetch(`https://ls.terminal.ink/api/v2/bots/${client.user.id}`, {
                 method: 'POST',
                 headers: {
                     'Authorization': tokens.termToken,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(data)
+                body: body
             });
 
             if (!posted.ok) throw new Error(posted.statusText);
@@ -121,16 +121,16 @@ module.exports = async (client) => {
 
         // Bots For Discord (botsfordiscord.com)
         try {
-            let data = {
-                server_count: client.guilds.size
-            };
+            let data = { server_count: client.guilds.size };
+            let body = JSON.stringify(data);
+
             let posted = await fetch(`https://botsfordiscord.com/api/bot/${client.user.id}`, {
                 method: 'POST',
                 headers: {
                     'Authorization': tokens.bfdToken,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(data)
+                body: body
             });
 
             if (!posted.ok) throw new Error(posted.statusText);

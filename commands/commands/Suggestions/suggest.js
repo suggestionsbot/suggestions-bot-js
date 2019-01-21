@@ -99,26 +99,23 @@ module.exports = class SuggestCommand extends Command {
 
         sChannel.send(sEmbed)
             .then(async msg => {
-                voteEmojis.forEach(async set => {
-                    let emojiSet = set.emojis;
-
-                    if (!emojis || emojis === 'defaultEmojis') {
-                        if (set.name !== 'defaultEmojis') return;
-                        for (let i = 0; i < emojiSet.length; i++) {
-                            await msg.react(emojiSet[i]
+                for (let i = 0; i < voteEmojis.length; i++) {
+                    const mappedEmojis = new Map(Object.entries(voteEmojis[i].emojis));
+                    for (const e of mappedEmojis.values()) {
+                        if (!emojis || emojis === 'defaultEmojis') {
+                            if (voteEmojis[i].name !== 'defaultEmojis') break;
+                            await msg.react(e
                                 .replace('<', '')
                                 .replace('>', ''));
+                            continue;
+                        } else if (emojis === voteEmojis[i].name) {
+                            await msg.react(e);
+                            continue;
+                        } else {
+                            break;
                         }
-                        return;
                     }
-
-                    if (emojis === set.name) {
-                        for (let i = 0; i < emojiSet.length; i++) {
-                            await msg.react(emojiSet[i]);
-                        }
-                        return;
-                    }
-                });
+                }
             })
             .catch(err => {
                 this.client.logger.error(err.stack);
