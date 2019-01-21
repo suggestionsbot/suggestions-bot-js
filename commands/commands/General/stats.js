@@ -19,11 +19,11 @@ module.exports = class StatsCommand extends Command {
         let { embedColor } = this.client.config;
         
         let excludedGuilds = {
-            'Discord Bot List': this.client.guilds.get('345753533141876737').memberCount || 0,
-            'Discord Bots': this.client.guilds.get('110373943822540800').memberCount || 0,
-            'Discord Bot List (2)': this.client.guilds.get('450100127256936458').memberCount || 0,
-            'Divine Discord Bot List': this.client.guilds.get('454933217666007052').memberCount || 0,
-            'Bots For Discord': this.client.guilds.get('374071874222686211').memberCount || 0,
+            'Discord Bot List': this.client.guilds.get('345753533141876737').members.size || 0,
+            'Discord Bots': this.client.guilds.get('110373943822540800').members.size || 0,
+            'Discord Bot List (2)': this.client.guilds.get('450100127256936458').members.size || 0,
+            'Divine Discord Bot List': this.client.guilds.get('454933217666007052').members.size || 0,
+            'Bots For Discord': this.client.guilds.get('374071874222686211').members.size || 0,
         };
         
         const botUptime = moment.duration(this.client.uptime).format(' D [days], H [hrs], m [mins], s [secs]');

@@ -43,7 +43,11 @@ module.exports = class SetVotesCommand extends Command {
             }
 
             for (let i = 0; i < voteEmojis.length; i++) {
+
+                const mappedEmojis = Array.from(Object.values(voteEmojis[i].emojis));
+
                 if (args[0] && (setID === voteEmojis[i].id)) {
+
                     this.client.settings.writeSettings(message.guild, {
                         voteEmojis: voteEmojis[i].name
                     }).catch(err => {
@@ -51,24 +55,29 @@ module.exports = class SetVotesCommand extends Command {
                         return message.channel.send(`Error updating the default emoji set: **${err.message}**.`);
                     });
 
-                    this.client.logger.log(`The default vote emojis in the guild ${message.guild.name} (${message.guild.id}) has been changed to ${voteEmojis[i].emojis.join(' ')}.`);
-                    return message.channel.send(`The default vote emojis have been changed to ${voteEmojis[i].emojis.join(' ')}.`).then(msg => msg.delete(5000).catch(err => this.client.logger.error(err.stack)));
+                    this.client.logger.log(`The default vote emojis in the guild ${message.guild.name} (${message.guild.id}) has been changed to ${mappedEmojis.join(' ')}.`);
+                    return message.channel.send(`The default vote emojis have been changed to ${mappedEmojis.join(' ')}.`).then(msg => msg.delete(5000).catch(err => this.client.logger.error(err.stack)));
                 } 
             }
         }
 
         let view = '';
         let emojiSets = [];
-        voteEmojis.forEach(set => {
-            let emojiSet = set.emojis;
+        for (let i = 0; i < voteEmojis.length; i++) {
 
-            view = `\`${set.id}\`: ${emojiSet.join(' ')}`;
-            if (gSettings.voteEmojis === set.name) {
-                view = `\`${set.id}\`: ${emojiSet.join(' ')} ***(Currently Using)***`;
+            const emojiSet = Array.from(Object.values(voteEmojis[i].emojis));
+
+            for (const val of Object.values(voteEmojis[i].emojis)) {
+                view = `\`${voteEmojis[i].id}\`: ${emojiSet.join(' ')}`;
+
+                if (gSettings.voteEmojis === voteEmojis[i].name) {
+                    view = `\`${voteEmojis[i].id}\`: ${emojiSet.join(' ')} ***(Currently Using)***`;
+                }
+
+                emojiSets.push(view);
+                break;
             }
-
-            emojiSets.push(view);
-        });
+        }
 
         if (!gSettings.voteEmojis) {
             let str = emojiSets[0].concat(' ', '***(Currently Using)***');
