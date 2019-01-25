@@ -14,16 +14,11 @@ module.exports = class SetVotesCommand extends Command {
         });
     }
 
-    async run(message, args) {
+    async run(message, args, settings) {
 
         const { embedColor, discord } = this.client.config;
 
         await message.delete().catch(O_o => {});
-
-        let gSettings = await this.client.settings.getSettings(message.guild).catch(err => {
-            this.client.logger.error(err.stack);
-            return message.channel.send(`Error querying the database for this guild's information: **${err.message}**.`);
-        });
 
         const usage = this.help.usage;
 
@@ -44,8 +39,6 @@ module.exports = class SetVotesCommand extends Command {
 
             for (let i = 0; i < voteEmojis.length; i++) {
 
-                const mappedEmojis = Array.from(Object.values(voteEmojis[i].emojis));
-
                 if (args[0] && (setID === voteEmojis[i].id)) {
 
                     this.client.settings.writeSettings(message.guild, {
@@ -55,31 +48,29 @@ module.exports = class SetVotesCommand extends Command {
                         return message.channel.send(`Error updating the default emoji set: **${err.message}**.`);
                     });
 
-                    this.client.logger.log(`The default vote emojis in the guild ${message.guild.name} (${message.guild.id}) has been changed to ${mappedEmojis.join(' ')}.`);
-                    return message.channel.send(`The default vote emojis have been changed to ${mappedEmojis.join(' ')}.`).then(msg => msg.delete(5000).catch(err => this.client.logger.error(err.stack)));
+                    this.client.logger.log(`The default vote emojis in the guild ${message.guild.name} (${message.guild.id}) has been changed to ${voteEmojis[i].emojis.join(' ')}.`);
+                    return message.channel.send(`The default vote emojis have been changed to ${voteEmojis[i].emojis.join(' ')}.`)
+                        .then(msg => msg.delete(5000)
+                        .catch(err => this.client.logger.error(err.stack)));
                 } 
             }
         }
 
         let view = '';
         let emojiSets = [];
-        for (let i = 0; i < voteEmojis.length; i++) {
+        voteEmojis.forEach(set => {
 
-            const emojiSet = Array.from(Object.values(voteEmojis[i].emojis));
+            let emojiSet = set.emojis;
 
-            for (const val of Object.values(voteEmojis[i].emojis)) {
-                view = `\`${voteEmojis[i].id}\`: ${emojiSet.join(' ')}`;
-
-                if (gSettings.voteEmojis === voteEmojis[i].name) {
-                    view = `\`${voteEmojis[i].id}\`: ${emojiSet.join(' ')} ***(Currently Using)***`;
-                }
-
-                emojiSets.push(view);
-                break;
+            view = `\`${set.id}\`: ${emojiSet.join(' ')}`;
+            if (settings.voteEmojis === set.name) {
+                view = `\`${set.id}\`: ${emojiSet.join(' ')} ***(Currently Using)***`;
             }
-        }
 
-        if (!gSettings.voteEmojis) {
+            emojiSets.push(view);
+        });
+
+        if (!settings.voteEmojis) {
             let str = emojiSets[0].concat(' ', '***(Currently Using)***');
             emojiSets[0] = str;
         }
@@ -91,7 +82,7 @@ module.exports = class SetVotesCommand extends Command {
 
             ${emojiSets.join('\n\n')}
 
-            You can do \`${gSettings.prefix + usage}\` to set the desired emojis.
+            You can do \`${settings.prefix + usage}\` to set the desired emojis.
             Submit new emoji set suggestions any time by joining our Discord server: ${discord}
             `);
 

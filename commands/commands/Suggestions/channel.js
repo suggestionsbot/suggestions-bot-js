@@ -11,16 +11,11 @@ module.exports = class ChannelCommand extends Command {
         });
     }
 
-    async run(message, args) {
+    async run(message, args, settings) {
 
         await message.delete().catch(O_o => {});
 
-        let gSettings = await this.client.settings.getSettings(message.guild).catch(err => {
-            this.client.logger.error(err.stack);
-            return message.channel.send(`Error querying the database for this guild's information: **${err.message}**.`);
-        });
-
-        let validation = message.guild.channels.find(c => c.name === gSettings.suggestionsChannel) || message.guild.channels.find(c => c.toString() === gSettings.suggestionsChannel) || message.guild.channels.get(gSettings.suggestionsChannel);
+        let validation = message.guild.channels.find(c => c.name === settings.suggestionsChannel) || message.guild.channels.find(c => c.toString() === settings.suggestionsChannel) || message.guild.channels.get(settings.suggestionsChannel);
         if (!validation) return message.channel.send('There is no suggestions channel set or I can\'t find the default one.');
 
         return message.channel.send(`Current suggestions channel: ${validation.toString()}`);

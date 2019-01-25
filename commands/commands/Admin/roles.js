@@ -13,18 +13,13 @@ module.exports = class RolesCommand extends Command {
         });
     }
 
-    async run(message, args) {
+    async run(message, args, settings) {
 
         const { embedColor } = this.client.config;
 
         await message.delete().catch(O_o => {});
 
-        let gSettings = await this.client.settings.getSettings(message.guild).catch(err => {
-            this.client.logger.error(err.stack);
-            return message.channel.send(`Error querying the database for this guild's information: **${err.message}**.`);
-        });
-
-        const { staffRoles } = gSettings;
+        const { staffRoles } = settings;
 
         let roles = message.guild.roles.filter(role => staffRoles.map(role => role.role).includes(role.id));
         roles.sort((a, b) => b.position - a.position);

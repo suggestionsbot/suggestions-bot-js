@@ -18,23 +18,18 @@ module.exports = class StaffSuggestCommand extends Command {
         });
     }
 
-    async run(message, args) {
+    async run(message, args, settings) {
 
         const { embedColor } = this.client.config;
         const usage = this.help.usage;
 
         await message.delete().catch(O_o => {});
-
-        let gSettings = await this.client.settings.getSettings(message.guild).catch(err => {
-            this.client.logger.error(err.stack);
-            return message.channel.send(`Error querying the database for this guild's information: **${err.message}**.`);
-        });
         
         const sUser = message.author;
-        const sChannel = message.guild.channels.find(c => c.name === gSettings.staffSuggestionsChannel) || message.guild.channels.find(c => c.toString() === gSettings.staffSuggestionsChannel) || message.guild.channels.get(gSettings.staffSuggestionsChannel);
+        const sChannel = message.guild.channels.find(c => c.name === settings.staffSuggestionsChannel) || message.guild.channels.find(c => c.toString() === settings.staffSuggestionsChannel) || message.guild.channels.get(settings.staffSuggestionsChannel);
         if (!sChannel) return noStaffSuggestions(message.channel);
 
-        if (!gSettings.staffRoles) return message.channel.send('No staff roles exist! Please create them or contact a server administrator to handle suggestions.').then(msg =>  msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
+        if (!settings.staffRoles) return message.channel.send('No staff roles exist! Please create them or contact a server administrator to handle suggestions.').then(msg =>  msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
 
         const embed = new RichEmbed()
             .setDescription(`Hey, ${sUser}. Your suggestion has been added in the ${sChannel.toString()} channel to be voted on!`)
@@ -44,7 +39,7 @@ module.exports = class StaffSuggestCommand extends Command {
             .setTimestamp();
 
         const suggestion = args.join(' ');
-        if (!suggestion) return message.channel.send(`Usage: \`${gSettings.prefix + usage}\``).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
+        if (!suggestion) return message.channel.send(`Usage: \`${settings.prefix + usage}\``).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
 
         const submittedOn = moment.utc(message.createdAt).format('MM/DD/YY @ h:mm A (z)');
 

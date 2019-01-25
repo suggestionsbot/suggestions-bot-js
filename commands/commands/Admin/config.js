@@ -5,7 +5,8 @@ const emojiSets = {
     defaultEmojis: 'Defaults',
     oldDefaults: 'Old Defaults',
     thumbsEmojis: 'Thumbs',
-    arrowsEmojis: 'Arrows'
+    arrowsEmojis: 'Arrows',
+    greenEmojis: 'Green'
 };
 
 const responses = {
@@ -25,16 +26,14 @@ module.exports = class ConfigCommand extends Command {
         });
     }
 
-    async run(message, args) {
+    async run(message, args, settings) {
         
         await message.delete().catch(O_o=>{});
 
-        let gSettings = {};
         let gBlacklists = {};
         let gSuggestions = {};
 
         try {
-            gSettings = await this.client.settings.getSettings(message.guild);
             gBlacklists = await this.client.blacklists.getGuildBlacklist(message.guild);
             gSuggestions = await this.client.suggestions.getGuildSuggestions(message.guild);
         } catch (err) {
@@ -53,7 +52,7 @@ module.exports = class ConfigCommand extends Command {
             staffRoles,
             voteEmojis,
             responseRequired
-        } = gSettings;
+        } = settings;
 
         const guildOwner = message.guild.members.get(guildOwnerID);
         

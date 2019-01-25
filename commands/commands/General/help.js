@@ -12,18 +12,14 @@ module.exports = class HelpCommand extends Command {
         });
     }
 
-    async run(message, args) {
+    async run(message, args, settings) {
         let { owner, embedColor, discord, docs } = this.client.config;
-        let gSettings = await this.client.settings.getSettings(message.guild).catch(err => {
-            this.client.logger.error(err);
-            return message.channel.send(`Error querying the database for this guild's information: **${err.message}**.`);
-        });
 
         let {
             prefix,
             staffRoles: roles,
             suggestionsChannel
-        } = gSettings;
+        } = settings;
 
         suggestionsChannel = message.guild.channels.find(c => c.name === suggestionsChannel) || message.guild.channels.find(c => c.toString() === suggestionsChannel) || message.guild.channels.get(suggestionsChannel) || '';
 
@@ -65,14 +61,14 @@ module.exports = class HelpCommand extends Command {
         const helpEmbed = new RichEmbed()
             .setTitle('Help Information')
             .setDescription(`View help information for ${this.client.user}. \n (Do \`${prefix + cmdName} <command>)\` for specific help information).`)
-            .addField('📣 Current Prefix', prefix)
+            .addField('📣 Current Prefix', `\`${prefix}\``)
             .addField('💬 Suggestions Channel', suggestionsChannel.toString() || (message.member.hasPermission('MANAGE_GUILD') && !suggestionsChannel ? `***Not set. Use*** \`${prefix + setChannelUsage}\`` : '***Not set. Contact a server administrator.***'))
             .addField('🤖 General Commands', generalCmds.join(' | '));
             if (message.member.hasPermission('MANAGE_GUILD') || message.member.roles.some(r => staffRoles.includes(r))) helpEmbed.addField('🗄 Staff Commands', staffCmds.join(' | '));
             if (message.member.hasPermission('MANAGE_GUILD')) helpEmbed.addField('🛡 Admin Commands', adminCmds.join(' | '));
             if (this.client.isOwner(message.author.id)) helpEmbed.addField('🔒 Owner Commands', ownerCmds.join(' | '));
             helpEmbed.addField('🔖 Documentation', docs)
-            .addField('❗ Found an issue?', `Please report any issues to <@${owner}> via the Support Discord: ${discord}.`)
+            .addField('❗ Found an issue?', `Please report any issues to <@${owner}> via the Support Discord: ${discord}`)
             .setColor(embedColor);
 
         await message.channel.send(helpEmbed);

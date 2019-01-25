@@ -19,17 +19,12 @@ module.exports = class BlacklistCommand extends Command {
         });
     }
 
-    async run(message, args) {
+    async run(message, args, settings) {
 
         const { name, usage } = this.help;
         const { embedColor } = this.client.config;
     
         await message.delete().catch(O_o=>{});
-
-        let gSettings = await this.client.settings.getSettings(message.guild).catch(err => {
-            this.client.logger.error(err.stack);
-            return message.channel.send(`Error querying the database for this guild's information: **${err.message}**.`);
-        });
 
         let gBlacklist = await this.client.blacklists.getGuildBlacklist(message.guild);
 
@@ -56,16 +51,16 @@ module.exports = class BlacklistCommand extends Command {
             }
     
             await blEmbed.setTitle(`${this.client.user.username} | Blacklisted User`);
-            await blEmbed.setDescription(`These users are currently blacklisted from using any of the bot commands in this guild. Use \`${gSettings.prefix + name} help\` for command information.`);
+            await blEmbed.setDescription(`These users are currently blacklisted from using any of the bot commands in this guild. Use \`${settings.prefix + name} help\` for command information.`);
             await blEmbed.setColor(embedColor);
     
-            if (gBlacklist.length === 0) return message.channel.send(`There are no blacklisted users! Use \`${gSettings.prefix + name} <help>\` for more information.`).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
-            if (active === 0) return message.channel.send(`There are currently no active blacklisted users. Use \`${gSettings.prefix + name} <help>\` for more information.`).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
+            if (gBlacklist.length === 0) return message.channel.send(`There are no blacklisted users! Use \`${settings.prefix + name} <help>\` for more information.`).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
+            if (active === 0) return message.channel.send(`There are currently no active blacklisted users. Use \`${settings.prefix + name} <help>\` for more information.`).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
     
             return message.channel.send(blEmbed);
         }
 
-        if (args[0] === 'help') return message.channel.send(`Usage: \`${gSettings.prefix + usage}\``).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
+        if (args[0] === 'help') return message.channel.send(`Usage: \`${settings.prefix + usage}\``).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
 
         let blacklisted = args[1];
         let reason = args.slice(2).join(' ');
@@ -129,7 +124,7 @@ module.exports = class BlacklistCommand extends Command {
                 break;
             }
             default:
-                message.channel.send(`Usage: \`${gSettings.prefix + usage}\``).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
+                message.channel.send(`Usage: \`${settings.prefix + usage}\``).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
                 break;
         }
         return;

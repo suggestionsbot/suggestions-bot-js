@@ -17,26 +17,18 @@ module.exports = class NoteCommand extends Command {
         });
     }
 
-    async run(message, args) {
+    async run(message, args, settings) {
         
         const usage = this.help.usage;
         let { embedColor } = this.client.config;
 
         message.delete().catch(O_o => {});
 
-        let gSettings = {};
-        try {
-            gSettings = await this.client.settings.getSettings(message.guild);
-        } catch (err) {
-            this.client.logger.error(err.stack);
-            return message.channel.send(`Error querying the database for this guild's information: **${err.message}**.`);
-        }
-
-        const suggestionsChannel = message.guild.channels.find(c => c.name === gSettings.suggestionsChannel) || (message.guild.channels.find(c => c.toString() === gSettings.suggestionsChannel)) || (message.guild.channels.get(gSettings.suggestionsChannel));
+        const suggestionsChannel = message.guild.channels.find(c => c.name === settings.suggestionsChannel) || (message.guild.channels.find(c => c.toString() === settings.suggestionsChannel)) || (message.guild.channels.get(settings.suggestionsChannel));
 
         let id = args[0];
         let note = args.slice(1).join(' ');
-        if (!id && !note) return message.channel.send(`Usage: \`${gSettings.prefix + usage}\``).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
+        if (!id && !note) return message.channel.send(`Usage: \`${settings.prefix + usage}\``).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
 
         let date = moment(Date.now()).format();
 
