@@ -18,7 +18,7 @@ module.exports = class SettingsStore {
         let gSettings = await Settings.findOne({ guildID: guild.id });
         
 
-        if (gSettings._id) return gSettings;
+        if (gSettings && gSettings._id) return gSettings;
         else return this.client.config.defaultSettings;
     }
 
