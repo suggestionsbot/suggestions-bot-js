@@ -96,7 +96,9 @@ module.exports = class SuggestCommand extends Command {
             .then(async msg => {
 
                 const filter = set => set.name === emojis;
-                const foundSet = voteEmojis.find(filter);
+                const defaults = set => set.name === 'defaultEmojis';
+                let foundSet = voteEmojis.find(filter);
+                if (!foundSet) foundSet = voteEmojis.find(defaults);
                 const emojiSet = foundSet.emojis;
 
                 if (!emojis || emojis === 'defaultEmojis') {
