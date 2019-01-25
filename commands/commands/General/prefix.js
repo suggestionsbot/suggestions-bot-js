@@ -9,15 +9,7 @@ module.exports = class PrefixCommand extends Command {
         });
     }
 
-    async run(message, args) {
-
-        let gSettings = {};
-        try {
-            gSettings = await this.client.settings.getSettings(message.guild);
-            return message.channel.send(`Current prefix: \`${gSettings.prefix}\``);
-        } catch (err) {
-            this.client.logger.error(err.stack);
-            message.channel.send(err.message);
-        }
+    async run(message, args, settings) {
+        return message.channel.send(`Current prefix: \`${settings.prefix}\``);
     }
 };

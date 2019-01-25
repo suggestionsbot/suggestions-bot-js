@@ -13,14 +13,11 @@ module.exports = class RoleCommand extends Command {
         });
     }
 
-    async run(message, args) {
+    async run(message, args, settings) {
 
         await message.delete().catch(O_o => {});
 
-        let { prefix, staffRoles } = await this.client.settings.getSettings(message.guild).catch(err => {
-            this.client.logger.error(err.stack);
-            return message.channel.send(`Error querying the database for this guild's information: **${err.message}**.`);
-        });
+        let { prefix, staffRoles } = settings;
 
         let usage = this.help.usage;
      

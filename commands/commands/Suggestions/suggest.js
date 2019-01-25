@@ -23,7 +23,7 @@ module.exports = class SuggestCommand extends Command {
         });
     }
 
-    async run(message, args) {
+    async run(message, args, settings) {
 
         const { embedColor } = this.client.config;
 
@@ -32,23 +32,18 @@ module.exports = class SuggestCommand extends Command {
         let id = crypto.randomBytes(20).toString('hex').slice(12, 20);
         let time = moment(Date.now());
 
-        let gSettings = await this.client.settings.getSettings(message.guild).catch(err => {
-            this.client.logger.error(err.stack);
-            return message.channel.send(`Error querying the database for this guild's information: **${err.message}**.`);
-        });
-
         let verifySuggestion = await this.client.suggestions.getGlobalSuggestion(id).catch(err => {
             this.client.logger.error(err.stack);
             return message.channel.send(`Error querying the database for this guild's suggestions: **${err.message}**.`);
         });
 
-        let { prefix, suggestionsChannel } = gSettings;
+        let { prefix, suggestionsChannel } = settings;
 
         const sUser = message.author;
         const sChannel = message.guild.channels.find(c => c.name === suggestionsChannel) || message.guild.channels.find(c => c.toString() === suggestionsChannel) || message.guild.channels.get(suggestionsChannel);
         if (!sChannel) return noSuggestions(message.channel);
 
-        let emojis = gSettings.voteEmojis;
+        let emojis = settings.voteEmojis;
 
         // If the sID exists globally, this will force a new one to be generated
         if (verifySuggestion) id = crypto.randomBytes(20).toString('hex').slice(12, 20);
@@ -99,22 +94,26 @@ module.exports = class SuggestCommand extends Command {
 
         sChannel.send(sEmbed)
             .then(async msg => {
-                for (let i = 0; i < voteEmojis.length; i++) {
-                    const mappedEmojis = new Map(Object.entries(voteEmojis[i].emojis));
-                    for (const e of mappedEmojis.values()) {
-                        if (!emojis || emojis === 'defaultEmojis') {
-                            if (voteEmojis[i].name !== 'defaultEmojis') break;
-                            await msg.react(e
-                                .replace('<', '')
-                                .replace('>', ''));
-                            continue;
-                        } else if (emojis === voteEmojis[i].name) {
-                            await msg.react(e);
-                            continue;
-                        } else {
-                            break;
-                        }
+
+                const filter = set => set.name === emojis;
+                const foundSet = voteEmojis.find(filter);
+                const emojiSet = foundSet.emojis;
+
+                if (!emojis || emojis === 'defaultEmojis') {
+                    if (foundSet.name !== 'defaultEmojis') return;
+                    for (let i = 0; i < emojiSet.length; i++) {
+                        await msg.react(emojiSet[i]
+                            .replace('<', '')
+                            .replace('>', ''));
                     }
+                    return;
+                }
+
+                if (foundSet) {
+                    for (let i = 0; i < emojiSet.length; i++) {
+                        await msg.react(emojiSet[i]);
+                    }
+                    return;
                 }
             })
             .catch(err => {

@@ -13,18 +13,13 @@ module.exports = class SetPrefixCommand extends Command {
         });
     }
 
-    async run(message, args) {
+    async run(message, args, settings) {
         
         const usage = this.help.usage;
 
         await message.delete().catch(O_o => {});
 
-        let gSettings = await this.client.settings.getSettings(message.guild).catch(err => {
-            this.client.logger.error(err.stack);
-            return message.channel.send(`Error querying the database for this guild's information: **${err.message}**.`);
-        });
-
-        if (!args[0]) return message.channel.send(`Usage: \`${gSettings.prefix + usage}\``).then(m => m.delete(5000)).catch(err => this.client.logger.error(err.stack));
+        if (!args[0]) return message.channel.send(`Usage: \`${settings.prefix + usage}\``).then(m => m.delete(5000)).catch(err => this.client.logger.error(err.stack));
 
         await this.client.settings.writeSettings(message.guild, { prefix: args[0] }).catch(err => {
             this.client.logger.error(err.stack);

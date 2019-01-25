@@ -14,15 +14,15 @@ module.exports = class {
 
         if (!message.guild) return;
 
-        let gSettings = {};
+        let settings = {};
 
         try {
-            gSettings = await this.client.settings.getSettings(message.guild);
+            settings = await this.client.settings.getSettings(message.guild);
         } catch (err) {
             this.client.logger.error(err.stack);
         }
 
-        let guildConf = gSettings;
+        let guildConf = settings;
 
         const prefixMention = new RegExp(`^<@!?${this.client.user.id}> `);
         const newPrefix = message.content.match(prefixMention) ? message.content.match(prefixMention)[0] : guildConf.prefix;
@@ -94,7 +94,7 @@ module.exports = class {
         }
 
         if (throttle) throttle.usages++;
-        cmd.run(message, args);
+        cmd.run(message, args, settings);
 
         newCommand.save().catch(err => this.client.logger.error(err.stack));
         this.client.logger.log(`${message.author.tag} (${message.author.id}) ran command ${cmd.help.name}`, 'cmd');

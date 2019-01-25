@@ -18,27 +18,22 @@ module.exports = class RejectCommand extends Command {
         });
     }
 
-    async run(message, args) {
+    async run(message, args, settings) {
 
         const usage = this.help.usage;
         const { rejected } = this.client.config.suggestionColors;
 
         message.delete().catch(O_o => {});
 
-        let gSettings = await this.client.settings.getSettings(message.guild).catch(err => {
-            this.client.logger.error(err.stack);
-            return message.channel.send(`Error querying the database for this guild's information: **${err.message}**.`);
-        });
+        if (!settings.staffRoles) return message.channel.send('No staff roles exist! Please create them or contact a server administrator to handle suggestions.').then(msg =>  msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
 
-        if (!gSettings.staffRoles) return message.channel.send('No staff roles exist! Please create them or contact a server administrator to handle suggestions.').then(msg =>  msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
-
-        const suggestionsChannel = message.guild.channels.find(c => c.name === gSettings.suggestionsChannel) || (message.guild.channels.find(c => c.toString() === gSettings.suggestionsChannel)) || (message.guild.channels.get(gSettings.suggestionsChannel));
-        const suggestionsLogs = message.guild.channels.find(c => c.name === gSettings.suggestionsLogs) || (message.guild.channels.find(c => c.toString() === gSettings.suggestionsLogs)) || (message.guild.channels.get(gSettings.suggestionsLogs));
+        const suggestionsChannel = message.guild.channels.find(c => c.name === settings.suggestionsChannel) || (message.guild.channels.find(c => c.toString() === settings.suggestionsChannel)) || (message.guild.channels.get(settings.suggestionsChannel));
+        const suggestionsLogs = message.guild.channels.find(c => c.name === settings.suggestionsLogs) || (message.guild.channels.find(c => c.toString() === settings.suggestionsLogs)) || (message.guild.channels.get(settings.suggestionsLogs));
         if (!suggestionsLogs) return noSuggestionsLogs(message.channel);
 
         let id = args[0];
         let reply = args.slice(1).join(' ');
-        if (!id) return message.channel.send(`Usage: \`${gSettings.prefix + usage}\``).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
+        if (!id) return message.channel.send(`Usage: \`${settings.prefix + usage}\``).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
 
         let date = moment(Date.now()).format();
 
@@ -50,7 +45,7 @@ module.exports = class RejectCommand extends Command {
         if (await this.client.isEmpty(sID)) return message.channel.send(`Could not find the suggestion with the sID **${args[0]}** in the guild database.`).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
 
         if (await this.client.suggestions.isResponseRequired(message.guild) && !reply) {
-            return message.channel.send(`A response is required for approving this suggestion. Usage: \`${gSettings.prefix + usage}\``)
+            return message.channel.send(`A response is required for approving this suggestion. Usage: \`${settings.prefix + usage}\``)
                 .then(msg => msg.delete(5000))
                 .catch(err => this.client.logger.error(err.stack));
         }
