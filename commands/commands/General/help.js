@@ -53,7 +53,7 @@ module.exports = class HelpCommand extends Command {
             return message.channel.send(cmdHelpEmbed);
         }
 
-        const generalCmds = cmds.filter(cmd => cmd.conf.ownerOnly === false && cmd.conf.adminOnly === false && cmd.conf.staffOnly === false).map(cmd => cmd.help.name).sort().map(cmd => '`'+ cmd + '`');
+        const generalCmds = cmds.filter(cmd => cmd.conf.ownerOnly === false && cmd.conf.adminOnly === false && cmd.conf.staffOnly === false && cmd.conf.superSecretOnly === false).map(cmd => cmd.help.name).sort().map(cmd => '`'+ cmd + '`');
         const staffCmds = cmds.filter(cmd => cmd.conf.staffOnly === true).map(cmd => cmd.help.name).sort().map(cmd => '`'+ cmd + '`');
         const adminCmds = cmds.filter(cmd => cmd.conf.adminOnly === true).map(cmd => cmd.help.name).sort().map(cmd => '`'+ cmd + '`');
         const ownerCmds = cmds.filter(cmd => cmd.conf.ownerOnly === true).map(cmd => cmd.help.name).sort().map(cmd => '`'+ cmd + '`');
