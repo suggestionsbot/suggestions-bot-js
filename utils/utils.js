@@ -1,7 +1,8 @@
+const { oneLine } = require('common-tags');
 const { prefix } = require('../config.js');
 require('dotenv-flow').config();
 
-module.exports.botPresence = async (client) =>  {
+const botPresence = async (client) =>  {
 
     if (process.env.NODE_ENV === 'production') {
 
@@ -16,4 +17,8 @@ module.exports.botPresence = async (client) =>  {
         client.user.setActivity('in code land...', { type: 'PLAYING' })
             .catch(console.error);
     }
+};
+
+module.exports = {
+    botPresence,
 };

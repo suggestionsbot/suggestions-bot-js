@@ -4,7 +4,6 @@ const crypto = require('crypto');
 const moment = require('moment');
 const { stripIndents } = require('common-tags');
 const { noSuggestions, noChannelPerms } = require('../../../utils/errors');
-const voteEmojis = require('../../../utils/voteEmojis');
 require('moment-duration-format');
 require('moment-timezone');
 
@@ -24,6 +23,8 @@ module.exports = class SuggestCommand extends Command {
     }
 
     async run(message, args, settings) {
+
+        const voteEmojis = require('../../../utils/voteEmojis')(this.client);
 
         const { embedColor } = this.client.config;
 
@@ -97,26 +98,25 @@ module.exports = class SuggestCommand extends Command {
 
                 const filter = set => set.name === emojis;
                 const defaults = set => set.name === 'defaultEmojis';
-                let foundSet = voteEmojis.find(filter);
-                if (!foundSet) foundSet = voteEmojis.find(defaults);
+                let foundSet = voteEmojis.find(filter) || voteEmojis.find(defaults);
                 const emojiSet = foundSet.emojis;
-
-                if (!emojis || emojis === 'defaultEmojis') {
-                    if (foundSet.name !== 'defaultEmojis') return;
-                    for (let i = 0; i < emojiSet.length; i++) {
-                        await msg.react(emojiSet[i]
-                            .replace('<', '')
-                            .replace('>', ''));
-                    }
-                    return;
+        
+                function delay() {
+                    return new Promise(resolve => setTimeout(resolve, 300));
                 }
 
-                if (foundSet) {
-                    for (let i = 0; i < emojiSet.length; i++) {
-                        await msg.react(emojiSet[i]);
-                    }
-                    return;
+                async function delayedReact(msg, item) {
+                    await delay();
+                    msg.react(item);
                 }
+
+                async function processReaction(msg, array) {
+                    for (const item of array) {
+                        await delayedReact(msg, item);
+                    }
+                }
+
+                processReaction(msg, emojiSet);
             })
             .catch(err => {
                 this.client.logger.error(err.stack);

@@ -15,16 +15,6 @@ module.exports = async (client) => {
         postBfd();
     }, 300000);
 
-    // const dbl = new DBL(tokens.dblToken, client, { statsInterval: 300000 });
-
-    // dbl.on('posted', () => {
-    //     client.logger.log('Server count posted to DiscordBots.org!');
-    // });
-
-    // dbl.on('error', e => {
-    //     client.logger.error(e);
-    // });
-
     async function postDBorg() {
         // Discord Bots (discordbots.org)
         try {
@@ -119,7 +109,7 @@ module.exports = async (client) => {
             let data = { server_count: client.guilds.size };
             let body = JSON.stringify(data);
 
-            let posted = await fetch(`https://botlist.space/api/bots/${client.user.id}`, {
+            let posted = await fetch(`https://api.botlist.space/v1/bots/${client.user.id}`, {
                 method: 'POST',
                 headers: {
                     'Authorization': tokens.blsToken,
