@@ -4,6 +4,12 @@ FROM node:latest
 RUN ["apt-get", "update"]
 RUN ["apt-get", "install", "-y", "vim-tiny", "apt-utils"]
 
+#Create non-root user for security
+RUN groupadd -r nodejs \
+    && useradd -m -r -g nodejs nodejs
+
+USER nodejs
+
 #Create the directory
 RUN mkdir -p /usr/src/suggestions-bot
 WORKDIR /usr/src/suggestions-bot

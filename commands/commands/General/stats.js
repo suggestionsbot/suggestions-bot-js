@@ -18,18 +18,23 @@ module.exports = class StatsCommand extends Command {
 
         let { embedColor } = this.client.config;
         
-        let excludedGuilds = {
-            'Discord Bot List': this.client.guilds.get('345753533141876737').members.size || 0,
-            'Discord Bots': this.client.guilds.get('110373943822540800').members.size || 0,
-            'Discord Bot List (2)': this.client.guilds.get('450100127256936458').members.size || 0,
-            'Divine Discord Bot List': this.client.guilds.get('454933217666007052').members.size || 0,
-            'Bots For Discord': this.client.guilds.get('374071874222686211').members.size || 0,
-        };
+        let userSize = this.client.users.size;
+
+        if (process.env.NODE_ENV === 'production') {
+            let excludedGuilds = {
+                'Discord Bot List': this.client.guilds.get('345753533141876737').members.size || 0,
+                'Discord Bots': this.client.guilds.get('110373943822540800').members.size || 0,
+                'Discord Bot List (2)': this.client.guilds.get('450100127256936458').members.size || 0,
+                'Divine Discord Bot List': this.client.guilds.get('454933217666007052').members.size || 0,
+                'Bots For Discord': this.client.guilds.get('374071874222686211').members.size || 0,
+            };
+
+            userSize = (this.client.users.size - sum(excludedGuilds)).toLocaleString();
+        }
         
         const botUptime = moment.duration(this.client.uptime).format(' D [days], H [hrs], m [mins], s [secs]');
         const memUsage = (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2);
         const guildSize = this.client.guilds.size.toLocaleString();
-        const userSize = (this.client.users.size - sum(excludedGuilds)).toLocaleString();
     
         const embed = new RichEmbed()
             .setAuthor(this.client.user.username, this.client.user.avatarURL)

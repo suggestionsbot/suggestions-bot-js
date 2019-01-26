@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const { Suggestion } = require('../models');
-const ErrorHandler = require('../utils/handlers');
 
 module.exports = class SuggestionsStore {
     constructor(client) {
@@ -68,7 +67,7 @@ module.exports = class SuggestionsStore {
     }
 
     // handles the creation of a suggestion in the database
-    async submitGuildSuggestion(suggestion) {
+    async submitGuildSuggestion(message, suggestion) {
         let submitted = suggestion;
         let defaults = { _id: mongoose.Types.ObjectId() };
         let merged = Object.assign(defaults, submitted);

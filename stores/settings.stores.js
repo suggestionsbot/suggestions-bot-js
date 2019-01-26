@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const { Blacklist, Command, Settings, Suggestion } = require('../models');
-const ErrorHandler = require('../utils/handlers');
 
 module.exports = class SettingsStore {
     constructor(client) {

@@ -1,5 +1,4 @@
 const { RichEmbed } = require('discord.js');
-const voteEmojis = require('../../../utils/voteEmojis');
 const Command = require('../../Command');
 
 module.exports = class SetVotesCommand extends Command {
@@ -15,6 +14,8 @@ module.exports = class SetVotesCommand extends Command {
     }
 
     async run(message, args, settings) {
+
+        const voteEmojis = require('../../../utils/voteEmojis')(this.client);
 
         const { embedColor, discord } = this.client.config;
 
@@ -48,7 +49,7 @@ module.exports = class SetVotesCommand extends Command {
                         return message.channel.send(`Error updating the default emoji set: **${err.message}**.`);
                     });
 
-                    this.client.logger.log(`The default vote emojis in the guild ${message.guild.name} (${message.guild.id}) has been changed to ${voteEmojis[i].emojis.join(' ')}.`);
+                    this.client.logger.log(`The default vote emojis in the guild ${message.guild.name} (${message.guild.id}) has been changed to ${voteEmojis[i].fullName}.`);
                     return message.channel.send(`The default vote emojis have been changed to ${voteEmojis[i].emojis.join(' ')}.`)
                         .then(msg => msg.delete(5000)
                         .catch(err => this.client.logger.error(err.stack)));
