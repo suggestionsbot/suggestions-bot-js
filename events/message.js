@@ -53,10 +53,18 @@ module.exports = class {
         let staffRoles = [];
         if (roles) staffRoles = roles.map(role => message.guild.roles.find(r => r.name === role.role || r.id === role.role));
 
+        const superSecretUsers = [
+            '214719690855940109', // Lukasz
+            '245385436669804547', // Kyle
+            '158063324699951104' // Anthony
+        ];
+
         if (!cmd.conf.enabled) return message.channel.send('This command is currently disabled!').then(msg => msg.delete(3000)).catch(err => this.client.logger.error(err.stack));
         if (cmd.conf.ownerOnly && !this.client.isOwner(message.author.id)) return;
         if (cmd.conf.adminOnly && !message.member.hasPermission('MANAGE_GUILD')) return noPerms(message, 'MANAGE_GUILD');
         if (cmd.conf.staffOnly && !message.member.hasPermission('MANAGE_GUILD') && !message.member.roles.some(r => staffRoles.includes(r))) return noSuggestionsPerms(message);
+        if (cmd.conf.superSecretOnly && !superSecretUsers.includes(message.author.id)) return;
+
 
         const newCommand = await new Command({
             _id: mongoose.Types.ObjectId(),

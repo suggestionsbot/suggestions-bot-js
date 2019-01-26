@@ -25,6 +25,7 @@ module.exports = {
     discord: process.env.DISCORD,
     docs: process.env.DOCS,
     invite: process.env.INVITE,
+    giphyKey: process.env.GIPHY,
     suggestionColors: {
         approved: '#00e640',
         rejected: '#cf000f'
