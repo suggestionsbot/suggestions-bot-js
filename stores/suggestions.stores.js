@@ -67,10 +67,9 @@ module.exports = class SuggestionsStore {
     }
 
     // handles the creation of a suggestion in the database
-    async submitGuildSuggestion(message, suggestion) {
-        let submitted = suggestion;
+    async submitGuildSuggestion(suggestion) {
         let defaults = { _id: mongoose.Types.ObjectId() };
-        let merged = Object.assign(defaults, submitted);
+        let merged = Object.assign(defaults, suggestion);
 
         const newSuggestion = await new Suggestion(merged);
         return newSuggestion.save().then(res => this.client.logger.log(`New suggestion: \n ${res}`));

@@ -34,7 +34,7 @@ module.exports = class GsIDCommand extends Command {
             return message.channel.send(`Error querying the database for this suggestion: **${err.message}**.`);
         });
 
-        if (await this.client.isEmpty(sID)) return message.channel.send(`Could not find the suggestion with the sID **${args[0]}** in the database.`).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
+        if (!sID._id) return message.channel.send(`Could not find the suggestion with the sID **${args[0]}** in the database.`).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
         
         let { 
             time,
