@@ -1,7 +1,5 @@
-const mongoose = require('mongoose');
 const moment = require('moment');
 const { oneLine } = require('common-tags');
-const Command = require('../models/commands');
 const { noPerms, noSuggestionsPerms } = require('../utils/errors');
 const permissions = require('../utils/perms');
 
@@ -66,8 +64,7 @@ module.exports = class {
         if (cmd.conf.superSecretOnly && !superSecretUsers.includes(message.author.id)) return;
 
 
-        const newCommand = await new Command({
-            _id: mongoose.Types.ObjectId(),
+        const newCommand = {
             guildID: message.guild.id,
             guildName: message.guild.name,
             guildOwnerID: message.guild.ownerID,
@@ -76,7 +73,7 @@ module.exports = class {
             username: message.author.tag,
             userID: message.author.id,
             time: moment(Date.now())
-        });
+        };
 
         // check bot permissions
         if (message.channel.type === 'text' && cmd.conf.botPermissions) {
@@ -101,10 +98,12 @@ module.exports = class {
             );
         }
 
-        if (throttle) throttle.usages++;
-        cmd.run(message, args, settings);
-
-        newCommand.save().catch(err => this.client.logger.error(err.stack));
-        this.client.logger.log(`${message.author.tag} (${message.author.id}) ran command ${cmd.help.name}`, 'cmd');
+        try {
+            if (throttle) throttle.usages++;
+            cmd.run(message, args, settings);
+            await this.client.settings.newCommandUsage(newCommand);
+        } catch (err) {
+            return this.client.logger.error(err.stack);
+        }
     }
 };

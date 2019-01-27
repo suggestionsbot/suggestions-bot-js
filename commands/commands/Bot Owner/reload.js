@@ -35,13 +35,13 @@ module.exports = class ReloadCommand extends Command {
         const cmd = this.client.commands.get(args[0]) || this.client.commands.get(this.client.aliases.get(args[0]));
         if (!cmd) return message.channel.send(`The command \`${args[0]}\` does not exist.`).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
 
-        let response = await this.client.unloadCommand(cmd.conf.location, cmd.help.name);
+        let response = await this.client.commandHandler.unloadCommand(cmd.conf.location, cmd.help.name);
         if (response) {
             this.client.logger.error(response);
             return message.channel.send(`An error occurred unloading \`${cmd.help.name}]\`: **${response}**`);
         }
 
-        response = this.client.loadCommand(cmd.conf.location, cmd.help.name);
+        response = this.client.commandHandler.loadCommand(cmd.conf.location, cmd.help.name);
         if (response) {
             this.client.logger.error(response);
             return message.channel.send(`An error occurred loading \`${cmd.help.name}]\`: **${response}**`);

@@ -30,6 +30,10 @@ module.exports = {
         approved: '#00e640',
         rejected: '#cf000f'
     },
+    guildStatusColors: {
+        created: '#2ecc71',
+        deleted: '#FF4500'
+    },
     voteSites: [
         { name: 'Discord Bot List (DiscordBots.org)', link: 'https://discordbots.org/bot/474051954998509571' },
         { name: 'Discord Bots', link: 'https://discord.bots.gg/bots/474051954998509571' },

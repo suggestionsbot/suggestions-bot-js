@@ -93,31 +93,14 @@ module.exports = class SuggestCommand extends Command {
         For reference, your suggestion ID (sID) is **${id}**. Please wait for staff member to approve/reject your suggestion.`).then(msg => msg.delete(5000));
         });
 
+        const filter = set => set.name === emojis;
+        const defaults = set => set.name === 'defaultEmojis';
+        let foundSet = voteEmojis.find(filter) || voteEmojis.find(defaults);
+        const emojiSet = foundSet.emojis;
+
         sChannel.send(sEmbed)
-            .then(async msg => {
-
-                const filter = set => set.name === emojis;
-                const defaults = set => set.name === 'defaultEmojis';
-                let foundSet = voteEmojis.find(filter) || voteEmojis.find(defaults);
-                const emojiSet = foundSet.emojis;
-        
-                function delay() {
-                    return new Promise(resolve => setTimeout(resolve, 300));
-                }
-
-                async function delayedReact(msg, item) {
-                    await delay();
-                    msg.react(item);
-                }
-
-                async function processReaction(msg, array) {
-                    for (const item of array) {
-                        await delayedReact(msg, item);
-                    }
-                }
-
-                processReaction(msg, emojiSet);
-            })
+            .then(msg => msg.react(emojiSet[0])
+                .then(() => msg.react(emojiSet[1])))
             .catch(err => {
                 this.client.logger.error(err.stack);
                 return message.channel.send(`An error occurred adding reactions to this suggestion: **${err.message}**.`);
