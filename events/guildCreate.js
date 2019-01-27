@@ -12,15 +12,9 @@ module.exports = class {
     async run(guild) {
 
         const { defaultSettings: { prefix, suggestionsChannel, suggestionsLogs} } = this.client.config;
+        const { guildStatusColors: { created } } = this.client.config;
 
-        const gOwnerID = guild.ownerID;
-
-        function gOwner(mID) {
-            if (!mID) return;
-
-            let obj = guild.members.find(m => m.id === mID);
-            return `${obj.user.username}#${obj.user.discriminator}`;
-        }
+        const gOwner = guild.owner;
 
         let newServer = new RichEmbed()
             .setTitle('Added')
@@ -29,9 +23,9 @@ module.exports = class {
             **Name:** \`${guild.name}\`
             **Members:** \`${guild.members.size}\`
             **Created:** \`${moment(guild.createdAt).fromNow()}\`
-            **Owner:** <@${gOwnerID}> \`[${gOwner(gOwnerID)}]\`
-        `)
-            .setColor('#2ecc71')
+            **Owner:** ${gOwner.toString()} \`[${gOwner.user.tag}]\`
+            `)
+            .setColor(created)
             .setTimestamp();
 
         const newSettings = {

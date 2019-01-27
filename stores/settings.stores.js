@@ -58,6 +58,16 @@ module.exports = class SettingsStore {
         return newSettings.save().then(this.client.logger.log(`Default settings saved for guild ${merged.guildName} (${merged.guildID})`));
     }
 
+    // handles adding a new command usage in the database
+    async newCommandUsage(data) {
+        let submitted = data;
+        let defaults = { _id: mongoose.Types.ObjectId() };
+        let merged = Object.assign(defaults, submitted);
+
+        const newCommand = await new Command(merged);
+        return newCommand.save().then(this.client.logger.log(`${submitted.username} (${submitted.userID}) ran command ${submitted.command}`, 'cmd'));
+    }
+
     // handles the removal of guild data
     // figure out why hash is outputted for guild ID instead of actual ID (maybe has to do with cache?)
     async removeGuildData(guild) {
@@ -111,5 +121,20 @@ module.exports = class SettingsStore {
     // gets all documents in the settings collection
     async getAllSettings() {
         return await Settings.find({});
+    }
+
+    // gets all documents in the commands collection
+    async getAllCommands() {
+        return await Command.find({});
+    }
+
+    // gets all documents in the suggestions collection
+    async getAllSuggestions() {
+        return await Suggestion.find({});
+    }
+
+    // get all documents in the blacklists collection
+    async getAllBlacklists() {
+        return await Blacklist.find({});
     }
 };

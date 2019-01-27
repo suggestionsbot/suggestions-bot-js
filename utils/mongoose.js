@@ -33,6 +33,4 @@ module.exports = class Mongoose {
             this.client.logger.log('Mongoose connection disconnected');
         });
     }
-
-
 };
