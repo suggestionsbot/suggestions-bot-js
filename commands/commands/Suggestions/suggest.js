@@ -99,8 +99,9 @@ module.exports = class SuggestCommand extends Command {
         const emojiSet = foundSet.emojis;
 
         sChannel.send(sEmbed)
-            .then(msg => msg.react(emojiSet[0])
-                .then(() => msg.react(emojiSet[1])))
+            .then(async msg => {
+                for (let i = 0; i < emojiSet.length; i++) await msg.react(emojiSet[i]);
+            })
             .catch(err => {
                 this.client.logger.error(err.stack);
                 return message.channel.send(`An error occurred adding reactions to this suggestion: **${err.message}**.`);
