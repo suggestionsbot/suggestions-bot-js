@@ -4,11 +4,8 @@ const voteEmojis = client => [
         name: 'defaultEmojis',
         fullName: 'Defaults',
         emojis: [
-            // '<:nerdSuccess:490708616056406017>',
-            // '<:nerdError:522929743507488795>'
             client.emojis.get('490708616056406017'),
-            client.emojis.get('522929743507488795')
-            
+            client.emojis.get('522929743507488795')   
         ]
     },
     {

@@ -68,6 +68,8 @@ module.exports = class BlacklistCommand extends Command {
         if (!userIDCheck.test(blacklisted)) return message.channel.send('You must supply a user ID.').then(msg => msg.delete(3000)).catch(err => this.client.logger.error(err.stack));
         const blUser = blacklisted.match(userIDCheck)[0];
 
+        const blMember = message.guild.members.get(blUser);
+
         switch(args[0]) {
             case 'add': {
                 if (!reason) return message.channel.send('Please provide a reason!').then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
@@ -90,12 +92,27 @@ module.exports = class BlacklistCommand extends Command {
                 blEmbed.addField('Reason', reason, true);
                 blEmbed.addField('Issuer', `${message.member.user.tag} (${message.author.id})`);
 
+                
+                const dmBlacklistAdd = new RichEmbed()
+                    .setDescription(`
+                    Hello${blMember || ''},
+
+                    You have been blacklisted by ${message.author} from using any of the ${this.client.user}'s commands in the guild **${message.guild.name}**.
+                    
+                    This blackist does not expire and can only be removed at the discretion of a server administrator. You may find the reason below.
+
+                    **Reason:** ${reason}
+                    `)
+                    .setColor(`#00e640`)
+                    .setTimestamp();
+
                 try {
                     await this.client.blacklists.addUserBlacklist(newBlacklist);
+                    blMember.send(dmBlacklistAdd);
                     message.channel.send(blEmbed).then(msg => msg.delete(5000));
                 } catch (err) {
-                    this.client.logger.error(err.stack);
-                    return message.channel.send(`There was an error adding this user to the blacklist: **${err.message}**.`);
+                    this.client.logger.error(err.message);
+                    return message.channel.send(`Could not DM **${blUser}** about their blacklist because they either have DMs disabled or aren't a member of this server.`);
                 }
                 break;
             }
@@ -114,11 +131,23 @@ module.exports = class BlacklistCommand extends Command {
                 blEmbed.addField('User ID', `${blUser}`, true);
                 blEmbed.addField('Issuer', `${message.member.user.tag} (${message.author.id})`);
 
+                const dmBlacklistRemove = new RichEmbed()
+                    .setDescription(`
+                    Hello${blMember || ''},
+
+                    You have been unblacklisted by ${message.author}. This means you are now able to use the ${this.client.user}'s commands in the guild **${message.guild.name}**.
+
+                    **Reason:** ${reason ? reason : 'None provided'}
+                    `)
+                    .setColor(`#d64541`)
+                    .setTimestamp();
+
                 try {
                     await this.client.blacklists.removeUserBlacklist(removeBlacklist);
+                    blMember.send(dmBlacklistRemove);
                     message.channel.send(blEmbed).then(msg => msg.delete(5000));
                 } catch (err) {
-                    this.client.logger.error(err.stack);
+                    this.client.logger.error(err.message);
                     return message.channel.send(`There was an error removing this user from the blacklist: **${err.message}**.`);
                 }
                 break;

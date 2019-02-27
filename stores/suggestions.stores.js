@@ -72,7 +72,9 @@ module.exports = class SuggestionsStore {
         let merged = Object.assign(defaults, suggestion);
 
         const newSuggestion = await new Suggestion(merged);
-        return newSuggestion.save().then(res => this.client.logger.log(`New suggestion: \n ${res}`));
+        return newSuggestion.save().then(res => {
+            this.client.logger.log(`New suggestion submitted by "${res.username}" (${res.userID}) in the guild "${res.guildName}" (${res.userID})`);
+        });
     }
 
     // handles the approval/rejection of a suggestion in the database

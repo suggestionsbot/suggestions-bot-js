@@ -14,7 +14,7 @@ module.exports = class InviteCommand extends Command {
 
     async run(message, args) {
 
-        let { embedColor, discord, invite, docs } = this.client.config;
+        let { embedColor, discord, invite, website } = this.client.config;
         
         const dmEmbed = new RichEmbed()
             .setAuthor('Bot Invite Information', this.client.user.avatarURL)
@@ -25,8 +25,8 @@ module.exports = class InviteCommand extends Command {
                 **Bot Invite:**
                 ${invite}
 
-                **Documentation:**
-                ${docs}
+                **Website:**
+                ${website}
 
                 **Support Server:**
                 ${discord}

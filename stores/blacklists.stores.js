@@ -78,8 +78,11 @@ module.exports = class BlacklistsStore {
 
         const newBlacklist = await new Blacklist(merged);
         return newBlacklist.save().then(res => {
-            if (submitted.scope === 'global') return this.client.logger.log(`New global blacklist: \n ${res}`);
-            else return this.client.logger.log(`New blacklist: \n ${res}`);
+            if (submitted.scope === 'global') {
+                return this.client.logger.log(`"${res.issuerUsername}" (${res.issuerID}) has issued a global blacklist for the user "${res.userID}".`);
+            } else {
+                return this.client.logger.log(`"${res.issuerUsername}" (${res.issuerID}) has issued a blacklist for the user "${res.userID}".`);
+            }
         });
     }
 
@@ -91,9 +94,8 @@ module.exports = class BlacklistsStore {
         let updatedData = status;
 
         await guildMemberBlacklist.updateOne(updatedData);
-        this.client.logger.log(`${issuerUsername} ("${issuerID}") has issued an unblacklist for the user ${userID}.`);
 
-        if (scope === 'global') return this.client.logger.log(`${issuerUsername} ("${issuerID}") has issued a global unblacklist for the user ${userID}.`);
-        else return this.client.logger.log(`${issuerUsername} ("${issuerID}") has issued an unblacklist for the user ${userID}.`);
+        if (scope === 'global') return this.client.logger.log(`"${issuerUsername}" (${issuerID}) has issued a global unblacklist for the user "${userID}".`);
+        else return this.client.logger.log(`"${issuerUsername}" (${issuerID}) has issued an unblacklist for the user "${userID}".`);
     }
 };

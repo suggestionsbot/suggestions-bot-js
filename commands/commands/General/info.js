@@ -16,7 +16,7 @@ module.exports = class InfoCommand extends Command {
 
     async run(message, args) {
         
-        let { embedColor, discord, owner, docs } = this.client.config;
+        let { embedColor, discord, owner, website } = this.client.config;
 
         const embed = new RichEmbed()
             .setTitle(this.client.user.username)
@@ -25,7 +25,7 @@ module.exports = class InfoCommand extends Command {
             .setThumbnail(this.client.user.avatarURL)
             .addField('Bot Author', `<@${owner}>`)
             .addField('Support Discord', discord)
-            .addField('Documentation', docs)
+            .addField('Website', website)
             .addField('Bot Version', version)
             .setFooter('© 2019 Nerd Cave Development');
 
