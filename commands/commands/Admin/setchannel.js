@@ -23,7 +23,7 @@ module.exports = class SetChannelCommand extends Command {
         let verified = message.guild.channels.find(c => c.name === args[0]) || message.guild.channels.find(c => c.toString() === args[0]);
         if (!verified) return message.channel.send(`\`${args[0]}\` is not a channel!`).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
 
-        await this.client.settings.writeSettings(message.guild, { suggestionsChannel: verified.id }).catch(err => {
+        await this.client.settings.updateGuild(message.guild, { suggestionsChannel: verified.id }).catch(err => {
             this.client.logger.log(err);
             return message.channel.send(`Error setting the suggestions channel: **${err.message}**.`);
         });

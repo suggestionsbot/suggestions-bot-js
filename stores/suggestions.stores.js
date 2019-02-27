@@ -6,7 +6,12 @@ module.exports = class SuggestionsStore {
         this.client = client;
     }
 
-    // // this method allows a single suggestion in a guild to be queried
+    /**
+     * Get a guild suggestion from the database.
+     * 
+     * @param {Object} guild - The guild object.
+     * @param {String} sID - The unique suggestion ID.
+     */
     async getGuildSuggestion(guild, sID) {
         let gSuggestion = await Suggestion.findOne({ $and: [{ guildID: guild.id, sID: sID }] }).catch(err => this.client.logger.error(err.stack));
 
@@ -14,7 +19,11 @@ module.exports = class SuggestionsStore {
         return guildSuggestion;
     }
 
-    // this method allows for a single suggestion to be queried, regardless of the guild (for administrative use)
+    /**
+     * Get a suggestion globally from the database (for administrative use).
+     * 
+     * @param {String} sID - The unique suggestion ID.
+     */
     async getGlobalSuggestion(sID) {
         let gSuggestion = await Suggestion.findOne({ sID: sID }).catch(err => this.client.logger.error(err.stack));
 
@@ -22,7 +31,11 @@ module.exports = class SuggestionsStore {
         return globalSuggestion;
     }
 
-    // this method gets the guild's suggestions from the database
+    /**
+     * Get all the suggestions of a specific guild from the database.
+     * 
+     * @param {Object} guild - The guild object.
+     */
     async getGuildSuggestions(guild) {
         let gSuggestions = await Suggestion.find({ guildID: guild.id }).catch(err => this.client.logger.error(err.stack));
 
@@ -30,15 +43,12 @@ module.exports = class SuggestionsStore {
         return guildSuggestions;
     }
 
-    // this method gets the global suggestions from the database
-    async getGlobalSuggestions() {
-        let gSuggestions = await Suggestion.find({}).catch(err => this.client.logger.error(err.stack));
-
-        let globalSuggestions = gSuggestions || {};
-        return globalSuggestions;
-    }
-
-    // this method gets a guild member's suggestions in a guild from the database
+    /**
+     * Get a specific guild member's suggestions from the database.
+     * 
+     * @param {Object} guild - The guild object.
+     * @param {Object} member - The member object.
+     */
     async getGuildMemberSuggestions(guild, member) {
         let gSuggestions = await Suggestion
             .find({ $and: [{ guildID: guild.id, userID: member.id }] })
@@ -49,7 +59,11 @@ module.exports = class SuggestionsStore {
         return memberSuggestions;
     }
 
-    // checks whether a response is required or not when rejecting suggestions
+    /**
+     * Check if a guild requirees a response or not when rejecting suggestions.
+     * 
+     * @param {Object} guild - The guild object.
+     */
     async isResponseRequired(guild) {
         let gSettings = {};
         try {
@@ -66,7 +80,11 @@ module.exports = class SuggestionsStore {
         return required;
     }
 
-    // handles the creation of a suggestion in the database
+    /**
+     * Create a new guild suggestion in the database.
+     * 
+     * @param {Object} suggestion - The suggestion object.
+     */
     async submitGuildSuggestion(suggestion) {
         let defaults = { _id: mongoose.Types.ObjectId() };
         let merged = Object.assign(defaults, suggestion);
@@ -77,7 +95,11 @@ module.exports = class SuggestionsStore {
         });
     }
 
-    // handles the approval/rejection of a suggestion in the database
+    /**
+     * Approve or reject a guild suggestion in the database.
+     * 
+     * @param {Object} suggestion - The suggestion object.
+     */
     async handleGuildSuggestion(suggestion) {
         let { 
             query,
@@ -116,7 +138,11 @@ module.exports = class SuggestionsStore {
         return;
     }
 
-    // handles adding notes to a suggestion in the database
+    /**
+     * Add a new note to a guild suggestion in the database.
+     * 
+     * @param {Object} suggestion - The suggestion object.
+     */
     async addGuildSuggestionNote(suggestion) {
         let { query, note } = suggestion;
         let { staffMemberID, staffMemberUsername } = note;

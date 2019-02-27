@@ -27,7 +27,7 @@ module.exports = class {
             .setTimestamp();
 
         try {
-            await this.client.settings.removeGuildData(guild);
+            await this.client.settings.deleteGuild(guild);
         } catch (err) {
             this.client.logger.error(err.stack);
         }
