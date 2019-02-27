@@ -32,7 +32,7 @@ module.exports = class AnnounceCommand extends Command {
                 .catch(err => this.client.logger.error(err.stack));
         }
 
-        let announcement = await this.client.awaitReply(message, 'What would you like to say?');
+        let announcement = await this.client.awaitReply(message, null, 'What would you like to say?');
         if (announcement === 'cancel') return message.channel.send('Cancelled input.').then(msg => msg.delete(3000)).catch(err => this.client.logger.error(err.stack));
 
         const announceEmbed = new RichEmbed()
@@ -53,7 +53,7 @@ module.exports = class AnnounceCommand extends Command {
             '374071874222686211',
         ];
 
-        let confirmation = await this.client.awaitReply(message, `Here is a preview of the announcement. If this is what you want, just type \`confirm\` to send.`, { embed: announceEmbed });
+        let confirmation = await this.client.awaitReply(message, null, `Here is a preview of the announcement. If this is what you want, just type \`confirm\` to send.`, announceEmbed);
         if (confirmation === 'confirm') {
             await message.channel.bulkDelete(5).catch(err => {
                 this.client.logger.error(err.stack);
