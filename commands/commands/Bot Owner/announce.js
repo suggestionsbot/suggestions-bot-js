@@ -1,5 +1,4 @@
 const { RichEmbed } = require('discord.js');
-const moment = require('moment');
 const Command = require('../../Command');
 require('moment-duration-format');
 require('moment-timezone');
@@ -45,26 +44,23 @@ module.exports = class AnnounceCommand extends Command {
 
         let dmErrorCount = 0;
         let dmSuccessCount = 0;
-        let ignoredGuilds = [
+        const ignoredGuilds = [
             '264445053596991498', 
             '110373943822540800',
             '450100127256936458',
             '454933217666007052',
             '374071874222686211',
         ];
+        const guilds = this.client.guilds.map(g => {
+            if (ignoredGuilds.includes(g.id)) return;
+            return g.owner;
+        });
 
         let confirmation = await this.client.awaitReply(message, null, `Here is a preview of the announcement. If this is what you want, just type \`confirm\` to send.`, announceEmbed);
         if (confirmation === 'confirm') {
             await message.channel.bulkDelete(5).catch(err => {
                 this.client.logger.error(err.stack);
                 return message.channel.send(`An error occurred: **${err.message}**`);
-            });
-
-            const guilds = this.client.guilds.map(g => {
-                return {
-                    id: g.id,
-                    owner: g.owner.user
-                };
             });
             
             delayedIteration(0, guilds);
@@ -79,17 +75,13 @@ module.exports = class AnnounceCommand extends Command {
 
         function delayedIteration(index, array) {
             if (index >= array.length) {
-                return message.channel.send(`Successfully messaged **${dmSuccessCount}** user(s).${dmErrorCount > 1 ? ` However, I was not able to DM **${dmErrorCount}** user(s)!` : ''}`);
+            return message.channel.send(`Successfully messaged **${dmSuccessCount}** user(s).${dmErrorCount > 1 ? ` However, I was not able to DM **${dmErrorCount}** user(s)!` : ''}`);
             }
 
             try {
-                let g = array[index];
-                let owner = g.owner;
-                if (ignoredGuilds.includes(g.id)) return;
-
-                let updatedAnnouncement = announcement.replace('{{owner}}', owner.toString());
+                let updatedAnnouncement = announcement.replace('{{owner}}', array[index].toString());
                 announceEmbed.setDescription(updatedAnnouncement);
-                owner.send(announceEmbed);
+                array[index].send(announceEmbed);
                 dmSuccessCount++;
             } catch (err) {
                 dmErrorCount++;

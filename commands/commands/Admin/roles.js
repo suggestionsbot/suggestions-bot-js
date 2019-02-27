@@ -22,26 +22,21 @@ module.exports = class RolesCommand extends Command {
         const { staffRoles } = settings;
 
         let roles = message.guild.roles.filter(role => staffRoles.map(role => role.role).includes(role.id));
-        roles.sort((a, b) => b.position - a.position);
+        let viewRoles = roles
+            .sort((a, b) => b.position - a.position)
+            .map(r => r.toString())
+            .join('\n') || null;
 
-        let adminPerms;
-        let admins = [];
-        message.guild.members.forEach(collected => {
-            if (collected.hasPermission('MANAGE_GUILD') && !collected.user.bot) {
-
-                admins.push(collected.id);
-
-                return adminPerms = admins.map(el => {
-                    return '<@' + el + '>';
-                });
-            }
-        });
+        let admins = message.guild.members
+            .filter(m => !m.user.bot && m.hasPermission('MANAGE_GUILD'))
+            .map(m => m.toString())
+            .join('\n');
 
         let embed = new RichEmbed()
             .setColor(embedColor)
-            .addField('Admins', adminPerms.join('\n'));
+            .addField('Admins', admins);
 
-        if (staffRoles.length >= 1) embed.addField('Staff Roles', roles.map(r => r.toString()).join('\n'));
+        if (staffRoles.length >= 1) embed.addField('Staff Roles', viewRoles);
 
         return message.channel.send(embed);
     }

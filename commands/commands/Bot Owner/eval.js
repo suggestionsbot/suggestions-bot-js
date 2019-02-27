@@ -12,12 +12,11 @@ module.exports = class EvalCommand extends Command {
         });
     }
 
-    async run(message, args) {
+    async run(message, args, settings) {
 
         const cmdUsage = this.help.usage;
-        const prefix = await this.client.settings.getSettings(message.guild).then(res => res.prefix);
         const code = args.join(' ');
-        if (!code) return message.channel.send(`Usage: \`${prefix + cmdUsage}\``).then(msg => msg.delete(3000)).catch(err => this.client.logger.error(err.stack));
+        if (!code) return message.channel.send(`Usage: \`${settings.prefix + cmdUsage}\``).then(msg => msg.delete(3000)).catch(err => this.client.logger.error(err.stack));
 
         try {
             const evaled = eval(code);
