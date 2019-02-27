@@ -32,21 +32,30 @@ module.exports = class Suggestions extends Client {
         this.eventHandler = new EventHandler(this);
     }
 
-    /*
-    SINGLE-LINE AWAITMESSAGE
-    A simple way to grab a single reply, from the user that initiated
-    the command. Useful to get "precisions" on certain things...
-    USAGE
-    const response = await client.awaitReply(msg, "Favourite Color?");
-    msg.reply(`Oh, I really love ${response} too!`);
-    */
-    async awaitReply(message, question, embed, limit = 60000) {
-        const filter = msg => msg.author.id = message.author.id;
-        await message.channel.send(question, embed || '');
+    /**
+     * Grabs a single reply from the user that initiated the command. Must include a question or embed.
+     * @example
+     * async function getReply() {
+     *      const name = awaitReply(message, "What is your name>");
+     *      return message.channel.send(`Your name is ${name}!`);
+     * }
+     * @returns {String} - Returns a string representing the first collection message.
+     * 
+     * @param {Object} message - The message object.
+     * @param {Object} channel - The channel object.
+     * @param {?String} question - The question (optional).
+     * @param {?Object} embed - The embed (optional).
+     * @param {?Number} limit - The limit/timeout (optional).
+     */
+    async awaitReply(message, channel, question, embed, limit) {
+        const filter = msg => msg.author.id === message.author.id;
+        channel = channel || message.channel;
+
+        await channel.send(question || '', embed || '');
         try {
-            const collected = await message.channel.awaitMessages(filter, {
+            const collected = await channel.awaitMessages(filter, {
                 max: 1,
-                time: limit,
+                time: limit || 60000, // by default, limit 1 minutes
                 errors: ['time']
             });
             return collected.first().content;

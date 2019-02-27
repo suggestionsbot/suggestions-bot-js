@@ -12,8 +12,12 @@ module.exports = class SettingsStore {
     wants to change settings for a specific guild.
     */
 
-    // getSettings gets the guild settings in MongoDB
-    async getSettings(guild) {
+    /**
+     * Get a guild's settings from the database.
+     * 
+     * @param {Object} guild - The guild object.
+     */
+    async getGuild(guild) {
         let gSettings = await Settings.findOne({ guildID: guild.id });
         
 
@@ -21,9 +25,13 @@ module.exports = class SettingsStore {
         else return this.client.config.defaultSettings;
     }
 
-    // writeSettings overrides, or adds, any configuration item that is different
-    // than the current guild schema. This allows me to write fewer lines of code!
-    async writeSettings(guild, newSettings) {
+    /**
+     * Update a guild's settings in the database.
+     * 
+     * @param {Object} guild - The guild object.
+     * @param {Object} newSettings - The settings object to be updated.
+     */
+    async updateGuild(guild, newSettings) {
         let gSettings = await Settings.findOne({ guildID: guild.id }).catch(err => this.client.logger.error(err.stack));
 
         let settings = gSettings;
@@ -39,7 +47,11 @@ module.exports = class SettingsStore {
         return await Settings.findOneAndUpdate({ guildID: guild.id }, settings).catch(err => this.logger.error(err));
     }
 
-    // handles the addition and removal of staff roles
+    /**
+     * Update a staff role of a guild in the database.
+     * 
+     * @param {Object} guild - The guild object.
+     */
     async updateGuildStaffRoles(guild) {
         let { query, staffRoles, added } = guild;
         let guildSettings = await Settings.findOne(query);
@@ -48,8 +60,12 @@ module.exports = class SettingsStore {
         else return await guildSettings.updateOne({ $pull: updatedData });
     }
 
-    // handles the creation of a guild settings
-    async createGuildSettings(guild) {
+    /**
+     * Create new settings for a guild in the database.
+     * 
+     * @param {Object} guild - The guild object.
+     */
+    async createGuild(guild) {
         let submitted = guild;
         let defaults = { _id: mongoose.Types.ObjectId() };
         let merged = Object.assign(defaults, submitted); // make this into a global function
@@ -58,9 +74,14 @@ module.exports = class SettingsStore {
         return newSettings.save().then(this.client.logger.log(`Default settings saved for guild ${merged.guildName} (${merged.guildID})`));
     }
 
-    // handles adding a new command usage in the database
-    async newCommandUsage(data) {
-        let submitted = data;
+    /**
+     * Update the usage for a specific command in the database.
+     * 
+     * @param {Object} command - The command object.
+     * @returns {Promise} - The promise object of the new command.
+     */
+    async newCommandUsage(command) {
+        let submitted = command;
         let defaults = { _id: mongoose.Types.ObjectId() };
         let merged = Object.assign(defaults, submitted);
 
@@ -68,9 +89,12 @@ module.exports = class SettingsStore {
         return newCommand.save().then(this.client.logger.log(`${submitted.username} (${submitted.userID}) ran command ${submitted.command}`, 'cmd'));
     }
 
-    // handles the removal of guild data
-    // figure out why hash is outputted for guild ID instead of actual ID (maybe has to do with cache?)
-    async removeGuildData(guild) {
+    /**
+     * Remove a guild's data from the database.
+     * 
+     * @param {Object} guild - The guild object.
+     */
+    async deleteGuild(guild) {
         await Settings.findOneAndDelete({ 
             $or: [
                 { guildID: guild.id },
@@ -79,7 +103,7 @@ module.exports = class SettingsStore {
         }, (err, res) => {
             if (err) this.client.logger.error(err.stack);
             
-            this.client.logger.log(`Settings data deleted for guild ${guild.guildName || guild.guildName} (${guild.id || guild.guildID})`);
+            this.client.logger.log(`Settings data deleted for guild ${guild.name || guild.guildName} (${guild.id || guild.guildID})`);
         });
     
         await Suggestion.deleteMany({ 
@@ -118,22 +142,34 @@ module.exports = class SettingsStore {
         return this.client.logger.log(`${this.client.user.username} has left a guild: ${guild.name || guild.guildName } (${guild.id || guild.guildID})`);
     }
 
-    // gets all documents in the settings collection
+    /**
+     * Get all documents in the settings collection
+     * @returns {Promise}
+     */
     async getAllSettings() {
         return await Settings.find({});
     }
 
-    // gets all documents in the commands collection
+    /**
+     * Get all documents in the commands collection.
+     * @returns {Promise}
+     */
     async getAllCommands() {
         return await Command.find({});
     }
 
-    // gets all documents in the suggestions collection
+    /**
+     * Get all documents in the suggestions collection.
+     * @returns {Promise}
+     */
     async getAllSuggestions() {
         return await Suggestion.find({});
     }
 
-    // get all documents in the blacklists collection
+    /**
+     * Get all documents in the blacklists collection.
+     * @returns {Promise}
+     */
     async getAllBlacklists() {
         return await Blacklist.find({});
     }

@@ -38,7 +38,7 @@ module.exports = class {
         };
 
         try {
-            await this.client.settings.createGuildSettings(newSettings);
+            await this.client.settings.createGuild(newSettings);
         } catch (err) {
             return this.client.logger.error(err.stack);
         }

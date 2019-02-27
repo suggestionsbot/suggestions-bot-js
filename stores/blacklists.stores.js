@@ -6,7 +6,11 @@ module.exports = class BlacklistsStore {
         this.client = client;
     }
 
-    // this method gets a guild's blacklist from the database
+    /**
+     * Get any blacklists in the database from a guild.
+     * 
+     * @param {Object} guild - The guild object.
+     */
     async getGuildBlacklist(guild) {
         let gBlacklist;
         try {
@@ -19,7 +23,9 @@ module.exports = class BlacklistsStore {
         return guildBlacklist;
     }
 
-    // this method gets the global blacklist from the database
+    /**
+     * Get all global blacklists from the database.
+     */
     async getGlobalBlacklist() {
         let gBlacklist;
         try {
@@ -32,7 +38,12 @@ module.exports = class BlacklistsStore {
         return guildBlacklist;
     }
 
-    // this method checks if a user is blacklisted (guild-scoped)
+    /**
+     * Get a guild-specific blacklisted user if present in the database.
+     * 
+     * @param {Object} guild - The guild object.
+     * @param {Object} user - The user object.
+     */
     async checkGuildBlacklist(guild, user) {
         let gBlacklist;
         try {
@@ -51,7 +62,11 @@ module.exports = class BlacklistsStore {
         return guildBlacklist;
     }
 
-    // this method checks if a user is blacklisted globally
+    /**
+     * Get a globally blacklist user if present in the database.
+     * 
+     * @param {Object} user - The user object.
+     */
     async checkGlobalBlacklist(user) {
         let gBlacklist;
         try {
@@ -70,7 +85,11 @@ module.exports = class BlacklistsStore {
         return guildBlacklist;
     }
 
-    // this method adds a new user blacklist to the guild blacklists
+    /**
+     * Add a new user blacklist in the database.
+     * 
+     * @param {Object} user - The user object.
+     */
     async addUserBlacklist(user) {
         let submitted = user;
         let defaults = { _id: mongoose.Types.ObjectId() };
@@ -85,8 +104,11 @@ module.exports = class BlacklistsStore {
             }
         });
     }
-
-    // this method lifts a user blacklist in the database
+    /**
+     * Update a blacklisted user's status to false in the database.
+     * 
+     * @param {Object} user - The user object.
+     */
     async removeUserBlacklist(user) {
         let { query, status } = user;
         let guildMemberBlacklist = await Blacklist.findOne({ $and: query }).sort({ case: -1 });

@@ -15,7 +15,7 @@ module.exports = class {
         let settings = {};
 
         try {
-            settings = await this.client.settings.getSettings(message.guild);
+            settings = await this.client.settings.getGuild(message.guild);
         } catch (err) {
             this.client.logger.error(err.stack);
         }

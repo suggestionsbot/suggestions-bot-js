@@ -36,11 +36,11 @@ module.exports = class {
 // 
             this.client.guilds.forEach(async g => {
                 try {
-                    let gSettings = await this.client.settings.getSettings(g);
+                    let gSettings = await this.client.settings.getGuild(g);
                     if (!gSettings._id) await this.client.emit('guildCreate', g); // must check for _id as that indicates the document exists in mongodb
                     
-                    if (gSettings.guildOwnerID !== g.ownerID) await this.client.settings.writeSettings(g, { guildOwnerID: g.ownerID });
-                    if (gSettings.guildName !== g.name) await this.client.settings.writeSettings(g, { guildName: g.name });
+                    if (gSettings.guildOwnerID !== g.ownerID) await this.client.settings.updateGuild(g, { guildOwnerID: g.ownerID });
+                    if (gSettings.guildName !== g.name) await this.client.settings.updateGuild(g, { guildName: g.name });
                 } catch (err) {
                     this.client.logger.error(err.stack);
                 }
@@ -58,7 +58,7 @@ module.exports = class {
                 let g = this.client.guilds.get(e.guildID);
                 if (!g) {
                     try {
-                        await this.client.settings.removeGuildData(e);
+                        await this.client.settings.deleteGuild(e);
                     } catch (err) {
                         this.client.logger.error(err);
                     }

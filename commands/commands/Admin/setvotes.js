@@ -42,7 +42,7 @@ module.exports = class SetVotesCommand extends Command {
 
                 if (args[0] && (setID === voteEmojis[i].id)) {
 
-                    this.client.settings.writeSettings(message.guild, {
+                    this.client.settings.updateGuild(message.guild, {
                         voteEmojis: voteEmojis[i].name
                     }).catch(err => {
                         this.client.logger.error(err.stack);
