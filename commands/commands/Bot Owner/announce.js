@@ -18,7 +18,7 @@ module.exports = class AnnounceCommand extends Command {
 
     async run(message, args) {
 
-        const { embedColor, discord, docs } = this.client.config;
+        const { embedColor, discord, website } = this.client.config;
 
         if (args[0] === 'help') {
             let options = [
@@ -40,8 +40,18 @@ module.exports = class AnnounceCommand extends Command {
             .setDescription(announcement)
             .setColor(embedColor)
             .addField('Support Discord', discord)
-            .addField('Documentation', docs)
+            .addField('Website', website)
             .setTimestamp();
+
+        let dmErrorCount = 0;
+        let dmSuccessCount = 0;
+        let ignoredGuilds = [
+            '264445053596991498', 
+            '110373943822540800',
+            '450100127256936458',
+            '454933217666007052',
+            '374071874222686211',
+        ];
 
         let confirmation = await this.client.awaitReply(message, `Here is a preview of the announcement. If this is what you want, just type \`confirm\` to send.`, { embed: announceEmbed });
         if (confirmation === 'confirm') {
@@ -49,39 +59,45 @@ module.exports = class AnnounceCommand extends Command {
                 this.client.logger.error(err.stack);
                 return message.channel.send(`An error occurred: **${err.message}**`);
             });
+
+            const guilds = this.client.guilds.map(g => {
+                return {
+                    id: g.id,
+                    owner: g.owner.user
+                };
+            });
             
-            let dmErrorCount = 0;
-            let dmSuccessCount = 0;
-            let ignoredGuilds = [
-                '264445053596991498', 
-                '110373943822540800',
-                '450100127256936458',
-                '454933217666007052',
-                '374071874222686211',
-            ];
-
-            try {
-                await this.client.guilds.forEach(async g => {
-                    let owner = g.owner;
-                    if (ignoredGuilds.includes(g.id)) return;
-
-                    let updatedAnnouncement = announcement.replace('{{owner}}', owner.user.toString());
-                    announceEmbed.setDescription(updatedAnnouncement);
-                    owner.send(announceEmbed);
-                    dmSuccessCount++;
-                    await this.client.wait(2500);
-                });
-            } catch (err) {
-                dmErrorCount++;
-            }
-
-            return message.channel.send(`Successfully messaged **${dmSuccessCount}** user(s).${dmErrorCount > 1 ? ` However, I was not able to DM **${dmErrorCount}** user(s)!` : ''}`);
+            delayedIteration(0, guilds);
+            message.channel.send(`Announcement is now in the progress of being sent to the owners of **${guilds.length}** guilds. Hang tight!`);
         } else {
             message.channel.send('Could not confirm your announcement. Cancelling...').then(msg => msg.delete(3000)).catch(err => this.client.logger.error(err.stack));
-            return message.channel.bulkDelete(6).catch(err => {
+            message.channel.bulkDelete(6).catch(err => {
                 this.client.logger.error(err.stack);
                 return message.channel.send(`An error occurred: **${err.message}**`);
             });
         }
+
+        function delayedIteration(index, array) {
+            if (index >= array.length) {
+                return message.channel.send(`Successfully messaged **${dmSuccessCount}** user(s).${dmErrorCount > 1 ? ` However, I was not able to DM **${dmErrorCount}** user(s)!` : ''}`);
+            }
+
+            try {
+                let g = array[index];
+                let owner = g.owner;
+                if (ignoredGuilds.includes(g.id)) return;
+
+                let updatedAnnouncement = announcement.replace('{{owner}}', owner.toString());
+                announceEmbed.setDescription(updatedAnnouncement);
+                owner.send(announceEmbed);
+                dmSuccessCount++;
+            } catch (err) {
+                dmErrorCount++;
+            }
+
+            index += 1;
+            setTimeout(delayedIteration.bind({}, index, array), 1500);
+        }
+        return;
     }
 };

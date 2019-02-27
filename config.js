@@ -23,7 +23,7 @@ module.exports = {
     owner: process.env.OWNER,
     embedColor: process.env.DEFAULT_COLOR,
     discord: process.env.DISCORD,
-    docs: process.env.DOCS,
+    website: process.env.WEBSITE,
     invite: process.env.INVITE,
     giphyKey: process.env.GIPHY,
     suggestionColors: {

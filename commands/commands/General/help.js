@@ -13,7 +13,7 @@ module.exports = class HelpCommand extends Command {
     }
 
     async run(message, args, settings) {
-        let { owner, embedColor, discord, docs } = this.client.config;
+        let { owner, embedColor, discord, website } = this.client.config;
 
         let {
             prefix,
@@ -67,7 +67,7 @@ module.exports = class HelpCommand extends Command {
             if (message.member.hasPermission('MANAGE_GUILD') || message.member.roles.some(r => staffRoles.includes(r))) helpEmbed.addField('🗄 Staff Commands', staffCmds.join(' | '));
             if (message.member.hasPermission('MANAGE_GUILD')) helpEmbed.addField('🛡 Admin Commands', adminCmds.join(' | '));
             if (this.client.isOwner(message.author.id)) helpEmbed.addField('🔒 Owner Commands', ownerCmds.join(' | '));
-            helpEmbed.addField('🔖 Documentation', docs)
+            helpEmbed.addField('ℹ Website', website)
             .addField('❗ Found an issue?', `Please report any issues to <@${owner}> via the Support Discord: ${discord}`)
             .setColor(embedColor);
 
