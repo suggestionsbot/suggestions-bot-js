@@ -1,8 +1,5 @@
 const { RichEmbed } = require('discord.js');
-const mongoose = require('mongoose');
 const moment = require('moment');
-const Settings = require('../models/settings');
-const { botPresence } = require('../utils/utils');
 
 module.exports = class {
     constructor(client) {
@@ -42,8 +39,6 @@ module.exports = class {
         } catch (err) {
             return this.client.logger.error(err.stack);
         }
-        
-        botPresence(this.client);
 
         switch (process.env.NODE_ENV) {
             // 345753533141876737 = Nerd Cave Testing

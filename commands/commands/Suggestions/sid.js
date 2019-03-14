@@ -18,18 +18,20 @@ module.exports = class SIDCommand extends Command {
     async run(message, args, settings) {
 
         const { embedColor } = this.client.config;
-        const usage = this.help.usage;
 
         message.delete().catch(O_o => {});
 
-        if (!args[0]) return message.channel.send(`Usage: \`${settings.prefix + usage}\``).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
+        if (!args[0]) return this.client.errors(message.channel, this, settings);
 
-        let sID = await this.client.suggestions.getGuildSuggestion(message.guild, args[0]).catch(err => {
+        let sID;
+        try {
+            sID = await this.client.suggestions.getGuildSuggestion(message.guild, args[0]);
+        } catch (err) {
             this.client.logger.error(err.stack);
             return message.channel.send(`Error querying the database for this suggestion: **${err.message}**.`);
-        });
+        }
 
-        if (!sID._id) return message.channel.send(`Could not find the suggestion with the sID **${args[0]}** in the guild database.`).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
+        if (!sID._id) return this.client.errors.noSuggestion(message.channel, args[0]);
         
         let { 
             time,
@@ -52,11 +54,7 @@ module.exports = class SIDCommand extends Command {
             .setFooter(`User ID: ${userID} | sID ${args[0]}`);
 
         let nResults = [];
-        if (newResults && newResults.length > 1) {
-            newResults.forEach(r => {
-                nResults.push(`${r.emoji} **${r.count}**`);
-            });
-        }
+        if (newResults && newResults.length > 1) nResults = newResults.map(r => `${r.emoji} **${r.count}**`);
 
         switch (status) {
             case undefined:

@@ -32,12 +32,13 @@ module.exports = class NoteCommand extends Command {
 
         let date = moment(Date.now()).format();
 
-        let sID = await this.client.suggestions.getGuildSuggestion(message.guild, id).catch(err => {
+        let sID;
+        try {
+            sID = await this.client.suggestions.getGuildSuggestion(message.guild, id);
+        } catch (err) {
             this.client.logger.error(err.stack);
             return message.channel.send(`Error querying the database for this guild's suggestions: **${err.message}**.`);
-        });
-
-        if (!sID._id) return message.channel.send(`Could not find the suggestion with the sID **${args[0]}** in the guild database.`).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
+        }
 
         let {
             userID,
@@ -50,13 +51,15 @@ module.exports = class NoteCommand extends Command {
         const sUser = message.guild.members.get(userID);
         if (!sUser) message.channel.send(`**${username}** is no longer in the guild, but a note will still be added to the suggestion.`).then(msg => msg.delete(3000)).catch(err => this.client.logger.error(err.stack));
 
-        let fetchedMessages = await suggestionsChannel.fetchMessages({ limit: 100 }).catch(err => {
+        let fetchedMessages;
+        try {
+            fetchedMessages = await suggestionsChannel.fetchMessages({ limit: 100 });
+        } catch (err) {
             this.client.logger.error(err.stack);
             return message.channel.send(`There was an error fetching messages from the ${suggestionsChannel}: **${err.message}**.`);
-        });
+        }
 
         try {
-
             fetchedMessages.forEach(async msg => {
 
                 let embed = msg.embeds[0];

@@ -1,35 +1,39 @@
 const { Client, Collection } = require('discord.js');
-const Mongoose = require('./utils/mongoose');
+const Mongoose = require('../db/mongoose');
 
 // Stores for handling various functions
-const { BlacklistsStore, SuggestionsStore, SettingsStore } = require('./stores');
+const { Blacklists, Suggestions, Settings } = require('../db/helpers');
 
-const {  CommandHandler, EventHandler } = require('./utils/handlers');
+const { CommandLoader, EventLoader } = require('../loaders');
 
-module.exports = class Suggestions extends Client {
+const ErrorHandler = require('../utils/errors');
+
+module.exports = class SuggestionsClient extends Client {
     constructor(options) {
         super(options);
 
-        this.config = require('./config.js');
+        this.config = require('../config.js');
 
         this.commands = new Collection();
         this.aliases = new Collection();
 
-        this.logger = require('./utils/logger');
+        this.logger = require('../utils/logger');
 
         this.wait = require('util').promisify(setTimeout);
 
-        this.suggestions = new SuggestionsStore(this);
+        this.suggestions = new Suggestions(this);
 
-        this.settings = new SettingsStore(this);
+        this.settings = new Settings(this);
 
-        this.blacklists = new BlacklistsStore(this);
+        this.blacklists = new Blacklists(this);
 
         this.mongoose = new Mongoose(this);
 
-        this.commandHandler = new CommandHandler(this);
+        this.commandLoader = new CommandLoader(this);
 
-        this.eventHandler = new EventHandler(this);
+        this.eventLoader = new EventLoader(this);
+
+        this.errors = new ErrorHandler(this);
     }
 
     /**
@@ -72,7 +76,7 @@ module.exports = class Suggestions extends Client {
     This is mostly only used by the Eval and Exec commands.
     */
 
-    async clean(client, text) {
+    async clean(text) {
         if (text && text.constructor.name == 'Promise') text = await text;
         if (typeof evaled !== 'string') {
             text = require('util').inspect(text, {
@@ -83,7 +87,7 @@ module.exports = class Suggestions extends Client {
         text = text
             .replace(/`/g, '`' + String.fromCharCode(8203))
             .replace(/@/g, '@' + String.fromCharCode(8203))
-            .replace(client.token, 'mfa.VkO_2G4Qv3T--NO--lWetW_tjND--TOKEN--QFTm6YGtzq9PH--4U--tG0');
+            .replace(this.token, 'mfa.VkO_2G4Qv3T--NO--lWetW_tjND--TOKEN--QFTm6YGtzq9PH--4U--tG0');
 
         return text;
     }
@@ -92,5 +96,25 @@ module.exports = class Suggestions extends Client {
     isOwner(id) {
         if (id === this.config.owner) return true;
         else return false;
+    }
+
+    // Updates the presence depending on production or development
+    async botPresence() {
+        const { prefix } = this.config;
+        const { help: { name: cmdName }} = await this.commands.get('help');
+
+        if (process.env.NODE_ENV === 'production') {
+            this.user.setStatus('online');
+            this.user.setActivity(`your suggestions | ${prefix + cmdName}`, { type: 'WATCHING' })
+                .catch(err => {
+                    this.logger.error(err.stack);
+                });
+        } else {
+            this.user.setStatus('dnd');
+            this.user.setActivity('in code land...', { type: 'PLAYING' })
+                .catch(err => {
+                    this.logger.error(err.stack);
+                });
+        }
     }
 };

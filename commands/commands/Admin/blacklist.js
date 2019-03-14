@@ -2,11 +2,6 @@ const { RichEmbed } = require('discord.js');
 const moment = require('moment');
 const Command = require('../../Command');
 
-const blStatus = {
-    true: 'True',
-    false: 'False'
-};
-
 module.exports = class BlacklistCommand extends Command {
     constructor(client) {
         super(client, {
@@ -17,16 +12,26 @@ module.exports = class BlacklistCommand extends Command {
             adminOnly: true,
             botPermissions: ['MANAGE_MESSAGES', 'EMBED_LINKS']
         });
+        this.blStatus = {
+            true: 'True',
+            false: 'False'
+        };
     }
 
     async run(message, args, settings) {
 
-        const { name, usage } = this.help;
         const { embedColor } = this.client.config;
+        const { name } = this.help;
     
         await message.delete().catch(O_o=>{});
 
-        let gBlacklist = await this.client.blacklists.getGuildBlacklist(message.guild);
+        let gBlacklist;
+        try {
+            gBlacklist = await this.client.blacklists.getGuildBlacklist(message.guild);
+        } catch (err) {
+            this.client.logger.error(err.stack);
+            return message.channel.send(`An error occurred: **${err.message}**`);
+        }
 
         let caseNum = gBlacklist.length + 1;
 
@@ -42,7 +47,7 @@ module.exports = class BlacklistCommand extends Command {
                     let caseUser = `${gBlacklist[i].userID}`;
                     let caseReason = gBlacklist[i].reason;
                     let caseIssuer = `${gBlacklist[i].issuerUsername} (${gBlacklist[i].issuerID})`;
-                    let caseStatus = blStatus[gBlacklist[i].status];
+                    let caseStatus = this.blStatus[gBlacklist[i].status];
                     await blEmbed.addField(`Case #${caseNum}`, `**User:** ${caseUser}\n **Reason:** ${caseReason}\n **Issuer:** ${caseIssuer}\n **Status:** ${caseStatus}`);
                     active++;
                 } catch (err) {
@@ -60,7 +65,7 @@ module.exports = class BlacklistCommand extends Command {
             return message.channel.send(blEmbed);
         }
 
-        if (args[0] === 'help') return message.channel.send(`Usage: \`${settings.prefix + usage}\``).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
+        if (args[0] === 'help') return this.client.errors.noUsage(message.channel, this, settings);
 
         let blacklisted = args[1];
         let reason = args.slice(2).join(' ');
@@ -153,7 +158,7 @@ module.exports = class BlacklistCommand extends Command {
                 break;
             }
             default:
-                message.channel.send(`Usage: \`${settings.prefix + usage}\``).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
+                this.client.errors.noUsage(message.channel, this, settings);
                 break;
         }
         return;

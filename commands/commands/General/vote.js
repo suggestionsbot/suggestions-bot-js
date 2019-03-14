@@ -16,9 +16,11 @@ module.exports = class VoteCommand extends Command {
         let { embedColor, voteSites, discord} = this.client.config;
 
         let i = 1;
-        let sites = voteSites.map(site => {
-            return `**${i++})** [**${site.name}**](${site.link})`;
-        }).join('\n');
+        let sites = voteSites
+            .filter(site => site.voting)
+            .map(site => {
+                return `**${i++})** [**${site.name}**](${site.link})`;
+            }).join('\n');
 
         let voteEmbed = new RichEmbed()
             .setTitle('Vote Information')

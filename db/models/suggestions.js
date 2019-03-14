@@ -23,6 +23,12 @@ const suggestionSchema = mongoose.Schema({
         staffMemberUsername: String,
         noteAdded: String
     }],
+    edits: [{
+        edit: String,
+        username: String,
+        userID: String,
+        edited: String
+    }],
     noteAdded: String
 });
 

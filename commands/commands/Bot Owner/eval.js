@@ -14,13 +14,12 @@ module.exports = class EvalCommand extends Command {
 
     async run(message, args, settings) {
 
-        const cmdUsage = this.help.usage;
         const code = args.join(' ');
-        if (!code) return message.channel.send(`Usage: \`${settings.prefix + cmdUsage}\``).then(msg => msg.delete(3000)).catch(err => this.client.logger.error(err.stack));
+        if (!code) return this.client.errors.noUsage(message.channel, this, settings);
 
         try {
             const evaled = eval(code);
-            const clean = await this.client.clean(this.client, evaled);
+            const clean = await this.client.clean(evaled);
             // 6 graves, and 2 characters for "js"
             const MAX_CHARS = 3 + 2 + clean.length + 3;
             if (MAX_CHARS > 2000) {
@@ -34,7 +33,7 @@ module.exports = class EvalCommand extends Command {
             }
             return message.channel.send(clean, { code: 'js' });
         } catch (err) {
-            message.channel.send(await this.client.clean(this.client, err), { code: 'bash' });
+            message.channel.send(await this.client.clean(err), { code: 'bash' });
         }
     }
 };

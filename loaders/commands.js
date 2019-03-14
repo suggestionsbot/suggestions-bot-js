@@ -1,9 +1,7 @@
-const { promisify } = require('util');
-const readdir = promisify(require('fs').readdir);
 const path = require('path');
 const klaw = require('klaw');
 
-class CommandHandler {
+module.exports = class CommandLoader {
     constructor(client) {
         this.client = client;
     }
@@ -19,7 +17,7 @@ class CommandHandler {
     loadCommand(cmdPath, cmdName) {
         try {
             const props = new (require(`${cmdPath}${path.sep}${cmdName}`))(this.client);
-            this.client.logger.log(`Loading Command: ${props.help.name}. 👌`, 'log');
+            this.client.logger.log(`Command Loaded: ${props.help.name}. 👌`);
             props.conf.location = cmdPath;
             if (props.init) props.init(this.client);
             this.client.commands.set(props.help.name, props);
@@ -55,28 +53,4 @@ class CommandHandler {
         });
         return;
     }
-}
-
-class EventHandler {
-    constructor(client) {
-        this.client = client;
-    }
-
-    async init() {
-        const evtFiles = await readdir('./events/');
-        this.client.logger.log(`Loading a total of ${evtFiles.length} events.`, 'log');
-        evtFiles.forEach(file => {
-            const evtName = file.split('.')[0];
-            this.client.logger.log(`Loading Event: ${evtName}. 👌`);
-            const event = new(require(`../events/${file}`))(this.client);
-            this.client.on(evtName, (...args) => event.run(...args));
-            delete require.cache[require.resolve(`../events/${file}`)];
-        });
-        return;
-    }
-}
-
-module.exports = {
-    CommandHandler,
-    EventHandler
 };

@@ -20,19 +20,21 @@ module.exports = class GsIDCommand extends Command {
     async run(message, args, settings) {
 
         const { embedColor } = this.client.config;
-        const usage = this.help.usage;
 
         let perms = message.guild.me.permissions;
         if (!perms.has('MANAGE_MESSAGES')) return noBotPerms(message, 'MANAGE_MESSAGES');
 
         message.delete().catch(O_o => {});
 
-        if (!args[0]) return message.channel.send(`Usage: \`${settings.prefix + usage}\``).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
+        if (!args[0]) return this.client.errors.noUsage(message.channel, this, settings);
 
-        let sID = await this.client.suggestions.getGlobalSuggestion(args[0]).catch(err => {
+        let sID;
+        try {
+            sID = await this.client.suggestions.getGlobalSuggestion(args[0]);
+        } catch (err) {
             this.client.logger.error(err.stack);
             return message.channel.send(`Error querying the database for this suggestion: **${err.message}**.`);
-        });
+        }
 
         if (!sID._id) return message.channel.send(`Could not find the suggestion with the sID **${args[0]}** in the database.`).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
         
@@ -129,6 +131,8 @@ module.exports = class GsIDCommand extends Command {
                 message.channel.send(embed);
                 break;
             default:
+                this.client.errors.noUsage(message.channel, this, settings);
+                break;
         }
         return;
     }

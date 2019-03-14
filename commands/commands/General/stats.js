@@ -17,39 +17,27 @@ module.exports = class StatsCommand extends Command {
     async run(message, args) {
 
         let { embedColor } = this.client.config;
-
-        // let totalCommands = '';
-        // let totalSuggestions = '';
-        
-        // try {
-        //     let commands = await this.client.settings.getAllCommands();
-        //     totalCommands = commands.length;
-            
-        //     let suggestions = await this.client.settings.getAllSuggestions();
-        //     totalSuggestions = suggestions.length;
-        // } catch (err) {
-        //     this.client.logger.error(err.stack);
-        //     return message.channel.send(`Error loading bot stats: **${err.message}**`);
-        // }
         
         const botUptime = moment.duration(this.client.uptime).format(' D [days], H [hrs], m [mins], s [secs]');
         const memUsage = (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2);
-        const guildSize = this.client.guilds.size.toLocaleString();
-        const userSize = this.client.users.size.toLocaleString();
-        // const channelSize = this.client.channels.size.toLocaleString();
+
+        const guildCount = await this.client.shard.fetchClientValues('guilds.size')
+            .then(res => res.reduce((prev, count) => prev + count, 0));
+
+        const memberCount = await this.client.shard.broadcastEval('this.guilds.reduce((prev, guild) => prev + guild.memberCount, 0)')
+            .then(res => res.reduce((prev, count) => prev + count, 0));
+
 
         const embed = new RichEmbed()
             .setAuthor(`${this.client.user.username} v${version}`, this.client.user.avatarURL)
             .setColor(embedColor)
-            .addField('Guilds', guildSize, true)
-            .addField('Users', userSize, true)
-            // .addField('Channels', channelSize, true)
-            // .addField('Suggestions', totalSuggestions, true)
-            // .addField('Commands', totalCommands, true)
+            .addField('Guilds', guildCount, true)
+            .addField('Users', memberCount, true)
             .addField('Uptime', botUptime, true)
             .addField('Memory', `${Math.round(memUsage)} MB`, true)
             .addField('Discord.js', `v${discordVersion}`, true)
             .addField('Node', `${process.version}`, true)
+            .setFooter(`Shard ${this.client.shard.id + 1}`)
             .setTimestamp();
 
         return message.channel.send(embed);

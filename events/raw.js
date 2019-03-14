@@ -24,10 +24,10 @@ module.exports = class {
         const emojiKey = data.emoji.id ? `${data.emoji.name}:${data.emoji.id}` : data.emoji.name;
         let reaction = message.reactions.get(emojiKey);
 
-        if (!reaction) {
-            const emoji = new Emoji(this.client.guilds.get(data.guild_id), data.emoji);
-            reaction = new MessageReaction(message, emoji, 1, data.user_id === this.client.user.id); // eslint-disable-line
-        }
+        // if (!reaction) {
+        //     const emoji = new Emoji(this.client.guilds.get(data.guild_id), data.emoji);
+        //     reaction = new MessageReaction(message, emoji, 1, data.user_id === this.client.user.id); // eslint-disable-line
+        // }
 
         this.client.emit(events[event.t], reaction, user);
 

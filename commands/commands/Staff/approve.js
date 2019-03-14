@@ -1,7 +1,6 @@
 const { RichEmbed } = require('discord.js');
 const moment = require('moment');
 const Command = require('../../Command');
-const { noSuggestionsLogs } = require('../../../utils/errors');
 require('moment-duration-format');
 require('moment-timezone');
 moment.suppressDeprecationWarnings = true;
@@ -20,7 +19,6 @@ module.exports = class ApproveCommand extends Command {
 
     async run(message, args, settings) {
 
-        const usage = this.help.usage;
         const { approved } = this.client.config.suggestionColors;
 
         message.delete().catch(O_o => {});
@@ -29,20 +27,23 @@ module.exports = class ApproveCommand extends Command {
 
         const suggestionsChannel = message.guild.channels.find(c => c.name === settings.suggestionsChannel) || (message.guild.channels.find(c => c.toString() === settings.suggestionsChannel)) || (message.guild.channels.get(settings.suggestionsChannel));
         const suggestionsLogs = message.guild.channels.find(c => c.name === settings.suggestionsLogs) || (message.guild.channels.find(c => c.toString() === settings.suggestionsLogs)) || (message.guild.channels.get(settings.suggestionsLogs));
-        if (!suggestionsLogs) return noSuggestionsLogs(message.channel);
+        if (!suggestionsLogs) return this.client.errors.noSuggestionsLogs(message.channel);
 
         let id = args[0];
         let reply = args.slice(1).join(' ');
-        if (!id) return message.channel.send(`Usage: \`${settings.prefix + usage}\``).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
+        if (!id) return this.client.errors.noUsage(message.channel, this, settings);
 
         let date = moment(Date.now()).format();
 
-        let sID = await this.client.suggestions.getGuildSuggestion(message.guild, id).catch(err => {
+        let sID;
+        try {
+            sID = await this.client.suggestions.getGuildSuggestion(message.guild, id);
+        } catch (err) {
             this.client.logger.error(err.stack);
             return message.channel.send(`Error querying the database for this guild's suggestions: **${err.message}**.`);
-        });
+        }
 
-        if (!sID._id) return message.channel.send(`Could not find the suggestion with the sID **${args[0]}** in the guild database.`).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
+        if (!sID._id) return this.client.errors.noSuggestion(message.channel, id);
 
         let {
             userID,
@@ -56,10 +57,13 @@ module.exports = class ApproveCommand extends Command {
         const sUser = message.guild.members.get(userID);
         if (!sUser) message.channel.send(`**${username}** is no longer in the guild, but their suggestion will still be approved.`).then(msg => msg.delete(3000)).catch(err => this.client.logger.error(err.stack));
 
-        let fetchedMessages = await suggestionsChannel.fetchMessages({ limit: 100 }).catch(err => {
+        let fetchedMessages;
+        try {
+            fetchedMessages = await suggestionsChannel.fetchMessages({ limit: 100 });
+        } catch (err) {
             this.client.logger.error(err.stack);
             return message.channel.send(`There was an error fetching messages from the ${suggestionsChannel}: **${err.message}**.`);
-        });
+        }
 
         fetchedMessages.forEach(async msg => {
             let embed = msg.embeds[0];

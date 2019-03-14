@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const { Blacklist, Command, Settings, Suggestion } = require('../models');
 
-module.exports = class SettingsStore {
+module.exports = class SettingsHelpers {
     constructor(client) {
         this.client = client;
     }

@@ -4,8 +4,8 @@ const voteEmojis = client => [
         name: 'defaultEmojis',
         fullName: 'Defaults',
         emojis: [
-            client.emojis.get('490708616056406017'),
-            client.emojis.get('522929743507488795')   
+            client.emojis.get('490708616056406017'), // nerdSuccess
+            client.emojis.get('522929743507488795')  // nerdError
         ]
     },
     {
@@ -31,6 +31,15 @@ const voteEmojis = client => [
         name: 'greenEmojis',
         fullName: 'Green',
         emojis: ['✅', '❎']
+    },
+    {
+        id: 5,
+        name: 'fancyEmojis',
+        fullName: 'Fancy',
+        emojis: [
+            client.emojis.get('555537247881920521'), // nerdApprove
+            client.emojis.get('555537277200367627')  // nerdDisapprove
+        ]
     }
 ];
 

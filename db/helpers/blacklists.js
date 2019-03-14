@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const { Blacklist } = require('../models');
 
-module.exports = class BlacklistsStore {
+module.exports = class BlacklistsHelpers {
     constructor(client) {
         this.client = client;
     }
