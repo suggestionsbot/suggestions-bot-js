@@ -9,6 +9,10 @@ module.exports = class CommandHandler {
 
     async run(message) {
 
+        if (!message.guild) return;
+        if (!message.channel.permissionsFor(this.client.user).missing('SEND_MESSAGES')) return;
+        if (message.guild && !message.member) await message.guild.fetchMember(message.author);
+
         let settings = {};
         const { superSecretUsers } = this.client.config;
 
@@ -43,7 +47,7 @@ module.exports = class CommandHandler {
 
         const roles = settings.staffRoles;
         let staffRoles;
-        if (roles.length >= 1) {
+        if (roles) {
             staffRoles = message.guild.roles
                 .filter(role => roles.map(r => r.role).includes(role.id))
                 .map(r => r);
@@ -62,7 +66,7 @@ module.exports = class CommandHandler {
         if (cmd.conf.ownerOnly && !ownerCheck) return;
         if (cmd.conf.adminOnly && !adminCheck) return this.client.errors.noPerms(message, 'MANAGE_GUILD');
         if (cmd.conf.staffOnly && !adminCheck && !staffCheck) {
-            if (roles.length >= 1) return this.client.errors.noSuggestionsPerms(message, staffRoles);
+            if (!roles) return this.client.errors.noSuggestionsPerms(message, staffRoles);
             else return this.client.errors.noPerms(message, 'MANAGE_GUILD');
         }
         if (cmd.conf.superSecretOnly && !superCheck) return;
