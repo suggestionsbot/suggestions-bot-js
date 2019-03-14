@@ -2,7 +2,6 @@ const { RichEmbed } = require('discord.js');
 const moment = require('moment');
 const { stripIndents } = require('common-tags');
 const Command = require('../../Command');
-const { noChannelPerms, noStaffSuggestions } = require('../../../utils/errors');
 require('moment-duration-format');
 require('moment-timezone');
 
@@ -27,7 +26,7 @@ module.exports = class StaffSuggestCommand extends Command {
         
         const sUser = message.author;
         const sChannel = message.guild.channels.find(c => c.name === settings.staffSuggestionsChannel) || message.guild.channels.find(c => c.toString() === settings.staffSuggestionsChannel) || message.guild.channels.get(settings.staffSuggestionsChannel);
-        if (!sChannel) return noStaffSuggestions(message.channel);
+        if (!sChannel) return this.client.errors.noStaffSuggestions(message.channel);
 
         if (!settings.staffRoles) return message.channel.send('No staff roles exist! Please create them or contact a server administrator to handle suggestions.').then(msg =>  msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
 
@@ -60,8 +59,8 @@ module.exports = class StaffSuggestCommand extends Command {
 
         const sendMsgs = sChannel.permissionsFor(message.guild.me).has('SEND_MESSAGES', false);
         const reactions = sChannel.permissionsFor(message.guild.me).has('ADD_REACTIONS', false);
-        if (!sendMsgs) return noChannelPerms(message, sChannel, 'SEND_MESSAGES');
-        if (!reactions) return noChannelPerms(message, sChannel, 'ADD_REACTIONS');
+        if (!sendMsgs) return this.client.errors.noChannelPerms(message, sChannel, 'SEND_MESSAGES');
+        if (!reactions) return this.client.errors.noChannelPerms(message, sChannel, 'ADD_REACTIONS');
 
         message.channel.send(embed).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
 

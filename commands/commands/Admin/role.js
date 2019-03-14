@@ -17,14 +17,12 @@ module.exports = class RoleCommand extends Command {
 
         await message.delete().catch(O_o => {});
 
-        let { prefix, staffRoles } = settings;
-
-        let usage = this.help.usage;
+        let { staffRoles } = settings;
      
         let role = args.slice(1).join(' ');
         let staffRole = message.guild.roles.find(r => r.toString() === role) || message.guild.roles.find(r => r.name === role);
 
-        if (!role) return message.channel.send(`Usage: \`${prefix + usage}\``).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
+        if (!role) return this.client.errors.noUsage(message.channel, this, settings);
         if (!staffRole) return message.channel.send('This role doesn\'t exist in this guild!');
 
         let updateRole = {
@@ -66,6 +64,7 @@ module.exports = class RoleCommand extends Command {
                 }
                 break;
             default:
+                this.client.errors.noUsage(message.channel, this, settings);
                 break;
         }
         return;

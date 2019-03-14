@@ -1,21 +1,19 @@
 if (Number(process.version.slice(1).split(".")[0]) < 8) throw new Error("Node 8.0.0 or higher is required. Update Node on your system.");
 
 const { oneLine } = require('common-tags');
-const Suggestions = require('./client');
+const SuggestionsClient = require('./client/SuggestionsClient');
 
 require('dotenv-flow').config();
 
-const client = new Suggestions();
+const client = new SuggestionsClient({ disableEveryone: true });
 
 (async () => {
-    client.commandHandler.init();
-    await client.eventHandler.init();
+    client.commandLoader.init();
+    await client.eventLoader.init();
     client.mongoose.init(); // initialize connection to the database
     client.login();
 })();
 
-client.on('disconnect', () => client.logger.warn('Bot is disconnecting...'));
-client.on('reconnecting', () => client.logger.log('Bot reconnecting...', 'log'));
 client.on('commandBlocked', (cmd, reason) => {
     client.logger.warn(oneLine `
             Command ${cmd ? `${cmd.help.category}:${cmd.help.name}` : ''}

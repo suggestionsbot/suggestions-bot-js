@@ -2,11 +2,6 @@ const { RichEmbed } = require('discord.js');
 const moment = require('moment');
 const Command = require('../../Command');
 
-const blStatus = {
-    true: 'True',
-    false: 'False'
-};
-
 module.exports = class GBlacklistCommand extends Command {
     constructor(client) {
         super(client, {
@@ -17,6 +12,10 @@ module.exports = class GBlacklistCommand extends Command {
             ownerOnly: true,
             botPermissions: ['MANAGE_MESSAGES', 'EMBED_LINKS']
         });
+        this.blStatus = {
+            true: 'True',
+            false: 'False'
+        };
     }
 
     async run(message, args, settings) {
@@ -44,7 +43,7 @@ module.exports = class GBlacklistCommand extends Command {
                     let caseUser = `${gBlacklist[i].userID}`;
                     let caseReason = gBlacklist[i].reason;
                     let caseIssuer = `${gBlacklist[i].issuerUsername} (${gBlacklist[i].issuerID})`;
-                    let caseStatus = blStatus[gBlacklist[i].status];
+                    let caseStatus = this.blStatus[gBlacklist[i].status];
                     await blEmbed.addField(`Case #${caseNum}`, `**User:** ${caseUser}\n **Reason:** ${caseReason}\n **Issuer:** ${caseIssuer}\n **Status:** ${caseStatus}`);
                     active++;
                 } catch (err) {

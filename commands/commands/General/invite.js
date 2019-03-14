@@ -7,7 +7,7 @@ module.exports = class InviteCommand extends Command {
             name: 'invite',
             category: 'General',
             description: 'Receive a DM with information on inviting the bot to your server.',
-            aliases: ['bot', 'botinvite'],
+            aliases: ['botinvite'],
             botPermissions: ['ADD_REACTIONS', 'EMBED_LINKS']
         });
     }

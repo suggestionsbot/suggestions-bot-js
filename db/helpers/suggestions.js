@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const { Suggestion } = require('../models');
 
-module.exports = class SuggestionsStore {
+module.exports = class SuggestionsHelpers {
     constructor(client) {
         this.client = client;
     }

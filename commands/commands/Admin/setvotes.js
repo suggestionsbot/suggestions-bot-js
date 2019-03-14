@@ -7,21 +7,21 @@ module.exports = class SetVotesCommand extends Command {
             name: 'setvotes',
             category: 'Admin',
             description: 'Set custom emojis to use when voting.',
-            usage: 'setvotes <id>',
+            usage: 'setvotes [id]',
             adminOnly: true,
             botPermissions: ['MANAGE_MESSAGES', 'EMBED_LINKS']
         });
+        this.voteEmojis = require('../../../utils/voteEmojis');
     }
 
     async run(message, args, settings) {
 
-        const voteEmojis = require('../../../utils/voteEmojis')(this.client);
-
         const { embedColor, discord } = this.client.config;
+        const voteEmojis = this.voteEmojis(this.client);
 
         await message.delete().catch(O_o => {});
 
-        const usage = this.help.usage;
+        const { usage } = this.help;
 
         let embed = new RichEmbed()
             .setAuthor(message.guild.name, message.guild.iconURL)

@@ -3,7 +3,6 @@ const { RichEmbed } = require('discord.js');
 const crypto = require('crypto');
 const moment = require('moment');
 const { stripIndents } = require('common-tags');
-const { noSuggestions, noChannelPerms } = require('../../../utils/errors');
 require('moment-duration-format');
 require('moment-timezone');
 
@@ -20,29 +19,30 @@ module.exports = class SuggestCommand extends Command {
             },
             botPermissions: ['MANAGE_MESSAGES', 'EMBED_LINKS', 'ADD_REACTIONS']
         });
+        this.voteEmojis = require('../../../utils/voteEmojis');
     }
 
     async run(message, args, settings) {
 
-        const voteEmojis = require('../../../utils/voteEmojis')(this.client);
-
         const { embedColor } = this.client.config;
-
-        const cmdUsage = this.help.usage;
+        const voteEmojis = this.voteEmojis(this.client);
 
         let id = crypto.randomBytes(20).toString('hex').slice(12, 20);
         let time = moment(Date.now());
 
-        let verifySuggestion = await this.client.suggestions.getGlobalSuggestion(id).catch(err => {
+        let verifySuggestion;
+        try {
+            verifySuggestion = await this.client.suggestions.getGlobalSuggestion(id);
+        } catch (err) {
             this.client.logger.error(err.stack);
             return message.channel.send(`Error querying the database for this guild's suggestions: **${err.message}**.`);
-        });
+        }
 
-        let { prefix, suggestionsChannel } = settings;
+        let { suggestionsChannel } = settings;
 
         const sUser = message.author;
         const sChannel = message.guild.channels.find(c => c.name === suggestionsChannel) || message.guild.channels.find(c => c.toString() === suggestionsChannel) || message.guild.channels.get(suggestionsChannel);
-        if (!sChannel) return noSuggestions(message.channel);
+        if (!sChannel) return this.client.errors.noSuggestions(message.channel);
 
         let emojis = settings.voteEmojis;
 
@@ -62,7 +62,7 @@ module.exports = class SuggestCommand extends Command {
             .setTimestamp();
 
         const suggestion = args.join(' ');
-        if (!suggestion) return message.channel.send(`Usage: \`${prefix + cmdUsage}\``).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
+        if (!suggestion) return this.client.errors.noUsage(message.channel, this, settings);
 
         const submittedOn = moment.utc(message.createdAt).format('MM/DD/YY @ h:mm A (z)');
 
@@ -83,8 +83,8 @@ module.exports = class SuggestCommand extends Command {
 
         const sendMsgs = sChannel.permissionsFor(message.guild.me).has('SEND_MESSAGES', false);
         const reactions = sChannel.permissionsFor(message.guild.me).has('ADD_REACTIONS', false);
-        if (!sendMsgs) return noChannelPerms(message, sChannel, 'SEND_MESSAGES');
-        if (!reactions) return noChannelPerms(message, sChannel, 'ADD_REACTIONS');
+        if (!sendMsgs) return this.client.errors.noChannelPerms(message, sChannel, 'SEND_MESSAGES');
+        if (!reactions) return this.client.errors.noChannelPerms(message, sChannel, 'ADD_REACTIONS');
 
         sUser.send(dmEmbed).catch(err => {
             this.client.logger.error(err.stack);

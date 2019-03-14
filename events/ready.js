@@ -1,6 +1,5 @@
 const { RichEmbed } = require('discord.js');
 const { version } = require('../package.json');
-const { botPresence } = require('../utils/utils');
 require('dotenv-flow').config();
 
 const versions = {
@@ -21,11 +20,14 @@ module.exports = class {
             this.client.appInfo = await this.client.fetchApplication();
         }, 60000);
 
+        const guildCount = await this.client.shard.fetchClientValues('guilds.size')
+            .then(res => res.reduce((prev, count) => prev + count, 0));
+
         await this.client.logger.log(`Version ${version} of the bot loaded.`);
         await this.client.logger.log(`${versions[process.env.NODE_ENV]} version of the bot loaded.`);
-        await this.client.logger.log(`Logged in as ${this.client.user.tag} (${this.client.user.id}) in ${this.client.guilds.size} server(s).`, 'ready');
+        await this.client.logger.log(`Logged in as ${this.client.user.tag} (${this.client.user.id}) on ${this.client.shard.count} shard(s) in ${guildCount} server(s).`, 'ready');
 
-        botPresence(this.client);
+        this.client.botPresence();
 
         // If the bot was invited to a guild while it was offline, the "ready" event will
         // be emitted (ONLY IN PRODUCTION)
@@ -33,14 +35,18 @@ module.exports = class {
 
             // handle posting stats to bot lists
             require('../utils/voting')(this.client);
-// 
+
             this.client.guilds.forEach(async g => {
                 try {
-                    let gSettings = await this.client.settings.getGuild(g);
-                    if (!gSettings._id) await this.client.emit('guildCreate', g); // must check for _id as that indicates the document exists in mongodb
-                    
-                    if (gSettings.guildOwnerID !== g.ownerID) await this.client.settings.updateGuild(g, { guildOwnerID: g.ownerID });
-                    if (gSettings.guildName !== g.name) await this.client.settings.updateGuild(g, { guildName: g.name });
+                    const {
+                        _id,
+                        guildOwnerID,
+                        guildName
+                    } = await this.client.settings.getGuild(g);
+
+                    if (!_id) await this.client.emit('guildCreate', g); // must check for _id as that indicates the document exists in mongodb
+                    if (guildOwnerID !== g.ownerID) await this.client.settings.updateGuild(g, { guildOwnerID: g.ownerID });
+                    if (guildName !== g.name) await this.client.settings.updateGuild(g, { guildName: g.name });
                 } catch (err) {
                     this.client.logger.error(err.stack);
                 }
@@ -62,8 +68,6 @@ module.exports = class {
                     } catch (err) {
                         this.client.logger.error(err);
                     }
-
-                    botPresence(this.client);
 
                     let oldServer = new RichEmbed()
                         .setTitle('Removed')

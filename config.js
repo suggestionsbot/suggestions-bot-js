@@ -35,15 +35,20 @@ module.exports = {
         deleted: '#FF4500'
     },
     voteSites: [
-        { name: 'Discord Bot List (DiscordBots.org)', link: 'https://discordbots.org/bot/474051954998509571' },
-        { name: 'Discord Bots', link: 'https://discord.bots.gg/bots/474051954998509571' },
-        { name: 'Discord Bot List (DiscordBotList.com)', link: 'https://discordbotlist.com/bots/474051954998509571' },
-        { name: 'Divine Discord Bot List', link: 'https://divinediscordbots.com/bots/474051954998509571' },
-        { name: 'botlist.space', link: 'https://botlist.space/bot/474051954998509571' },
-        { name: 'Discord Bot List by Terminal.ink', link: 'https://ls.terminal.ink/bots/474051954998509571', },
-        { name: 'Bots For Discord', link: 'https://botsfordiscord.com/bots/474051954998509571' }
+        { name: 'Discord Bot List (DiscordBots.org)', link: 'https://discordbots.org/bot/474051954998509571', voting: true },
+        { name: 'Discord Bots', link: 'https://discord.bots.gg/bots/474051954998509571', voting: false },
+        { name: 'Discord Bot List (DiscordBotList.com)', link: 'https://discordbotlist.com/bots/474051954998509571', voting: true },
+        { name: 'Divine Discord Bot List', link: 'https://divinediscordbots.com/bots/474051954998509571', voting: true },
+        { name: 'botlist.space', link: 'https://botlist.space/bot/474051954998509571', voting: true },
+        { name: 'Discord Bot List by Terminal.ink', link: 'https://ls.terminal.ink/bots/474051954998509571', voting: true },
+        { name: 'Bots For Discord', link: 'https://botsfordiscord.com/bots/474051954998509571', voting: true }
     ],
     patreon: process.env.PATREON,
+    superSecretUsers: [
+        '214719690855940109', // Lukasz
+        '245385436669804547', // Kyle
+        '158063324699951104' // Anthony
+    ],
     defaultSettings: {
         prefix: process.env.PREFIX,
         suggestionsChannel: process.env.SUGGESTIONSCHANNEL,

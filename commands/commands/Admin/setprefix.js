@@ -15,11 +15,9 @@ module.exports = class SetPrefixCommand extends Command {
 
     async run(message, args, settings) {
         
-        const usage = this.help.usage;
-
         await message.delete().catch(O_o => {});
 
-        if (!args[0]) return message.channel.send(`Usage: \`${settings.prefix + usage}\``).then(m => m.delete(5000)).catch(err => this.client.logger.error(err.stack));
+        if (!args[0]) return this.client.errors.noUsage(message.channel, this, settings);
 
         await this.client.settings.updateGuild(message.guild, { prefix: args[0] }).catch(err => {
             this.client.logger.error(err.stack);
