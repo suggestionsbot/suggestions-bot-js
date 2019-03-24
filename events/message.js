@@ -8,6 +8,7 @@ module.exports = class {
 
     async run(message) {
     
+        if (!message.author) return;
         this.commands.run(message);
     }
 };
