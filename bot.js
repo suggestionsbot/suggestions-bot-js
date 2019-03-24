@@ -60,7 +60,7 @@ process.on('uncaughtException', (err) => {
 
 process.on('unhandledRejection', err => {
     // let msg = err.stack.replace(new RegExp(`${__dirname}/`, 'g'), './');
-	client.logger.error(`Unhandled Rejection: \n ${err}`);
+	client.logger.error(`Unhandled Rejection: \n ${err.path}`);
 });
 
 process.on('SIGTERM', async () => {
