@@ -10,7 +10,6 @@ module.exports = class CommandHandler {
     async run(message) {
 
         if (!message.guild) return;
-        if (!message.author) return;
         if (!message.channel.permissionsFor(this.client.user).missing('SEND_MESSAGES')) return;
         if (message.guild && !message.member) await message.guild.fetchMember(message.author);
 

@@ -8,7 +8,10 @@ module.exports = class {
 
     async run(message) {
     
-        if (!message.author) return;
+        if (!message.guild) return;
+        if (!message.channel.permissionsFor(this.client.user).missing('SEND_MESSAGES')) return;
+        if (message.guild && !message.member) await message.guild.fetchMember(message.author);
+        
         this.commands.run(message);
     }
 };
