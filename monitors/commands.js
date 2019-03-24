@@ -10,8 +10,6 @@ module.exports = class CommandHandler {
     async run(message) {
 
         if (!message.guild) return;
-        if (!message.channel.permissionsFor(this.client.user).missing('SEND_MESSAGES')) return;
-        if (message.guild && !message.member) await message.guild.fetchMember(message.author);
 
         let settings = {};
         const { superSecretUsers } = this.client.config;
@@ -36,6 +34,8 @@ module.exports = class CommandHandler {
         const args = message.content.slice(newPrefix.length).trim().split(/ +/g);
         const command = args.shift().toLowerCase();
 
+        if (message.guild && !message.member) await message.guild.fetchMember(message.author);
+        
         const cmd = this.client.commands.get(command) || this.client.commands.get(this.client.aliases.get(command));
         if (!cmd) return;
 
