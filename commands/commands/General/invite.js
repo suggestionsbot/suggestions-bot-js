@@ -8,7 +8,8 @@ module.exports = class InviteCommand extends Command {
             category: 'General',
             description: 'Receive a DM with information on inviting the bot to your server.',
             aliases: ['botinvite'],
-            botPermissions: ['ADD_REACTIONS', 'EMBED_LINKS']
+            botPermissions: ['ADD_REACTIONS', 'EMBED_LINKS'],
+            guildOnly: false
         });
     }
 
@@ -34,11 +35,11 @@ module.exports = class InviteCommand extends Command {
             .setColor(embedColor)
             .setTimestamp();
 
-        await message.react('📧').then(message.delete(2500));
+        if (message.guildOnly) await message.react('📧').then(message.delete(2500));
         await message.member.send(dmEmbed).catch(err => {
-        this.client.logger.error(err);
-        return message.reply('you have DMs disabled! I could not send you the invite link. Enable them to receive the bot invite link.');
-    });
+            this.client.logger.error(err);
+            return message.reply('you have DMs disabled! I could not send you the invite link. Enable them to receive the bot invite link.');
+        });
 
     }
 };

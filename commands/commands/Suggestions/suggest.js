@@ -65,6 +65,8 @@ module.exports = class SuggestCommand extends Command {
         if (!suggestion) return this.client.errors.noUsage(message.channel, this, settings);
 
         const submittedOn = moment.utc(message.createdAt).format('MM/DD/YY @ h:mm A (z)');
+        
+        const imageCheck = /(http(s?):)([/|.|\w|\s|-])*\.(?:jpg|gif|png)/.exec(suggestion);
 
         const sEmbed = new RichEmbed()
             .setThumbnail(sUser.avatarURL)
@@ -80,6 +82,8 @@ module.exports = class SuggestCommand extends Command {
             `)
             .setColor(embedColor)
             .setFooter(`User ID: ${sUser.id} | sID: ${id}`);
+
+        if (imageCheck) sEmbed.setImage(imageCheck[0]);
 
         const sendMsgs = sChannel.permissionsFor(message.guild.me).has('SEND_MESSAGES', false);
         const reactions = sChannel.permissionsFor(message.guild.me).has('ADD_REACTIONS', false);

@@ -10,7 +10,8 @@ module.exports = class StatsCommand extends Command {
             name: 'stats',
             category: 'General',
             description: 'View bot statistics.',
-            botPermissions: ['EMBED_LINKS']
+            botPermissions: ['EMBED_LINKS'],
+            guildOnly: false
         });
     }
 

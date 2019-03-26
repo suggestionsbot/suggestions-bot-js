@@ -29,7 +29,7 @@ module.exports = class BlacklistsHelpers {
     async getGlobalBlacklist() {
         let gBlacklist;
         try {
-            gBlacklist = await Blacklist.find({scope: 'global' });
+            gBlacklist = await Blacklist.find({ scope: 'global' });
         } catch (err) {
             this.client.logger.error(err.stack);
         }

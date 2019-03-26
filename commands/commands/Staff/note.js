@@ -13,32 +13,55 @@ module.exports = class NoteCommand extends Command {
             description: 'Add a new note to a submitted suggestion.',
             usage: 'note <sID> <note>',
             staffOnly: true,
+            guildOnly: false,
             botPermissions: ['MANAGE_MESSAGES']
         });
     }
 
     async run(message, args, settings) {
         
-        const usage = this.help.usage;
         let { embedColor } = this.client.config;
 
         message.delete().catch(O_o => {});
 
-        const suggestionsChannel = message.guild.channels.find(c => c.name === settings.suggestionsChannel) || (message.guild.channels.find(c => c.toString() === settings.suggestionsChannel)) || (message.guild.channels.get(settings.suggestionsChannel));
-
         let id = args[0];
         let note = args.slice(1).join(' ');
-        if (!id && !note) return message.channel.send(`Usage: \`${settings.prefix + usage}\``).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
+        if (!note) return this.client.errors.noUsage(message.channel, this, settings);
+
+        let sID,
+            guild = message.guild;
+        try {
+            sID = await this.client.suggestions.getGlobalSuggestion(id);
+        } catch (err) {
+            this.client.logger.error(err.stack);
+            return message.channel.send(`Error querying the database for this suggestions: **${err.message}**.`);
+        }
+
+        if (!sID._id) return this.client.errors.noSuggestion(message.channel, id);
+
+        if (!message.guild) {
+            try {
+                guild = this.client.guilds.get(sID.guildID);
+                settings = await this.client.settings.getGuild(sID.guildID);
+            } catch (err) {
+                this.client.logger.error(err.message);
+                return message.channel.send(`An error occurred: **${err.message}**`);
+            }
+        }
+
+        const suggestionsChannel = guild.channels.find(c => c.name === settings.suggestionsChannel) ||
+            (guild.channels.find(c => c.toString() === settings.suggestionsChannel)) ||
+            (guild.channels.get(settings.suggestionsChannel));
 
         let date = moment(Date.now()).format();
 
-        let sID;
-        try {
-            sID = await this.client.suggestions.getGuildSuggestion(message.guild, id);
-        } catch (err) {
-            this.client.logger.error(err.stack);
-            return message.channel.send(`Error querying the database for this guild's suggestions: **${err.message}**.`);
-        }
+        // let sID;
+        // try {
+        //     sID = await this.client.suggestions.getGuildSuggestion(message.guild, id);
+        // } catch (err) {
+        //     this.client.logger.error(err.stack);
+        //     return message.channel.send(`Error querying the database for this guild's suggestions: **${err.message}**.`);
+        // }
 
         let {
             userID,
@@ -48,7 +71,7 @@ module.exports = class NoteCommand extends Command {
 
         if (status === 'approved' || status === 'rejected') return message.channel.send(`sID **${id}** has already been approved or rejected. Cannot do this action again.`).then(msg => msg.delete(3000)).catch(err => this.client.logger.error(err.stack));
 
-        const sUser = message.guild.members.get(userID);
+        const sUser = guild.members.get(userID);
         if (!sUser) message.channel.send(`**${username}** is no longer in the guild, but a note will still be added to the suggestion.`).then(msg => msg.delete(3000)).catch(err => this.client.logger.error(err.stack));
 
         let fetchedMessages;
@@ -68,7 +91,7 @@ module.exports = class NoteCommand extends Command {
                 const suggestion = new RichEmbed(embed);
 
                 const dmEmbed = new RichEmbed()
-                    .setAuthor(message.guild, message.guild.iconURL)
+                    .setAuthor(guild, guild.iconURL)
                     .setDescription(`Hey, ${sUser}. ${message.author} has added a note to your suggestion:
 
                     Staff note: **${note}**
@@ -76,7 +99,7 @@ module.exports = class NoteCommand extends Command {
                     Your suggestion ID (sID) for reference was **${id}**.
                     `)
                     .setColor(embedColor)
-                    .setFooter(`Guild ID: ${message.guild.id} | sID: ${id}`)
+                    .setFooter(`Guild ID: ${guild.id} | sID: ${id}`)
                     .setTimestamp();
 
                 if (embed.fields.length && embed.fields[0].name === 'Staff Note') {
@@ -115,7 +138,7 @@ module.exports = class NoteCommand extends Command {
 
                     const suggestionNote = {
                         query: [
-                            { guildID: message.guild.id },
+                            { guildID: guild.id },
                             { sID: id }
                         ],
                         note: staffNote

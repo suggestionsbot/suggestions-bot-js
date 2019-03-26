@@ -13,6 +13,7 @@ module.exports = class GsIDCommand extends Command {
             description: 'View the information of a specific guild suggestion by their sID (globally for bot owners).',
             usage: 'gsid <sID>',
             ownerOnly: true,
+            guildOnly: false,
             botPermissions: ['MANAGE_MESSAGES']
         });
     }

@@ -6,7 +6,8 @@ module.exports = class ArianaCommand extends Command {
             name: 'ariana',
             category: 'Owner',
             description: 'Much to Ariana Grande <3',
-            ownerOnly: true
+            ownerOnly: true,
+            guildOnly: false
         });
     }
 

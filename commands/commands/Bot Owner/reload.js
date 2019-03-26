@@ -10,6 +10,7 @@ module.exports = class ReloadCommand extends Command {
             description: 'Reload a bot command.',
             usage: 'reload <command>',
             ownerOnly: true,
+            guildOnly: false,
             botPermissions: ['MANAGE_MESSAGES']
         });
     }

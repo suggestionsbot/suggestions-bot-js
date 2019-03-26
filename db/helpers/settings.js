@@ -18,7 +18,7 @@ module.exports = class SettingsHelpers {
      * @param {Object} guild - The guild object.
      */
     async getGuild(guild) {
-        let gSettings = await Settings.findOne({ guildID: guild.id });
+        let gSettings = await Settings.findOne({ guildID: guild.id || guild });
         
 
         if (gSettings && gSettings._id) return gSettings;

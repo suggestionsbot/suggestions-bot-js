@@ -8,7 +8,7 @@ module.exports = class {
         const message = messageReaction.message;
         const guild = message.guild;
         const member = guild.members.get(user.id);
-        if (member.user.bot) return;
+        if (user.bot) return;
 
         let settings;
         try {

@@ -7,7 +7,8 @@ module.exports = class SuperCommand extends Command {
             name: 'super',
             category: 'SuperSecretOnly',
             description: 'A "super" secret command!',
-            superSecretOnly: true
+            superSecretOnly: true,
+            guildOnly: false
         });
    }
 
