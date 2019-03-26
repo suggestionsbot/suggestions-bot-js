@@ -8,7 +8,8 @@ module.exports = class EvalCommand extends Command {
             category: 'Bot Owner',
             description: 'Run raw Javascript code via the bot.',
             usage: 'eval <code>',
-            ownerOnly: true
+            ownerOnly: true,
+            guildOnly: false
         });
     }
 

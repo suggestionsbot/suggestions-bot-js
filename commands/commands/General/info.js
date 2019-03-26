@@ -10,7 +10,8 @@ module.exports = class InfoCommand extends Command {
             category: 'General',
             description: 'View bot information.',
             aliases: ['botinfo'],
-            botPermissions: ['ADD_REACTIONS', 'EMBED_LINKS']
+            botPermissions: ['ADD_REACTIONS', 'EMBED_LINKS'],
+            guildOnly: false
         });
     }
 

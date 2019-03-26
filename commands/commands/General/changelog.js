@@ -9,7 +9,8 @@ module.exports = class ChangelogCommand extends Command {
             category: 'General',
             description: 'View the recent changelog for the bot',
             aliases: ['changes', 'updates', 'changelogs'],
-            botPermissions: ['EMBED_LINKS']
+            botPermissions: ['EMBED_LINKS'],
+            guildOnly: false
         });
     }
 

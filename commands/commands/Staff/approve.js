@@ -13,6 +13,7 @@ module.exports = class ApproveCommand extends Command {
             description: 'Approve a submitted suggestion via the suggestion ID (sID).',
             usage: 'approve <sID> [response]',
             staffOnly: true,
+            guildOnly: false,
             botPermissions: ['MANAGE_MESSAGES']
         });
     }
@@ -23,27 +24,38 @@ module.exports = class ApproveCommand extends Command {
 
         message.delete().catch(O_o => {});
 
-        if (!settings.staffRoles) return message.channel.send('No staff roles exist! Please create them or contact a server administrator to handle suggestions.').then(msg =>  msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
-
-        const suggestionsChannel = message.guild.channels.find(c => c.name === settings.suggestionsChannel) || (message.guild.channels.find(c => c.toString() === settings.suggestionsChannel)) || (message.guild.channels.get(settings.suggestionsChannel));
-        const suggestionsLogs = message.guild.channels.find(c => c.name === settings.suggestionsLogs) || (message.guild.channels.find(c => c.toString() === settings.suggestionsLogs)) || (message.guild.channels.get(settings.suggestionsLogs));
-        if (!suggestionsLogs) return this.client.errors.noSuggestionsLogs(message.channel);
-
-        let id = args[0];
+        const id = args[0];
         let reply = args.slice(1).join(' ');
         if (!id) return this.client.errors.noUsage(message.channel, this, settings);
 
-        let date = moment(Date.now()).format();
-
-        let sID;
+        let sID,
+            guild = message.guild;
         try {
-            sID = await this.client.suggestions.getGuildSuggestion(message.guild, id);
+            sID = await this.client.suggestions.getGlobalSuggestion(id);
         } catch (err) {
             this.client.logger.error(err.stack);
-            return message.channel.send(`Error querying the database for this guild's suggestions: **${err.message}**.`);
+            return message.channel.send(`Error querying the database for this suggestions: **${err.message}**.`);
         }
 
         if (!sID._id) return this.client.errors.noSuggestion(message.channel, id);
+
+        if (!message.guild) {
+            try {
+                guild = this.client.guilds.get(sID.guildID);
+                settings = await this.client.settings.getGuild(sID.guildID);
+            } catch (err) {
+                this.client.logger.error(err.message);
+                return message.channel.send(`An error occurred: **${err.message}**`);
+            }
+        }
+
+        if (!settings.staffRoles) return message.channel.send('No staff roles exist! Please create them or contact a server administrator to handle suggestions.').then(msg =>  msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
+
+        const suggestionsChannel = guild.channels.find(c => c.name === settings.suggestionsChannel) || (guild.channels.find(c => c.toString() === settings.suggestionsChannel)) || (guild.channels.get(settings.suggestionsChannel));
+        const suggestionsLogs = guild.channels.find(c => c.name === settings.suggestionsLogs) || (guild.channels.find(c => c.toString() === settings.suggestionsLogs)) || (guild.channels.get(settings.suggestionsLogs));
+        if (!suggestionsLogs) return this.client.errors.noSuggestionsLogs(message.channel);
+
+        let date = moment(Date.now()).format();
 
         let {
             userID,
@@ -54,7 +66,7 @@ module.exports = class ApproveCommand extends Command {
 
         if (status === 'approved') return message.channel.send(`sID **${id}** has already been approved. Cannot do this action again.`).then(msg => msg.delete(3000)).catch(err => this.client.logger.error(err.stack));
 
-        const sUser = message.guild.members.get(userID);
+        const sUser = guild.members.get(userID);
         if (!sUser) message.channel.send(`**${username}** is no longer in the guild, but their suggestion will still be approved.`).then(msg => msg.delete(3000)).catch(err => this.client.logger.error(err.stack));
 
         let fetchedMessages;
@@ -74,13 +86,13 @@ module.exports = class ApproveCommand extends Command {
                 .setColor(approved);
 
             const dmEmbed = new RichEmbed()
-                .setAuthor(message.guild, message.guild.iconURL)
+                .setAuthor(guild, guild.iconURL)
                 .setDescription(`Hey, ${sUser}. Your suggestion has been approved by <@${message.author.id}>!
                             
                 Your suggestion ID (sID) for reference was **${id}**.
                 `)
                 .setColor(approved)
-                .setFooter(`Guild ID: ${message.guild.id} | sID: ${id}`)
+                .setFooter(`Guild ID: ${guild.id} | sID: ${id}`)
                 .setTimestamp();
 
             let reactions = embed.message.reactions;    
@@ -109,7 +121,7 @@ module.exports = class ApproveCommand extends Command {
             }).join('\n');
 
             const logsEmbed = new RichEmbed()
-                .setAuthor(message.guild.name, message.guild.iconURL)
+                .setAuthor(guild.name, guild.iconURL)
                 .setDescription(`
                     **Results:**
                     ${view}
@@ -157,8 +169,8 @@ module.exports = class ApproveCommand extends Command {
             if (footer.includes(id)) {
                 let sMessage = await suggestionsChannel.fetchMessage(embed.message.id);
 
-                const sendMsgs = suggestionsLogs.permissionsFor(message.guild.me).has('SEND_MESSAGES', false);
-                const reactions = suggestionsLogs.permissionsFor(message.guild.me).has('ADD_REACTIONS', false);
+                const sendMsgs = suggestionsLogs.permissionsFor(guild.me).has('SEND_MESSAGES', false);
+                const reactions = suggestionsLogs.permissionsFor(guild.me).has('ADD_REACTIONS', false);
                 if (!sendMsgs) return message.channel.send(`I can't send messages in the ${suggestionsLogs} channel! Make sure I have \`Send Messages\`.`);
                 if (!reactions) return message.channel.send(`I can't add reactions in the ${suggestionsLogs} channel! Make sure I have \`Add Reactions\`.`);
 
@@ -172,7 +184,7 @@ module.exports = class ApproveCommand extends Command {
 
                 const approveSuggestion = {
                     query: [
-                        { guildID: message.guild.id },
+                        { guildID: guild.id },
                         { sID: id }
                     ],
                     status: 'approved',

@@ -65,19 +65,10 @@ module.exports = class SuggestionsHelpers {
      * @param {Object} guild - The guild object.
      */
     async isResponseRequired(guild) {
-        let gSettings = {};
-        try {
-            gSettings = await this.client.settings.getSettings(guild);
-        } catch (err) {
-            this.client.logger.error(err.stack);
-        }
+        let { responseRequired } = await this.client.settings.getGuild(guild);
 
-        let required = false;
-
-        if (gSettings.responseRequired) required = true;
-        else required = false;
-
-        return required;
+        if (responseRequired) return true;
+        else return false;
     }
 
     /**

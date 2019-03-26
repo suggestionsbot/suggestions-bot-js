@@ -19,40 +19,42 @@ module.exports = class RejectCommand extends Command {
 
     async run(message, args, settings) {
 
-        const usage = this.help.usage;
         const { rejected } = this.client.config.suggestionColors;
 
         message.delete().catch(O_o => {});
 
-        if (!settings.staffRoles) return message.channel.send('No staff roles exist! Please create them or contact a server administrator to handle suggestions.').then(msg =>  msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
-
-        const suggestionsChannel = message.guild.channels.find(c => c.name === settings.suggestionsChannel) || (message.guild.channels.find(c => c.toString() === settings.suggestionsChannel)) || (message.guild.channels.get(settings.suggestionsChannel));
-        const suggestionsLogs = message.guild.channels.find(c => c.name === settings.suggestionsLogs) || (message.guild.channels.find(c => c.toString() === settings.suggestionsLogs)) || (message.guild.channels.get(settings.suggestionsLogs));
-        if (!suggestionsLogs) return this.client.errors.noSuggestionsLogs(message.channel);
-
         let id = args[0];
         let reply = args.slice(1).join(' ');
-        if (!id) return message.channel.send(`Usage: \`${settings.prefix + usage}\``).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
-
-        let date = moment(Date.now()).format();
+        if (!id) return this.client.errors.noUsage(message.channel, this, settings);
 
         let sID,
-            responseCheck;
+            guild = message.guild;
         try {
-            sID = await this.client.suggestions.getGuildSuggestion(message.guild, id);
-            responseCheck = await this.client.suggestions.isResponseRequired(message.guild);
+            sID = await this.client.suggestions.getGlobalSuggestion(id);
         } catch (err) {
             this.client.logger.error(err.stack);
-            return message.channel.send(`Error querying the database for this guild's suggestions: **${err.message}**.`);
+            return message.channel.send(`Error querying the database for this suggestions: **${err.message}**.`);
         }
 
-        if (!sID._id) return message.channel.send(`Could not find the suggestion with the sID **${args[0]}** in the guild database.`).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
+        if (!sID._id) return this.client.errors.noSuggestion(message.channel, id);
 
-        if (responseCheck && !reply) {
-            return message.channel.send(`A response is required for approving this suggestion. Usage: \`${settings.prefix + usage}\``)
-                .then(msg => msg.delete(5000))
-                .catch(err => this.client.logger.error(err.stack));
+        if (!message.guild) {
+            try {
+                guild = this.client.guilds.get(sID.guildID);
+                settings = await this.client.settings.getGuild(sID.guildID);
+            } catch (err) {
+                this.client.logger.error(err.message);
+                return message.channel.send(`An error occurred: **${err.message}**`);
+            }
         }
+
+        if (!settings.staffRoles) return message.channel.send('No staff roles exist! Please create them or contact a server administrator to handle suggestions.').then(msg =>  msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
+
+        const suggestionsChannel = guild.channels.find(c => c.name === settings.suggestionsChannel) || (guild.channels.find(c => c.toString() === settings.suggestionsChannel)) || (guild.channels.get(settings.suggestionsChannel));
+        const suggestionsLogs = guild.channels.find(c => c.name === settings.suggestionsLogs) || (guild.channels.find(c => c.toString() === settings.suggestionsLogs)) || (guild.channels.get(settings.suggestionsLogs));
+        if (!suggestionsLogs) return this.client.errors.noSuggestionsLogs(message.channel);
+
+        let date = moment(Date.now()).format();
         
         let {
             userID,
@@ -63,7 +65,7 @@ module.exports = class RejectCommand extends Command {
 
         if (status === 'rejected') return message.channel.send(`sID **${id}** has already been rejected. Cannot do this action again.`).then(msg => msg.delete(3000)).catch(err => this.client.logger.error(err.stack));
 
-        const sUser = message.guild.members.get(userID);
+        const sUser = guild.members.get(userID);
         if (!sUser) message.channel.send(`**${username}** is no longer in the guild, but their suggestion will still be rejected.`).then(msg => msg.delete(3000)).catch(err => this.client.logger.error(err.stack));
 
         let fetchedMessages;
@@ -83,14 +85,14 @@ module.exports = class RejectCommand extends Command {
                 .setColor(rejected);
 
             const dmEmbed = new RichEmbed()
-                .setAuthor(message.guild, message.guild.iconURL)
-                .setTitle(message.guild, message.guild.iconURL)
+                .setAuthor(message.guild, guild.iconURL)
+                .setTitle(message.guild, guild.iconURL)
                 .setDescription(`Hey, ${sUser}. Unfortunately, your suggestion has been rejected by <@${message.author.id}>!
                             
                 Your suggestion ID (sID) for reference was **${id}**.
                 `)
                 .setColor(rejected)
-                .setFooter(`Guild ID: ${message.guild.id} | sID: ${id}`)
+                .setFooter(`Guild ID: ${guild.id} | sID: ${id}`)
                 .setTimestamp();
 
             let reactions = embed.message.reactions;    
@@ -119,7 +121,7 @@ module.exports = class RejectCommand extends Command {
             }).join('\n');
 
             const logsEmbed = new RichEmbed()
-                .setAuthor(message.guild.name, message.guild.iconURL)
+                .setAuthor(guild.name, guild.iconURL)
                 .setDescription(`
                     **Results:**
                     ${view}
@@ -167,8 +169,8 @@ module.exports = class RejectCommand extends Command {
             if (footer.includes(id)) {
                 let sMessage = await suggestionsChannel.fetchMessage(embed.message.id);
 
-                const sendMsgs = suggestionsLogs.permissionsFor(message.guild.me).has('SEND_MESSAGES', false);
-                const reactions = suggestionsLogs.permissionsFor(message.guild.me).has('ADD_REACTIONS', false);
+                const sendMsgs = suggestionsLogs.permissionsFor(guild.me).has('SEND_MESSAGES', false);
+                const reactions = suggestionsLogs.permissionsFor(guild.me).has('ADD_REACTIONS', false);
                 if (!sendMsgs) return message.channel.send(`I can't send messages in the ${suggestionsLogs} channel! Make sure I have \`Send Messages\`.`);
                 if (!reactions) return message.channel.send(`I can't add reactions in the ${suggestionsLogs} channel! Make sure I have \`Add Reactions\`.`);
 
@@ -182,7 +184,7 @@ module.exports = class RejectCommand extends Command {
 
                 const rejectSuggestion = {
                     query: [
-                        { guildID: message.guild.id },
+                        { guildID: guild.id },
                         { sID: id }
                     ],
                     status: 'rejected',

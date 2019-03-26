@@ -7,7 +7,8 @@ module.exports = class PatronsCommand extends Command {
             name: 'patrons',
             category: 'General',
             description: 'View Patrons that support Nerd Cave Development.',
-            botPermissions: ['EMBED_LINKS']
+            botPermissions: ['EMBED_LINKS'],
+            guildOnly: false
         });
     }
 

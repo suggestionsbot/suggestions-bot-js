@@ -83,13 +83,14 @@ class ErrorHandler {
 
     noUsage(channel, cmd, settings) {
 
-        const { embedColor } = this.client.config;
-        
+        const { embedColor, prefix } = this.client.config;
+        if (!channel.guild) settings.prefix = prefix;
+
         const embed = new RichEmbed()
             .setTitle(`${cmd.help.name} | Help Information`)
             .setDescription(cmd.help.description)
             .addField('Category', `\`${cmd.help.category}\``, true)
-            .addField('Usage', `\`${settings.prefix + cmd.help.usage}\``, true)
+            .addField('Usage', `\`${prefix + cmd.help.usage}\``, true)
             .setColor(embedColor)
             .setFooter('<> = Required | [] = Optional')
             .setTimestamp();

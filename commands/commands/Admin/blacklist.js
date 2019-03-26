@@ -1,4 +1,5 @@
 const { RichEmbed } = require('discord.js');
+const { oneLine } = require('common-tags');
 const moment = require('moment');
 const Command = require('../../Command');
 
@@ -113,11 +114,18 @@ module.exports = class BlacklistCommand extends Command {
 
                 try {
                     await this.client.blacklists.addUserBlacklist(newBlacklist);
-                    blMember.send(dmBlacklistAdd);
                     message.channel.send(blEmbed).then(msg => msg.delete(5000));
+                    await blMember.send(dmBlacklistAdd);
                 } catch (err) {
-                    this.client.logger.error(err.message);
-                    return message.channel.send(`Could not DM **${blUser}** about their blacklist because they either have DMs disabled or aren't a member of this server.`);
+                    this.client.logger.error(err.stack);
+                    if (err.code === 50007) {
+                        return message.channel.send(oneLine`
+                            Bot blacklist has been issued. However, I could not DM **${blUser}** because they either have DMs disabled
+                            or aren't a member of this server.
+                        `)
+                        .then(m => m.delete(5000));
+                    }
+                    message.channel.send(`There was an error adding this user to the blacklist: **${err.message}**.`);
                 }
                 break;
             }
@@ -149,11 +157,18 @@ module.exports = class BlacklistCommand extends Command {
 
                 try {
                     await this.client.blacklists.removeUserBlacklist(removeBlacklist);
-                    blMember.send(dmBlacklistRemove);
                     message.channel.send(blEmbed).then(msg => msg.delete(5000));
+                    await blMember.send(dmBlacklistRemove);
                 } catch (err) {
-                    this.client.logger.error(err.message);
-                    return message.channel.send(`There was an error removing this user from the blacklist: **${err.message}**.`);
+                    this.client.logger.error(err.stack);
+                    if (err.code === 50007) {
+                        return message.channel.send(oneLine`
+                            Bot blacklist removal has been issued. However, I could not DM **${blUser}** because they either have DMs disabled
+                            or aren't a member of this server.
+                        `)
+                        .then(m => m.delete(5000));
+                    }
+                    message.channel.send(`There was an error adding this user to the blacklist: **${err.message}**.`);
                 }
                 break;
             }
