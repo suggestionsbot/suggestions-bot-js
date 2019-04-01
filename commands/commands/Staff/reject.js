@@ -8,10 +8,10 @@ moment.suppressDeprecationWarnings = true;
 module.exports = class RejectCommand extends Command {
     constructor(client) {
         super(client, {
-            name: 'reject',
+            name: 'approve',
             category: 'Staff',
-            description: 'Reject a submitted suggestion via the suggestion ID (sID).',
-            usage: 'reject <sID> [response]',
+            description: 'Approve a submitted suggestion via the suggestion ID (sID).',
+            usage: 'approve <sID> [response]',
             staffOnly: true,
             botPermissions: ['MANAGE_MESSAGES']
         });
