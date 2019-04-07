@@ -9,19 +9,20 @@ module.exports = class EvalCommand extends Command {
             category: 'Bot Owner',
             description: 'Run raw Javascript code via the bot.',
             usage: 'eval <code>',
-            ownerOnly: true
+            ownerOnly: true,
+            guildOnly: false
         });
     }
 
-    async run(message, args) {
+    async run(message, args, settings) {
 
         const { embedColor, suggestionColors: { rejected } } = this.client.config;
 
         let code = args.join(' ');
-        if (!code) return this.client.errors.noUsage(message.channel, this);
+        if (!code) return this.client.errors.noUsage(message.channel, this, settings);
 
-        const embed = new RichEmbed();
-        const exceededEmbed = new RichEmbed();
+        const embed = new RichEmbed().setFooter(`ID: ${message.author.id}`);
+        const exceededEmbed = new RichEmbed().setFooter(`ID: ${message.author.id}`);
 
         try {
             const evaled = eval(code);
@@ -44,6 +45,10 @@ module.exports = class EvalCommand extends Command {
                 await msg.delete(2500);
                 return;
             }
+
+            embed.setColor(embedColor);
+            embed.addField('Input 📥', `\`\`\`js\n${code}\`\`\``);
+            embed.addField('Output 📤', `\`\`\`js\n${clean}\`\`\``);
         } catch (err) {
             if (err.length > 2000) {
                 const haste = await hastebin(Buffer.from(err), {

@@ -8,6 +8,8 @@ const { CommandLoader, EventLoader } = require('../loaders');
 
 const ErrorHandler = require('../utils/errors');
 
+const DashboardClient = require('../api');
+
 module.exports = class SuggestionsClient extends Client {
     constructor(options) {
         super(options);
@@ -34,6 +36,8 @@ module.exports = class SuggestionsClient extends Client {
         this.eventLoader = new EventLoader(this);
 
         this.errors = new ErrorHandler(this);
+
+        this.dashboard = new DashboardClient(this);
     }
 
     /**

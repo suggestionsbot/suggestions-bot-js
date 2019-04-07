@@ -7,6 +7,7 @@ module.exports = class {
 
         const message = messageReaction.message;
         const guild = message.guild;
+        if (!guild) return;
         const member = guild.members.get(user.id);
         if (user.bot) return;
 
