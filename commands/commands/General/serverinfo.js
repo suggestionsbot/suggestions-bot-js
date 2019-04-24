@@ -16,6 +16,7 @@ module.exports = class GuildInfoCommand extends Command {
                 usages: 3,
                 duration: 60
             },
+            guarded: true
         });
     }
 

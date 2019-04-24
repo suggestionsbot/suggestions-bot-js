@@ -8,7 +8,8 @@ module.exports = class PingCommand extends Command {
             description: 'View the latency of the bot and API.',
             usage: 'ping',
             aliases: ['pong'],
-            guildOnly: false
+            guildOnly: false,
+            guarded: true
         });
     }
 

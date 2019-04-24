@@ -5,6 +5,7 @@ module.exports = class Command {
         category = null,
         usage = null,
         enabled = true,
+        guarded = false,
         guildOnly = true,
         staffOnly = false,
         adminOnly = false,
@@ -16,7 +17,7 @@ module.exports = class Command {
         throttling = { usages: 2, duration: 5 } || false
     }) {
         this.client = client;
-        this.conf = { enabled, guildOnly, staffOnly, adminOnly, ownerOnly, superSecretOnly, aliases, botPermissions, throttles, throttling };
+        this.conf = { enabled, guarded, guildOnly, staffOnly, adminOnly, ownerOnly, superSecretOnly, aliases, botPermissions, throttles, throttling };
         this.help = { name, description, category, usage };
     }
 

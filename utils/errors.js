@@ -108,6 +108,45 @@ class ErrorHandler {
             .catch(e => this.client.logger.error(e));
     }
 
+    suggestionToLong(channel) {
+
+        const embed = new RichEmbed()
+            .setTitle('Error')
+            .setDescription('The suggestion is too long! Please shorten it.')
+            .setColor(this.colors.red);
+            
+        channel.send(embed).then(m => m.delete(5000)).catch(err => this.client.logger.error(err));
+    }
+
+    commandNotFound(command, channel) {
+
+        const embed = new RichEmbed()
+            .setTitle('Error')
+            .setDescription(`The command \`${command}\` was not found.`)
+            .setColor(this.colors.red);
+            
+        channel.send(embed).then(m => m.delete(5000)).catch(err => this.client.logger.error(err));
+    }
+
+    commandIsGuarded(command, channel) {
+
+        const embed = new RichEmbed()
+            .setTitle('Error')
+            .setDescription(`The command \`${command.help.name}\` is guarded and cannot be enabled/disabled!`)
+            .setColor(this.colors.red);
+            
+        channel.send(embed).then(m => m.delete(5000)).catch(err => this.client.logger.error(err));
+    }
+
+    noDisabledCommands(channel) {
+
+        const embed = new RichEmbed()
+            .setTitle('Error')
+            .setDescription(`There are no commands currently disabled for this guild!`)
+            .setColor(this.colors.red);
+            
+        channel.send(embed).then(m => m.delete(5000)).catch(err => this.client.logger.error(err));
+    }
 }
 
 module.exports = ErrorHandler;

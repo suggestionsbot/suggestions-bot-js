@@ -8,7 +8,8 @@ module.exports = class VoteCommand extends Command {
             category: 'General',
             description: 'Vote for the bot on various Discord bot lists.',
             botPermissions: ['EMBED_LINKS'],
-            guildOnly: false
+            guildOnly: false,
+            guarded: true
         });
     }
 

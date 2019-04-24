@@ -11,7 +11,6 @@ const client = new SuggestionsClient({ disableEveryone: true });
 (async () => {
     client.commandLoader.init();
     await client.eventLoader.init();
-    client.mongoose.init(); // initialize connection to the database
     client.login();
 })();
 

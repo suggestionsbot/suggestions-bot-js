@@ -61,6 +61,19 @@ module.exports = class SettingsHelpers {
     }
 
     /**
+     * Update a guild's disabled commands
+     * 
+     * @param {Object} guild - The guild object.
+     */
+    async updateGuildCommands(guild) {
+        const { query, disabledCommands, added } = guild;
+        const guildSettings = await Settings.findOne(query);
+        const updatedData = { disabledCommands };
+        if (added === true) return await guildSettings.updateOne({ $push: updatedData });
+        else return await guildSettings.updateOne({ $pull: updatedData });
+    }
+
+    /**
      * Create new settings for a guild in the database.
      * 
      * @param {Object} guild - The guild object.

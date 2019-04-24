@@ -11,7 +11,8 @@ module.exports = class StatsCommand extends Command {
             category: 'General',
             description: 'View bot statistics.',
             botPermissions: ['EMBED_LINKS'],
-            guildOnly: false
+            guildOnly: false,
+            guarded: true
         });
     }
 

@@ -84,6 +84,7 @@ module.exports = class SuggestCommand extends Command {
             .setFooter(`User ID: ${sUser.id} | sID: ${id}`);
 
         if (imageCheck) sEmbed.setImage(imageCheck[0]);
+        if (sEmbed.description >= 2000) return this.client.errors.suggestionToLong(message.channel);
 
         const sendMsgs = sChannel.permissionsFor(message.guild.me).has('SEND_MESSAGES', false);
         const reactions = sChannel.permissionsFor(message.guild.me).has('ADD_REACTIONS', false);

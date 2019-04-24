@@ -11,7 +11,8 @@ module.exports = class InfoCommand extends Command {
             description: 'View bot information.',
             aliases: ['botinfo'],
             botPermissions: ['ADD_REACTIONS', 'EMBED_LINKS'],
-            guildOnly: false
+            guildOnly: false,
+            guarded: true
         });
     }
 

@@ -6,7 +6,8 @@ module.exports = class PrefixCommand extends Command {
             name: 'prefix',
             category: 'General',
             description: 'View the current bot prefix in this guild or the global prefix in DMs.',
-            guildOnly: false
+            guildOnly: false,
+            guarded: true
         });
     }
 

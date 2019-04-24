@@ -9,7 +9,8 @@ module.exports = class InviteCommand extends Command {
             description: 'Receive a DM with information on inviting the bot to your server.',
             aliases: ['botinvite'],
             botPermissions: ['ADD_REACTIONS', 'EMBED_LINKS'],
-            guildOnly: false
+            guildOnly: false,
+            guarded: true
         });
     }
 

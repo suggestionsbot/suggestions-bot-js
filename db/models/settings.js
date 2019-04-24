@@ -9,11 +9,17 @@ const settingsSchema = mongoose.Schema({
     suggestionsChannel: String,
     suggestionsLogs: String,
     staffSuggestionsChannel: String,
-    staffRoles: [{role: String}],
+    staffRoles: [{ role: String }],
     cmdStatus: String,
     voteEmojis: String,
     lockStatus: String,
-    responseRequired: Boolean
+    responseRequired: Boolean,
+    disabledCommands: [{
+        command: String,
+        added: Number,
+        addedByUsername: String,
+        addedByUserID: String
+    }]
 });
 
 module.exports = mongoose.model('Settings', settingsSchema);

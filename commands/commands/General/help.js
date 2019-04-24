@@ -11,7 +11,8 @@ module.exports = class HelpCommand extends Command {
             usage: 'help [command]',
             aliases:  ['h', 'halp'],
             botPermissions: ['EMBED_LINKS'],
-            guildOnly: false
+            guildOnly: false,
+            guarded: true
         });
     }
 

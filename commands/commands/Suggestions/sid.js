@@ -21,7 +21,7 @@ module.exports = class SIDCommand extends Command {
 
         message.delete().catch(O_o => {});
 
-        if (!args[0]) return this.client.errors(message.channel, this, settings);
+        if (!args[0]) return this.client.errors.noUsage(message.channel, this, settings);
 
         let sID;
         try {

@@ -1,20 +1,5 @@
-const { stripIndents } = require('common-tags');
 const { RichEmbed } = require('discord.js');
 const Command = require('../../Command');
-
-const emojiSets = {
-    defaultEmojis: 'Defaults',
-    oldDefaults: 'Old Defaults',
-    thumbsEmojis: 'Thumbs',
-    arrowsEmojis: 'Arrows',
-    greenEmojis: 'Green',
-    fancyEmojis: 'Fancy'
-};
-
-const responses = {
-    true: 'True',
-    false: 'False'
-};
 
 module.exports = class ConfigCommand extends Command {
     constructor(client) {
@@ -23,9 +8,10 @@ module.exports = class ConfigCommand extends Command {
             category: 'Admin',
             description: 'View a text-based version of the bot configuration for the guild.',
             aliases: ['conf', 'viewconf', 'viewconfig', 'settings'],
-            usage: 'config [option] [value]',
+            usage: 'config [setting] [value]',
             adminOnly: true,
-            botPermissions: ['MANAGE_MESSAGES']
+            botPermissions: ['MANAGE_MESSAGES'],
+            guarded: true
         });
         this.voteEmojis = require('../../../utils/voteEmojis');
     }
@@ -35,34 +21,19 @@ module.exports = class ConfigCommand extends Command {
         const { embedColor, discord } = this.client.config;
         const { help: { usage, name } } = this;
 
-        let gBlacklists = {};
-        let gSuggestions = {};
-
         const setting = args[0],
             updated = args[1];
-
-        try {
-            gBlacklists = await this.client.blacklists.getGuildBlacklist(message.guild);
-            gSuggestions = await this.client.suggestions.getGuildSuggestions(message.guild);
-        } catch (err) {
-            this.client.logger.error(err.stack);
-            return message.channel.send(err.message);
-        }
-
+        
         let {
-            guildID,
-            guildName,
-            guildOwnerID,
             prefix,
             suggestionsChannel,
             suggestionsLogs,
             staffSuggestionsChannel,
             staffRoles,
             voteEmojis,
-            responseRequired
+            responseRequired,
+            disabledCommands
         } = settings;
-
-        const guildOwner = message.guild.members.get(guildOwnerID);
         
         let roles = [];
         try {
@@ -75,37 +46,11 @@ module.exports = class ConfigCommand extends Command {
             return message.channel.send(err.message);
         }
 
-        const config = stripIndents`
-        • Guild Name: ${guildName} [${guildID}]
-        • Guild Owner: ${guildOwner.user.tag} [${guildOwner.id}]
-        • Prefix: ${prefix}
-        • Suggestions: ${suggestionsChannel.name || 'Not set'}
-        • Suggestions Logs: ${suggestionsLogs.name || 'Not Set'}
-        • Staff Suggestions: ${staffSuggestionsChannel.name || 'Not set'}
-        • Staff Roles: ${roles.map(role => role.name).join(', ') || 'None set'}
-        • Vote Emojis: ${emojiSets[voteEmojis] || 'Default'}
-        • Total Suggestions: ${gSuggestions.length || 'None'}
-        • Total Blacklists: ${gBlacklists.length || 'None'}
-        • Responses Required: ${responses[responseRequired] || 'False'}
-        
-        Do ${prefix + usage} to view information on a specific setting or update a setting.
-        `;
-
         const configEmbed = new RichEmbed()
-            .setAuthor(this.client.user.username, this.client.user.avatarURL)
-            .setDescription(`
-                To view more information on a specific configuration option: \`${prefix + name} [setting]\`.
-                
-                For updating a specific configuration option: \`${prefix + usage}\`
-                `)
-            .addField('Prefix', `\`${prefix + name} prefix\``, true)
-            .addField('Suggestions Channel', `\`${prefix + name} channel\``, true)
-            .addField('Suggestions Logs', `\`${prefix + name} logs\``, true)
-            .addField('Staff Suggestions Channel', `\`${prefix + name} staffchannel\``, true)
-            .addField('Staff Roles', `\`${prefix + name} roles\``, true)
-            .addField('Vote Emojis', `\`${prefix + name} emojis\``, true)
-            .addField('Rejection Responses', `\`${prefix + name} responses\``, true)
-            .setColor(embedColor);
+            .setAuthor(message.guild, message.guild.iconURL)
+            .setColor(embedColor)
+            .setFooter(`Guild: ${message.guild.id}`)
+            .setTimestamp();
 
         switch (setting) {
             case 'prefix': {
@@ -131,7 +76,7 @@ module.exports = class ConfigCommand extends Command {
 
                     try {
                         await this.client.settings.updateGuild(message.guild, { suggestionsChannel: verified.id });
-                        return message.channel.send(`Suggestions channel has been updated to: \`${verified}\``);
+                        return message.channel.send(`Suggestions channel has been updated to: ${verified}`);
                     } catch (err) {
                         this.client.logger.error(err);
                         return message.channel.send(`An error occurred: **${err.message}**`);
@@ -150,7 +95,7 @@ module.exports = class ConfigCommand extends Command {
 
                     try {
                         await this.client.settings.updateGuild(message.guild, { suggestionsLogs: verified.id });
-                        return message.channel.send(`Suggestions channel has been updated to: \`${verified}\``);
+                        return message.channel.send(`Suggestions channel has been updated to: ${verified}`);
                     } catch (err) {
                         this.client.logger.error(err);
                         return message.channel.send(`An error occurred: **${err.message}**`);
@@ -169,7 +114,7 @@ module.exports = class ConfigCommand extends Command {
 
                     try {
                         await this.client.settings.updateGuild(message.guild, { staffSuggestionsChannel: verified.id });
-                        return message.channel.send(`Suggestions channel has been updated to: \`${verified}\``);
+                        return message.channel.send(`Suggestions staff channel has been updated to: ${verified}`);
                     } catch (err) {
                         this.client.logger.error(err);
                         return message.channel.send(`An error occurred: **${err.message}**`);
@@ -183,7 +128,7 @@ module.exports = class ConfigCommand extends Command {
                 if (updated) {
                     const verified = message.guild.roles.find(r => r.name === updated) || message.guild.roles.find(r => r.toString() === updated);
                     if (!verified) {
-                        return message.channel.send(`\`${updated}\` is not a channel!`).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
+                        return message.channel.send(`\`${updated}\` is not a role!`).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
                     }
 
                     const filter = r => r.role === verified.id;
@@ -216,8 +161,7 @@ module.exports = class ConfigCommand extends Command {
                     return;
                 }
 
-                const sRoles = message.guild.roles.filter(role => staffRoles.map(role => role.role).includes(role.id));
-                const viewRoles = sRoles
+                const viewRoles = roles
                     .sort((a, b) => b.position - a.position)
                     .map(r => r.toString())
                     .join('\n') || null;
@@ -334,8 +278,70 @@ module.exports = class ConfigCommand extends Command {
                 message.channel.send(`Rejection responses are currently **${responseRequired ? 'required' : 'not required'}**.`);
                 break;
             }
+            case 'commands': {
+                if (updated) {
+                    const cmd = this.client.commands.get(updated);
+                    if (!cmd) return this.client.errors.commandNotFound(cmd, message.channel);
+                    if (cmd.conf.guarded) return this.client.errors.commandIsGuarded(cmd, message.channel);
+                    if (cmd.conf.ownerOnly || cmd.conf.superSecretOnly) return this.client.errors.commandNotFound(cmd, message.channel);
+                    
+                    let updatedCommand = {
+                        query: { guildID: message.guild.id },
+                        disabledCommands: {
+                            command: cmd.help.name,
+                            added: Date.now(),
+                            addedByUsername: message.author.tag,
+                            addedByUserID: message.author.id
+                        },
+                        added: false
+                    };
+
+                    const foundCmd = disabledCommands.find(c => c.command === cmd.help.name);
+                    if (foundCmd) {
+                        try {
+                            await this.client.settings.updateGuildCommands(updatedCommand);
+                            message.channel.send(`<:nerdSuccess:490708616056406017> Enabled the **${cmd.help.name}** command.`)
+                                .then(msg => msg.delete(5000));
+                        } catch (err) {
+                            this.client.logger.error(err.stack);
+                            return message.channel.send(`An error occurred: **${err.message}**`);
+                        }
+                    } else {
+                        try {
+                            updatedCommand = Object.assign(updatedCommand, { added: true });
+                            await this.client.settings.updateGuildCommands(updatedCommand);
+                            message.channel.send(`<:nerdSuccess:490708616056406017> Disabled the **${cmd.help.name}** command.`)
+                                .then(msg => msg.delete(5000));
+                        } catch (err) {
+                            this.client.logger.error(err.stack);
+                            return message.channel.send(`An error occurred: **${err.message}**`);
+                        }
+                    }
+                    return;
+                }
+
+                if (!disabledCommands || disabledCommands.length < 1) return this.client.errors.noDisabledCommands(message.channel);
+                
+                configEmbed.setDescription(disabledCommands.map(c => `\`${c}\``).join(' | '));
+                message.channel.send(configEmbed);
+                break;
+            }
             default: {
-                // message.channel.send(config, { code: 'asciidoc' });
+                configEmbed
+                    .setDescription(`
+                    To view more information on a specific configuration option: \`${prefix + name} [setting]\`.
+                    
+                    For updating a specific configuration option: \`${prefix + usage}\`
+                    `)
+                    .addField('Prefix', `\`${prefix + name} prefix\``, true)
+                    .addField('Suggestions Channel', `\`${prefix + name} channel\``, true)
+                    .addField('Suggestions Logs', `\`${prefix + name} logs\``, true)
+                    .addField('Staff Suggestions Channel', `\`${prefix + name} staffchannel\``, true)
+                    .addField('Staff Roles', `\`${prefix + name} roles\``, true)
+                    .addField('Vote Emojis', `\`${prefix + name} emojis\``, true)
+                    .addField('Rejection Responses', `\`${prefix + name} responses\``, true)
+                    .addField('Disabled Commands', `\`${prefix + name} commands\``, true);
+
                 message.channel.send(configEmbed);
                 break;
             }
