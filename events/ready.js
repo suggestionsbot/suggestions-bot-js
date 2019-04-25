@@ -20,13 +20,13 @@ module.exports = class {
             this.client.appInfo = await this.client.fetchApplication();
         }, 60000);
 
-        // const guildCount = await this.client.shard.fetchClientValues('guilds.size')
-        //     .then(res => res.reduce((prev, count) => prev + count, 0));
+        const guildCount = await this.client.shard.fetchClientValues('guilds.size')
+            .then(res => res.reduce((prev, count) => prev + count, 0));
 
         await this.client.logger.log(`Version ${version} of the bot loaded.`);
         await this.client.logger.log(`${versions[process.env.NODE_ENV]} version of the bot loaded.`);
         this.client.mongoose.init(); // initialize connection to the database
-        await this.client.logger.log(`Logged in as ${this.client.user.tag} (${this.client.user.id}) in ${this.client.guilds.size} server(s).`, 'ready');
+        await this.client.logger.log(`Logged in as ${this.client.user.tag} (${this.client.user.id}) in ${guildCount} server(s).`, 'ready');
 
         this.client.botPresence();
 

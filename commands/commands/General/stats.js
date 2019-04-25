@@ -22,8 +22,26 @@ module.exports = class StatsCommand extends Command {
         
         const botUptime = moment.duration(this.client.uptime).format(' D [days], H [hrs], m [mins], s [secs]');
         const memUsage = (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2);
-        const guildSize = this.client.guilds.size.toLocaleString();
-        const userSize = this.client.users.size.toLocaleString();
+        // const guildSize = this.client.guilds.size.toLocaleString();
+        // const userSize = this.client.users.size.toLocaleString();
+
+        let guildSize,
+            userSize;
+
+        const promises = [
+            this.client.shard.fetchClientValues('guilds.size'),
+            this.client.shard.broadcastEval('this.guilds.reduce((prev, guild) => prev + guild.memberCount, 0)')
+        ];
+
+        try {
+            const resolved = await Promise.all(promises);
+        
+            guildSize = (resolved[0].reduce((prev, count) => prev + count, 0)).toLocaleString();
+            userSize = (resolved[1].reduce((prev, count) => prev + count, 0)).toLocaleString();
+        } catch (err) {
+            this.client.logger.error(err.stack);
+            return message.channel.send(`An error occurred: **${err.message}**`);
+        }
 
         // const guildSize = await this.client.shard.fetchClientValues('guilds.size')
         //     .then(res => res.reduce((prev, count) => prev + count, 0));

@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { oneLine } = require('common-tags');
 const { Suggestion } = require('../models');
 
 module.exports = class SuggestionsHelpers {
@@ -13,10 +14,10 @@ module.exports = class SuggestionsHelpers {
      * @param {String} sID - The unique suggestion ID.
      */
     async getGuildSuggestion(guild, sID) {
-        let gSuggestion = await Suggestion.findOne({ $and: [{ guildID: guild.id, sID: sID }] }).catch(err => this.client.logger.error(err.stack));
-
-        const guildSuggestion = gSuggestion || {};
-        return guildSuggestion;
+        const data = await Suggestion
+            .findOne({ $and: [{ guildID: guild.id, sID: sID }] });
+        
+        return data;
     }
 
     /**
@@ -25,10 +26,10 @@ module.exports = class SuggestionsHelpers {
      * @param {String} sID - The unique suggestion ID.
      */
     async getGlobalSuggestion(sID) {
-        let gSuggestion = await Suggestion.findOne({ sID: sID }).catch(err => this.client.logger.error(err.stack));
+        const data = await Suggestion
+            .findOne({ sID: sID });
 
-        const globalSuggestion = gSuggestion || {};
-        return globalSuggestion;
+        return data;
     }
 
     /**
@@ -37,10 +38,10 @@ module.exports = class SuggestionsHelpers {
      * @param {Object} guild - The guild object.
      */
     async getGuildSuggestions(guild) {
-        let gSuggestions = await Suggestion.find({ guildID: guild.id }).catch(err => this.client.logger.error(err.stack));
+        const data = await Suggestion
+            .find({ guildID: guild.id });
 
-        const guildSuggestions = gSuggestions || {};
-        return guildSuggestions;
+        return data;
     }
 
     /**
@@ -50,13 +51,24 @@ module.exports = class SuggestionsHelpers {
      * @param {Object} member - The member object.
      */
     async getGuildMemberSuggestions(guild, member) {
-        let gSuggestions = await Suggestion
+        const data = await Suggestion
             .find({ $and: [{ guildID: guild.id, userID: member.id }] })
-            .sort({ time: -1 })
-            .catch(err => this.client.logger.error(err.stack));
+            .sort({ time: -1 });
 
-        const memberSuggestions = gSuggestions || {};
-        return memberSuggestions;
+        return data;
+    }
+
+    /**
+     * Get a specific user's global suggestions data from the database.
+     * 
+     * @param {Object} user - The user object. 
+     */
+    async getUserGlobalSuggestions(user) {
+        const data = await Suggestion
+            .find({ userID: user.id })
+            .sort({ _id: -1 });
+
+        return data;
     }
 
     /**
@@ -65,7 +77,7 @@ module.exports = class SuggestionsHelpers {
      * @param {Object} guild - The guild object.
      */
     async isResponseRequired(guild) {
-        let { responseRequired } = await this.client.settings.getGuild(guild);
+        const { responseRequired } = await this.client.settings.getGuild(guild);
 
         if (responseRequired) return true;
         else return false;
@@ -77,13 +89,13 @@ module.exports = class SuggestionsHelpers {
      * @param {Object} suggestion - The suggestion object.
      */
     async submitGuildSuggestion(suggestion) {
-        let defaults = { _id: mongoose.Types.ObjectId() };
-        let merged = Object.assign(defaults, suggestion);
+        const defaults = { _id: mongoose.Types.ObjectId() };
+        const merged = Object.assign(defaults, suggestion);
 
         const newSuggestion = await new Suggestion(merged);
-        return newSuggestion.save().then(res => {
-            this.client.logger.log(`New suggestion submitted by "${res.username}" (${res.userID}) in the guild "${res.guildName}" (${res.userID})`);
-        });
+        const data = await newSuggestion.save();
+        this.client.logger.log(`New suggestion submitted by "${data.username}" (${data.userID}) in the guild "${data.guildName}" (${data.userID})`);
+        return data;
     }
 
     /**
@@ -92,36 +104,37 @@ module.exports = class SuggestionsHelpers {
      * @param {Object} suggestion - The suggestion object.
      */
     async handleGuildSuggestion(suggestion) {
-        let { 
-            query,
-            status,
-            statusUpdated,
-            statusReply,
-            staffMemberID,
-            staffMemberUsername,
-            newResults
-         } = suggestion;
 
-        let guildSuggestion = await Suggestion.findOne({ $and: query });
-        let { guildID, guildName, sID } = guildSuggestion;
-        let updatedData = {
-            status,
-            statusUpdated,
-            statusReply,
-            staffMemberID,
-            staffMemberUsername,
-            newResults
+        const guildSuggestion = await Suggestion.findOne({ $and: suggestion.query });
+        const { guildID, guildName, sID } = guildSuggestion;
+        const updatedData = {
+            status: suggestion.status,
+            statusUpdated: suggestion.statusUpdated,
+            statusReply: suggestion.statusReply,
+            staffMemberID: suggestion.staffMemberID,
+            staffMemberUsername: suggestion.staffMemberUsername,
+            newResults: suggestion.newResults
         };
 
         await guildSuggestion.updateOne(updatedData);
-        switch (status) {
+        switch (suggestion.status) {
             case 'approved':
                 this.client.logger.log(`sID ${sID} has been approved in the guild "${guildName}" (${guildID}).`);
-                if (statusReply) this.client.logger.log(`sID ${sID} has been approved in the guild "${guildName}" (${guildID}) with the response "${statusReply}".`);
+                if (suggestion.statusReply) {
+                    this.client.logger.log(oneLine`
+                        sID ${sID} has been approved in the guild "${guildName}" (${guildID}) 
+                        with the response "${suggestion.statusReply}".
+                    `);
+                }
                 break;
             case 'rejected':
                 this.client.logger.log(`sID ${sID} has been rejected in the guild "${guildName}" (${guildID}).`);
-                if (statusReply) this.client.logger.log(`sID ${sID} has been rejected in the guild "${guildName}" (${guildID}) with the response "${statusReply}".`);
+                if (suggestion.statusReply) {
+                    this.client.logger.log(`
+                        sID ${sID} has been rejected in the guild "${guildName}" (${guildID}) 
+                        with the response "${suggestion.statusReply}".
+                    `);
+                }
                 break;
             default:
                 break;

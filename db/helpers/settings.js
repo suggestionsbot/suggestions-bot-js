@@ -18,10 +18,9 @@ module.exports = class SettingsHelpers {
      * @param {Object} guild - The guild object.
      */
     async getGuild(guild) {
-        let gSettings = await Settings.findOne({ guildID: guild.id || guild });
+        const data = await Settings.findOne({ guildID: guild.id || guild });
         
-
-        if (gSettings && gSettings._id) return gSettings;
+        if (data && data._id) return data;
         else return this.client.config.defaultSettings;
     }
 
@@ -32,31 +31,31 @@ module.exports = class SettingsHelpers {
      * @param {Object} newSettings - The settings object to be updated.
      */
     async updateGuild(guild, newSettings) {
-        let gSettings = await Settings.findOne({ guildID: guild.id }).catch(err => this.client.logger.error(err.stack));
+        const data = await Settings.findOne({ guildID: guild.id });
 
-        let settings = gSettings;
+        let settings = data;
         // maybe check if settings object is empty, return an error?
         if (typeof settings != 'object') settings = {};
         for (const key in newSettings) {
-            if (gSettings[key] !== newSettings[key]) settings[key] = newSettings[key];
+            if (data[key] !== newSettings[key]) settings[key] = newSettings[key];
             else return;
         }
 
-        this.client.logger.log(`Guild "${guild.name}" (${guild.id}) updated settings: \n ${JSON.stringify(newSettings)}`);
-
-        return await Settings.findOneAndUpdate({ guildID: guild.id }, settings).catch(err => this.logger.error(err));
+        this.client.logger.log(`Guild "${guild.name}" (${guild.id}) updated settings: \n ${Object.keys(newSettings)}`);
+        return await Settings.findOneAndUpdate({ guildID: guild.id }, settings);
     }
 
     /**
      * Update a staff role of a guild in the database.
      * 
      * @param {Object} guild - The guild object.
+     * @param {Boolean} added - To check if the role should be removed or not.
      */
-    async updateGuildStaffRoles(guild) {
-        let { query, staffRoles, added } = guild;
-        let guildSettings = await Settings.findOne(query);
-        let updatedData = { staffRoles };
-        if (added === true) return await guildSettings.updateOne({ $push: updatedData });
+    async updateGuildStaffRoles(guild, added = true) {
+        const { query, staffRoles } = guild;
+        const guildSettings = await Settings.findOne(query);
+        const updatedData = { staffRoles };
+        if (added) return await guildSettings.updateOne({ $push: updatedData });
         else return await guildSettings.updateOne({ $pull: updatedData });
     }
 
@@ -64,12 +63,13 @@ module.exports = class SettingsHelpers {
      * Update a guild's disabled commands
      * 
      * @param {Object} guild - The guild object.
+     * @param {Boolean} added - To check if the command should be disabled or not.
      */
-    async updateGuildCommands(guild) {
-        const { query, disabledCommands, added } = guild;
+    async updateGuildCommands(guild, added = true) {
+        const { query, disabledCommands } = guild;
         const guildSettings = await Settings.findOne(query);
         const updatedData = { disabledCommands };
-        if (added === true) return await guildSettings.updateOne({ $push: updatedData });
+        if (added) return await guildSettings.updateOne({ $push: updatedData });
         else return await guildSettings.updateOne({ $pull: updatedData });
     }
 
@@ -79,12 +79,13 @@ module.exports = class SettingsHelpers {
      * @param {Object} guild - The guild object.
      */
     async createGuild(guild) {
-        let submitted = guild;
-        let defaults = { _id: mongoose.Types.ObjectId() };
-        let merged = Object.assign(defaults, submitted); // make this into a global function
+        const defaults = { _id: mongoose.Types.ObjectId() };
+        const merged = Object.assign(defaults, guild); // make this into a global function
 
         const newSettings = await new Settings(merged);
-        return newSettings.save().then(this.client.logger.log(`Default settings saved for guild ${merged.guildName} (${merged.guildID})`));
+        const data = await newSettings.save();
+        this.client.logger.log(`Default settings saved for guild ${data.guildName} (${data.guildID})`);
+        return data;
     }
 
     /**
@@ -94,12 +95,13 @@ module.exports = class SettingsHelpers {
      * @returns {Promise} - The promise object of the new command.
      */
     async newCommandUsage(command) {
-        let submitted = command;
-        let defaults = { _id: mongoose.Types.ObjectId() };
-        let merged = Object.assign(defaults, submitted);
+        const defaults = { _id: mongoose.Types.ObjectId() };
+        const merged = Object.assign(defaults, command);
 
         const newCommand = await new Command(merged);
-        return newCommand.save().then(this.client.logger.log(`${submitted.username} (${submitted.userID}) ran command ${submitted.command}`, 'cmd'));
+        const data = await newCommand.save();
+        this.client.logger.log(`${data.username} (${data.userID}) ran command ${data.command}`, 'cmd');
+        return data;
     }
 
     /**
@@ -113,46 +115,34 @@ module.exports = class SettingsHelpers {
                 { guildID: guild.id },
                 { guildID: guild.guildID }
             ]
-        }, (err, res) => {
-            if (err) this.client.logger.error(err.stack);
-            
-            this.client.logger.log(`Settings data deleted for guild ${guild.name || guild.guildName} (${guild.id || guild.guildID})`);
         });
-    
+        this.client.logger.log(`Settings data deleted for guild ${guild.name || guild.guildName} (${guild.id || guild.guildID})`);
+
         await Suggestion.deleteMany({ 
             $or: [
                 { guildID: guild.id },
                 { guildID: guild.guildID }
             ]
-        }, (err, res) => {
-            if (err) this.client.logger.error(err.stack);
-    
-            this.client.logger.log(`Suggestions data deleted for guild ${guild.name || guild.guildName} (${guild.id || guild.guildID})`);
         });
+        this.client.logger.log(`Suggestions data deleted for guild ${guild.name || guild.guildName} (${guild.id || guild.guildID})`);
     
         await Command.deleteMany({ 
             $or: [
                 { guildID: guild.id },
                 { guildID: guild.guildID }
             ]
-        }, (err, res) => {
-            if (err) this.client.logger.error(err.stack);
-    
-            this.client.logger.log(`Command data deleted for guild ${guild.name || guild.guildName} (${guild.id || guild.guildID})`);
         });
+        this.client.logger.log(`Command data deleted for guild ${guild.name || guild.guildName} (${guild.id || guild.guildID})`);
 
         await Blacklist.deleteMany({ 
             $or: [
                 { guildID: guild.id },
                 { guildID: guild.guildID }
             ]
-        }, (err, res) => {
-            if (err) this.client.logger.error(err.stack);
-
-            this.client.logger.log(`Blacklist data deleted for guild ${guild.name || guild.guildName} (${guild.id || guild.guildID})`);
         });
+        this.client.logger.log(`Blacklist data deleted for guild ${guild.name || guild.guildName} (${guild.id || guild.guildID})`);
 
-        return this.client.logger.log(`${this.client.user.username} has left a guild: ${guild.name || guild.guildName } (${guild.id || guild.guildID})`);
+        this.client.logger.log(`${this.client.user.username} has left a guild: ${guild.name || guild.guildName } (${guild.id || guild.guildID})`);
     }
 
     /**

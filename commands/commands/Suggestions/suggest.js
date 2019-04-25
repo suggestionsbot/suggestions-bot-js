@@ -68,7 +68,10 @@ module.exports = class SuggestCommand extends Command {
         
         const imageCheck = /(http(s?):)([/|.|\w|\s|-])*\.(?:jpg|gif|png)/.exec(suggestion);
 
-        const sEmbed = new RichEmbed()
+        let sEmbed;
+
+        try {
+            sEmbed = new RichEmbed()
             .setThumbnail(sUser.avatarURL)
             .setDescription(`
             **Submitter**
@@ -82,21 +85,34 @@ module.exports = class SuggestCommand extends Command {
             `)
             .setColor(embedColor)
             .setFooter(`User ID: ${sUser.id} | sID: ${id}`);
+        } catch (error) {
+            message.delete();
+            return this.client.errors.suggestionToLong(message.channel);
+        }
 
         if (imageCheck) sEmbed.setImage(imageCheck[0]);
-        if (sEmbed.description >= 2000) return this.client.errors.suggestionToLong(message.channel);
-
         const sendMsgs = sChannel.permissionsFor(message.guild.me).has('SEND_MESSAGES', false);
         const reactions = sChannel.permissionsFor(message.guild.me).has('ADD_REACTIONS', false);
         if (!sendMsgs) return this.client.errors.noChannelPerms(message, sChannel, 'SEND_MESSAGES');
         if (!reactions) return this.client.errors.noChannelPerms(message, sChannel, 'ADD_REACTIONS');
 
-        sUser.send(dmEmbed).catch(err => {
+        try {
+            if (settings.dmResponses) sUser.send(dmEmbed);
+        } catch (err) {
             this.client.logger.error(err.stack);
-            message.channel.send(stripIndents `An error occurred DMing you your suggestion information: **${err.message}**. Please make sure you are able to receive messages from server members.
+            message.channel.send(stripIndents`
+                An error occurred DMing you your suggestion information: **${err.message}**. Please make sure you are able to receive messages from server members.
         
-        For reference, your suggestion ID (sID) is **${id}**. Please wait for staff member to approve/reject your suggestion.`).then(msg => msg.delete(5000));
-        });
+                For reference, your suggestion ID (sID) is **${id}**. Please wait for staff member to approve/reject your suggestion.`
+            );
+        }
+
+        // sUser.send(dmEmbed).catch(err => {
+        //     this.client.logger.error(err.stack);
+        //     message.channel.send(stripIndents `An error occurred DMing you your suggestion information: **${err.message}**. Please make sure you are able to receive messages from server members.
+        
+        // For reference, your suggestion ID (sID) is **${id}**. Please wait for staff member to approve/reject your suggestion.`).then(msg => msg.delete(5000));
+        // });
 
         const filter = set => set.name === emojis;
         const defaults = set => set.name === 'defaultEmojis';

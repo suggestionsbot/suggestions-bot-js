@@ -12,30 +12,19 @@ module.exports = class BlacklistsHelpers {
      * @param {Object} guild - The guild object.
      */
     async getGuildBlacklist(guild) {
-        let gBlacklist;
-        try {
-            gBlacklist = await Blacklist.find({ guildID: guild.id });
-        } catch (err) {
-            this.client.logger.error(err.stack);
-        }
+        const data = await Blacklist
+            .find({ guildID: guild.id });
 
-        const guildBlacklist = gBlacklist || {};
-        return guildBlacklist;
+        return data;
     }
 
     /**
      * Get all global blacklists from the database.
      */
     async getGlobalBlacklist() {
-        let gBlacklist;
-        try {
-            gBlacklist = await Blacklist.find({ scope: 'global' });
-        } catch (err) {
-            this.client.logger.error(err.stack);
-        }
+        const data = await Blacklist.find({ scope: 'global' });
 
-        const guildBlacklist = gBlacklist || {};
-        return guildBlacklist;
+        return data;
     }
 
     /**
@@ -45,21 +34,15 @@ module.exports = class BlacklistsHelpers {
      * @param {Object} user - The user object.
      */
     async checkGuildBlacklist(guild, user) {
-        let gBlacklist;
-        try {
-            gBlacklist = Blacklist.findOne({
-                $and: [
-                    { guildID: guild.id },
-                    { userID: user.id },
-                    { status: true }
-                ]
-            });
-        } catch (err) {
-            this.client.logger.error(err.stack);
-        }
+        const data = await Blacklist.findOne({
+            $and: [
+                { guildID: guild.id },
+                { userID: user.id },
+                { status: true }
+            ]
+        });
 
-        const guildBlacklist = gBlacklist || {};
-        return guildBlacklist;
+        return data;
     }
 
     /**
@@ -68,21 +51,15 @@ module.exports = class BlacklistsHelpers {
      * @param {Object} user - The user object.
      */
     async checkGlobalBlacklist(user) {
-        let gBlacklist;
-        try {
-            gBlacklist = Blacklist.findOne({
-                $and: [
-                    { userID: user.id },
-                    { scope: 'global' },
-                    { status: true }
-                ]
-            });
-        } catch (err) {
-            this.client.logger.error(err.stack);
-        }
+        const data = await Blacklist.findOne({
+            $and: [
+                { userID: user.id },
+                { scope: 'global' },
+                { status: true }
+            ]
+        });
 
-        const guildBlacklist = gBlacklist || {};
-        return guildBlacklist;
+        return data;
     }
 
     /**
@@ -91,18 +68,18 @@ module.exports = class BlacklistsHelpers {
      * @param {Object} user - The user object.
      */
     async addUserBlacklist(user) {
-        let submitted = user;
-        let defaults = { _id: mongoose.Types.ObjectId() };
-        let merged = Object.assign(defaults, submitted);
+        const defaults = { _id: mongoose.Types.ObjectId() };
+        const merged = Object.assign(defaults, user);
 
         const newBlacklist = await new Blacklist(merged);
-        return newBlacklist.save().then(res => {
-            if (submitted.scope === 'global') {
-                return this.client.logger.log(`"${res.issuerUsername}" (${res.issuerID}) has issued a global blacklist for the user "${res.userID}".`);
-            } else {
-                return this.client.logger.log(`"${res.issuerUsername}" (${res.issuerID}) has issued a blacklist for the user "${res.userID}".`);
-            }
-        });
+        const data = await newBlacklist.save();
+        
+        if (user.scope === 'global') {
+            this.client.logger.log(`"${data.issuerUsername}" (${data.issuerID}) has issued a global blacklist for the user "${data.userID}".`);
+        } else {
+            this.client.logger.log(`"${data.issuerUsername}" (${data.issuerID}) has issued a blacklist for the user "${data.userID}".`);
+        }
+        return data;
     }
     /**
      * Update a blacklisted user's status to false in the database.
@@ -110,14 +87,21 @@ module.exports = class BlacklistsHelpers {
      * @param {Object} user - The user object.
      */
     async removeUserBlacklist(user) {
-        let { query, status } = user;
-        let guildMemberBlacklist = await Blacklist.findOne({ $and: query }).sort({ case: -1 });
-        let { issuerUsername, issuerID, userID, scope } = guildMemberBlacklist;
-        let updatedData = status;
+        const { query, status } = user;
+        const guildMemberBlacklist = await Blacklist
+            .findOne({ $and: query })
+            .sort({ case: -1 });
+        const { issuerUsername, issuerID, userID, scope } = guildMemberBlacklist;
+        const updatedData = status;
 
-        await guildMemberBlacklist.updateOne(updatedData);
+        const data = await guildMemberBlacklist.updateOne(updatedData);
 
-        if (scope === 'global') return this.client.logger.log(`"${issuerUsername}" (${issuerID}) has issued a global unblacklist for the user "${userID}".`);
-        else return this.client.logger.log(`"${issuerUsername}" (${issuerID}) has issued an unblacklist for the user "${userID}".`);
+        if (scope === 'global') {
+            this.client.logger.log(`"${issuerUsername}" (${issuerID}) has issued a global unblacklist for the user "${userID}".`);
+        } else {
+            this.client.logger.log(`"${issuerUsername}" (${issuerID}) has issued an unblacklist for the user "${userID}".`);
+        }
+        
+        return data;
     }
 };

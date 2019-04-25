@@ -9,6 +9,7 @@ module.exports = class {
         const guild = message.guild;
         if (!guild) return;
         const member = guild.members.get(user.id);
+        if (!member) message.guild.fetchMember(user);
         if (user.bot) return;
 
         let settings;

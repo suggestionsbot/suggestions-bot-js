@@ -1,5 +1,4 @@
 const fetch = require('node-fetch');
-const DBL = require('dblapi.js');
 
 module.exports = async (client) => {
 
@@ -87,7 +86,7 @@ module.exports = async (client) => {
         let body = JSON.stringify(data);
 
         try {
-            let posted = await fetch(`https://divinediscordbots.com/bots/${client.user.id}/stats`, {
+            let posted = await fetch(`https://divinediscordbots.com/bot/${client.user.id}/stats`, {
                 method: 'POST',
                 headers: {
                     'Authorization': tokens.ddbToken,

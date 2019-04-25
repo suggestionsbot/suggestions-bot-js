@@ -142,9 +142,67 @@ class ErrorHandler {
 
         const embed = new RichEmbed()
             .setTitle('Error')
-            .setDescription(`There are no commands currently disabled for this guild!`)
+            .setDescription(`There are no commands currently disabled for **${channel.guild}**!`)
             .setColor(this.colors.red);
             
+        channel.send(embed).then(m => m.delete(5000)).catch(err => this.client.logger.error(err));
+    }
+
+    commandIsDisabled(command, channel) {
+
+        const embed = new RichEmbed()
+            .setTitle('Error')
+            .setDescription(`The command \`${command.help.name}\` is currently disabled!`)
+            .setColor(this.colors.red);
+            
+        channel.send(embed).then(m => m.delete(5000)).catch(err => this.client.logger.error(err));
+    }
+
+    commandGuildOnly(command, channel) {
+
+        const embed = new RichEmbed()
+            .setTitle('Error')
+            .setDescription(`The command \`${command.help.name}\` can only be ran in a guild/server channel!`)
+            .setColor(this.colors.red);
+            
+        channel.send(embed).then(m => m.delete(5000)).catch(err => this.client.logger.error(err));
+    }
+
+    channelNotFound(c, channel) {
+
+        const embed = new RichEmbed()
+            .setTitle('Error')
+            .setDescription(`The channel \`${c}\` was not found!`)
+            .setColor(this.colors.red);
+            
+        channel.send(embed).then(m => m.delete(5000)).catch(err => this.client.logger.error(err));
+    }
+
+    roleNotFound(role, channel) {
+
+        const embed = new RichEmbed()
+            .setTitle('Error')
+            .setDescription(`The role \`${role}\` was not found!`)
+            .setColor(this.colors.red);
+            
+        channel.send(embed).then(m => m.delete(5000)).catch(err => this.client.logger.error(err));
+    }
+
+    voteEmojiNotFound(id, channel) {
+        const embed = new RichEmbed()
+            .setTitle('Error')
+            .setDescription(`The emoji set ID \`${id}\` was not found!`)
+            .setColor(this.colors.red);
+
+        channel.send(embed).then(m => m.delete(5000)).catch(err => this.client.logger.error(err));
+    }
+
+    invalidResponseValue(channel) {
+        const embed = new RichEmbed()
+            .setTitle('Error')
+            .setDescription('The value must be `true` or `false`!')
+            .setColor(this.colors.red);
+
         channel.send(embed).then(m => m.delete(5000)).catch(err => this.client.logger.error(err));
     }
 }

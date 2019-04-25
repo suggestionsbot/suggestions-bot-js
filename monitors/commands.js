@@ -64,23 +64,15 @@ module.exports = class CommandHandler {
             adminCheck;
 
         if (message.guild) {
-            staffCheck = message.member.roles.some(r => staffRoles.map(sr => sr.id).includes(r.id));
+            if (staffRoles) staffCheck = message.member.roles.some(r => staffRoles.map(sr => sr.id).includes(r.id));
             adminCheck = message.member.hasPermission('MANAGE_GUILD');
         }
 
         const superCheck = superSecretUsers.includes(message.author.id);
         const ownerCheck = this.client.isOwner(message.author.id);
 
-        if (!cmd.conf.enabled) {
-            return message.channel.send('This command is currently disabled!')
-                .then(msg => msg.delete(3000))
-                .catch(err => this.client.logger.error(err.stack));
-        }
-        if ((!message.guild && cmd.conf.guildOnly)) {
-            return message.channel.send('This command can only be ran in a guild channel!')
-                .then(msg => msg.delete(3000))
-                .catch(err => this.client.logger.error(err.stack));
-        }
+        if (!cmd.conf.enabled) return this.client.errors.commandIsDisabled(cmd, message.channel);
+        if ((!message.guild && cmd.conf.guildOnly)) return this.client.errors.commandGuildOnly(cmd, message.channel);
         if (cmd.conf.superSecretOnly && !superCheck) return;
 
         if (message.guild) {
@@ -128,8 +120,14 @@ module.exports = class CommandHandler {
             );
         }
 
+        // command inhibitor
+        const { disabledCommands } = settings;
+        let disabledCommand;
+        if (message.guild && disabledCommands) disabledCommand = disabledCommands.find(c => c.command === cmd.help.name);
+
         try {
             if (throttle) throttle.usages++;
+            if (disabledCommand) return this.client.errors.commandIsDisabled(cmd, message.channel);
             cmd.run(message, args, settings);
             if (process.env.NODE_ENV === 'production') await this.client.settings.newCommandUsage(newCommand);
         } catch (err) {

@@ -177,10 +177,16 @@ module.exports = class RejectCommand extends Command {
                 message.channel.send(`Suggestion **${id}** has been rejected.`).then(msg => msg.delete(5000));
                 sMessage.edit(approvedEmbed).then(msg => msg.delete(5000));
                 suggestionsLogs.send(logsEmbed);
-                sUser.send(dmEmbed).catch(err => {
+                try {
+                    if (settings.dmResponses) sUser.send(dmEmbed);
+                } catch (err) {
                     this.client.logger.error(err.stack);
                     message.channel.send(`An error occurred DMing **${sUser.displayName}** their suggestion information: **${err.message}**.`);
-                });
+                }
+                // sUser.send(dmEmbed).catch(err => {
+                //     this.client.logger.error(err.stack);
+                //     message.channel.send(`An error occurred DMing **${sUser.displayName}** their suggestion information: **${err.message}**.`);
+                // });
 
                 const rejectSuggestion = {
                     query: [

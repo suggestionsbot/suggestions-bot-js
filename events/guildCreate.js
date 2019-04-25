@@ -7,8 +7,6 @@ module.exports = class {
     }
 
     async run(guild) {
-
-        const { defaultSettings: { prefix, suggestionsChannel, suggestionsLogs} } = this.client.config;
         const { guildStatusColors: { created } } = this.client.config;
 
         const gOwner = guild.owner;
@@ -28,10 +26,7 @@ module.exports = class {
         const newSettings = {
             guildID: guild.id,
             guildName: guild.name,
-            guildOwnerID: guild.ownerID,
-            prefix: prefix,
-            suggestionsChannel: suggestionsChannel,
-            suggestionsLogs: suggestionsLogs
+            guildOwnerID: guild.ownerID
         };
 
         try {

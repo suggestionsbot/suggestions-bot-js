@@ -12,7 +12,8 @@ module.exports = class MySuggestionsCommand extends Command {
             description: 'View your own suggestions data or another user\'s data in this guild.',
             botPermissions: ['MANAGE_MESSAGES'],
             aliases: ['mysuggestions'],
-            usage: 'suggestions <@User>'
+            usage: 'suggestions <@User>',
+            guildOnly: false
         });
     }
 
@@ -24,10 +25,15 @@ module.exports = class MySuggestionsCommand extends Command {
 
         const sUser = message.mentions.users.first() || message.author;
 
-        let gSuggestions = await this.client.suggestions.getGuildMemberSuggestions(message.guild, sUser).catch(err => {
+        let gSuggestions;
+        try {
+            if (message.guild) gSuggestions = await this.client.suggestions.getGuildMemberSuggestions(message.guild, sUser);
+            else gSuggestions = await this.client.suggestions.getUserGlobalSuggestions(sUser);
+        } catch (err) {
             this.client.logger.error(err.stack);
             return message.channel.send(`Error querying the database for your suggestions: **${err.message}**.`);
-        });
+        }
+
         let sortedSuggestions = gSuggestions.sort((a, b) => b._id.getTimestamp() - a._id.getTimestamp());
 
         if (gSuggestions.length === 0) return message.channel.send(`No suggestions data exists for **${sUser.tag}** in this guild!`).then(msg => msg.delete(3000)).catch(err => this.client.logger.error(err.stack));
@@ -48,19 +54,30 @@ module.exports = class MySuggestionsCommand extends Command {
 
         const lastDate = moment(new Date(lastSuggestion.time)).format('MM/DD/YY');
         const lastsID = lastSuggestion.sID;
-        const lastSuggestionInfo = `${lastsID} (${lastDate})`;
+        const lastSuggestionInfo = `\`${lastsID}\` (${lastDate})`;
 
-        const createdOn = moment.utc(message.guild.createdAt).format('MM/DD/YY @ h:mm A (z)');
-        const joinedOn = moment.utc(message.guild.members.get(sUser.id).joinedAt).format('MM/DD/YY @ h:mm A (z)');
+        let createdOn,
+            joinedOn;
+
+        if (message.guild) {
+            createdOn = moment.utc(message.guild.createdAt).format('MM/DD/YY @ h:mm A (z)');
+            joinedOn = moment.utc(message.guild.members.get(sUser.id).joinedAt).format('MM/DD/YY @ h:mm A (z)');
+        }
 
         const embed = new RichEmbed()
-            .setAuthor(sUser.tag + ' | ' + message.guild.name, sUser.avatarURL)
             .setColor(embedColor)
             .setThumbnail(sUser.avatarURL)
             .addField('User', `${sUser} \`[${sUser.id}]\``)
-            .addField('Created On', createdOn)
-            .addField('Joined', joinedOn)
             .setTimestamp();
+
+        if (message.guild) {
+            embed
+                .setAuthor(`${sUser.tag} | ${message.guild}`, sUser.avatarURL)
+                .addField('Created On', createdOn)
+                .addField('Joined', joinedOn);
+        } else {
+            embed.setAuthor(`${sUser.tag} | Global Statistics`, sUser.avatarURL);
+        }
 
         if (gSuggestions.length >= 1) {
             embed.addField('Suggestions', suggestions.join('\n'));

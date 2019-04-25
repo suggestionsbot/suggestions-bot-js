@@ -131,10 +131,16 @@ module.exports = class NoteCommand extends Command {
 
                     message.channel.send(`Added a note to **${id}**: **${note}**.`).then(msg => msg.delete(5000));
                     sMessage.edit(suggestion);
-                    sUser.send(dmEmbed).catch(err => {
+                    try {
+                        if (settings.dmResponses) sUser.send(dmEmbed);
+                    } catch (err) {
                         this.client.logger.error(err.stack);
                         message.channel.send(`An error occurred DMing **${sUser.displayName}** their suggestion note: **${err.message}**.`);
-                    });
+                    }
+                    // sUser.send(dmEmbed).catch(err => {
+                    //     this.client.logger.error(err.stack);
+                    //     message.channel.send(`An error occurred DMing **${sUser.displayName}** their suggestion note: **${err.message}**.`);
+                    // });
 
                     const suggestionNote = {
                         query: [

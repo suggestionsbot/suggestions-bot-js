@@ -1,8 +1,8 @@
 {
   "name": "suggestions-bot",
-  "version": "2.6.0",
+  "version": "2.7.0",
   "description": "The only suggestions bot you'll ever need. Simple usage and management of suggestions for public and staff use.",
-  "main": "bot.js",
+  "main": "sharding.js",
   "scripts": {
     "start": "node .",
     "test": "eslint .",
@@ -12,7 +12,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://bitbucket.org/acollierr17/suggestions-bot.git"
+    "url": "https://gitlab.com/acollierr17/suggestions-bot.git"
   },
   "bugs": {
     "url": "https://discord.gg/g7wr8xb"
@@ -26,12 +26,12 @@
     "dotenv-flow": "^0.1.0",
     "express": "^4.16.4",
     "giphy-api": "^2.0.1",
-    "hastebin-gen": "^2.0.3",
+    "hastebin-gen": "^2.0.4",
     "klaw": "^2.1.1",
     "moment": "^2.24.0",
     "moment-duration-format": "^2.2.2",
-    "moment-timezone": "^0.5.23",
-    "mongoose": "^5.4.20",
+    "moment-timezone": "^0.5.25",
+    "mongoose": "^5.5.3",
     "node-fetch": "^2.3.0",
     "passport": "^0.4.0",
     "passport-headerapikey": "^1.1.0"

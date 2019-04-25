@@ -32,7 +32,8 @@ module.exports = class ConfigCommand extends Command {
             staffRoles,
             voteEmojis,
             responseRequired,
-            disabledCommands
+            disabledCommands,
+            dmResponses
         } = settings;
         
         let roles = [];
@@ -54,104 +55,120 @@ module.exports = class ConfigCommand extends Command {
 
         switch (setting) {
             case 'prefix': {
+                configEmbed.setAuthor(`${message.guild} | Prefix`, message.guild.iconURL);
+
                 if (updated) {
                     try {
                         await this.client.settings.updateGuild(message.guild, { prefix: updated });
-                        return message.channel.send(`Prefix has been updated to: \`${updated}\``);
+                        configEmbed.setDescription(`Prefix has been updated to: \`${updated}\``);
+
+                        return message.channel.send(configEmbed).then(m => m.delete(5000));
                     } catch (err) {
                         this.client.logger.error(err);
                         return message.channel.send(`An error occurred: **${err.message}**`);
                     }
                 }
 
-                message.channel.send(`Current prefix: \`${prefix}\``);
+                configEmbed.setDescription(`Current prefix: \`${prefix}\``);
+                message.channel.send(configEmbed);
                 break;
             }
             case 'channel': {
+                configEmbed.setAuthor(`${message.guild} | Suggestions Channel`, message.guild.iconURL);
+
                 if (updated) {
                     const verified = message.guild.channels.find(c => c.name === updated) || message.guild.channels.find(c => c.toString() === updated);
-                    if (!verified) {
-                        return message.channel.send(`\`${updated}\` is not a channel!`).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
-                    }
+                    if (!verified) return this.client.errors.channelNotFound(updated, message.channel);
 
                     try {
                         await this.client.settings.updateGuild(message.guild, { suggestionsChannel: verified.id });
-                        return message.channel.send(`Suggestions channel has been updated to: ${verified}`);
+                        configEmbed.setDescription(`Suggestions channel has been updated to: ${verified}`);
+
+                        return message.channel.send(configEmbed).then(m => m.delete(5000));
                     } catch (err) {
                         this.client.logger.error(err);
                         return message.channel.send(`An error occurred: **${err.message}**`);
                     }
                 }
 
-                message.channel.send(`Current suggestions channel: ${suggestionsChannel}`);
+                configEmbed.setDescription(`Current suggestions channel: ${suggestionsChannel}`);
+                message.channel.send(configEmbed);
                 break;
             }
             case 'logs': {
+                configEmbed.setAuthor(`${message.guild} | Suggestion Logs Channel`, message.guild.iconURL);
+
                 if (updated) {
                     const verified = message.guild.channels.find(c => c.name === updated) || message.guild.channels.find(c => c.toString() === updated);
-                    if (!verified) {
-                        return message.channel.send(`\`${updated}\` is not a channel!`).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
-                    }
+                    if (!verified) return this.client.errors.channelNotFound(updated, message.channel);
 
                     try {
                         await this.client.settings.updateGuild(message.guild, { suggestionsLogs: verified.id });
-                        return message.channel.send(`Suggestions channel has been updated to: ${verified}`);
+                        configEmbed.setDescription(`Suggestion logs channel has been updated to: ${verified}`);
+
+                        return message.channel.send(configEmbed).then(m => m.delete(5000));
                     } catch (err) {
                         this.client.logger.error(err);
                         return message.channel.send(`An error occurred: **${err.message}**`);
                     }
                 }
 
-                message.channel.send(`Current suggestions logs channel: ${suggestionsLogs}`);
+                configEmbed.setDescription(`Current suggestions logs channel: ${suggestionsLogs}`);
+                message.channel.send(configEmbed);
                 break;
             }
             case 'staffchannel': {
+                configEmbed.setAuthor(`${message.guild} | Suggestions Staff Channel`, message.guild.iconURL);
+
                 if (updated) {
                     const verified = message.guild.channels.find(c => c.name === updated) || message.guild.channels.find(c => c.toString() === updated);
-                    if (!verified) {
-                        return message.channel.send(`\`${updated}\` is not a channel!`).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
-                    }
+                    if (!verified) return this.client.errors.channelNotFound(updated, message.channel);
 
                     try {
                         await this.client.settings.updateGuild(message.guild, { staffSuggestionsChannel: verified.id });
-                        return message.channel.send(`Suggestions staff channel has been updated to: ${verified}`);
+                        configEmbed.setDescription(`Suggestions staff channel has been updated to: ${verified}`);
+
+                        return message.channel.send(configEmbed).then(m => m.delete(5000));
                     } catch (err) {
                         this.client.logger.error(err);
                         return message.channel.send(`An error occurred: **${err.message}**`);
                     }
                 }
 
-                message.channel.send(`Current staff suggestions channel: ${staffSuggestionsChannel}`);
+                configEmbed.setDescription(`Current staff suggestions channel: ${staffSuggestionsChannel}`);
+                message.channel.send(configEmbed);
                 break;
             }
             case 'roles': {
+                configEmbed.setAuthor(`${message.guild} | Staff Roles`, message.guild.iconURL);
+
                 if (updated) {
                     const verified = message.guild.roles.find(r => r.name === updated) || message.guild.roles.find(r => r.toString() === updated);
-                    if (!verified) {
-                        return message.channel.send(`\`${updated}\` is not a role!`).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
-                    }
+                    if (!verified) return this.client.errors.roleNotFound(updated, message.channel);
 
                     const filter = r => r.role === verified.id;
                     const sRole = staffRoles.find(filter);
-                    let updateRole = {
+                    const updateRole = {
                         query: { guildID: message.guild.id },
-                        staffRoles: { role: verified.id },
-                        added: false
+                        staffRoles: { role: verified.id }
                     };
 
                     if (sRole) {
                         try {
-                            await this.client.settings.updateGuildStaffRoles(updateRole);
-                            message.channel.send(`<:nerdSuccess:490708616056406017> Removed **${verified.name}** from the staff roles.`).then(msg => msg.delete(5000));
+                            await this.client.settings.updateGuildStaffRoles(updateRole, false);
+                            configEmbed.setDescription(`<:nerdSuccess:490708616056406017> Removed **${verified.name}** from the staff roles.`);
+
+                            message.channel.send(configEmbed).then(m => m.delete(5000));
                         } catch (err) {
                             this.client.logger.error(err.stack);
                             return message.channel.send(`An error occurred: **${err.message}**`);
                         }
                     } else {
                         try {
-                            updateRole = Object.assign(updateRole, { added: true });
-                            await this.client.settings.updateGuildStaffRoles(updateRole);
-                            message.channel.send(`<:nerdSuccess:490708616056406017> Added **${verified.name}** to the staff roles.`).then(msg => msg.delete(5000));
+                            await this.client.settings.updateGuildStaffRoles(updateRole, true);
+                            configEmbed.setDescription(`<:nerdSuccess:490708616056406017> Added **${verified.name}** to the staff roles.`);
+
+                            message.channel.send(configEmbed).then(m => m.delete(5000));
                         } catch (err) {
                             this.client.logger.error(err.stack);
                             return message.channel.send(`An error occurred: **${err.message}**`);
@@ -171,18 +188,18 @@ module.exports = class ConfigCommand extends Command {
                     .map(m => m.toString())
                     .join('\n');
 
-                const embed = new RichEmbed()
-                    .setAuthor(message.guild, message.guild.iconURL)
+                configEmbed
                     .setDescription(`Add/remove a staff role by doing \`${prefix + name} roles [role]\``)
-                    .setColor(embedColor)
                     .addField('Admins', admins);
 
-                if (staffRoles.length >= 1) embed.addField('Staff Roles', viewRoles);
+                if (staffRoles.length >= 1) configEmbed.addField('Staff Roles', viewRoles);
 
-                message.channel.send(embed);
+                message.channel.send(configEmbed);
                 break;
             }
             case 'emojis': {
+                configEmbed.setAuthor(`${message.guild} | Vote Emojis`, message.guild.iconURL);
+
                 const vEmojis = this.voteEmojis(this.client);
                 const setID = parseInt(updated);
 
@@ -191,27 +208,18 @@ module.exports = class ConfigCommand extends Command {
                     const foundSet = vEmojis.find(filter);
                     const emojiSet = foundSet.emojis;
 
-                    if (!foundSet) {
-                        return message.channel.send(`**${setID}** is not a valid emoji set id!`)
-                            .then(msg => msg.delete(3000).catch(err => this.client.logger.error(err.stack)));
-                    }
+                    if (!foundSet) return this.client.errors.voteEmojiNotFound(updated, message.channel);
 
                     try {
                         await this.client.settings.updateGuild(message.guild, { voteEmojis: foundSet.name });
-                        return message.channel.send(`The default vote emojis have been changed to ${emojiSet.join(' ')}.`)
-                            .then(msg => msg.delete(5000)
-                            .catch(err => this.client.logger.error(err)));
+                        configEmbed.setDescription(`The default vote emojis have been changed to ${emojiSet.join(' ')}.`);
+                        
+                        return message.channel.send(configEmbed).then(m => m.delete(5000));
                     } catch (err) {
                         this.client.logger.error(err.stack);
                         return message.channel.send(`An error occurred: **${err.message}**`);
                     }
                 }
-
-                const embed = new RichEmbed()
-                    .setAuthor(message.guild.name, message.guild.iconURL)
-                    .setColor(embedColor)
-                    .setFooter(`Guild ID: ${message.guild.id}`)
-                    .setTimestamp();
 
                 let view = '';
                 let emojiSets = [];
@@ -232,7 +240,7 @@ module.exports = class ConfigCommand extends Command {
                     emojiSets[0] = str;
                 }
 
-                embed.setDescription(`
+                configEmbed.setDescription(`
                     **Voting Emojis**
                     Choose from ${vEmojis.length} different emoji sets to be used for voting in your guild.
 
@@ -242,16 +250,19 @@ module.exports = class ConfigCommand extends Command {
                     Submit new emoji set suggestions any time by joining our Discord server: ${discord}
                     `);
 
-                message.channel.send(embed);
+                message.channel.send(configEmbed);
                 break;
             }
             case 'responses': {
+                configEmbed.setAuthor(`${message.guild} | Suggestion Responses`, message.guild.iconURL);
+
                 if (updated) {
                     switch (updated) {
                         case 'true':
                             try {
                                 await this.client.settings.updateGuild(message.guild, { responseRequired: true });
-                                message.channel.send('Responses required set to `true`. This means a response **is required** when using the `reject` command.').then(msg => msg.delete(5000));
+                                configEmbed.setDescription('Responses required set to `true`. This means a response **is required** when using the `reject` command.');
+                                message.channel.send(configEmbed).then(m => m.delete(5000));
                             } catch (err) {
                                 this.client.logger.error(err.stack);
                                 return message.channel.send(`Error setting required responses: **${err.message}**.`);
@@ -260,58 +271,65 @@ module.exports = class ConfigCommand extends Command {
                         case 'false':
                             try {
                                 await this.client.settings.updateGuild(message.guild, { responseRequired: false });
-                                message.channel.send('Responses required set to `false`. This means a response **is not required** when using the `reject` command.').then(msg => msg.delete(5000));
+                                configEmbed.setDescription('Responses required set to `false`. This means a response **is not required** when using the `reject` command.');
+                                message.channel.send(configEmbed).then(m => m.delete(5000));
                             } catch (err) {
                                 this.client.logger.error(err.stack);
                                 return message.channel.send(`Error setting required responses: **${err.message}**.`);
                             }
                             break;
                         default:
-                            message.channel.send('Value must be `true` or `false`.')
-                                .then(m => m.delete(5000))
-                                .catch(e => this.client.logger.error(e));
+                            this.client.errors.invalidResponseValue(message.channel);
                             break;
                     }
                     return;
                 }
 
-                message.channel.send(`Rejection responses are currently **${responseRequired ? 'required' : 'not required'}**.`);
+                configEmbed.setDescription(`Rejection responses are currently **${responseRequired ? 'required' : 'not required'}**.`);
+                message.channel.send(configEmbed);
                 break;
             }
             case 'commands': {
+                configEmbed.setAuthor(`${message.guild} | Disabled Commands`, message.guild.iconURL);
+
                 if (updated) {
                     const cmd = this.client.commands.get(updated);
-                    if (!cmd) return this.client.errors.commandNotFound(cmd, message.channel);
+                    if (!cmd) return this.client.errors.commandNotFound(updated, message.channel);
                     if (cmd.conf.guarded) return this.client.errors.commandIsGuarded(cmd, message.channel);
                     if (cmd.conf.ownerOnly || cmd.conf.superSecretOnly) return this.client.errors.commandNotFound(cmd, message.channel);
                     
-                    let updatedCommand = {
+                    const disabledCommand = {
                         query: { guildID: message.guild.id },
                         disabledCommands: {
                             command: cmd.help.name,
                             added: Date.now(),
                             addedByUsername: message.author.tag,
                             addedByUserID: message.author.id
-                        },
-                        added: false
+                        }
+                    };
+
+                    const enabledCommand = {
+                        query: { guildID: message.guild.id },
+                        disabledCommands: { command: cmd.help.name }
                     };
 
                     const foundCmd = disabledCommands.find(c => c.command === cmd.help.name);
                     if (foundCmd) {
                         try {
-                            await this.client.settings.updateGuildCommands(updatedCommand);
-                            message.channel.send(`<:nerdSuccess:490708616056406017> Enabled the **${cmd.help.name}** command.`)
-                                .then(msg => msg.delete(5000));
+                            await this.client.settings.updateGuildCommands(enabledCommand, false);
+                            configEmbed.setDescription(`<:nerdSuccess:490708616056406017> Enabled the **${cmd.help.name}** command.`);
+
+                            message.channel.send(configEmbed).then(m => m.delete(5000));
                         } catch (err) {
                             this.client.logger.error(err.stack);
                             return message.channel.send(`An error occurred: **${err.message}**`);
                         }
                     } else {
                         try {
-                            updatedCommand = Object.assign(updatedCommand, { added: true });
-                            await this.client.settings.updateGuildCommands(updatedCommand);
-                            message.channel.send(`<:nerdSuccess:490708616056406017> Disabled the **${cmd.help.name}** command.`)
-                                .then(msg => msg.delete(5000));
+                            await this.client.settings.updateGuildCommands(disabledCommand, true);
+                            configEmbed.setDescription(`<:nerdSuccess:490708616056406017> Disabled the **${cmd.help.name}** command.`);
+                            
+                            message.channel.send(configEmbed).then(m => m.delete(5000));
                         } catch (err) {
                             this.client.logger.error(err.stack);
                             return message.channel.send(`An error occurred: **${err.message}**`);
@@ -322,7 +340,67 @@ module.exports = class ConfigCommand extends Command {
 
                 if (!disabledCommands || disabledCommands.length < 1) return this.client.errors.noDisabledCommands(message.channel);
                 
-                configEmbed.setDescription(disabledCommands.map(c => `\`${c}\``).join(' | '));
+                configEmbed
+                    .setDescription(disabledCommands.map(c => `\`${c.command}\``).join(' | '));
+
+                message.channel.send(configEmbed);
+                break;
+            }
+            case 'dmResponses': {
+                configEmbed.setAuthor(`${message.guild} | DM Responses`, message.guild.iconURL);
+
+                if (updated) {
+                    switch (updated) {
+                        case 'true': {
+                            try {
+                                await this.client.settings.updateGuild(message.guild, { dmResponses: true });
+                                configEmbed
+                                    .setDescription(`
+                                    DM responses have been enabled. The bot will DM users when these actions happen:
+                                    
+                                    - Suggestion submitted
+                                    - Suggestion approved
+                                    - Suggestion rejected
+                                    - Suggestion note added
+                                `);
+    
+                                message.channel.send(configEmbed).then(m => m.delete(5000));
+                            } catch (err) {
+                                this.client.logger.error(err.stack);
+                                return message.channel.send(`An error occurred: **${err.message}**.`);
+                            }
+                            break;
+                        }
+                        case 'false': {
+                            try {
+                                await this.client.settings.updateGuild(message.guild, { dmResponses: false });
+                                configEmbed
+                                    .setDescription(`
+                                    DM responses have been disabled. The bot will *not* DM users when these actions happen:
+                                    
+                                    - Suggestion submitted
+                                    - Suggestion approved
+                                    - Suggestion rejected
+                                    - Suggestion note added
+                                `);
+    
+                                message.channel.send(configEmbed).then(m => m.delete(5000));
+                            } catch (err) {
+                                this.client.logger.error(err.stack);
+                                return message.channel.send(`An error occurred: **${err.message}**.`);
+                            }
+                            break;
+                        }
+                        default: {
+                            this.client.errors.invalidResponseValue(message.channel);
+                            break;
+                        }
+                    }
+                    return;
+                }
+
+                configEmbed.setDescription(`DM responses are currently **${dmResponses ? 'enabled' : 'disabled' }**.`);
+
                 message.channel.send(configEmbed);
                 break;
             }
@@ -340,7 +418,8 @@ module.exports = class ConfigCommand extends Command {
                     .addField('Staff Roles', `\`${prefix + name} roles\``, true)
                     .addField('Vote Emojis', `\`${prefix + name} emojis\``, true)
                     .addField('Rejection Responses', `\`${prefix + name} responses\``, true)
-                    .addField('Disabled Commands', `\`${prefix + name} commands\``, true);
+                    .addField('Disabled Commands', `\`${prefix + name} commands\``, true)
+                    .addField('DM Responses', `\`${prefix + name} dmResponses\``, true);
 
                 message.channel.send(configEmbed);
                 break;
