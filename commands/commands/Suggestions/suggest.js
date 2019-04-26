@@ -79,7 +79,7 @@ module.exports = class SuggestCommand extends Command {
     
             **Suggestion**
             ${suggestion}
-    
+
             **Submitted**
             ${submittedOn}
             `)
@@ -107,13 +107,6 @@ module.exports = class SuggestCommand extends Command {
             );
         }
 
-        // sUser.send(dmEmbed).catch(err => {
-        //     this.client.logger.error(err.stack);
-        //     message.channel.send(stripIndents `An error occurred DMing you your suggestion information: **${err.message}**. Please make sure you are able to receive messages from server members.
-        
-        // For reference, your suggestion ID (sID) is **${id}**. Please wait for staff member to approve/reject your suggestion.`).then(msg => msg.delete(5000));
-        // });
-
         const filter = set => set.name === emojis;
         const defaults = set => set.name === 'defaultEmojis';
         let foundSet = voteEmojis.find(filter) || voteEmojis.find(defaults);
@@ -129,18 +122,16 @@ module.exports = class SuggestCommand extends Command {
             });
 
         const newSuggestion = {
-            guildName: message.guild.name,
             guildID: message.guild.id,
-            username: sUser.tag,
             userID: sUser.id,
             suggestion,
             sID: id,
-            time
+            newTime: message.createdAt.getTime()
         };
 
         try {
             await this.client.suggestions.submitGuildSuggestion(newSuggestion);
-            await message.react('✉');
+            if (settings.dmRespones) await message.react('✉');
             await message.delete(3000).catch(O_o => {});
         } catch (err) {
             this.client.logger.error(err.stack);

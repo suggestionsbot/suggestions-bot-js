@@ -55,8 +55,6 @@ module.exports = class ApproveCommand extends Command {
         const suggestionsLogs = guild.channels.find(c => c.name === settings.suggestionsLogs) || (guild.channels.find(c => c.toString() === settings.suggestionsLogs)) || (guild.channels.get(settings.suggestionsLogs));
         if (!suggestionsLogs) return this.client.errors.noSuggestionsLogs(message.channel);
 
-        let date = moment(Date.now()).format();
-
         let {
             userID,
             username,
@@ -174,35 +172,31 @@ module.exports = class ApproveCommand extends Command {
                 if (!sendMsgs) return message.channel.send(`I can't send messages in the ${suggestionsLogs} channel! Make sure I have \`Send Messages\`.`);
                 if (!reactions) return message.channel.send(`I can't add reactions in the ${suggestionsLogs} channel! Make sure I have \`Add Reactions\`.`);
 
-                message.channel.send(`Suggestion **${id}** has been approved.`).then(msg => msg.delete(5000));
-                sMessage.edit(approvedEmbed).then(msg => msg.delete(5000));
-                suggestionsLogs.send(logsEmbed);
-                try {
-                    if (settings.dmResponses) sUser.send(dmEmbed);
-                } catch (err) {
-                    this.client.logger.error(err.stack);
-                    message.channel.send(`An error occurred DMing **${sUser.displayName}** their suggestion information: **${err.message}**.`);
-                }
-
-                // sUser.send(dmEmbed).catch(err => {
-                //     this.client.logger.error(err.stack);
-                //     message.channel.send(`An error occurred DMing **${sUser.displayName}** their suggestion information: **${err.message}**.`);
-                // });
-
                 const approveSuggestion = {
                     query: [
                         { guildID: guild.id },
                         { sID: id }
                     ],
-                    status: 'approved',
-                    statusUpdated: date,
-                    statusReply: reply || null,
-                    staffMemberID: message.author.id,
-                    staffMemberUsername: message.author.tag,
-                    newResults
+                    data: {
+                        status: 'approved',
+                        newStatusUpdated: message.createdAt.getTime(),
+                        statusReply: reply || null,
+                        staffMemberID: message.author.id,
+                        newResults
+                    }
                 };
 
                 try {
+                    message.channel.send(`Suggestion **${id}** has been approved.`).then(msg => msg.delete(5000));
+                    sMessage.edit(approvedEmbed).then(msg => msg.delete(5000));
+                    suggestionsLogs.send(logsEmbed);
+                    try {
+                        if (settings.dmResponses) sUser.send(dmEmbed);
+                    } catch (err) {
+                        this.client.logger.error(err.stack);
+                        message.channel.send(`An error occurred DMing **${sUser.displayName}** their suggestion information: **${err.message}**.`);
+                    }
+
                     await this.client.suggestions.handleGuildSuggestion(approveSuggestion);
                 } catch (err) {
                     this.client.logger.error(err.stack);

@@ -50,9 +50,6 @@ module.exports = class StaffSuggestCommand extends Command {
 
             **Suggestion**
             ${suggestion}
-
-            **Submitted**
-            ${submittedOn}
             `)
             .setColor(embedColor)
             .setFooter(`User ID: ${sUser.id}`);

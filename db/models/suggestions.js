@@ -9,8 +9,10 @@ const suggestionSchema = mongoose.Schema({
     suggestion: String,
     sID: String,
     time: String,
+    newTime: Number,
     status: String,
     statusUpdated: String,
+    newStatusUpdated: Number,
     statusReply: String,
     staffMemberID: String,
     staffMemberUsername: String,
@@ -21,13 +23,15 @@ const suggestionSchema = mongoose.Schema({
         note: String,
         staffMemberID: String,
         staffMemberUsername: String,
-        noteAdded: String
+        noteAdded: String,
+        newNoteAdded: Number
     }],
     edits: [{
         edit: String,
         username: String,
         userID: String,
-        edited: String
+        edited: String,
+        newEdited: Number
     }],
     noteAdded: String
 });

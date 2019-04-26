@@ -17,7 +17,7 @@ module.exports = class SIDCommand extends Command {
 
     async run(message, args, settings) {
 
-        const { embedColor } = this.client.config;
+        const { embedColor, suggestionColors } = this.client.config;
 
         message.delete().catch(O_o => {});
 
@@ -35,20 +35,30 @@ module.exports = class SIDCommand extends Command {
         
         let { 
             time,
-            username,
+            newTime,
             userID,
             suggestion,
-            staffMemberUsername,
+            staffMemberUserID,
             results,
             newResults,
             status,
-            statusUpdated
+            statusUpdated,
+            newStatusUpdated
         } = sID;
         
-        let submittedOn = moment(new Date(time)).utc().format('MM/DD/YY @ h:mm A (z)');
-        let updatedOn = moment(new Date(statusUpdated)).utc().format('MM/DD/YY @ h:mm A (z)');
+        let submittedOn,
+            updatedOn;
 
-        let embed = new RichEmbed()
+        if (time) submittedOn = moment(new Date(time)).utc().format('MM/DD/YY @ h:mm A (z)');
+        if (newTime) submittedOn = moment(new Date(newTime)).utc().format('MM/DD/YY @ h:mm A (z)');
+
+        if (statusUpdated) updatedOn = moment.utc(new Date(statusUpdated)).format('MM/DD/YY @ h:mm A (z)');
+        if (newStatusUpdated) updatedOn = moment.utc(new Date(newStatusUpdated)).format('MM/DD/YY @ h:mm A (z)');
+
+        const sUser = this.client.users.get(userID);
+        const sStaff = this.client.users.get(staffMemberUserID);
+
+        const embed = new RichEmbed()
             .setAuthor(message.guild.name, message.guild.iconURL)
             .setTitle(`Info for sID ${args[0]}`)
             .setFooter(`User ID: ${userID} | sID ${args[0]}`);
@@ -60,7 +70,7 @@ module.exports = class SIDCommand extends Command {
             case undefined:
                 embed.setDescription(`
                 **Submitter**
-                ${username}
+                ${sUser}
         
                 **Suggestion**
                 ${suggestion}
@@ -73,7 +83,7 @@ module.exports = class SIDCommand extends Command {
             case 'approved':
                 embed.setDescription(`
                 **Submitter**
-                ${username}
+                ${sUser}
 
                 **Suggestion**
                 ${suggestion}
@@ -85,19 +95,19 @@ module.exports = class SIDCommand extends Command {
                 ${updatedOn}
 
                 **Approved By**
-                ${staffMemberUsername}
+                ${sStaff}
 
                 **Results**
                 ${nResults.join('\n') || results}
             
                 `);
-                embed.setColor('#00e640');
+                embed.setColor(suggestionColors.approved);
                 message.channel.send(embed);
                 break;
             case 'rejected':
                 embed.setDescription(`
                 **Submitter**
-                ${username}
+                ${sUser}
 
                 **Suggestion**
                 ${suggestion}
@@ -109,13 +119,13 @@ module.exports = class SIDCommand extends Command {
                 ${updatedOn}
 
                 **Rejected By**
-                ${staffMemberUsername}
+                ${sStaff}
 
                 **Results**
                 ${nResults.join('\n') || results}
             
                 `);
-                embed.setColor('#cf000f');
+                embed.setColor(suggestionColors.rejected);
                 message.channel.send(embed);
                 break;
             default:

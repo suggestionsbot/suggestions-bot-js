@@ -20,17 +20,20 @@ module.exports = class StatsCommand extends Command {
 
         let { embedColor } = this.client.config;
         
-        const botUptime = moment.duration(this.client.uptime).format(' D [days], H [hrs], m [mins], s [secs]');
+        // const botUptime = moment.duration(this.client.uptime).format(' D [days], H [hrs], m [mins], s [secs]');
         const memUsage = (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2);
+        const shardID = this.client.shard.id;
         // const guildSize = this.client.guilds.size.toLocaleString();
         // const userSize = this.client.users.size.toLocaleString();
 
         let guildSize,
-            userSize;
+            userSize,
+            shardUptime;
 
         const promises = [
             this.client.shard.fetchClientValues('guilds.size'),
-            this.client.shard.broadcastEval('this.guilds.reduce((prev, guild) => prev + guild.memberCount, 0)')
+            this.client.shard.broadcastEval('this.guilds.reduce((prev, guild) => prev + guild.memberCount, 0)'),
+            this.client.shard.broadcastEval('this.uptime')
         ];
 
         try {
@@ -38,6 +41,7 @@ module.exports = class StatsCommand extends Command {
         
             guildSize = (resolved[0].reduce((prev, count) => prev + count, 0)).toLocaleString();
             userSize = (resolved[1].reduce((prev, count) => prev + count, 0)).toLocaleString();
+            shardUptime = moment.duration(resolved[2]).format(' D [days], H [hrs], m [mins], s [secs]');
         } catch (err) {
             this.client.logger.error(err.stack);
             return message.channel.send(`An error occurred: **${err.message}**`);
@@ -55,10 +59,11 @@ module.exports = class StatsCommand extends Command {
             .setColor(embedColor)
             .addField('Guilds', guildSize, true)
             .addField('Users', userSize, true)
-            .addField('Uptime', botUptime, true)
+            .addField('Uptime', shardUptime, true)
             .addField('Memory', `${Math.round(memUsage)} MB`, true)
             .addField('Discord.js', `v${discordVersion}`, true)
             .addField('Node', `${process.version}`, true)
+            .setFooter(`Shard ${shardID === 0 ? 1 : shardID}`)
             .setTimestamp();
 
         return message.channel.send(embed);

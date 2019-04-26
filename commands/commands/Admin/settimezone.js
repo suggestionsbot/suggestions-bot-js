@@ -14,12 +14,10 @@ module.exports = class SetTimezoneCommand extends Command {
     }
 
     async run(message, args, settings) {
-        
-        const usage = this.help.usage;
 
         await message.delete().catch(O_o => {});
 
-        if (!args[0]) return message.channel.send(`Usage: \`${settings.prefix + usage}\``).then(m => m.delete(5000)).catch(err => this.client.logger.error(err.stack));
+        if (!args[0]) return this.client.errors.noUsagE(message.channel, this, settings);
 
 
         return;

@@ -1,5 +1,4 @@
 const { RichEmbed } = require('discord.js');
-const { oneLineTrim } = require('common-tags');
 const Command = require('../../Command');
 const { version, description } = require('../../../package.json');
 

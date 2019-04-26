@@ -53,16 +53,6 @@ module.exports = class NoteCommand extends Command {
             (guild.channels.find(c => c.toString() === settings.suggestionsChannel)) ||
             (guild.channels.get(settings.suggestionsChannel));
 
-        let date = moment(Date.now()).format();
-
-        // let sID;
-        // try {
-        //     sID = await this.client.suggestions.getGuildSuggestion(message.guild, id);
-        // } catch (err) {
-        //     this.client.logger.error(err.stack);
-        //     return message.channel.send(`Error querying the database for this guild's suggestions: **${err.message}**.`);
-        // }
-
         let {
             userID,
             username,
@@ -117,40 +107,34 @@ module.exports = class NoteCommand extends Command {
                     suggestion.addField('Staff Member', `${message.author} (${message.author.id})`);
                 }
 
-                let footer = embed.footer.text;
-                let staffNote = {
-                    note,
-                    staffMemberID: message.author.id,
-                    staffMemberUsername: message.author.tag,
-                    noteAdded: date
-                };
-
+                const footer = embed.footer.text;
                 if (footer.includes(id)) {
-
-                    let sMessage = await suggestionsChannel.fetchMessage(embed.message.id);
-
-                    message.channel.send(`Added a note to **${id}**: **${note}**.`).then(msg => msg.delete(5000));
-                    sMessage.edit(suggestion);
-                    try {
-                        if (settings.dmResponses) sUser.send(dmEmbed);
-                    } catch (err) {
-                        this.client.logger.error(err.stack);
-                        message.channel.send(`An error occurred DMing **${sUser.displayName}** their suggestion note: **${err.message}**.`);
-                    }
-                    // sUser.send(dmEmbed).catch(err => {
-                    //     this.client.logger.error(err.stack);
-                    //     message.channel.send(`An error occurred DMing **${sUser.displayName}** their suggestion note: **${err.message}**.`);
-                    // });
+                    const staffNote = {
+                        note,
+                        staffMemberID: message.author.id,
+                        newNoteAdded: message.createdAt.getTime()
+                    };
 
                     const suggestionNote = {
                         query: [
                             { guildID: guild.id },
                             { sID: id }
                         ],
-                        note: staffNote
+                        data: staffNote
                     };
 
                     try {
+                        let sMessage = await suggestionsChannel.fetchMessage(embed.message.id);
+
+                        message.channel.send(`Added a note to **${id}**: **${note}**.`).then(msg => msg.delete(5000));
+                        sMessage.edit(suggestion);
+                        try {
+                            if (settings.dmResponses) sUser.send(dmEmbed);
+                        } catch (err) {
+                            this.client.logger.error(err.stack);
+                            message.channel.send(`An error occurred DMing **${sUser.displayName}** their suggestion note: **${err.message}**.`);
+                        }
+
                         await this.client.suggestions.addGuildSuggestionNote(suggestionNote);
                     } catch (err) {
                         this.client.logger.error(err.stack);

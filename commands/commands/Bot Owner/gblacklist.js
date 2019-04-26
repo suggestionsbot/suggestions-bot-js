@@ -42,10 +42,11 @@ module.exports = class GBlacklistCommand extends Command {
             for (let i = 0; i < gBlacklist.length; i++) {
                 try {
                     if (gBlacklist[i].status === false) continue;
+                    const issuer = this.client.users.get(gBlacklist[i].isserID);
                     let caseNum = gBlacklist[i].case;
                     let caseUser = `${gBlacklist[i].userID}`;
                     let caseReason = gBlacklist[i].reason;
-                    let caseIssuer = `${gBlacklist[i].issuerUsername} (${gBlacklist[i].issuerID})`;
+                    let caseIssuer = `${issuer.tag} (${issuer.id})`;
                     let caseStatus = this.blStatus[gBlacklist[i].status];
                     await blEmbed.addField(`Case #${caseNum}`, `**User:** ${caseUser}\n **Reason:** ${caseReason}\n **Issuer:** ${caseIssuer}\n **Status:** ${caseStatus}`);
                     active++;
@@ -89,12 +90,9 @@ module.exports = class GBlacklistCommand extends Command {
                 if (!reason) return message.channel.send('Please provide a reason!').then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
 
                 const newBlacklist = {
-                    guildID: null,
-                    guildName: null,
                     userID: blUser,
                     reason: reason,
                     issuerID: message.author.id,
-                    issuerUsername: message.member.user.tag,
                     time: moment(Date.now()),
                     status: true,
                     case: caseNum,

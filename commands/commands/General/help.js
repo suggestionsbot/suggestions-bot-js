@@ -26,7 +26,9 @@ module.exports = class HelpCommand extends Command {
         } = settings;
 
         if (message.guild) {
-            suggestionsChannel = message.guild.channels.find(c => c.name === suggestionsChannel) || message.guild.channels.find(c => c.toString() === suggestionsChannel) || message.guild.channels.get(suggestionsChannel) || '';
+            suggestionsChannel = message.guild.channels.find(c => c.name === suggestionsChannel) ||
+                message.guild.channels.find(c => c.toString() === suggestionsChannel) ||
+                message.guild.channels.get(suggestionsChannel) || '';
     
             staffRoles = [];
             if (roles) staffRoles = roles.map(role => message.guild.roles.find(r => r.name === role.role || r.id === role.role));
@@ -60,10 +62,29 @@ module.exports = class HelpCommand extends Command {
             return message.channel.send(cmdHelpEmbed);
         }
 
-        const generalCmds = cmds.filter(cmd => cmd.conf.ownerOnly === false && cmd.conf.adminOnly === false && cmd.conf.staffOnly === false && cmd.conf.superSecretOnly === false).map(cmd => cmd.help.name).sort().map(cmd => '`'+ cmd + '`');
-        const staffCmds = cmds.filter(cmd => cmd.conf.staffOnly === true).map(cmd => cmd.help.name).sort().map(cmd => '`'+ cmd + '`');
-        const adminCmds = cmds.filter(cmd => cmd.conf.adminOnly === true).map(cmd => cmd.help.name).sort().map(cmd => '`'+ cmd + '`');
-        const ownerCmds = cmds.filter(cmd => cmd.conf.ownerOnly === true).map(cmd => cmd.help.name).sort().map(cmd => '`'+ cmd + '`');
+        const generalCmds = cmds
+            .filter(cmd => cmd.conf.ownerOnly === false && cmd.conf.adminOnly === false && cmd.conf.staffOnly === false && cmd.conf.superSecretOnly === false)
+            .map(cmd => cmd.help.name)
+            .sort()
+            .map(cmd => '`'+ cmd + '`');
+
+        const staffCmds = cmds
+            .filter(cmd => cmd.conf.staffOnly === true)
+            .map(cmd => cmd.help.name)
+            .sort()
+            .map(cmd => '`'+ cmd + '`');
+
+        const adminCmds = cmds
+            .filter(cmd => cmd.conf.adminOnly === true)
+            .map(cmd => cmd.help.name)
+            .sort()
+            .map(cmd => '`'+ cmd + '`');
+
+        const ownerCmds = cmds
+            .filter(cmd => cmd.conf.ownerOnly === true)
+            .map(cmd => cmd.help.name)
+            .sort()
+            .map(cmd => '`'+ cmd + '`');
 
         const helpEmbed = new RichEmbed()
             .setTitle('Help Information')

@@ -30,7 +30,7 @@ module.exports = class EvalCommand extends Command {
 
             // 6 graves, and 2 characters for "js"
             const MAX_CHARS = 3 + 2 + clean.length + 3;
-            if (MAX_CHARS > 2000) {
+            if (MAX_CHARS > 1000) {
                 const haste = await hastebin(Buffer.from(clean), {
                     url: 'https://paste.thenerdcave.us',
                     extension: 'js'
@@ -38,7 +38,7 @@ module.exports = class EvalCommand extends Command {
                 message.author.send(`<${haste}>`);
 
                 exceededEmbed.setColor(embedColor);
-                exceededEmbed.setDescription('📨 Output exceeded 2000 characters. DMing you the Hastebin.');
+                exceededEmbed.setDescription('📨 Output exceeded 1000 characters. DMing you the Hastebin.');
 
                 const msg = await message.channel.send(exceededEmbed);
                 await msg.react('📧');

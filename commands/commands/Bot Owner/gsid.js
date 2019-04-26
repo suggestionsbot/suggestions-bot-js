@@ -41,21 +41,30 @@ module.exports = class GsIDCommand extends Command {
         
         let { 
             time,
-            username,
+            newTime,
             userID,
             suggestion,
-            updatedBy,
+            staffMemberID,
             results,
             newResults,
             status,
             statusUpdated,
+            newStatusUpdated,
             guildID
         } = sID;
-        
-        let guild = await this.client.guilds.get(guildID);
 
-        let submittedOn = moment(new Date(time)).utc().format('MM/DD/YY @ h:mm A (z)');
-        let updatedOn = moment(new Date(statusUpdated)).utc().format('MM/DD/YY @ h:mm A (z)');
+        let submittedOn,
+            updatedOn;
+
+        if (time) submittedOn = moment(new Date(time)).utc().format('MM/DD/YY @ h:mm A (z)');
+        if (newTime) submittedOn = moment(new Date(newTime)).utc().format('MM/DD/YY @ h:mm A (z)');
+
+        if (statusUpdated) updatedOn = moment.utc(new Date(statusUpdated)).format('MM/DD/YY @ h:mm A (z)');
+        if (newStatusUpdated) updatedOn = moment.utc(new Date(newStatusUpdated)).format('MM/DD/YY @ h:mm A (z)');
+
+        const guild = this.client.guilds.get(guildID);
+        const sUser = this.client.users.get(userID);
+        const sStaff = this.client.users.get(staffMemberID);
 
         let embed = new RichEmbed()
             .setAuthor(guild.name, guild.iconURL)
@@ -73,7 +82,7 @@ module.exports = class GsIDCommand extends Command {
             case undefined:
                 embed.setDescription(`
                 **Submitter**
-                ${username}
+                ${sUser}
         
                 **Suggestion**
                 ${suggestion}
@@ -86,7 +95,7 @@ module.exports = class GsIDCommand extends Command {
             case 'approved':
                 embed.setDescription(`
                 **Submitter**
-                ${username}
+                ${sUser}
 
                 **Suggestion**
                 ${suggestion}
@@ -98,7 +107,7 @@ module.exports = class GsIDCommand extends Command {
                 ${updatedOn}
 
                 **Approved By**
-                ${updatedBy}
+                ${sStaff}
 
                 **Results**
                 ${nResults.join('\n') || results}
@@ -110,7 +119,7 @@ module.exports = class GsIDCommand extends Command {
             case 'rejected':
                 embed.setDescription(`
                 **Submitter**
-                ${username}
+                ${sUser}
 
                 **Suggestion**
                 ${suggestion}
@@ -122,7 +131,7 @@ module.exports = class GsIDCommand extends Command {
                 ${updatedOn}
 
                 **Rejected By**
-                ${updatedBy}
+                ${sStaff}
 
                 **Results**
                 ${nResults.join('\n') || results}

@@ -52,7 +52,10 @@ module.exports = class MySuggestionsCommand extends Command {
 
         const lastSuggestion = sortedSuggestions[0];
 
-        const lastDate = moment(new Date(lastSuggestion.time)).format('MM/DD/YY');
+        let lastDate;
+        if (lastSuggestion.time) lastDate = moment.utc(new Date(lastSuggestion.time)).format('MM/DD/YY');
+        if (lastSuggestion.newTime) lastDate = moment.utc(new Date(lastSuggestion.newTime)).format('MM/DD/YY');
+
         const lastsID = lastSuggestion.sID;
         const lastSuggestionInfo = `\`${lastsID}\` (${lastDate})`;
 

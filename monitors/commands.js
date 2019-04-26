@@ -86,11 +86,9 @@ module.exports = class CommandHandler {
 
         const newCommand = {
             guildID: message.guild ? message.guild.id : null,
-            guildName: message.guild ? message.guild.name : null,
             guildOwnerID: message.guild ? message.guild.ownerID : null,
             command: cmd.help.name,
             channel: message.guild ? message.channel.name : null,
-            username: message.author.tag,
             userID: message.author.id,
             time: moment(Date.now())
         };

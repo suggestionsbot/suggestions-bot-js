@@ -4,6 +4,10 @@ module.exports = async (client) => {
 
     const tokens = client.config.botLists;
 
+    const guildsPerShard = await client.shard.fetchClientValues('guilds.size');
+    const guildSizeCount = guildsPerShard.reduce((prev, count) => prev + count, 0);
+    // guildSize = guildSize.reduce((prev, count) => prev + count, 0);
+
     setInterval(() => {
         postDBorg();
         postBotsGG();
@@ -17,10 +21,15 @@ module.exports = async (client) => {
     async function postDBorg() {
         // Discord Bots (discordbots.org)
         try {
-            let data = { server_count: client.guilds.size };
-            let body = JSON.stringify(data);
+            // let data = { server_count: client.guilds.size };
+            const data = { 
+                shards: guildsPerShard,
+                shard_id: client.shard.id,
+                shard_count: client.shard.count
+            };
+            const body = JSON.stringify(data);
 
-            let posted = await fetch(`https://discordbots.org/api/bots/${client.user.id}/stats`, {
+            const posted = await fetch(`https://discordbots.org/api/bots/${client.user.id}/stats`, {
                 method: 'POST',
                 headers: {
                     'Authorization': tokens.dblToken,
@@ -39,10 +48,15 @@ module.exports = async (client) => {
     async function postBotsGG() {
         // Discord Bot List (discord.bots.gg)
         try {
-            let data = { guildCount: client.guilds.size };
-            let body = JSON.stringify(data);
+            // let data = { guildCount: client.guilds.size };
+            const data = {
+                guildCount: guildSizeCount,
+                shardCount: client.shard.count,
+                shardId: client.shard.id
+            };
+            const body = JSON.stringify(data);
 
-            let posted = await fetch(`https://discord.bots.gg/api/v1/bots/${client.user.id}/stats`, {
+            const posted = await fetch(`https://discord.bots.gg/api/v1/bots/${client.user.id}/stats`, {
                 method: 'POST',
                 headers: {
                     'Authorization': tokens.botsggToken,
@@ -61,10 +75,14 @@ module.exports = async (client) => {
     async function postDBotList() {
         // Discord Bot List (discordbotlist.com)
         try {
-            let data = { guilds: client.guilds.size };
-            let body = JSON.stringify(data);
+            // let data = { guilds: client.guilds.size };
+            const data = {
+                guilds: guildSizeCount,
+                shard_id: client.shard.id
+            };
+            const body = JSON.stringify(data);
 
-            let posted = await fetch(`https://discordbotlist.com/api/bots/${client.user.id}/stats`, {
+            const posted = await fetch(`https://discordbotlist.com/api/bots/${client.user.id}/stats`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bot ${tokens.dbl2Token}`,
@@ -82,11 +100,12 @@ module.exports = async (client) => {
 
     async function postDivine() {
         // Divine Discord Bot List (divinediscordbots.com)
-        let data = { server_count: client.guilds.size };
-        let body = JSON.stringify(data);
+        // let data = { server_count: client.guilds.size };
+        const data = { server_count : guildSizeCount };
+        const body = JSON.stringify(data);
 
         try {
-            let posted = await fetch(`https://divinediscordbots.com/bot/${client.user.id}/stats`, {
+            const posted = await fetch(`https://divinediscordbots.com/bot/${client.user.id}/stats`, {
                 method: 'POST',
                 headers: {
                     'Authorization': tokens.ddbToken,
@@ -105,10 +124,11 @@ module.exports = async (client) => {
     async function postBLSpace() {
         // botlist.space
         try {
-            let data = { server_count: client.guilds.size };
-            let body = JSON.stringify(data);
+            // let data = { server_count: client.guilds.size };
+            const data = { shards: guildsPerShard };
+            const body = JSON.stringify(data);
 
-            let posted = await fetch(`https://api.botlist.space/v1/bots/${client.user.id}`, {
+            const posted = await fetch(`https://api.botlist.space/v1/bots/${client.user.id}`, {
                 method: 'POST',
                 headers: {
                     'Authorization': tokens.blsToken,
@@ -127,10 +147,11 @@ module.exports = async (client) => {
     async function postTerminal() {
         // Discord Bot List by Terminal.ink (ls.terminal.ink)
         try {
-            let data = { bot: { count: client.guilds.size }};
-            let body = JSON.stringify(data);
+            // let data = { bot: { count: client.guilds.size }};
+            const data = { bot: { count: guildSizeCount } };
+            const body = JSON.stringify(data);
 
-            let posted = await fetch(`https://ls.terminal.ink/api/v2/bots/${client.user.id}`, {
+            const posted = await fetch(`https://ls.terminal.ink/api/v2/bots/${client.user.id}`, {
                 method: 'POST',
                 headers: {
                     'Authorization': tokens.termToken,
@@ -149,10 +170,11 @@ module.exports = async (client) => {
     async function postBfd() {
         // Bots For Discord (botsfordiscord.com)
         try {
-            let data = { server_count: client.guilds.size };
-            let body = JSON.stringify(data);
+            // let data = { server_count: client.guilds.size };
+            const data = { server_count: guildSizeCount };
+            const body = JSON.stringify(data);
 
-            let posted = await fetch(`https://botsfordiscord.com/api/bot/${client.user.id}`, {
+            const posted = await fetch(`https://botsfordiscord.com/api/bot/${client.user.id}`, {
                 method: 'POST',
                 headers: {
                     'Authorization': tokens.bfdToken,
