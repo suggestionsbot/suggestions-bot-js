@@ -41,7 +41,9 @@ module.exports = class SuggestCommand extends Command {
     const { suggestionsChannel } = settings;
 
     const sUser = message.author;
-    const sChannel = message.guild.channels.find(c => c.name === suggestionsChannel) || message.guild.channels.find(c => c.toString() === suggestionsChannel) || message.guild.channels.get(suggestionsChannel);
+    const sChannel = message.guild.channels.find(c => c.name === suggestionsChannel) ||
+      message.guild.channels.find(c => c.toString() === suggestionsChannel) ||
+      message.guild.channels.get(suggestionsChannel);
     if (!sChannel) return this.client.errors.noSuggestions(message.channel);
 
     const emojis = settings.voteEmojis;
@@ -90,9 +92,9 @@ module.exports = class SuggestCommand extends Command {
     } catch (err) {
       this.client.logger.error(err.stack);
       message.channel.send(stripIndents`
-                An error occurred DMing you your suggestion information: **${err.message}**. Please make sure you are able to receive messages from server members.
-        
-                For reference, your suggestion ID (sID) is **${id}**. Please wait for staff member to approve/reject your suggestion.`
+        An error occurred DMing you your suggestion information: **${err.message}**. Please make sure you are able to receive messages from server members.
+
+        For reference, your suggestion ID (sID) is **${id}**. Please wait for staff member to approve/reject your suggestion.`
       );
     }
 

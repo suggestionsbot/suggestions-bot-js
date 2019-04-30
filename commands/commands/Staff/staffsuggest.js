@@ -1,6 +1,4 @@
 const { RichEmbed } = require('discord.js');
-const moment = require('moment');
-const { stripIndents } = require('common-tags');
 const Command = require('../../Command');
 require('moment-duration-format');
 require('moment-timezone');
@@ -20,39 +18,39 @@ module.exports = class StaffSuggestCommand extends Command {
   async run(message, args, settings) {
 
     const { embedColor } = this.client.config;
-    const usage = this.help.usage;
 
     await message.delete().catch(O_o => {});
 
-    const sUser = message.author;
-    const sChannel = message.guild.channels.find(c => c.name === settings.staffSuggestionsChannel) || message.guild.channels.find(c => c.toString() === settings.staffSuggestionsChannel) || message.guild.channels.get(settings.staffSuggestionsChannel);
+    const sUser = message.member;
+    const sChannel = message.guild.channels.find(c => c.name === settings.staffSuggestionsChannel) ||
+      message.guild.channels.find(c => c.toString() === settings.staffSuggestionsChannel) ||
+      message.guild.channels.get(settings.staffSuggestionsChannel);
     if (!sChannel) return this.client.errors.noStaffSuggestions(message.channel);
 
-    if (!settings.staffRoles) return message.channel.send('No staff roles exist! Please create them or contact a server administrator to handle suggestions.').then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
+    if (!settings.staffRoles) return this.client.errors.noStaffRoles(message.channel);
 
     const embed = new RichEmbed()
-      .setDescription(`Hey, ${sUser}. Your suggestion has been added in the ${sChannel.toString()} channel to be voted on!`)
+      .setDescription(`Hey, ${sUser.user.tag}. Your suggestion has been added in the ${sChannel} channel to be voted on!`)
       .setColor(embedColor)
       .setAuthor(sUser.displayName)
       .setFooter(`User ID: ${sUser.id}`)
       .setTimestamp();
 
     const suggestion = args.join(' ');
-    if (!suggestion) return message.channel.send(`Usage: \`${settings.prefix + usage}\``).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
-
-    const submittedOn = moment.utc(message.createdAt).format('MM/DD/YY @ h:mm A (z)');
+    if (!suggestion) this.client.errors.noUsage(message.channel, this, settings);
 
     const sEmbed = new RichEmbed()
-      .setThumbnail(sUser.avatarURL)
       .setDescription(`
-            **Submitter**
-            ${sUser.tag}
+      **Submitter**
+      ${sUser.user.tag}
 
-            **Suggestion**
-            ${suggestion}
-            `)
+      **Suggestion**
+      ${suggestion}
+      `)
+      .setThumbnail(sUser.avatarURL)
       .setColor(embedColor)
-      .setFooter(`User ID: ${sUser.id}`);
+      .setFooter(`User ID: ${sUser.id}`)
+      .setTimestamp();
 
     const sendMsgs = sChannel.permissionsFor(message.guild.me).has('SEND_MESSAGES', false);
     const reactions = sChannel.permissionsFor(message.guild.me).has('ADD_REACTIONS', false);
@@ -61,12 +59,7 @@ module.exports = class StaffSuggestCommand extends Command {
 
     message.channel.send(embed).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
 
-    this.client.logger.log(stripIndents`A new staff suggestion has been created:
-        Author: ${sUser.tag} (ID: ${sUser.id})
-        Suggestion: ${suggestion}
-        Time: ${submittedOn}
-        Channel: ${sChannel.name}
-        Guild: ${message.guild.name} (ID: ${message.guild.id})`);
+    this.client.logger.log(`New staff suggestion submitted by "${sUser.user.tag}" (${sUser.id}) in "${message.guild}" (${message.guild.id})`);
 
     return sChannel.send(sEmbed)
       .then(async msg => {
