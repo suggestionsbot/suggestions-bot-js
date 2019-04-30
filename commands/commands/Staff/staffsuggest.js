@@ -6,76 +6,76 @@ require('moment-duration-format');
 require('moment-timezone');
 
 module.exports = class StaffSuggestCommand extends Command {
-    constructor(client) {
-        super(client, {
-            name: 'staffsuggest',
-            category: 'Staff',
-            description: 'Submit a new suggestion for staff members to vote.',
-            usage: 'staffsuggest <suggestion>',
-            staffOnly: true,
-            botPermissions: ['MANAGE_MESSAGES', 'EMBED_LINKS', 'ADD_REACTIONS']
-        });
-    }
+  constructor(client) {
+    super(client, {
+      name: 'staffsuggest',
+      category: 'Staff',
+      description: 'Submit a new suggestion for staff members to vote.',
+      usage: 'staffsuggest <suggestion>',
+      staffOnly: true,
+      botPermissions: ['MANAGE_MESSAGES', 'EMBED_LINKS', 'ADD_REACTIONS']
+    });
+  }
 
-    async run(message, args, settings) {
+  async run(message, args, settings) {
 
-        const { embedColor } = this.client.config;
-        const usage = this.help.usage;
+    const { embedColor } = this.client.config;
+    const usage = this.help.usage;
 
-        await message.delete().catch(O_o => {});
-        
-        const sUser = message.author;
-        const sChannel = message.guild.channels.find(c => c.name === settings.staffSuggestionsChannel) || message.guild.channels.find(c => c.toString() === settings.staffSuggestionsChannel) || message.guild.channels.get(settings.staffSuggestionsChannel);
-        if (!sChannel) return this.client.errors.noStaffSuggestions(message.channel);
+    await message.delete().catch(O_o => {});
 
-        if (!settings.staffRoles) return message.channel.send('No staff roles exist! Please create them or contact a server administrator to handle suggestions.').then(msg =>  msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
+    const sUser = message.author;
+    const sChannel = message.guild.channels.find(c => c.name === settings.staffSuggestionsChannel) || message.guild.channels.find(c => c.toString() === settings.staffSuggestionsChannel) || message.guild.channels.get(settings.staffSuggestionsChannel);
+    if (!sChannel) return this.client.errors.noStaffSuggestions(message.channel);
 
-        const embed = new RichEmbed()
-            .setDescription(`Hey, ${sUser}. Your suggestion has been added in the ${sChannel.toString()} channel to be voted on!`)
-            .setColor(embedColor)
-            .setAuthor(sUser.displayName)
-            .setFooter(`User ID: ${sUser.id}`)
-            .setTimestamp();
+    if (!settings.staffRoles) return message.channel.send('No staff roles exist! Please create them or contact a server administrator to handle suggestions.').then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
 
-        const suggestion = args.join(' ');
-        if (!suggestion) return message.channel.send(`Usage: \`${settings.prefix + usage}\``).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
+    const embed = new RichEmbed()
+      .setDescription(`Hey, ${sUser}. Your suggestion has been added in the ${sChannel.toString()} channel to be voted on!`)
+      .setColor(embedColor)
+      .setAuthor(sUser.displayName)
+      .setFooter(`User ID: ${sUser.id}`)
+      .setTimestamp();
 
-        const submittedOn = moment.utc(message.createdAt).format('MM/DD/YY @ h:mm A (z)');
+    const suggestion = args.join(' ');
+    if (!suggestion) return message.channel.send(`Usage: \`${settings.prefix + usage}\``).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
 
-        const sEmbed = new RichEmbed()
-            .setThumbnail(sUser.avatarURL)
-            .setDescription(`
+    const submittedOn = moment.utc(message.createdAt).format('MM/DD/YY @ h:mm A (z)');
+
+    const sEmbed = new RichEmbed()
+      .setThumbnail(sUser.avatarURL)
+      .setDescription(`
             **Submitter**
             ${sUser.tag}
 
             **Suggestion**
             ${suggestion}
             `)
-            .setColor(embedColor)
-            .setFooter(`User ID: ${sUser.id}`);
+      .setColor(embedColor)
+      .setFooter(`User ID: ${sUser.id}`);
 
-        const sendMsgs = sChannel.permissionsFor(message.guild.me).has('SEND_MESSAGES', false);
-        const reactions = sChannel.permissionsFor(message.guild.me).has('ADD_REACTIONS', false);
-        if (!sendMsgs) return this.client.errors.noChannelPerms(message, sChannel, 'SEND_MESSAGES');
-        if (!reactions) return this.client.errors.noChannelPerms(message, sChannel, 'ADD_REACTIONS');
+    const sendMsgs = sChannel.permissionsFor(message.guild.me).has('SEND_MESSAGES', false);
+    const reactions = sChannel.permissionsFor(message.guild.me).has('ADD_REACTIONS', false);
+    if (!sendMsgs) return this.client.errors.noChannelPerms(message, sChannel, 'SEND_MESSAGES');
+    if (!reactions) return this.client.errors.noChannelPerms(message, sChannel, 'ADD_REACTIONS');
 
-        message.channel.send(embed).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
+    message.channel.send(embed).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
 
-        this.client.logger.log(stripIndents`A new staff suggestion has been created:
+    this.client.logger.log(stripIndents`A new staff suggestion has been created:
         Author: ${sUser.tag} (ID: ${sUser.id})
         Suggestion: ${suggestion}
         Time: ${submittedOn}
         Channel: ${sChannel.name}
         Guild: ${message.guild.name} (ID: ${message.guild.id})`);
 
-        return sChannel.send(sEmbed)
-            .then(async msg => {
-                await msg.react(`✅`);
-                await msg.react(`❌`);
-            })
-            .catch(err => {
-                this.client.logger.error(err.stack);
-                return message.channel.send(`An error occurred adding reactions to this suggestion: **${err.message}**.`);
-            });
-    }
+    return sChannel.send(sEmbed)
+      .then(async msg => {
+        await msg.react('✅');
+        await msg.react('❌');
+      })
+      .catch(err => {
+        this.client.logger.error(err.stack);
+        return message.channel.send(`An error occurred adding reactions to this suggestion: **${err.message}**.`);
+      });
+  }
 };

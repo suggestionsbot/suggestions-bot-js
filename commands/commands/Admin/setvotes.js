@@ -2,82 +2,82 @@ const { RichEmbed } = require('discord.js');
 const Command = require('../../Command');
 
 module.exports = class SetVotesCommand extends Command {
-    constructor(client) {
-        super(client, {
-            name: 'setvotes',
-            category: 'Admin',
-            description: 'Set custom emojis to use when voting.',
-            usage: 'setvotes [id]',
-            adminOnly: true,
-            botPermissions: ['MANAGE_MESSAGES', 'EMBED_LINKS']
-        });
-        this.voteEmojis = require('../../../utils/voteEmojis');
+  constructor(client) {
+    super(client, {
+      name: 'setvotes',
+      category: 'Admin',
+      description: 'Set custom emojis to use when voting.',
+      usage: 'setvotes [id]',
+      adminOnly: true,
+      botPermissions: ['MANAGE_MESSAGES', 'EMBED_LINKS']
+    });
+    this.voteEmojis = require('../../../utils/voteEmojis');
+  }
+
+  async run(message, args, settings) {
+
+    const { embedColor, discord } = this.client.config;
+    const voteEmojis = this.voteEmojis(this.client);
+
+    await message.delete().catch(O_o => {});
+
+    const { usage } = this.help;
+
+    const embed = new RichEmbed()
+      .setAuthor(message.guild.name, message.guild.iconURL)
+      .setColor(embedColor)
+      .setFooter(`Guild ID: ${message.guild.id}`)
+      .setTimestamp();
+
+    const setID = parseInt(args[0]);
+
+    if (args[0]) {
+
+      if (args[0] && (setID > voteEmojis.length - 1)) {
+        return message.channel.send(`**${setID}** is not a valid emoji set id!`)
+          .then(msg => msg.delete(3000).catch(err => this.client.logger.error(err.stack)));
+      }
+
+      for (let i = 0; i < voteEmojis.length; i++) {
+
+        if (args[0] && (setID === voteEmojis[i].id)) {
+
+          this.client.settings.updateGuild(message.guild, {
+            voteEmojis: voteEmojis[i].name
+          }).catch(err => {
+            this.client.logger.error(err.stack);
+            return message.channel.send(`Error updating the default emoji set: **${err.message}**.`);
+          });
+
+          this.client.logger.log(`The default vote emojis in the guild ${message.guild.name} (${message.guild.id}) has been changed to ${voteEmojis[i].fullName}.`);
+          return message.channel.send(`The default vote emojis have been changed to ${voteEmojis[i].emojis.join(' ')}.`)
+            .then(msg => msg.delete(5000)
+              .catch(err => this.client.logger.error(err.stack)));
+        }
+      }
     }
 
-    async run(message, args, settings) {
+    let view = '';
+    const emojiSets = [];
+    voteEmojis.forEach(set => {
 
-        const { embedColor, discord } = this.client.config;
-        const voteEmojis = this.voteEmojis(this.client);
+      const emojiSet = set.emojis;
 
-        await message.delete().catch(O_o => {});
+      view = `\`${set.id}\`: ${emojiSet.join(' ')}`;
+      if (settings.voteEmojis === set.name) {
+        view = `\`${set.id}\`: ${emojiSet.join(' ')} ***(Currently Using)***`;
+      }
 
-        const { usage } = this.help;
+      emojiSets.push(view);
+    });
 
-        let embed = new RichEmbed()
-            .setAuthor(message.guild.name, message.guild.iconURL)
-            .setColor(embedColor)
-            .setFooter(`Guild ID: ${message.guild.id}`)
-            .setTimestamp();
+    if (!settings.voteEmojis) {
+      const str = emojiSets[0].concat(' ', '***(Currently Using)***');
+      emojiSets[0] = str;
+    }
 
-        let setID = parseInt(args[0]);
-        
-        if (args[0]) {
-
-            if (args[0] && (setID > voteEmojis.length - 1)) {
-                return message.channel.send(`**${setID}** is not a valid emoji set id!`)
-                    .then(msg => msg.delete(3000).catch(err => this.client.logger.error(err.stack)));
-            }
-
-            for (let i = 0; i < voteEmojis.length; i++) {
-
-                if (args[0] && (setID === voteEmojis[i].id)) {
-
-                    this.client.settings.updateGuild(message.guild, {
-                        voteEmojis: voteEmojis[i].name
-                    }).catch(err => {
-                        this.client.logger.error(err.stack);
-                        return message.channel.send(`Error updating the default emoji set: **${err.message}**.`);
-                    });
-
-                    this.client.logger.log(`The default vote emojis in the guild ${message.guild.name} (${message.guild.id}) has been changed to ${voteEmojis[i].fullName}.`);
-                    return message.channel.send(`The default vote emojis have been changed to ${voteEmojis[i].emojis.join(' ')}.`)
-                        .then(msg => msg.delete(5000)
-                        .catch(err => this.client.logger.error(err.stack)));
-                } 
-            }
-        }
-
-        let view = '';
-        let emojiSets = [];
-        voteEmojis.forEach(set => {
-
-            let emojiSet = set.emojis;
-
-            view = `\`${set.id}\`: ${emojiSet.join(' ')}`;
-            if (settings.voteEmojis === set.name) {
-                view = `\`${set.id}\`: ${emojiSet.join(' ')} ***(Currently Using)***`;
-            }
-
-            emojiSets.push(view);
-        });
-
-        if (!settings.voteEmojis) {
-            let str = emojiSets[0].concat(' ', '***(Currently Using)***');
-            emojiSets[0] = str;
-        }
-
-        if (!args[0]) {
-            embed.setDescription(`
+    if (!args[0]) {
+      embed.setDescription(`
             **Voting Emojis**
             Choose from ${voteEmojis.length} different emoji sets to be used for voting in your guild.
 
@@ -87,9 +87,9 @@ module.exports = class SetVotesCommand extends Command {
             Submit new emoji set suggestions any time by joining our Discord server: ${discord}
             `);
 
-            return message.channel.send(embed);
-        }
-
-        return;
+      return message.channel.send(embed);
     }
+
+    return;
+  }
 };

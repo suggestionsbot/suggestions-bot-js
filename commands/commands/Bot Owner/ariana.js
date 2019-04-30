@@ -1,38 +1,38 @@
 const Command = require('../../Command');
 
 module.exports = class ArianaCommand extends Command {
-    constructor(client) {
-        super(client, {
-            name: 'ariana',
-            category: 'Owner',
-            description: 'Much to Ariana Grande <3',
-            ownerOnly: true,
-            guildOnly: false
-        });
-    }
+  constructor(client) {
+    super(client, {
+      name: 'ariana',
+      category: 'Owner',
+      description: 'Much love to Ariana Grande <3',
+      ownerOnly: true,
+      guildOnly: false
+    });
+  }
 
-    async run(message, args) {
+  async run(message, args) {
 
-        const { giphyKey } = this.client.config;
+    const { giphyKey } = this.client.config;
 
-        const giphy = require('giphy-api')(giphyKey);
-        const query = 'ariana grande';
-        
-        try {
-            const ariana = await giphy.random(query);
-            const data = ariana.data;
-            const image = data.images.original.url;
-            
-            message.channel.send({ embed: {
-                color: 0xCCCCFF,
-                image: { url: image }
-            } });
-        } catch (err) {
-            this.client.logger.error(err.stack);
-            return message.channel.send(`Error searching **${query}** on Giphy: **${err.message}**`);
+    const giphy = require('giphy-api')(giphyKey);
+    const query = 'ariana grande';
+
+    try {
+      const { data } = await giphy.random(query);
+      const url = data.images.original.url;
+
+      message.channel.send({
+        embed: {
+          color: 0xCCCCFF,
+          image: { url }
         }
-        
-
-        return;
+      });
+    } catch (err) {
+      this.client.logger.error(err.stack);
+      return message.channel.send(`Error searching **${query}** on Giphy: **${err.message}**`);
     }
+
+    return;
+  }
 };

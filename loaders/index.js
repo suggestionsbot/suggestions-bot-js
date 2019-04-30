@@ -1,4 +1,4 @@
 module.exports = {
-    CommandLoader: require('./commands'),
-    EventLoader: require('./events')
+  CommandLoader: require('./commands'),
+  EventLoader: require('./events')
 };
