@@ -84,10 +84,10 @@ module.exports = class NoteCommand extends Command {
           .setAuthor(guild, guild.iconURL)
           .setDescription(`Hey, ${sUser}. ${message.author} has added a note to your suggestion:
 
-                    Staff note: **${note}**
-                                
-                    Your suggestion ID (sID) for reference was **${id}**.
-                    `)
+          Staff note: **${note}**
+                      
+          Your suggestion ID (sID) for reference was **${id}**.
+          `)
           .setColor(embedColor)
           .setFooter(`Guild ID: ${guild.id} | sID: ${id}`)
           .setTimestamp();
@@ -98,13 +98,13 @@ module.exports = class NoteCommand extends Command {
 
           dmEmbed.setDescription(`Hey, ${sUser}. ${message.author} has updated a note on your suggestion:
 
-                    Staff note: **${note}**
-                                
-                    Your suggestion ID (sID) for reference was **${id}**.
-                    `);
+          Staff note: **${note}**
+                      
+          Your suggestion ID (sID) for reference was **${id}**.
+          `);
         } else {
           suggestion.addField('Staff Note', note);
-          suggestion.addField('Staff Member', `${message.author} (${message.author.id})`);
+          suggestion.addField('Staff Member', `${message.author} \`[${message.author.id}]\``);
         }
 
         const footer = embed.footer.text;

@@ -121,9 +121,14 @@ module.exports = class RejectCommand extends Command {
       const nerdSuccess = this.client.guilds.get('345753533141876737').emojis.find(e => e.name === 'nerdSuccess');
       const nerdError = this.client.guilds.get('345753533141876737').emojis.find(e => e.name === 'nerdError');
 
+      const nerdApprove = this.client.guilds.get('345753533141876737').emojis.find(e => e.name === 'nerdApprove');
+      const nerdDisapprove = this.client.guilds.get('345753533141876737').emojis.find(e => e.name === 'nerdDisapprove');
+
       results.forEach(result => {
         if (result.emoji === 'nerdSuccess') result.emoji = nerdSuccess.toString();
         if (result.emoji === 'nerdError') result.emoji = nerdError.toString();
+        if (result.emoji === 'nerdApprove') result.emoji = nerdApprove.toString();
+        if (result.emoji === 'nerdDisapprove') result.emoji = nerdDisapprove.toString();
       });
 
       const newResults = Array.from(results);

@@ -19,21 +19,19 @@ module.exports = class PatronsCommand extends Command {
     const patreonEmoji = this.client.guilds.get('345753533141876737').emojis.find(e => e.name === 'patreon');
 
     const patrons = [
-      'Jack Kelly',
       'Kyle',
-      'Noah Altman',
-      'Josh Walker'
+      'Noah Altman'
     ];
 
     const patronsEmbed = new RichEmbed()
       .setDescription(`
-            These are Patrons that help support bot development of Nerd Cave Development! Thank 
-            you to all who help support us in any form :nerd:
-            
-            ${patrons.map(p => `**• ${p}**`).join('\n')}
+        These are Patrons that help support bot development of Nerd Cave Development! Thank 
+        you to all who help support us in any form :nerd:
+        
+        ${patrons.map(p => `**• ${p}**`).join('\n')}
 
-            ${patreonEmoji} [Become a Patron today!](${patreon})
-            `)
+        ${patreonEmoji} [Become a Patron today!](${patreon})
+        `)
       .setColor(embedColor)
       .setTimestamp();
 

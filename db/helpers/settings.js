@@ -41,8 +41,9 @@ module.exports = class SettingsHelpers {
       else return;
     }
 
-    this.client.logger.log(`Guild "${guild.name}" (${guild.id}) updated settings: \n ${Object.keys(newSettings)}`);
-    return await Settings.findOneAndUpdate({ guildID: guild.id }, settings);
+    const updated = await Settings.findOneAndUpdate({ guildID: guild.id }, settings);
+    this.client.logger.log(`Guild "${guild}" (${guild.id}) updated settings: \n ${Object.keys(newSettings)}`);
+    return updated;
   }
 
   /**

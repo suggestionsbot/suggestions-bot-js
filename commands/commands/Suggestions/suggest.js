@@ -53,10 +53,10 @@ module.exports = class SuggestCommand extends Command {
       .setAuthor(message.guild, message.guild.iconURL)
       .setDescription(`Hey, ${sUser}. Your suggestion has been sent to the ${sChannel} channel to be voted on!
             
-                Please wait until it gets approved or rejected by a staff member.
-            
-                Your suggestion ID (sID) for reference is **${id}**.
-            `)
+          Please wait until it gets approved or rejected by a staff member.
+      
+          Your suggestion ID (sID) for reference is **${id}**.
+      `)
       .setColor(embedColor)
       .setFooter(`Guild ID: ${message.guild.id} | sID: ${id}`)
       .setTimestamp();
@@ -76,7 +76,8 @@ module.exports = class SuggestCommand extends Command {
             ${suggestion}
             `)
       .setColor(embedColor)
-      .setFooter(`User ID: ${sUser.id} | sID: ${id}`);
+      .setFooter(`User ID: ${sUser.id} | sID: ${id}`)
+      .setTimestamp();
 
     if (imageCheck) sEmbed.setImage(imageCheck[0]);
     const sendMsgs = sChannel.permissionsFor(message.guild.me).has('SEND_MESSAGES', false);
