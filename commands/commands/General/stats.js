@@ -20,11 +20,8 @@ module.exports = class StatsCommand extends Command {
 
     const { embedColor } = this.client.config;
 
-    // const botUptime = moment.duration(this.client.uptime).format(' D [days], H [hrs], m [mins], s [secs]');
     const memUsage = (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2);
     const shardID = this.client.shard.id;
-    // const guildSize = this.client.guilds.size.toLocaleString();
-    // const userSize = this.client.users.size.toLocaleString();
 
     let guildSize,
       userSize,
@@ -33,7 +30,7 @@ module.exports = class StatsCommand extends Command {
     const promises = [
       this.client.shard.fetchClientValues('guilds.size'),
       this.client.shard.broadcastEval('this.guilds.reduce((prev, guild) => prev + guild.memberCount, 0)'),
-      this.client.shard.broadcastEval('this.uptime')
+      this.client.shard.fetchClientValues('uptime')
     ];
 
     try {
@@ -41,18 +38,11 @@ module.exports = class StatsCommand extends Command {
 
       guildSize = (resolved[0].reduce((prev, count) => prev + count, 0)).toLocaleString();
       userSize = (resolved[1].reduce((prev, count) => prev + count, 0)).toLocaleString();
-      shardUptime = moment.duration(resolved[2]).format(' D [days], H [hrs], m [mins], s [secs]');
+      shardUptime = moment.duration(resolved[2][this.client.shard.id]).format(' D [days], H [hrs], m [mins], s [secs]');
     } catch (err) {
       this.client.logger.error(err.stack);
       return message.channel.send(`An error occurred: **${err.message}**`);
     }
-
-    // const guildSize = await this.client.shard.fetchClientValues('guilds.size')
-    //     .then(res => res.reduce((prev, count) => prev + count, 0));
-
-    // const userSize = await this.client.shard.broadcastEval('this.guilds.reduce((prev, guild) => prev + guild.memberCount, 0)')
-    //     .then(res => res.reduce((prev, count) => prev + count, 0));
-
 
     const embed = new RichEmbed()
       .setAuthor(`${this.client.user.username} v${version}`, this.client.user.avatarURL)
