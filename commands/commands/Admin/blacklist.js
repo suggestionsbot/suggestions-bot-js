@@ -52,18 +52,20 @@ module.exports = class BlacklistCommand extends Command {
       });
 
       blEmbed.setTitle(`${this.client.user.username} | Blacklisted User`);
-      blEmbed.setDescription(`These users are currently blacklisted from using any of the bot commands in this guild. Use \`${settings.prefix + name} help\` for command information.`);
+      blEmbed.setDescription(`
+        These users are currently blacklisted from using any of the bot commands in this guild. Use \`${settings.prefix + name} help\` for command information.
+      `);
       blEmbed.setColor(embedColor);
 
       if (gBlacklists.length === 0) {
         return message.channel.send(`There are no blacklisted users! Use \`${settings.prefix + name} help\` for more information.`)
-          .then(msg => msg.delete(5000))
-          .catch(err => this.client.logger.error(err.stack));
+          .then(m => m.delete(5000))
+          .catch(e => this.client.logger.error(e.stack));
       }
       if (active === 0) {
         return message.channel.send(`There are currently no active blacklisted users. Use \`${settings.prefix + name} help\` for more information.`)
-          .then(msg => msg.delete(5000))
-          .catch(err => this.client.logger.error(err.stack));
+          .then(m => m.delete(5000))
+          .catch(e => this.client.logger.error(e.stack));
       }
 
       return message.channel.send(blEmbed);
@@ -75,6 +77,11 @@ module.exports = class BlacklistCommand extends Command {
     const reason = args.slice(2).join(' ');
 
     if (!blUser) return this.client.errors.userNotFound(args[1], message.channel);
+    if (blUser.id === message.author.id) {
+      return message.channel.send('You cannot issue a blacklist to yourself!')
+        .then(m => m.delete(5000))
+        .catch(e => this.client.logger.error(e.stack));
+    }
 
     switch(args[0]) {
     case 'add': {

@@ -75,6 +75,13 @@ module.exports = class GBlacklistCommand extends Command {
     const blUser = this.client.users.get(args[1]) || message.mentions.users.first();
     const reason = args.slice(2).join(' ');
 
+    if (!blUser) return this.client.errors.userNotFound(args[1], message.channel);
+    if (blUser.id === message.author.id) {
+      return message.channel.send('You cannot issue a blacklist to yourself!')
+        .then(m => m.delete(5000))
+        .catch(e => this.client.logger.error(e.stack));
+    }
+
     switch(args[0]) {
     case 'add': {
       if (!blUser) return this.client.errors.userNotFound(args[1], message.channel);
