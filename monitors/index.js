@@ -1,3 +1,3 @@
 module.exports = {
-    CommandHandler: require('./commands')
+  CommandHandler: require('./commands')
 };

@@ -1,5 +1,5 @@
 module.exports = {
-    Blacklists: require('./blacklists'),
-    Settings: require('./settings'),
-    Suggestions: require('./suggestions')
+  Blacklists: require('./blacklists'),
+  Settings: require('./settings'),
+  Suggestions: require('./suggestions')
 };

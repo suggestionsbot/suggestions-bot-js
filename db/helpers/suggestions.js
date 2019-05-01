@@ -1,147 +1,165 @@
 const mongoose = require('mongoose');
+const { oneLine } = require('common-tags');
 const { Suggestion } = require('../models');
 
 module.exports = class SuggestionsHelpers {
-    constructor(client) {
-        this.client = client;
-    }
+  constructor(client) {
+    this.client = client;
+  }
 
-    /**
+  /**
      * Get a guild suggestion from the database.
-     * 
+     *
      * @param {Object} guild - The guild object.
      * @param {String} sID - The unique suggestion ID.
      */
-    async getGuildSuggestion(guild, sID) {
-        let gSuggestion = await Suggestion.findOne({ $and: [{ guildID: guild.id, sID: sID }] }).catch(err => this.client.logger.error(err.stack));
+  async getGuildSuggestion(guild, sID) {
+    const data = await Suggestion
+      .findOne({ $and: [{ guildID: guild.id, sID: sID }] });
 
-        const guildSuggestion = gSuggestion || {};
-        return guildSuggestion;
-    }
+    return data;
+  }
 
-    /**
+  /**
      * Get a suggestion globally from the database (for administrative use).
-     * 
+     *
      * @param {String} sID - The unique suggestion ID.
      */
-    async getGlobalSuggestion(sID) {
-        let gSuggestion = await Suggestion.findOne({ sID: sID }).catch(err => this.client.logger.error(err.stack));
+  async getGlobalSuggestion(sID) {
+    const data = await Suggestion
+      .findOne({ sID: sID });
 
-        const globalSuggestion = gSuggestion || {};
-        return globalSuggestion;
-    }
+    return data;
+  }
 
-    /**
+  /**
      * Get all the suggestions of a specific guild from the database.
-     * 
+     *
      * @param {Object} guild - The guild object.
      */
-    async getGuildSuggestions(guild) {
-        let gSuggestions = await Suggestion.find({ guildID: guild.id }).catch(err => this.client.logger.error(err.stack));
+  async getGuildSuggestions(guild) {
+    const data = await Suggestion
+      .find({ guildID: guild.id });
 
-        const guildSuggestions = gSuggestions || {};
-        return guildSuggestions;
-    }
+    return data;
+  }
 
-    /**
+  /**
      * Get a specific guild member's suggestions from the database.
-     * 
+     *
      * @param {Object} guild - The guild object.
      * @param {Object} member - The member object.
      */
-    async getGuildMemberSuggestions(guild, member) {
-        let gSuggestions = await Suggestion
-            .find({ $and: [{ guildID: guild.id, userID: member.id }] })
-            .sort({ time: -1 })
-            .catch(err => this.client.logger.error(err.stack));
+  async getGuildMemberSuggestions(guild, member) {
+    const data = await Suggestion
+      .find({ $and: [{ guildID: guild.id, userID: member.id }] })
+      .sort({ time: -1 });
 
-        const memberSuggestions = gSuggestions || {};
-        return memberSuggestions;
-    }
+    return data;
+  }
 
-    /**
+  /**
+     * Get a specific user's global suggestions data from the database.
+     *
+     * @param {Object} user - The user object.
+     */
+  async getUserGlobalSuggestions(user) {
+    const data = await Suggestion
+      .find({ userID: user.id })
+      .sort({ _id: -1 });
+
+    return data;
+  }
+
+  /**
      * Check if a guild requirees a response or not when rejecting suggestions.
-     * 
+     *
      * @param {Object} guild - The guild object.
      */
-    async isResponseRequired(guild) {
-        let { responseRequired } = await this.client.settings.getGuild(guild);
+  async isResponseRequired(guild) {
+    const { responseRequired } = await this.client.settings.getGuild(guild);
 
-        if (responseRequired) return true;
-        else return false;
-    }
+    if (responseRequired) return true;
+    else return false;
+  }
 
-    /**
+  /**
      * Create a new guild suggestion in the database.
-     * 
+     *
      * @param {Object} suggestion - The suggestion object.
      */
-    async submitGuildSuggestion(suggestion) {
-        let defaults = { _id: mongoose.Types.ObjectId() };
-        let merged = Object.assign(defaults, suggestion);
+  async submitGuildSuggestion(suggestion) {
+    const defaults = { _id: mongoose.Types.ObjectId() };
+    const merged = Object.assign(defaults, suggestion);
 
-        const newSuggestion = await new Suggestion(merged);
-        return newSuggestion.save().then(res => {
-            this.client.logger.log(`New suggestion submitted by "${res.username}" (${res.userID}) in the guild "${res.guildName}" (${res.userID})`);
-        });
-    }
+    const newSuggestion = await new Suggestion(merged);
+    const data = await newSuggestion.save();
 
-    /**
+    const sUser = this.client.users.get(data.userID);
+    const sGuild = this.client.guilds.get(data.guildID);
+    this.client.logger.log(
+      `New suggestion submitted by "${sUser.tag}" (${sUser.id}) in the guild "${sGuild}" (${sGuild.id})`
+    );
+    return data;
+  }
+
+  /**
      * Approve or reject a guild suggestion in the database.
-     * 
+     *
      * @param {Object} suggestion - The suggestion object.
      */
-    async handleGuildSuggestion(suggestion) {
-        let { 
-            query,
-            status,
-            statusUpdated,
-            statusReply,
-            staffMemberID,
-            staffMemberUsername,
-            newResults
-         } = suggestion;
+  async handleGuildSuggestion({ query, data }) {
 
-        let guildSuggestion = await Suggestion.findOne({ $and: query });
-        let { guildID, guildName, sID } = guildSuggestion;
-        let updatedData = {
-            status,
-            statusUpdated,
-            statusReply,
-            staffMemberID,
-            staffMemberUsername,
-            newResults
-        };
+    const guildSuggestion = await Suggestion.findOne({ $and: query });
+    const { guildID, sID } = guildSuggestion;
 
-        await guildSuggestion.updateOne(updatedData);
-        switch (status) {
-            case 'approved':
-                this.client.logger.log(`sID ${sID} has been approved in the guild "${guildName}" (${guildID}).`);
-                if (statusReply) this.client.logger.log(`sID ${sID} has been approved in the guild "${guildName}" (${guildID}) with the response "${statusReply}".`);
-                break;
-            case 'rejected':
-                this.client.logger.log(`sID ${sID} has been rejected in the guild "${guildName}" (${guildID}).`);
-                if (statusReply) this.client.logger.log(`sID ${sID} has been rejected in the guild "${guildName}" (${guildID}) with the response "${statusReply}".`);
-                break;
-            default:
-                break;
-        }
-        return;
+    const sGuild = this.client.guilds.get(guildID);
+
+    const updated = await guildSuggestion.updateOne(data);
+    switch (data.status) {
+    case 'approved':
+      this.client.logger.log(`sID ${sID} has been approved in the guild "${sGuild}" (${sGuild.id}).`);
+      if (data.statusReply) {
+        this.client.logger.log(oneLine`
+            sID ${sID} has been approved in the guild "${sGuild}" (${sGuild.id}) 
+            with the response "${data.statusReply}".
+        `);
+      }
+      break;
+    case 'rejected':
+      this.client.logger.log(`sID ${sID} has been rejected in the guild "${sGuild}" (${sGuild.id}).`);
+      if (data.statusReply) {
+        this.client.logger.log(oneLine`
+            sID ${sID} has been rejected in the guild "${sGuild}" (${sGuild.id}) 
+            with the response "${data.statusReply}".
+        `);
+      }
+      break;
+    default:
+      break;
     }
+    return updated;
+  }
 
-    /**
+  /**
      * Add a new note to a guild suggestion in the database.
-     * 
+     *
      * @param {Object} suggestion - The suggestion object.
      */
-    async addGuildSuggestionNote(suggestion) {
-        let { query, note } = suggestion;
-        let { staffMemberID, staffMemberUsername } = note;
-        let guildSuggestion = await Suggestion.findOne({ $and: query });
-        let { guildID, guildName, sID } = guildSuggestion;
-        let updatedData = { notes: note };
+  async addGuildSuggestionNote({ query, data }) {
+    // let { query, note } = suggestion;
+    const { staffMemberID } = data;
+    const guildSuggestion = await Suggestion.findOne({ $and: query });
+    const { guildID, sID } = guildSuggestion;
+    const updatedData = { notes: data };
 
-        await guildSuggestion.updateOne({ $push: updatedData });
-        return this.client.logger.log(`sID ${sID} had a note added by ${staffMemberUsername} (${staffMemberID}) "${guildName}" (${guildID}).`);
-    }
+    const sUser = this.client.users.get(staffMemberID);
+    const sGuild = this.client.guilds.get(guildID);
+
+    const updated = await guildSuggestion.updateOne({ $push: updatedData });
+    this.client.logger.log(
+      `sID ${sID} had a note added by ${sUser.tag} (${sUser.id}) "${sGuild}" (${sGuild.id}).`
+    );
+    return updated;
+  }
 };

@@ -1,9 +1,9 @@
 module.exports = class {
-    constructor(client) {
-        this.client = client;
-    }
+  constructor(client) {
+    this.client = client;
+  }
 
-    async run() {
-        this.client.logger.log('Lost connection! Reconnecting...');
-    }
+  async run() {
+    this.client.logger.log('Lost connection! Reconnecting...');
+  }
 };

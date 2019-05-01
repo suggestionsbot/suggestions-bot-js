@@ -5,121 +5,128 @@ require('moment-duration-format');
 require('moment-timezone');
 
 module.exports = class SIDCommand extends Command {
-    constructor(client) {
-        super(client, {
-            name: 'sid',
-            category: 'Suggestions',
-            description: 'View the information of a specific guild suggestion by their sID.',
-            usage: 'sid <sID>',
-            botPermissions: ['MANAGE_MESSAGES']
-        });
+  constructor(client) {
+    super(client, {
+      name: 'sid',
+      category: 'Suggestions',
+      description: 'View the information of a specific guild suggestion by their sID.',
+      usage: 'sid <sID>',
+      botPermissions: ['MANAGE_MESSAGES']
+    });
+  }
+
+  async run(message, args, settings) {
+
+    const { embedColor, suggestionColors } = this.client.config;
+
+    message.delete().catch(O_o => {});
+
+    if (!args[0]) return this.client.errors.noUsage(message.channel, this, settings);
+
+    let sID;
+    try {
+      sID = await this.client.suggestions.getGuildSuggestion(message.guild, args[0]);
+    } catch (err) {
+      this.client.logger.error(err.stack);
+      return message.channel.send(`Error querying the database for this suggestion: **${err.message}**.`);
     }
 
-    async run(message, args, settings) {
+    if (!sID) return this.client.errors.noSuggestion(message.channel, args[0]);
 
-        const { embedColor } = this.client.config;
+    let submittedOn,
+      updatedOn;
 
-        message.delete().catch(O_o => {});
+    // if (sID.time) submittedOn = moment(new Date(sID.time)).utc().format('MM/DD/YY @ h:mm A (z)');
+    // if (sID.newTime) submittedOn = moment(new Date(sID.newTime)).utc().format('MM/DD/YY @ h:mm A (z)');
 
-        if (!args[0]) return this.client.errors(message.channel, this, settings);
+    if (sID.time) submittedOn = sID.time;
+    if (sID.newTime) submittedOn = sID.newTime;
 
-        let sID;
-        try {
-            sID = await this.client.suggestions.getGuildSuggestion(message.guild, args[0]);
-        } catch (err) {
-            this.client.logger.error(err.stack);
-            return message.channel.send(`Error querying the database for this suggestion: **${err.message}**.`);
-        }
+    // if (sID.statusUpdated) updatedOn = moment.utc(new Date(sID.statusUpdated)).format('MM/DD/YY @ h:mm A (z)');
+    // if (sID.newStatusUpdated) updatedOn = moment.utc(new Date(sID.newStatusUpdated)).format('MM/DD/YY @ h:mm A (z)');
 
-        if (!sID._id) return this.client.errors.noSuggestion(message.channel, args[0]);
-        
-        let { 
-            time,
-            username,
-            userID,
-            suggestion,
-            staffMemberUsername,
-            results,
-            newResults,
-            status,
-            statusUpdated
-        } = sID;
-        
-        let submittedOn = moment(new Date(time)).utc().format('MM/DD/YY @ h:mm A (z)');
-        let updatedOn = moment(new Date(statusUpdated)).utc().format('MM/DD/YY @ h:mm A (z)');
+    if (sID.statusUpdated) updatedOn = sID.statusUpdated;
+    if (sID.newStatusUpdated) updatedOn = sID.newStatusUpdated;
 
-        let embed = new RichEmbed()
-            .setAuthor(message.guild.name, message.guild.iconURL)
-            .setTitle(`Info for sID ${args[0]}`)
-            .setFooter(`User ID: ${userID} | sID ${args[0]}`);
+    const sUser = this.client.users.get(sID.userID);
+    const sStaff = this.client.users.get(sID.staffMemberID);
 
-        let nResults = [];
-        if (newResults && newResults.length > 1) nResults = newResults.map(r => `${r.emoji} **${r.count}**`);
+    const embed = new RichEmbed()
+      .setAuthor(message.guild, message.guild.iconURL)
+      .setTitle(`Info for sID ${sID.sID}`)
+      .setFooter(`User ID: ${sUser.id} | sID ${sID.sID}`);
 
-        switch (status) {
-            case undefined:
-                embed.setDescription(`
-                **Submitter**
-                ${username}
-        
-                **Suggestion**
-                ${suggestion}
+    let nResults = [];
+    if (sID.newResults && sID.newResults.length > 1) {
+      const nerdSuccess = this.client.guilds.get('345753533141876737').emojis.find(e => e.name === 'nerdSuccess');
+      const nerdError = this.client.guilds.get('345753533141876737').emojis.find(e => e.name === 'nerdError');
+
+      const nerdApprove = this.client.guilds.get('345753533141876737').emojis.find(e => e.name === 'nerdApprove');
+      const nerdDisapprove = this.client.guilds.get('345753533141876737').emojis.find(e => e.name === 'nerdDisapprove');
+
+      sID.newResults.forEach(result => {
+        if (result.emoji === 'nerdSuccess') result.emoji = nerdSuccess.toString();
+        if (result.emoji === 'nerdError') result.emoji = nerdError.toString();
+        if (result.emoji === 'nerdApprove') result.emoji = nerdApprove.toString();
+        if (result.emoji === 'nerdDisapprove') result.emoji = nerdDisapprove.toString();
+      });
+
+      nResults = sID.newResults.map(r => `${r.emoji} **${r.count}**`);
+    }
+
+    switch (sID.status) {
+    case undefined:
+      embed.setDescription(`
+        **Submitter**
+        ${sUser}
+
+        **Suggestion**
+        ${sID.suggestion}
+      `);
+      embed.setColor(embedColor);
+      embed.setTimestamp(submittedOn);
+      message.channel.send(embed);
+      break;
+    case 'approved':
+      embed.setDescription(`
+        **Submitter**
+        ${sUser}
+
+        **Suggestion**
+        ${sID.suggestion}
+
+        **Approved By**
+        ${sStaff}
+
+        **Results**
+        ${nResults.join('\n') || sID.results}
     
-                **Submitted**
-                ${submittedOn}`);
-                embed.setColor(embedColor);
-                message.channel.send(embed);
-                break;
-            case 'approved':
-                embed.setDescription(`
-                **Submitter**
-                ${username}
+        `);
+      embed.setColor(suggestionColors.approved);
+      embed.setTimestamp(updatedOn);
+      message.channel.send(embed);
+      break;
+    case 'rejected':
+      embed.setDescription(`
+        **Submitter**
+        ${sUser}
 
-                **Suggestion**
-                ${suggestion}
+        **Suggestion**
+        ${sID.suggestion}
 
-                **Submitted**
-                ${submittedOn}
+        **Rejected By**
+        ${sStaff}
 
-                **Approved**
-                ${updatedOn}
+        **Results**
+        ${nResults.join('\n') || sID.results}
 
-                **Approved By**
-                ${staffMemberUsername}
-
-                **Results**
-                ${nResults.join('\n') || results}
-            
-                `);
-                embed.setColor('#00e640');
-                message.channel.send(embed);
-                break;
-            case 'rejected':
-                embed.setDescription(`
-                **Submitter**
-                ${username}
-
-                **Suggestion**
-                ${suggestion}
-
-                **Submitted**
-                ${submittedOn}
-
-                **Rejected**
-                ${updatedOn}
-
-                **Rejected By**
-                ${staffMemberUsername}
-
-                **Results**
-                ${nResults.join('\n') || results}
-            
-                `);
-                embed.setColor('#cf000f');
-                message.channel.send(embed);
-                break;
-            default:
-        }
-        return;
+        `);
+      embed.setColor(suggestionColors.rejected);
+      embed.setTimestamp(updatedOn);
+      message.channel.send(embed);
+      break;
+    default:
     }
+    return;
+  }
 };

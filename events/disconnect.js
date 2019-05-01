@@ -1,9 +1,9 @@
 module.exports = class {
-    constructor(client) {
-        this.client = client;
-    }
+  constructor(client) {
+    this.client = client;
+  }
 
-    async run() {
-        this.client.logger.log('Bot is disconnecting...');
-    }
+  async run() {
+    this.client.logger.log('Bot is disconnecting...');
+  }
 };
