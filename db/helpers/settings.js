@@ -6,12 +6,6 @@ module.exports = class SettingsHelpers {
     this.client = client;
   }
 
-  /* SETTINGS FUNCTIONS
-    These functions are used by any and all location in the bot that wants to either
-    read the current *complete* guild settings (default + overrides, merged) or that
-    wants to change settings for a specific guild.
-    */
-
   /**
      * Get a guild's settings from the database.
      *
@@ -85,7 +79,9 @@ module.exports = class SettingsHelpers {
 
     const newSettings = await new Settings(merged);
     const data = await newSettings.save();
-    this.client.logger.log(`Default settings saved for guild ${data.guildName} (${data.guildID})`);
+
+    const nGuild = this.client.guilds.get(data.guildID);
+    this.client.logger.log(`Default settings saved for guild ${nGuild} (${nGuild.id})`);
     return data;
   }
 
@@ -101,7 +97,9 @@ module.exports = class SettingsHelpers {
 
     const newCommand = await new Command(merged);
     const data = await newCommand.save();
-    this.client.logger.log(`${data.username} (${data.userID}) ran command ${data.command}`, 'cmd');
+
+    const cUser = this.client.users.get(data.userID);
+    this.client.logger.log(`${cUser.tag} (${cUser.id}) ran command ${data.command}`, 'cmd');
     return data;
   }
 

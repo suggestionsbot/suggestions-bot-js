@@ -7,7 +7,7 @@ module.exports = class ConfigCommand extends Command {
       name: 'config',
       category: 'Admin',
       description: 'View a text-based version of the bot configuration for the guild.',
-      aliases: ['conf', 'viewconf', 'viewconfig', 'settings'],
+      aliases: ['conf', 'settings'],
       usage: 'config [setting] [value]',
       adminOnly: true,
       botPermissions: ['MANAGE_MESSAGES'],

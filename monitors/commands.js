@@ -86,11 +86,10 @@ module.exports = class CommandHandler {
 
     const newCommand = {
       guildID: message.guild ? message.guild.id : null,
-      guildOwnerID: message.guild ? message.guild.ownerID : null,
       command: cmd.help.name,
       channel: message.guild ? message.channel.name : null,
       userID: message.author.id,
-      time: moment(Date.now())
+      newTime: message.createdAt.getTime()
     };
 
     if (message.guild) {
@@ -101,9 +100,9 @@ module.exports = class CommandHandler {
           this.client.emit('commandBlocked', cmd, `botPermissions: ${missing.join(', ')}`);
           if (missing.length === 1) return message.reply(`I need the \`${permissions[missing[0]]}\` permission for the \`${cmd.help.name}\` command to work.`).then(msg => msg.delete(5000));
           return message.reply(oneLine`
-                        I need the following permissions for the \`${cmd.help.name}\` command to work:
-                        ${missing.map(p => `\`${permissions[p]}\``).join(', ')}
-                    `);
+              I need the following permissions for the \`${cmd.help.name}\` command to work:
+              ${missing.map(p => `\`${permissions[p]}\``).join(', ')}
+          `);
         }
       }
     }

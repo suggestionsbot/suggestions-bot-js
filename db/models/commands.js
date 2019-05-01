@@ -9,7 +9,8 @@ const commandSchema = mongoose.Schema({
   username: String,
   userID: String,
   channel: String,
-  time: String
+  time: String,
+  newTime: Number
 });
 
 module.exports = mongoose.model('Commands', commandSchema);
