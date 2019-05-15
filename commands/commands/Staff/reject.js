@@ -36,7 +36,7 @@ module.exports = class RejectCommand extends Command {
       return message.channel.send(`Error querying the database for this suggestions: **${err.message}**.`);
     }
 
-    if (!sID._id) return this.client.errors.noSuggestion(message.channel, id);
+    if (!sID) return this.client.errors.noSuggestion(message.channel, id);
 
     if (!message.guild) {
       try {
@@ -62,10 +62,11 @@ module.exports = class RejectCommand extends Command {
 
     const {
       userID,
-      username,
       suggestion,
       status
     } = sID;
+
+    const sUser = this.client.users.get(userID);
 
     if (status === 'rejected') {
       return message.channel.send(`sID **${id}** has already been rejected. Cannot do this action again.`)
@@ -74,8 +75,8 @@ module.exports = class RejectCommand extends Command {
     }
 
     const sUser = this.client.users.get(userID);
-    if (!message.guild.members.get(sUser.id)) {
-      message.channel.send(`**${username}** is no longer in the guild, but their suggestion will still be rejected.`)
+    if (!guild.members.get(sUser.id)) {
+      message.channel.send(`**${sUser.tag}** is no longer in the guild, but their suggestion will still be rejected.`)
         .then(msg => msg.delete(3000))
         .catch(err => this.client.logger.error(err.stack));
     }
@@ -101,8 +102,8 @@ module.exports = class RejectCommand extends Command {
         .setTitle(message.guild, guild.iconURL)
         .setDescription(`Hey, ${sUser}. Unfortunately, your suggestion has been rejected by ${message.author}!
                             
-                Your suggestion ID (sID) for reference was **${id}**.
-                `)
+        Your suggestion ID (sID) for reference was **${id}**.
+        `)
         .setColor(rejected)
         .setFooter(`Guild ID: ${guild.id} | sID: ${id}`)
         .setTimestamp();
@@ -139,18 +140,18 @@ module.exports = class RejectCommand extends Command {
       const logsEmbed = new RichEmbed()
         .setAuthor(guild.name, guild.iconURL)
         .setDescription(`
-                    **Results:**
-                    ${view}
-                    
-                    **Suggestion:**
-                    ${suggestion}
-        
-                    **Submitter:**
-                    ${sUser}
-        
-                    **Rejected By:**
-                    ${message.author}
-                `)
+            **Results:**
+            ${view}
+            
+            **Suggestion:**
+            ${suggestion}
+
+            **Submitter:**
+            ${sUser}
+
+            **Rejected By:**
+            ${message.author}
+        `)
         .setColor(rejected)
         .setFooter(`sID: ${id}`)
         .setTimestamp();
@@ -158,27 +159,27 @@ module.exports = class RejectCommand extends Command {
       if (reply) {
         dmEmbed.setDescription(`Hey, ${sUser}. Unfortunately, your suggestion has been rejected by ${message.author}!
         
-                Staff response: **${reply}**
-                                    
-                Your suggestion ID (sID) for reference was **${id}**.
-                `);
+          Staff response: **${reply}**
+                              
+          Your suggestion ID (sID) for reference was **${id}**.
+        `);
 
         logsEmbed.setDescription(`
-                **Results:**
-                ${view}
+          **Results:**
+          ${view}
 
-                **Suggestion:**
-                ${suggestion}
-                    
-                **Submitter:**
-                ${sUser}
-        
-                **Rejected By:**
-                ${message.author}
-    
-                **Response:**
-                ${reply}
-                `);
+          **Suggestion:**
+          ${suggestion}
+              
+          **Submitter:**
+          ${sUser}
+  
+          **Rejected By:**
+          ${message.author}
+
+          **Response:**
+          ${reply}
+        `);
       }
 
       const footer = embed.footer.text;
@@ -208,7 +209,7 @@ module.exports = class RejectCommand extends Command {
           sMessage.edit(approvedEmbed).then(m => m.delete(5000));
           suggestionsLogs.send(logsEmbed);
           try {
-            if (settings.dmResponses) sUser.send(dmEmbed);
+            if (settings.dmResponses && guild.members.get(sUser.id)) sUser.send(dmEmbed);
           } catch (err) {
             message.channel.send(`**${sUser.tag}** has DMs disabled, but their suggestion will still be rejected.`);
           }

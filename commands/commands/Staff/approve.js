@@ -37,7 +37,7 @@ module.exports = class ApproveCommand extends Command {
       return message.channel.send(`Error querying the database for this suggestions: **${err.message}**.`);
     }
 
-    if (!sID._id) return this.client.errors.noSuggestion(message.channel, id);
+    if (!sID) return this.client.errors.noSuggestion(message.channel, id);
 
     if (!message.guild) {
       try {
@@ -63,7 +63,6 @@ module.exports = class ApproveCommand extends Command {
 
     const {
       userID,
-      username,
       suggestion,
       status
     } = sID;
@@ -75,8 +74,8 @@ module.exports = class ApproveCommand extends Command {
     }
 
     const sUser = this.client.users.get(userID);
-    if (!message.guild.members.get(sUser.id)) {
-      message.channel.send(`**${username}** is no longer in the guild, but their suggestion will still be approved.`)
+    if (!guild.members.get(sUser.id)) {
+      message.channel.send(`**${sUser.tag}** is no longer in the guild, but their suggestion will still be approved.`)
         .then(msg => msg.delete(3000))
         .catch(err => this.client.logger.error(err.stack));
     }
@@ -101,8 +100,8 @@ module.exports = class ApproveCommand extends Command {
         .setAuthor(guild, guild.iconURL)
         .setDescription(`Hey, ${sUser}. Your suggestion has been approved by ${message.author}!
                             
-                Your suggestion ID (sID) for reference was **${id}**.
-                `)
+        Your suggestion ID (sID) for reference was **${id}**.
+        `)
         .setColor(approved)
         .setFooter(`Guild ID: ${guild.id} | sID: ${id}`)
         .setTimestamp();
@@ -139,18 +138,18 @@ module.exports = class ApproveCommand extends Command {
       const logsEmbed = new RichEmbed()
         .setAuthor(guild.name, guild.iconURL)
         .setDescription(`
-                    **Results:**
-                    ${view}
+          **Results:**
+          ${view}
 
-                    **Suggestion:**
-                    ${suggestion}
-        
-                    **Submitter:**
-                    ${sUser}
-        
-                    **Approved By:**
-                    ${message.author}
-                `)
+          **Suggestion:**
+          ${suggestion}
+
+          **Submitter:**
+          ${sUser}
+
+          **Approved By:**
+          ${message.author}
+        `)
         .setColor(approved)
         .setFooter(`sID: ${id}`)
         .setTimestamp();
@@ -158,27 +157,27 @@ module.exports = class ApproveCommand extends Command {
       if (reply) {
         dmEmbed.setDescription(`Hey, ${sUser}. Your suggestion has been approved by ${message.author}!
         
-                Staff response: **${reply}**
-                                    
-                Your suggestion ID (sID) for reference was **${id}**.
-                `);
+          Staff response: **${reply}**
+                              
+          Your suggestion ID (sID) for reference was **${id}**.
+        `);
 
         logsEmbed.setDescription(`
-                **Results:**
-                ${view}
-                
-                **Suggestion:**
-                ${suggestion}
-                    
-                **Submitter:**
-                ${sUser}
-        
-                **Approved By:**
-                ${message.author}
-    
-                **Response:**
-                ${reply}
-                `);
+          **Results:**
+          ${view}
+          
+          **Suggestion:**
+          ${suggestion}
+              
+          **Submitter:**
+          ${sUser}
+
+          **Approved By:**
+          ${message.author}
+
+          **Response:**
+          ${reply}
+        `);
       }
 
       const footer = embed.footer.text;
@@ -208,7 +207,7 @@ module.exports = class ApproveCommand extends Command {
           sMessage.edit(approvedEmbed).then(m => m.delete(5000));
           suggestionsLogs.send(logsEmbed);
           try {
-            if (settings.dmResponses) sUser.send(dmEmbed);
+            if (settings.dmResponses && guild.members.get(sUser.id)) sUser.send(dmEmbed);
           } catch (err) {
             message.channel.send(`**${sUser.tag}** has DMs disabled, but their suggestion will still be approved.`);
           }

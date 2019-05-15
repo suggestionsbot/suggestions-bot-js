@@ -28,7 +28,7 @@ module.exports = class CommandHandler {
 
     if (message.guild) {
       const getPrefix = new RegExp(`^<@!?${this.client.user.id}>( |)$`);
-      if (message.content.match(getPrefix)) return message.channel.send(`My prefix in this guild is \`${settings.prefix}\``);
+      if (message.content.match(getPrefix) && !message.author.bot) return message.channel.send(`My prefix in this guild is \`${settings.prefix}\``);
     }
 
     if (message.author.bot) return;

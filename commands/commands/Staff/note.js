@@ -37,7 +37,7 @@ module.exports = class NoteCommand extends Command {
       return message.channel.send(`Error querying the database for this suggestions: **${err.message}**.`);
     }
 
-    if (!sID._id) return this.client.errors.noSuggestion(message.channel, id);
+    if (!sID) return this.client.errors.noSuggestion(message.channel, id);
 
     if (!message.guild) {
       try {
@@ -53,16 +53,20 @@ module.exports = class NoteCommand extends Command {
             (guild.channels.find(c => c.toString() === settings.suggestionsChannel)) ||
             (guild.channels.get(settings.suggestionsChannel));
 
-    const {
-      userID,
-      username,
-      status
-    } = sID;
+    const { userID, status } = sID;
 
-    if (status === 'approved' || status === 'rejected') return message.channel.send(`sID **${id}** has already been approved or rejected. Cannot do this action again.`).then(msg => msg.delete(3000)).catch(err => this.client.logger.error(err.stack));
+    if (status === 'approved' || status === 'rejected') {
+      return message.channel.send(`sID **${id}** has already been approved or rejected. Cannot do this action again.`)
+        .then(msg => msg.delete(3000))
+        .catch(err => this.client.logger.error(err.stack));
+    }
 
     const sUser = guild.members.get(userID);
-    if (!sUser) message.channel.send(`**${username}** is no longer in the guild, but a note will still be added to the suggestion.`).then(msg => msg.delete(3000)).catch(err => this.client.logger.error(err.stack));
+    if (!sUser) {
+      message.channel.send(`**${sUser.tag}** is no longer in the guild, but a note will still be added to the suggestion.`)
+        .then(msg => msg.delete(3000))
+        .catch(err => this.client.logger.error(err.stack));
+    }
 
     let fetchedMessages;
     try {
@@ -129,10 +133,10 @@ module.exports = class NoteCommand extends Command {
             message.channel.send(`Added a note to **${id}**: **${note}**.`).then(m => m.delete(5000));
             sMessage.edit(suggestion);
             try {
-              if (settings.dmResponses) sUser.send(dmEmbed);
+              if (settings.dmResponses && guild.members.get(sUser.id)) sUser.send(dmEmbed);
             } catch (err) {
               this.client.logger.error(err.stack);
-              message.channel.send(`An error occurred DMing **${sUser.displayName}** their suggestion note: **${err.message}**.`);
+              message.channel.send(`An error occurred DMing **${sUser.tag}** their suggestion note: **${err.message}**.`);
             }
 
             await this.client.suggestions.addGuildSuggestionNote(suggestionNote);
