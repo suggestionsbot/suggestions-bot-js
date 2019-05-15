@@ -37,7 +37,7 @@ module.exports = class ApproveCommand extends Command {
       return message.channel.send(`Error querying the database for this suggestions: **${err.message}**.`);
     }
 
-    if (!sID._id) return this.client.errors.noSuggestion(message.channel, id);
+    if (!sID) return this.client.errors.noSuggestion(message.channel, id);
 
     if (!message.guild) {
       try {
