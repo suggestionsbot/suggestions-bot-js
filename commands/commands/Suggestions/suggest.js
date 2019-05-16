@@ -100,12 +100,17 @@ module.exports = class SuggestCommand extends Command {
 
     const filter = set => set.name === emojis;
     const defaults = set => set.name === 'defaultEmojis';
+    const fallback = set => set.name === 'oldDefaults';
     const foundSet = voteEmojis.find(filter) || voteEmojis.find(defaults);
     const emojiSet = foundSet.emojis;
+    const fallbackSet = voteEmojis.find(fallback).emojis;
 
     sChannel.send(sEmbed)
       .then(async msg => {
-        for (let i = 0; i < emojiSet.length; i++) await msg.react(emojiSet[i]);
+        for (let i = 0; i < emojiSet.length; i++) {
+          if (!emojiSet[i]) await msg.react(fallbackSet[i]);
+          else await msg.react(emojiSet[i]);
+        }
       })
       .catch(err => {
         this.client.logger.error(err.stack);

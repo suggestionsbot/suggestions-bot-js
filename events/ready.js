@@ -37,67 +37,70 @@ module.exports = class {
       // handle posting stats to bot lists
       require('../utils/voting')(this.client);
 
-      this.client.guilds.forEach(async g => {
-        try {
-          const {
-            _id,
-            guildOwnerID,
-            guildName
-          } = await this.client.settings.getGuild(g);
-
-          if (!_id) await this.client.emit('guildCreate', g); // must check for _id as that indicates the document exists in mongodb
-          if (guildOwnerID !== g.ownerID) await this.client.settings.updateGuild(g, { guildOwnerID: g.ownerID });
-          if (guildName !== g.name) await this.client.settings.updateGuild(g, { guildName: g.name });
-        } catch (err) {
-          this.client.logger.error(err.stack);
-        }
-      });
-
-
-      let allSettings;
-      try {
-        allSettings = await this.client.settings.getAllSettings();
-      } catch (err) {
-        this.client.logger.error(err.stack);
-      }
-
-      allSettings.map(async e => {
-        const g = this.client.guilds.get(e.guildID);
-        if (!g) {
+      this.client.shard.broadcastEval(`
+        (async() => {
           try {
-            await this.client.settings.deleteGuild(e);
+            this.guilds.forEach(async g => {
+              const {
+                guildID,
+                guildOwnerID,
+                guildName
+              } = await this.settings.getGuild(g);
+    
+              if (!guildID) await this.emit('guildCreate', g);
+              if (guildID && (guildOwnerID !== g.ownerID)) await this.settings.updateGuild(g, { guildOwnerID: g.ownerID });
+              if (guildID && (guildName !== g.name)) await this.settings.updateGuild(g, { guildName: g.name });
+            });
           } catch (err) {
-            this.client.logger.error(err);
+            this.logger.error(err.stack);
           }
+        })();
+      `);
 
-          const oldServer = new RichEmbed()
-            .setTitle('Removed')
-            .setDescription(`
-                        **ID:** \`${e.guildID}\`
-                        **Name:** \`${e.guildName}\`
-                        **Owner:** <@${e.guildOwnerID}>
-                        `)
-            .setColor('#FF4500')
-            .setTimestamp();
+      // let allSettings;
+      // try {
+      //   allSettings = await this.client.settings.getAllSettings();
+      // } catch (err) {
+      //   this.client.logger.error(err.stack);
+      // }
 
-          switch (process.env.NODE_ENV) {
-          // 345753533141876737 = Nerd Cave Testing
-          case 'development': {
-            const logGuild = this.client.guilds.get('345753533141876737');
-            const logChannel = logGuild.channels.find(c => c.name === 'server_logs');
-            logChannel.send(oldServer);
-            break;
-          }
-          // 480231440932667393 = Nerd Cave Development
-          default: {
-            const logGuild = this.client.guilds.get('480231440932667393');
-            const logChannel = logGuild.channels.find(c => c.name === 'server_logs');
-            logChannel.send(oldServer);
-            break;
-          }
-          }
-        }
-      });
+      // allSettings.map(async e => {
+      //   const g = this.client.guilds.get(e.guildID);
+      //   if (!g) {
+      //     try {
+      //       await this.client.settings.deleteGuild(e);
+      //     } catch (err) {
+      //       this.client.logger.error(err);
+      //     }
+
+      //     const oldServer = new RichEmbed()
+      //       .setTitle('Removed')
+      //       .setDescription(`
+      //                   **ID:** \`${e.guildID}\`
+      //                   **Name:** \`${e.guildName}\`
+      //                   **Owner:** <@${e.guildOwnerID}>
+      //                   `)
+      //       .setColor('#FF4500')
+      //       .setTimestamp();
+
+      //     switch (process.env.NODE_ENV) {
+      //     // 345753533141876737 = Nerd Cave Testing
+      //     case 'development': {
+      //       const logGuild = this.client.guilds.get('345753533141876737');
+      //       const logChannel = logGuild.channels.find(c => c.name === 'server_logs');
+      //       logChannel.send(oldServer);
+      //       break;
+      //     }
+      //     // 480231440932667393 = Nerd Cave Development
+      //     default: {
+      //       const logGuild = this.client.guilds.get('480231440932667393');
+      //       const logChannel = logGuild.channels.find(c => c.name === 'server_logs');
+      //       logChannel.send(oldServer);
+      //       break;
+      //     }
+      //     }
+      //   }
+      // });
     }
   }
 };

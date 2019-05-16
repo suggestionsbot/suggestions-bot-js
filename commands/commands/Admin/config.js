@@ -233,9 +233,9 @@ module.exports = class ConfigCommand extends Command {
 
         const emojiSet = set.emojis;
 
-        view = `\`${set.id}\`: ${emojiSet.join(' ')}`;
+        view = `\`${set.id}\`: ${emojiSet[0] ? emojiSet.join(' ') : 'Not found'}`;
         if (settings.voteEmojis === set.name) {
-          view = `\`${set.id}\`: ${emojiSet.join(' ')} ***(Currently Using)***`;
+          view = `\`${set.id}\`: ${emojiSet[0] ? emojiSet.join(' ') : 'Not found'} ***(Currently Using)***`;
         }
 
         emojiSets.push(view);
