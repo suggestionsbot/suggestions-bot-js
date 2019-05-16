@@ -74,7 +74,6 @@ module.exports = class RejectCommand extends Command {
         .catch(err => this.client.logger.error(err.stack));
     }
 
-    const sUser = this.client.users.get(userID);
     if (!guild.members.get(sUser.id)) {
       message.channel.send(`**${sUser.tag}** is no longer in the guild, but their suggestion will still be rejected.`)
         .then(msg => msg.delete(3000))
