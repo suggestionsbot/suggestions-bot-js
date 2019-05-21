@@ -247,14 +247,14 @@ module.exports = class ConfigCommand extends Command {
       }
 
       configEmbed.setDescription(`
-                    **Voting Emojis**
-                    Choose from ${vEmojis.length} different emoji sets to be used for voting in your guild.
+        **Voting Emojis**
+        Choose from ${vEmojis.length} different emoji sets to be used for voting in your guild.
 
-                    ${emojiSets.join('\n\n')}
+        ${emojiSets.join('\n\n')}
 
-                    You can do \`${prefix + name} emojis [id]\` to set the desired emojis.
-                    Submit new emoji set suggestions any time by joining our Discord server: ${discord}
-                    `);
+        You can do \`${prefix + name} emojis [id]\` to set the desired emojis.
+        Submit new emoji set suggestions any time by joining our Discord server: ${discord}
+        `);
 
       message.channel.send(configEmbed);
       break;
@@ -362,13 +362,13 @@ module.exports = class ConfigCommand extends Command {
             await this.client.settings.updateGuild(message.guild, { dmResponses: true });
             configEmbed
               .setDescription(`
-                                    DM responses have been enabled. The bot will DM users when these actions happen:
-                                    
-                                    - Suggestion submitted
-                                    - Suggestion approved
-                                    - Suggestion rejected
-                                    - Suggestion note added
-                                `);
+                  DM responses have been enabled. The bot will DM users when these actions happen:
+                  
+                  - Suggestion submitted
+                  - Suggestion approved
+                  - Suggestion rejected
+                  - Suggestion note added
+              `);
 
             message.channel.send(configEmbed).then(m => m.delete(5000));
           } catch (err) {
@@ -382,13 +382,13 @@ module.exports = class ConfigCommand extends Command {
             await this.client.settings.updateGuild(message.guild, { dmResponses: false });
             configEmbed
               .setDescription(`
-                                    DM responses have been disabled. The bot will *not* DM users when these actions happen:
-                                    
-                                    - Suggestion submitted
-                                    - Suggestion approved
-                                    - Suggestion rejected
-                                    - Suggestion note added
-                                `);
+                  DM responses have been disabled. The bot will *not* DM users when these actions happen:
+                  
+                  - Suggestion submitted
+                  - Suggestion approved
+                  - Suggestion rejected
+                  - Suggestion note added
+              `);
 
             message.channel.send(configEmbed).then(m => m.delete(5000));
           } catch (err) {
@@ -413,10 +413,10 @@ module.exports = class ConfigCommand extends Command {
     default: {
       configEmbed
         .setDescription(`
-                    To view more information on a specific configuration option: \`${prefix + name} [setting]\`.
-                    
-                    For updating a specific configuration option: \`${prefix + usage}\`
-                    `)
+        To view more information on a specific configuration option: \`${prefix + name} [setting]\`.
+        
+        For updating a specific configuration option: \`${prefix + usage}\`
+        `)
         .addField('Prefix', `\`${prefix + name} prefix\``, true)
         .addField('Suggestions Channel', `\`${prefix + name} channel\``, true)
         .addField('Suggestions Logs', `\`${prefix + name} logs\``, true)

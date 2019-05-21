@@ -39,16 +39,22 @@ module.exports = class BlacklistCommand extends Command {
     if (!args[0]) {
 
       let active = 0;
-      gBlacklists.forEach(blacklist => {
-        if (blacklist.status === false) return;
-        const issued = this.client.users.get(blacklist.userID);
-        const issuer = this.client.users.get(blacklist.issuerID);
-        const num = blacklist.case;
-        const reason = blacklist.reason;
-        const caseStatus = this.blStatus[blacklist.status];
+      gBlacklists.forEach(async blacklist => {
+        try {
+          if (blacklist.status === false) return;
+          // const issued = this.client.users.get(blacklist.userID);
+          // const issuer = this.client.users.get(blacklist.issuerID);
+          const issued = await this.client.shard.broadcastEval(`this.client.users.get('${blacklist.userID}')`);
+          const issuer = await this.client.shard.broadcastEval(`this.client.users.get('${blacklist.issuerID}')`);
+          const num = blacklist.case;
+          const reason = blacklist.reason;
+          const caseStatus = this.blStatus[blacklist.status];
 
-        blEmbed.addField(`Case #${num}`, `**User:** ${issued.tag}\n**Reason:** ${reason}\n**Issuer:** ${issuer.tag}\n**Status:** ${caseStatus}`);
-        active++;
+          blEmbed.addField(`Case #${num}`, `**User:** ${issued.tag}\n**Reason:** ${reason}\n**Issuer:** ${issuer.tag}\n**Status:** ${caseStatus}`);
+          active++;
+        } catch (err) {
+          return;
+        }
       });
 
       blEmbed.setTitle(`${this.client.user.username} | Blacklisted User`);
@@ -106,14 +112,14 @@ module.exports = class BlacklistCommand extends Command {
 
       const dmBlacklistAdd = new RichEmbed()
         .setDescription(`
-                    Hello ${blUser},
+          Hello ${blUser},
 
-                    You have been blacklisted by ${message.author} from using any of the ${this.client.user}'s commands in the guild **${message.guild}**.
-                    
-                    This blackist does not expire and can only be removed at the discretion of a server administrator. You may find the reason below.
+          You have been blacklisted by ${message.author} from using any of the ${this.client.user}'s commands in the guild **${message.guild}**.
+          
+          This blackist does not expire and can only be removed at the discretion of a server administrator. You may find the reason below.
 
-                    **Reason:** ${reason}
-                    `)
+          **Reason:** ${reason}
+          `)
         .setColor('#00e640')
         .setTimestamp();
 

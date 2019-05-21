@@ -2,38 +2,34 @@ const mongoose = require('mongoose');
 
 const suggestionSchema = mongoose.Schema({
   _id: mongoose.Schema.Types.ObjectId,
-  guildName: String,
   guildID: String,
-  username: String,
   userID: String,
+  messageID: String,
   suggestion: String,
   sID: String,
-  time: String,
+  time: Number,
   newTime: Number,
   status: String,
-  statusUpdated: String,
   newStatusUpdated: Number,
+  statusUpdated: Number,
   statusReply: String,
   staffMemberID: String,
-  staffMemberUsername: String,
-  results: String,
+  results: [{ emoji: String, count: Number }],
   newResults: [{ emoji: String, count: Number }],
-  note: String,
   notes: [{
     note: String,
     staffMemberID: String,
     staffMemberUsername: String,
-    noteAdded: String,
+    noteAdded: Number,
     newNoteAdded: Number
   }],
   edits: [{
     edit: String,
     username: String,
     userID: String,
-    edited: String,
+    edited: Number,
     newEdited: Number
-  }],
-  noteAdded: String
+  }]
 });
 
 module.exports = mongoose.model('Suggestion', suggestionSchema);

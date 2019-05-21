@@ -30,6 +30,10 @@ module.exports = class {
 
     this.client.botPresence();
 
+    // this.client.shard.broadcastEval(`
+    //   if (this.shard.id === 0) this.dashboard.app.listen(process.env.API_PORT);
+    // `);
+
     // If the bot was invited to a guild while it was offline, the "ready" event will
     // be emitted (ONLY IN PRODUCTION)
     if (process.env.NODE_ENV === 'production') {

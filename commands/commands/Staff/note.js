@@ -41,7 +41,8 @@ module.exports = class NoteCommand extends Command {
 
     if (!message.guild) {
       try {
-        guild = this.client.guilds.get(sID.guildID);
+        guild = await this.client.shard.broadcastEval(`this.client.guilds.get('${sID.guildID}');`);
+        guild = guild[0];
         settings = await this.client.settings.getGuild(sID.guildID);
       } catch (err) {
         this.client.logger.error(err.message);
@@ -50,10 +51,13 @@ module.exports = class NoteCommand extends Command {
     }
 
     const suggestionsChannel = guild.channels.find(c => c.name === settings.suggestionsChannel) ||
-            (guild.channels.find(c => c.toString() === settings.suggestionsChannel)) ||
-            (guild.channels.get(settings.suggestionsChannel));
+      (guild.channels.get(settings.suggestionsChannel));
 
-    const { userID, status } = sID;
+    const {
+      userID,
+      messageID,
+      status
+    } = sID;
 
     if (status === 'approved' || status === 'rejected') {
       return message.channel.send(`sID **${id}** has already been approved or rejected. Cannot do this action again.`)
@@ -68,90 +72,162 @@ module.exports = class NoteCommand extends Command {
         .catch(err => this.client.logger.error(err.stack));
     }
 
-    let fetchedMessages;
-    try {
-      fetchedMessages = await suggestionsChannel.fetchMessages({ limit: 100 });
-    } catch (err) {
-      this.client.logger.error(err.stack);
-      return message.channel.send(`There was an error fetching messages from the ${suggestionsChannel}: **${err.message}**.`);
-    }
+    if (messageID) {
+      let sMessage;
+      try {
+        sMessage = await suggestionsChannel.fetchMessage(messageID);
+      } catch (err) {
+        this.client.logger.error(err.stack);
+        message.channel.send('The suggestion message was not found, but still will be updated!')
+          .then(m => m.delete(5000));
+      }
 
-    try {
-      fetchedMessages.forEach(async msg => {
+      const embed = sMessage.embeds[0];
 
-        const embed = msg.embeds[0];
-        if (!embed) return;
+      const suggestion = new RichEmbed(embed);
 
-        const suggestion = new RichEmbed(embed);
+      const dmEmbed = new RichEmbed()
+        .setAuthor(guild, guild.iconURL)
+        .setDescription(`Hey, ${sUser}. ${message.author} has added a note to your suggestion:
 
-        const dmEmbed = new RichEmbed()
-          .setAuthor(guild, guild.iconURL)
-          .setDescription(`Hey, ${sUser}. ${message.author} has added a note to your suggestion:
+        Staff note: **${note}**
+                    
+        Your suggestion ID (sID) for reference was **${id}**.
+        `)
+        .setColor(embedColor)
+        .setFooter(`Guild ID: ${guild.id} | sID: ${id}`)
+        .setTimestamp();
 
-          Staff note: **${note}**
-                      
-          Your suggestion ID (sID) for reference was **${id}**.
-          `)
-          .setColor(embedColor)
-          .setFooter(`Guild ID: ${guild.id} | sID: ${id}`)
-          .setTimestamp();
+      if (embed.fields.length && embed.fields[0].name === 'Staff Note') {
+        suggestion.fields[0].value = note;
+        suggestion.fields[1].value = `${message.author} (${message.author.id})`;
 
-        if (embed.fields.length && embed.fields[0].name === 'Staff Note') {
-          suggestion.fields[0].value = note;
-          suggestion.fields[1].value = `${message.author} (${message.author.id})`;
+        dmEmbed.setDescription(`Hey, ${sUser}. ${message.author} has updated a note on your suggestion:
 
-          dmEmbed.setDescription(`Hey, ${sUser}. ${message.author} has updated a note on your suggestion:
+        Staff note: **${note}**
+                    
+        Your suggestion ID (sID) for reference was **${id}**.
+        `);
+      } else {
+        suggestion.addField('Staff Note', note);
+        suggestion.addField('Staff Member', `${message.author} \`[${message.author.id}]\``);
+      }
 
-          Staff note: **${note}**
-                      
-          Your suggestion ID (sID) for reference was **${id}**.
-          `);
-        } else {
-          suggestion.addField('Staff Note', note);
-          suggestion.addField('Staff Member', `${message.author} \`[${message.author.id}]\``);
+      const suggestionNote = {
+        query: [
+          { guildID: guild.id },
+          { sID: id }
+        ],
+        data: {
+          note,
+          staffMemberID: message.author.id,
+          // newNoteAdded: message.createdAt.getTime()
+          noteAdded: message.createdAt.getTime()
+        }
+      };
+
+      try {
+        message.channel.send(`Added a note to **${id}**: **${note}**.`).then(m => m.delete(5000));
+        sMessage.edit(suggestion);
+        try {
+          if (settings.dmResponses && guild.members.get(sUser.id)) sUser.send(dmEmbed);
+        } catch (err) {
+          this.client.logger.error(err.stack);
+          message.channel.send(`An error occurred DMing **${sUser.tag}** their suggestion note: **${err.message}**.`);
         }
 
-        const footer = embed.footer.text;
-        if (footer.includes(id)) {
-          const staffNote = {
-            note,
-            staffMemberID: message.author.id,
-            newNoteAdded: message.createdAt.getTime()
-          };
+        await this.client.suggestions.addGuildSuggestionNote(suggestionNote);
+      } catch (err) {
+        this.client.logger.error(err.stack);
+        message.delete(3000).catch(O_o => {});
+        message.channel.send(`Error updating this suggestion in the database: **${err.message}**`);
+      }
+    } else {
+      let fetchedMessages;
+      try {
+        fetchedMessages = await suggestionsChannel.fetchMessages({ limit: 100 });
+      } catch (err) {
+        this.client.logger.error(err.stack);
+        return message.channel.send(`There was an error fetching messages from the ${suggestionsChannel}: **${err.message}**.`);
+      }
 
-          const suggestionNote = {
-            query: [
-              { guildID: guild.id },
-              { sID: id }
-            ],
-            data: staffNote
-          };
+      try {
+        fetchedMessages.forEach(async msg => {
 
-          try {
-            const sMessage = await suggestionsChannel.fetchMessage(embed.message.id);
+          const embed = msg.embeds[0];
+          if (!embed) return;
 
-            message.channel.send(`Added a note to **${id}**: **${note}**.`).then(m => m.delete(5000));
-            sMessage.edit(suggestion);
+          const suggestion = new RichEmbed(embed);
+
+          const dmEmbed = new RichEmbed()
+            .setAuthor(guild, guild.iconURL)
+            .setDescription(`Hey, ${sUser}. ${message.author} has added a note to your suggestion:
+
+            Staff note: **${note}**
+                        
+            Your suggestion ID (sID) for reference was **${id}**.
+            `)
+            .setColor(embedColor)
+            .setFooter(`Guild ID: ${guild.id} | sID: ${id}`)
+            .setTimestamp();
+
+          if (embed.fields.length && embed.fields[0].name === 'Staff Note') {
+            suggestion.fields[0].value = note;
+            suggestion.fields[1].value = `${message.author} (${message.author.id})`;
+
+            dmEmbed.setDescription(`Hey, ${sUser}. ${message.author} has updated a note on your suggestion:
+
+            Staff note: **${note}**
+                        
+            Your suggestion ID (sID) for reference was **${id}**.
+            `);
+          } else {
+            suggestion.addField('Staff Note', note);
+            suggestion.addField('Staff Member', `${message.author} \`[${message.author.id}]\``);
+          }
+
+          const footer = embed.footer.text;
+          if (footer.includes(id)) {
+            const suggestionNote = {
+              query: [
+                { guildID: guild.id },
+                { sID: id }
+              ],
+              data: {
+                note,
+                staffMemberID: message.author.id,
+                noteAdded: message.createdAt.getTime()
+                // newNoteAdded: message.createdAt.getTime()
+              }
+            };
+
             try {
-              if (settings.dmResponses && guild.members.get(sUser.id)) sUser.send(dmEmbed);
+              const sMessage = await suggestionsChannel.fetchMessage(embed.message.id);
+
+              message.channel.send(`Added a note to **${id}**: **${note}**.`).then(m => m.delete(5000));
+              sMessage.edit(suggestion);
+              try {
+                if (settings.dmResponses && guild.members.get(sUser.id)) sUser.send(dmEmbed);
+              } catch (err) {
+                this.client.logger.error(err.stack);
+                message.channel.send(`An error occurred DMing **${sUser.tag}** their suggestion note: **${err.message}**.`);
+              }
+
+              await this.client.suggestions.addGuildSuggestionNote(suggestionNote);
             } catch (err) {
               this.client.logger.error(err.stack);
-              message.channel.send(`An error occurred DMing **${sUser.tag}** their suggestion note: **${err.message}**.`);
+              message.delete(3000).catch(O_o => {});
+              message.channel.send(`Error updating this suggestion in the database: **${err.message}**`);
             }
-
-            await this.client.suggestions.addGuildSuggestionNote(suggestionNote);
-          } catch (err) {
-            this.client.logger.error(err.stack);
-            message.delete(3000).catch(O_o => {});
-            message.channel.send(`Error updating this suggestion in the database: **${err.message}**`);
           }
-        }
-      });
-    } catch (err) {
-      this.client.logger.error(err.stack);
-      message.delete(3000).catch(O_o => {});
-      message.channel.send(`Error adding a note to this suggestion in the database: **${err.message}**`);
+        });
+      } catch (err) {
+        this.client.logger.error(err.stack);
+        message.delete(3000).catch(O_o => {});
+        message.channel.send(`Error adding a note to this suggestion in the database: **${err.message}**`);
+      }
     }
+
     return;
   }
 };

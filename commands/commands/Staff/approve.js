@@ -1,6 +1,7 @@
 const { RichEmbed } = require('discord.js');
 const moment = require('moment');
 const Command = require('../../Command');
+const { stripIndents } = require('common-tags');
 require('moment-duration-format');
 require('moment-timezone');
 moment.suppressDeprecationWarnings = true;
@@ -41,7 +42,8 @@ module.exports = class ApproveCommand extends Command {
 
     if (!message.guild) {
       try {
-        guild = this.client.guilds.get(sID.guildID);
+        guild = await this.client.shard.broadcastEval(`this.guilds.get('${sID.guildID}');`);
+        guild = guild[0];
         settings = await this.client.settings.getGuild(sID.guildID);
       } catch (err) {
         this.client.logger.error(err.message);
@@ -52,17 +54,16 @@ module.exports = class ApproveCommand extends Command {
     if (!settings.staffRoles) return this.client.errors.noStaffRoles(message.channel);
 
     const suggestionsChannel = guild.channels.find(c => c.name === settings.suggestionsChannel) ||
-            (guild.channels.find(c => c.toString() === settings.suggestionsChannel)) ||
-            (guild.channels.get(settings.suggestionsChannel));
+      (guild.channels.get(settings.suggestionsChannel));
 
     const suggestionsLogs = guild.channels.find(c => c.name === settings.suggestionsLogs) ||
-            (guild.channels.find(c => c.toString() === settings.suggestionsLogs)) ||
-            (guild.channels.get(settings.suggestionsLogs));
+      (guild.channels.get(settings.suggestionsLogs));
 
     if (!suggestionsLogs) return this.client.errors.noSuggestionsLogs(message.channel);
 
     const {
       userID,
+      messageID,
       suggestion,
       status
     } = sID;
@@ -80,17 +81,17 @@ module.exports = class ApproveCommand extends Command {
         .catch(err => this.client.logger.error(err.stack));
     }
 
-    let fetchedMessages;
-    try {
-      fetchedMessages = await suggestionsChannel.fetchMessages({ limit: 100 });
-    } catch (err) {
-      this.client.logger.error(err.stack);
-      return message.channel.send(`There was an error fetching messages from the ${suggestionsChannel}: **${err.message}**.`);
-    }
+    if (sID.messageID) {
+      let sMessage;
+      try {
+        sMessage = await suggestionsChannel.fetchMessage(messageID);
+      } catch (err) {
+        this.client.logger.error(err.stack);
+        return message.channel.send('The suggestion message was not found!')
+          .then(m => m.delete(5000));
+      }
 
-    fetchedMessages.forEach(async msg => {
-      const embed = msg.embeds[0];
-      if (!embed) return;
+      const embed = sMessage.embeds[0];
 
       const approvedEmbed = new RichEmbed(embed)
         .setTitle('Suggestion Approved')
@@ -117,11 +118,11 @@ module.exports = class ApproveCommand extends Command {
         };
       });
 
-      const nerdSuccess = this.client.guilds.get('345753533141876737').emojis.find(e => e.name === 'nerdSuccess');
-      const nerdError = this.client.guilds.get('345753533141876737').emojis.find(e => e.name === 'nerdError');
+      const nerdSuccess = this.client.emojis.find(e => e.name === 'nerdSuccess');
+      const nerdError = this.client.emojis.find(e => e.name === 'nerdError');
 
-      const nerdApprove = this.client.guilds.get('345753533141876737').emojis.find(e => e.name === 'nerdApprove');
-      const nerdDisapprove = this.client.guilds.get('345753533141876737').emojis.find(e => e.name === 'nerdDisapprove');
+      const nerdApprove = this.client.emojis.find(e => e.name === 'nerdApprove');
+      const nerdDisapprove = this.client.emojis.find(e => e.name === 'nerdDisapprove');
 
       results.forEach(result => {
         if (result.emoji === 'nerdSuccess') result.emoji = nerdSuccess.toString();
@@ -180,47 +181,188 @@ module.exports = class ApproveCommand extends Command {
         `);
       }
 
-      const footer = embed.footer.text;
-      if (footer.includes(id)) {
-        const sendMsgs = suggestionsLogs.permissionsFor(guild.me).has('SEND_MESSAGES', false);
-        const addReactions = suggestionsLogs.permissionsFor(guild.me).has('ADD_REACTIONS', false);
-        if (!sendMsgs) return message.channel.send(`I can't send messages in the ${suggestionsLogs} channel! Make sure I have \`Send Messages\`.`);
-        if (!addReactions) return message.channel.send(`I can't add reactions in the ${suggestionsLogs} channel! Make sure I have \`Add Reactions\`.`);
+      const sendMsgs = suggestionsLogs.permissionsFor(guild.me).has('SEND_MESSAGES', false);
+      const addReactions = suggestionsLogs.permissionsFor(guild.me).has('ADD_REACTIONS', false);
+      if (!sendMsgs) return message.channel.send(`I can't send messages in the ${suggestionsLogs} channel! Make sure I have \`Send Messages\`.`);
+      if (!addReactions) return message.channel.send(`I can't add reactions in the ${suggestionsLogs} channel! Make sure I have \`Add Reactions\`.`);
 
-        const approveSuggestion = {
-          query: [
-            { guildID: guild.id },
-            { sID: id }
-          ],
-          data: {
-            status: 'approved',
-            newStatusUpdated: message.createdAt.getTime(),
-            statusReply: reply || null,
-            staffMemberID: message.author.id,
-            newResults
-          }
-        };
-
-        try {
-          const sMessage = await suggestionsChannel.fetchMessage(embed.message.id);
-          message.channel.send(`Suggestion **${id}** has been approved.`).then(m => m.delete(5000));
-          sMessage.edit(approvedEmbed).then(m => m.delete(5000));
-          suggestionsLogs.send(logsEmbed);
-          try {
-            if (settings.dmResponses && guild.members.get(sUser.id)) sUser.send(dmEmbed);
-          } catch (err) {
-            message.channel.send(`**${sUser.tag}** has DMs disabled, but their suggestion will still be approved.`);
-          }
-
-          await this.client.suggestions.handleGuildSuggestion(approveSuggestion);
-        } catch (err) {
-          this.client.logger.error(err.stack);
-          message.delete(3000).catch(O_o => {});
-          message.channel.send(`Error updating this suggestion in the database: **${err.message}**`);
+      const approveSuggestion = {
+        query: [
+          { guildID: guild.id },
+          { sID: id }
+        ],
+        data: {
+          status: 'approved',
+          statusUpdated: message.createdAt.getTime(),
+          statusReply: reply || null,
+          staffMemberID: message.author.id,
+          // newResults
+          results
         }
+      };
+
+      try {
+        message.channel.send(`Suggestion **${id}** has been approved.`).then(m => m.delete(5000));
+        sMessage.edit(approvedEmbed).then(m => m.delete(5000));
+        suggestionsLogs.send(logsEmbed);
+        try {
+          if (settings.dmResponses && guild.members.get(sUser.id)) sUser.send(dmEmbed);
+        } catch (err) {
+          message.channel.send(`**${sUser.tag}** has DMs disabled, but their suggestion will still be approved.`);
+        }
+
+        await this.client.suggestions.handleGuildSuggestion(approveSuggestion);
+      } catch (err) {
+        this.client.logger.error(err.stack);
+        message.delete(3000).catch(O_o => {});
+        message.channel.send(`An error occured: **${err.message}**`);
       }
-      return;
-    });
+
+    } else {
+      let fetchedMessages;
+      try {
+        fetchedMessages = await suggestionsChannel.fetchMessages({ limit: 100 });
+      } catch (err) {
+        this.client.logger.error(err.stack);
+        return message.channel.send(`There was an error fetching messages from the ${suggestionsChannel}: **${err.message}**.`);
+      }
+
+      fetchedMessages.forEach(async msg => {
+        const embed = msg.embeds[0];
+        if (!embed) return;
+
+        const approvedEmbed = new RichEmbed(embed)
+          .setTitle('Suggestion Approved')
+          .setColor(approved);
+
+        const dmEmbed = new RichEmbed()
+          .setAuthor(guild, guild.iconURL)
+          .setDescription(`Hey, ${sUser}. Your suggestion has been approved by ${message.author}!
+                              
+          Your suggestion ID (sID) for reference was **${id}**.
+          `)
+          .setColor(approved)
+          .setFooter(`Guild ID: ${guild.id} | sID: ${id}`)
+          .setTimestamp();
+
+        const reactions = embed.message.reactions;
+        const reactName = reactions.map(e => e._emoji.name);
+        const reactCount = reactions.map(e => e.count);
+
+        const results = reactName.map((r, c) => {
+          return {
+            emoji: r,
+            count: reactCount[c] - 1 || 0
+          };
+        });
+
+        const nerdSuccess = this.client.emojis.find(e => e.name === 'nerdSuccess');
+        const nerdError = this.client.emojis.find(e => e.name === 'nerdError');
+
+        const nerdApprove = this.client.emojis.find(e => e.name === 'nerdApprove');
+        const nerdDisapprove = this.client.emojis.find(e => e.name === 'nerdDisapprove');
+
+        results.forEach(result => {
+          if (result.emoji === 'nerdSuccess') result.emoji = nerdSuccess.toString();
+          if (result.emoji === 'nerdError') result.emoji = nerdError.toString();
+          if (result.emoji === 'nerdApprove') result.emoji = nerdApprove.toString();
+          if (result.emoji === 'nerdDisapprove') result.emoji = nerdDisapprove.toString();
+        });
+
+        const newResults = Array.from(results);
+        const view = newResults.map(r => {
+          return `${r.emoji} **: ${r.count}**`;
+        }).join('\n');
+
+        const logsEmbed = new RichEmbed()
+          .setAuthor(guild.name, guild.iconURL)
+          .setDescription(`
+            **Results:**
+            ${view}
+
+            **Suggestion:**
+            ${suggestion}
+
+            **Submitter:**
+            ${sUser}
+
+            **Approved By:**
+            ${message.author}
+          `)
+          .setColor(approved)
+          .setFooter(`sID: ${id}`)
+          .setTimestamp();
+
+        if (reply) {
+          dmEmbed.setDescription(`Hey, ${sUser}. Your suggestion has been approved by ${message.author}!
+          
+            Staff response: **${reply}**
+                                
+            Your suggestion ID (sID) for reference was **${id}**.
+          `);
+
+          logsEmbed.setDescription(`
+            **Results:**
+            ${view}
+            
+            **Suggestion:**
+            ${suggestion}
+                
+            **Submitter:**
+            ${sUser}
+
+            **Approved By:**
+            ${message.author}
+
+            **Response:**
+            ${reply}
+          `);
+        }
+
+        const footer = embed.footer.text;
+        if (footer.includes(id)) {
+          const sendMsgs = suggestionsLogs.permissionsFor(guild.me).has('SEND_MESSAGES', false);
+          const addReactions = suggestionsLogs.permissionsFor(guild.me).has('ADD_REACTIONS', false);
+          if (!sendMsgs) return message.channel.send(`I can't send messages in the ${suggestionsLogs} channel! Make sure I have \`Send Messages\`.`);
+          if (!addReactions) return message.channel.send(`I can't add reactions in the ${suggestionsLogs} channel! Make sure I have \`Add Reactions\`.`);
+
+          const approveSuggestion = {
+            query: [
+              { guildID: guild.id },
+              { sID: id }
+            ],
+            data: {
+              status: 'approved',
+              statusUpdated: message.createdAt.getTime(),
+              statusReply: reply || null,
+              staffMemberID: message.author.id,
+              // newResults,
+              results
+            }
+          };
+
+          try {
+            const sMessage = await suggestionsChannel.fetchMessage(embed.message.id);
+            message.channel.send(`Suggestion **${id}** has been approved.`).then(m => m.delete(5000));
+            sMessage.edit(approvedEmbed).then(m => m.delete(5000));
+            suggestionsLogs.send(logsEmbed);
+            try {
+              if (settings.dmResponses && guild.members.get(sUser.id)) sUser.send(dmEmbed);
+            } catch (err) {
+              message.channel.send(`**${sUser.tag}** has DMs disabled, but their suggestion will still be approved.`);
+            }
+
+            await this.client.suggestions.handleGuildSuggestion(approveSuggestion);
+          } catch (err) {
+            this.client.logger.error(err.stack);
+            message.delete(3000).catch(O_o => {});
+            message.channel.send(`An error occurred: **${err.message}**`);
+          }
+        }
+        return;
+      });
+    }
+
     return;
   }
 };

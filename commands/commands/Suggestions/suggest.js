@@ -1,7 +1,6 @@
 const Command = require('../../Command');
 const { RichEmbed } = require('discord.js');
 const crypto = require('crypto');
-const moment = require('moment');
 const { stripIndents } = require('common-tags');
 require('moment-duration-format');
 require('moment-timezone');
@@ -28,7 +27,6 @@ module.exports = class SuggestCommand extends Command {
     const voteEmojis = this.voteEmojis(this.client);
 
     let id = crypto.randomBytes(20).toString('hex').slice(12, 20);
-    const time = moment(Date.now());
 
     let verifySuggestion;
     try {
@@ -53,7 +51,7 @@ module.exports = class SuggestCommand extends Command {
 
     const dmEmbed = new RichEmbed()
       .setAuthor(message.guild, message.guild.iconURL)
-      .setDescription(`Hey, ${sUser}. Your suggestion has been sent to the ${sChannel} channel to be voted on!
+      .setDescription(stripIndents`Hey, ${sUser}. Your suggestion has been sent to the ${sChannel} channel to be voted on!
             
           Please wait until it gets approved or rejected by a staff member.
       
@@ -70,13 +68,13 @@ module.exports = class SuggestCommand extends Command {
 
     const sEmbed = new RichEmbed()
       .setThumbnail(sUser.avatarURL)
-      .setDescription(`
-            **Submitter**
-            ${sUser.tag}
-    
-            **Suggestion**
-            ${suggestion}
-            `)
+      .setDescription(stripIndents`
+        **Submitter**
+        ${sUser.tag}
+
+        **Suggestion**
+        ${suggestion}
+        `)
       .setColor(embedColor)
       .setFooter(`User ID: ${sUser.id} | sID: ${id}`)
       .setTimestamp();
@@ -105,33 +103,33 @@ module.exports = class SuggestCommand extends Command {
     const emojiSet = foundSet.emojis;
     const fallbackSet = voteEmojis.find(fallback).emojis;
 
-    sChannel.send(sEmbed)
-      .then(async msg => {
-        for (let i = 0; i < emojiSet.length; i++) {
-          if (!emojiSet[i]) await msg.react(fallbackSet[i]);
-          else await msg.react(emojiSet[i]);
-        }
-      })
-      .catch(err => {
-        this.client.logger.error(err.stack);
-        return message.channel.send(`An error occurred adding reactions to this suggestion: **${err.message}**.`);
-      });
-
-    const newSuggestion = {
-      guildID: message.guild.id,
-      userID: sUser.id,
-      suggestion,
-      sID: id,
-      newTime: message.createdAt.getTime()
-    };
-
     try {
+      const sMessage = await sChannel.send(sEmbed)
+        .then(async msg => {
+          for (let i = 0; i < emojiSet.length; i++) {
+            if (!emojiSet[i]) await msg.react(fallbackSet[i]);
+            else await msg.react(emojiSet[i]);
+          }
+
+          return msg;
+        });
+
+      const newSuggestion = {
+        guildID: message.guild.id,
+        userID: sUser.id,
+        messageID: sMessage.id,
+        suggestion,
+        sID: id,
+        time: sMessage.createdAt.getTime()
+      };
+
       await this.client.suggestions.submitGuildSuggestion(newSuggestion);
-      if (settings.dmRespones) await message.react('✉');
-      await message.delete(3000).catch(O_o => {});
+      if (settings.dmRespones) message.react('✉');
+      else message.react(this.client.emojis.find(e => e.name === 'nerdSuccess'));
+      message.delete(3000).catch(O_o => {});
     } catch (err) {
       this.client.logger.error(err.stack);
-      return message.channel.send(`An error occurred saving this suggestion in the database: **${err.message}**.`);
+      return message.channel.send(`An error occurred: **${err.message}**.`);
     }
 
     return;

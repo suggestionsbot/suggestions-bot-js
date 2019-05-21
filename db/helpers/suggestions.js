@@ -118,21 +118,23 @@ module.exports = class SuggestionsHelpers {
     const updated = await guildSuggestion.updateOne(data);
     switch (data.status) {
     case 'approved':
-      this.client.logger.log(`sID ${sID} has been approved in the guild "${sGuild}" (${sGuild.id}).`);
       if (data.statusReply) {
         this.client.logger.log(oneLine`
             sID ${sID} has been approved in the guild "${sGuild}" (${sGuild.id}) 
             with the response "${data.statusReply}".
         `);
+      } else {
+        this.client.logger.log(`sID ${sID} has been approved in the guild "${sGuild}" (${sGuild.id}).`);
       }
       break;
     case 'rejected':
-      this.client.logger.log(`sID ${sID} has been rejected in the guild "${sGuild}" (${sGuild.id}).`);
       if (data.statusReply) {
         this.client.logger.log(oneLine`
             sID ${sID} has been rejected in the guild "${sGuild}" (${sGuild.id}) 
             with the response "${data.statusReply}".
         `);
+      } else {
+        this.client.logger.log(`sID ${sID} has been rejected in the guild "${sGuild}" (${sGuild.id}).`);
       }
       break;
     default:
