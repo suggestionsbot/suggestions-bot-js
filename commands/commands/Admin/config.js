@@ -13,7 +13,6 @@ module.exports = class ConfigCommand extends Command {
       botPermissions: ['MANAGE_MESSAGES'],
       guarded: true
     });
-    this.voteEmojis = require('../../../utils/voteEmojis');
   }
 
   async run(message, args, settings) {
@@ -206,7 +205,7 @@ module.exports = class ConfigCommand extends Command {
     case 'emojis': {
       configEmbed.setAuthor(`${message.guild} | Vote Emojis`, message.guild.iconURL);
 
-      const vEmojis = this.voteEmojis(this.client);
+      const vEmojis = this.client.voteEmojis;
       const setID = parseInt(updated);
 
       if (updated) {

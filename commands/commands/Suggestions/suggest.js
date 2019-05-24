@@ -24,7 +24,7 @@ module.exports = class SuggestCommand extends Command {
   async run(message, args, settings) {
 
     const { embedColor } = this.client.config;
-    const voteEmojis = this.voteEmojis(this.client);
+    // const voteEmojis = this.voteEmojis(this.client);
 
     let id = crypto.randomBytes(20).toString('hex').slice(12, 20);
 
@@ -96,37 +96,124 @@ module.exports = class SuggestCommand extends Command {
       );
     }
 
-    const filter = set => set.name === emojis;
-    const defaults = set => set.name === 'defaultEmojis';
-    const fallback = set => set.name === 'oldDefaults';
-    const foundSet = voteEmojis.find(filter) || voteEmojis.find(defaults);
-    const emojiSet = foundSet.emojis;
-    const fallbackSet = voteEmojis.find(fallback).emojis;
-
     try {
-      const sMessage = await sChannel.send(sEmbed)
-        .then(async msg => {
+      // const filter = set => set.name === emojis;
+      // const defaults = set => set.name === 'defaultEmojis';
+      // const fallback = set => set.name === 'oldDefaults';
+
+      // this.voteEmojis = await this.voteEmojis;
+      // const voteEmojis = await this.voteEmojis;
+
+      // const foundSet = this.voteEmojis.find(filter) || this.voteEmojis.find(defaults);
+      // const emojiSet = foundSet.emojis;
+      // const fallbackSet = this.voteEmojis.find(fallback).emojis;
+
+      await this.client.shard.broadcastEval(`
+        const { RichEmbed } = require('discord.js');
+        const { stripIndents } = require('common-tags');
+
+        (async () => {
+          const sEmbed = new RichEmbed()
+            .setThumbnail('${message.author.avatarURL}')
+            .setDescription(stripIndents\`
+              **Submitter**
+              ${message.author.tag}
+
+              **Suggestion**
+              ${suggestion}
+              \`)
+            .setColor('${embedColor}')
+            .setFooter('User ID: ${message.author.id} | sID: ${id}')
+            .setTimestamp();
+
+          const filter = set => set.name === ${emojis};
+          const defaults = set => set.name === 'defaultEmojis';
+          const fallback = set => set.name === 'oldDefaults';
+
+          const successEmoji = this.emojis.find(e => e.name === 'nerdSuccess');
+
+          const channel = this.channels.get('${sChannel.id}');
+          const m = await channel.send(sEmbed);
+          const senderMessage = await this.channels.get('${message.channel.id}')
+            .fetchMessage('${message.id}');
+
+          const foundSet = this.voteEmojis.find(filter) || this.voteEmojis.find(defaults);
+          const emojiSet = foundSet.emojis;
+          const fallbackSet = this.voteEmojis.find(fallback).emojis;  
+
           for (let i = 0; i < emojiSet.length; i++) {
-            if (!emojiSet[i]) await msg.react(fallbackSet[i]);
-            else await msg.react(emojiSet[i]);
+            const e = this.emojis.find(e => e.name === emojiSet[i]);
+            if (e) await m.react(e);
+            else await m.react(fallbackSet[i]);
           }
 
-          return msg;
-        });
+          const newSuggestion = {
+            guildID: senderMessage.guild.id,
+            userID: senderMessage.author.id,
+            messageID: m.id,
+            suggestion: '${suggestion}',
+            sID: '${id}',
+            time: m.createdAt.getTime()
+          };
 
-      const newSuggestion = {
-        guildID: message.guild.id,
-        userID: sUser.id,
-        messageID: sMessage.id,
-        suggestion,
-        sID: id,
-        time: sMessage.createdAt.getTime()
-      };
+          await this.suggestions.submitGuildSuggestion(newSuggestion);
+          if (${settings.dmResponses}) senderMessage.react('✉');
+          else senderMessage.react(successEmoji);
+          senderMessage.delete(3000).catch(O_o=>{});
+          
+          return;
+        })();
+      `);
 
-      await this.client.suggestions.submitGuildSuggestion(newSuggestion);
-      if (settings.dmRespones) message.react('✉');
-      else message.react(this.client.emojis.find(e => e.name === 'nerdSuccess'));
-      message.delete(3000).catch(O_o => {});
+      // message.channel.send(m.content);
+
+      // message.react(e[0]);
+
+      // const sMessage = await sChannel.send(sEmbed);
+      // .then(async msg => {
+      //   for (let i = 0; i < emojiSet.length; i++) {
+      //     try {
+      //       if (!emojiSet[i]) await msg.react(fallbackSet[i]);
+      //       else await msg.react(emojiSet[i]);
+      //     } catch (err) {
+      //       return this.client.logger.error(err);
+      //     }
+      //   }
+
+      //   return msg;
+      // });
+
+      // for (let i = 0; i < emojiSet.length; i++) {
+      //   try {
+      //     if (emojiSet[i]) {
+      //       const e = await this.client.shard.broadcastEval(`
+      //         this.emojis.find(e => e.name === '${emojiSet[i]}');
+      //       `);
+      //       await sMessage.react(e[0]);
+      //     } else {
+      //       await sMessage.react(fallbackSet[i]);
+      //     }
+
+      //     // if (!emojiSet[i]) await sMessage.react(fallbackSet[i]);
+      //     // else await sMessage.react(emojiSet[i]);
+      //   } catch (err) {
+      //     return this.client.logger.error(err);
+      //   }
+      // }
+
+      // const newSuggestion = {
+      //   guildID: message.guild.id,
+      //   userID: sUser.id,
+      //   messageID: sMessage.id,
+      //   suggestion,
+      //   sID: id,
+      //   time: sMessage.createdAt.getTime()
+      // };
+
+      // await this.client.suggestions.submitGuildSuggestion(newSuggestion);
+      // if (settings.dmRespones) message.react('✉');
+      // else message.react(this.client.emojis.find(e => e.name === 'nerdSuccess'));
+      // message.delete(3000).catch(O_o => {});
     } catch (err) {
       this.client.logger.error(err.stack);
       return message.channel.send(`An error occurred: **${err.message}**.`);

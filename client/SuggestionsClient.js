@@ -115,4 +115,9 @@ module.exports = class SuggestionsClient extends Client {
       await this.user.setActivity('in code land...', { type: 'PLAYING' });
     }
   }
+
+  get voteEmojis() {
+    const emojis = require('../utils/voteEmojis');
+    return emojis;
+  }
 };

@@ -16,6 +16,8 @@ module.exports = class RejectCommand extends Command {
       staffOnly: true,
       botPermissions: ['MANAGE_MESSAGES']
     });
+
+    this.voteEmojis = require('../../../utils/voteEmojis');
   }
 
   async run(message, args, settings) {
@@ -117,17 +119,23 @@ module.exports = class RejectCommand extends Command {
         };
       });
 
-      const nerdSuccess = this.client.emojis.find(e => e.name === 'nerdSuccess');
-      const nerdError = this.client.emojis.find(e => e.name === 'nerdError');
+      // const nerdSuccess = this.client.emojis.find(e => e.name === 'nerdSuccess');
+      // const nerdError = this.client.emojis.find(e => e.name === 'nerdError');
 
-      const nerdApprove = this.client.emojis.find(e => e.name === 'nerdApprove');
-      const nerdDisapprove = this.client.emojis.find(e => e.name === 'nerdDisapprove');
+      // const nerdApprove = this.client.emojis.find(e => e.name === 'nerdApprove');
+      // const nerdDisapprove = this.client.emojis.find(e => e.name === 'nerdDisapprove');
 
       results.forEach(result => {
-        if (result.emoji === 'nerdSuccess') result.emoji = nerdSuccess.toString();
-        if (result.emoji === 'nerdError') result.emoji = nerdError.toString();
-        if (result.emoji === 'nerdApprove') result.emoji = nerdApprove.toString();
-        if (result.emoji === 'nerdDisapprove') result.emoji = nerdDisapprove.toString();
+        if (result.emoji === 'nerdSuccess') result.emoji = this.voteEmojis.find(e => e.name === 'defaultEmojis').emojis[0];
+        if (result.emoji === 'nerdSuccess') result.emoji = this.voteEmojis.find(e => e.name === 'defaultEmojis').emojis[1];
+
+        if (result.emoji === 'nerdSuccess') result.emoji = this.voteEmojis.find(e => e.name === 'fancyEmojis').emojis[0];
+        if (result.emoji === 'nerdSuccess') result.emoji = this.voteEmojis.find(e => e.name === 'fancyEmojis').emojis[1];
+
+        // if (result.emoji === 'nerdSuccess') result.emoji = nerdSuccess.toString();
+        // if (result.emoji === 'nerdError') result.emoji = nerdError.toString();
+        // if (result.emoji === 'nerdApprove') result.emoji = nerdApprove.toString();
+        // if (result.emoji === 'nerdDisapprove') result.emoji = nerdDisapprove.toString();
       });
 
       const newResults = Array.from(results);

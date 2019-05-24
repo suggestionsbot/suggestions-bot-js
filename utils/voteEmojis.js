@@ -1,12 +1,9 @@
-const voteEmojis = client => [
+module.exports = [
   {
     id: 0,
     name: 'defaultEmojis',
     fullName: 'Defaults',
-    emojis: [
-      client.emojis.find(e => e.name === 'nerdSuccess'),
-      client.emojis.find(e => e.name === 'nerdError')
-    ]
+    emojis: ['nerdSuccess', 'nerdError']
   },
   {
     id: 1,
@@ -36,11 +33,6 @@ const voteEmojis = client => [
     id: 5,
     name: 'fancyEmojis',
     fullName: 'Fancy',
-    emojis: [
-      client.emojis.find(e => e.name === 'nerdApprove'),
-      client.emojis.find(e => e.name === 'nerdDisapprove')
-    ]
+    emojis: ['nerdApprove', 'nerdDisapprove']
   }
 ];
-
-module.exports = voteEmojis;
