@@ -157,6 +157,16 @@ class ErrorHandler {
 
     channel.send(embed).then(m => m.delete(5000)).catch(err => this.client.logger.error(err));
   }
+  
+  adminCommandIsDisabled(command, channel) {
+
+    const embed = new RichEmbed()
+      .setTitle('Error')
+      .setDescription(`The command \`${command.help.name}\` is currently disabled by the bot developer for maintenance!`)
+      .setColor(this.colors.red);
+
+    channel.send(embed).then(m => m.delete(5000)).catch(err => this.client.logger.error(err));
+  }
 
   commandGuildOnly(command, channel) {
 
