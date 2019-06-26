@@ -71,7 +71,7 @@ module.exports = class CommandHandler {
     const superCheck = superSecretUsers.includes(message.author.id);
     const ownerCheck = this.client.isOwner(message.author.id);
 
-    if (!cmd.conf.enabled) return this.client.errors.commandIsDisabled(cmd, message.channel);
+    if (!cmd.conf.enabled) return this.client.errors.adminCommandIsDisabled(cmd, message.channel);
     if ((!message.guild && cmd.conf.guildOnly)) return this.client.errors.commandGuildOnly(cmd, message.channel);
     if (cmd.conf.superSecretOnly && !superCheck) return;
 

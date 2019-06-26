@@ -205,12 +205,11 @@ module.exports = class ConfigCommand extends Command {
     case 'emojis': {
       configEmbed.setAuthor(`${message.guild} | Vote Emojis`, message.guild.iconURL);
 
-      const vEmojis = this.client.voteEmojis;
       const setID = parseInt(updated);
 
       if (updated) {
         const filter = set => set.id === setID;
-        const foundSet = vEmojis.find(filter);
+        const foundSet = this.client.voteEmojis.find(filter);
         const emojiSet = foundSet.emojis;
 
         if (!foundSet) return this.client.errors.voteEmojiNotFound(updated, message.channel);
@@ -226,32 +225,57 @@ module.exports = class ConfigCommand extends Command {
         }
       }
 
-      let view = '';
-      const emojiSets = [];
-      vEmojis.forEach(set => {
+      const emojiSets = this.client.voteEmojis.map(set => {
+        let emojis = set.emojis;
 
-        const emojiSet = set.emojis;
+        if (set.custom) {
+          emojis = emojis.map(e => {
+          //   this.client.shard.broadcastEval(`this.emojis.find(e => e.name === '${e}');`)
+          //     .then(data => {
+          //       // return e = `<:${data[0].name}:${data[0].id}>`;
+          //       const { name, id } = data[0];
+          //       const emoji = `<:${name}:${id}>`;
+          //       e = emoji;
+          //     })
+          //     .catch(err => {
+          //       this.client.logger.error(err.stack);
+          //       return message.channel.send(`An error occurred: **${err.message}**`);
+          //     });
 
-        view = `\`${set.id}\`: ${emojiSet[0] ? emojiSet.join(' ') : 'Not found'}`;
-        if (settings.voteEmojis === set.name) {
-          view = `\`${set.id}\`: ${emojiSet[0] ? emojiSet.join(' ') : 'Not found'} ***(Currently Using)***`;
+            const data = this.client.shard.broadcastEval(`this.emojis.find(e => e.name === '${e}')`);
+            const { name, id } = data[0];
+
+            // console.log(emojis);
+            console.log(name, id);
+          });
+
+          // emojis = emojis.map(e => {
+          //   e = 'hello';
+          //   return e;
+          // });
         }
 
-        emojiSets.push(view);
+        // console.log(emojis);
+        
+        if (settings.voteEmojis === set.name) {
+          return `\`${set.id}\`: ${emojis[0] ? emojis.join(' ') : 'Not found'} ***(Currently Using)***`;
+        } else if (!this.client.voteEmojis.length && set.id === 0) {
+          return `\`${set.id}\`: ${emojis.join(' ').concat(' ', '***(Currently Using)***')}`;
+        } else {
+          return `\`${set.id}\`: ${emojis[0] ? emojis.join(' ') : 'Not found'}`;
+        }
       });
 
-      if (!voteEmojis) {
-        const str = emojiSets[0].concat(' ', '***(Currently Using)***');
-        emojiSets[0] = str;
-      }
+      return;
 
       configEmbed.setDescription(`
         **Voting Emojis**
-        Choose from ${vEmojis.length} different emoji sets to be used for voting in your guild.
+        Choose from ${this.client.voteEmojis.length} different emoji sets to be used for voting in your guild.
 
         ${emojiSets.join('\n\n')}
 
         You can do \`${prefix + name} emojis [id]\` to set the desired emojis.
+
         Submit new emoji set suggestions any time by joining our Discord server: ${discord}
         `);
 

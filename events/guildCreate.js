@@ -14,20 +14,16 @@ module.exports = class {
     const newServer = new RichEmbed()
       .setTitle('Added')
       .setDescription(`
-            **ID:** \`${guild.id}\`
-            **Name:** \`${guild.name}\`
-            **Members:** \`${guild.members.size}\`
-            **Created:** \`${moment(guild.createdAt).fromNow()}\`
-            **Owner:** ${gOwner.toString()} \`[${gOwner.user.tag}]\`
-            `)
+        **ID:** \`${guild.id}\`
+        **Name:** \`${guild.name}\`
+        **Members:** \`${guild.members.size}\`
+        **Created:** \`${moment(guild.createdAt).fromNow()}\`
+        **Owner:** ${guild.owner} \`[${guild.owner.user.tag}]\`
+      `)
       .setColor(created)
       .setTimestamp();
 
-    const newSettings = {
-      guildID: guild.id,
-      guildName: guild.name,
-      guildOwnerID: guild.ownerID
-    };
+    const newSettings = { guildID: guild.id };
 
     try {
       await this.client.settings.createGuild(newSettings);

@@ -41,25 +41,23 @@ module.exports = class {
       // handle posting stats to bot lists
       require('../utils/voting')(this.client);
 
-      this.client.shard.broadcastEval(`
-        (async() => {
-          try {
-            this.guilds.forEach(async g => {
-              const {
-                guildID,
-                guildOwnerID,
-                guildName
-              } = await this.settings.getGuild(g);
-    
-              if (!guildID) await this.emit('guildCreate', g);
-              if (guildID && (guildOwnerID !== g.ownerID)) await this.settings.updateGuild(g, { guildOwnerID: g.ownerID });
-              if (guildID && (guildName !== g.name)) await this.settings.updateGuild(g, { guildName: g.name });
-            });
-          } catch (err) {
-            this.logger.error(err.stack);
-          }
-        })();
-      `);
+      try {
+        await this.client.shard.broadcastEval(`
+          (() => {
+            try {
+              this.guilds.forEach(async g => {
+                const { guildID } = await this.settings.getGuild(g);
+                if (!guildID) this.emit('guildCreate', g);
+              });
+            } catch (err) {
+              this.logger.error(err.stack);
+            }
+          })();
+        `);
+
+      } catch (error) {
+        this.client.logger.error(error.stack);
+      }
 
       // let allSettings;
       // try {

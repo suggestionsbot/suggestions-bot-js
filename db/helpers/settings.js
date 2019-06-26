@@ -12,7 +12,8 @@ module.exports = class SettingsHelpers {
      * @param {Object} guild - The guild object.
      */
   async getGuild(guild) {
-    const data = await Settings.findOne({ guildID: guild.id || guild });
+    // const data = await Settings.findOne({ guildID: guild.id || guild });
+    const data = await Settings.findOne({ guildID: typeof guild === String ? guild : guild.id });
 
     if (data && data._id) return data;
     else return this.client.config.defaultSettings;
@@ -25,7 +26,9 @@ module.exports = class SettingsHelpers {
      * @param {Object} newSettings - The settings object to be updated.
      */
   async updateGuild(guild, newSettings) {
-    const data = await Settings.findOne({ guildID: guild.id });
+    const searchGuild = typeof guild === Object ? guild.id : guild;
+    const data = await Settings
+      .findOne({ guildID: searchGuild });
 
     let settings = data;
     // maybe check if settings object is empty, return an error?
@@ -35,8 +38,14 @@ module.exports = class SettingsHelpers {
       else return;
     }
 
-    const updated = await Settings.findOneAndUpdate({ guildID: guild.id }, settings);
-    this.client.logger.log(`Guild "${guild}" (${guild.id}) updated settings: \n ${Object.keys(newSettings)}`);
+    const updated = await Settings.findOneAndUpdate({ guildID: searchGuild }, settings);
+    await this.client.shard.broadcastEval(`
+      const sGuild = this.guilds.get('${data.guildID}');
+
+      this.logger.log(
+        'Guild "' + sGuild.name + '" (' + sGuild.id + ') updated settings: ${Object.keys(newSettings)}'
+      );
+    `);
     return updated;
   }
 
@@ -80,8 +89,13 @@ module.exports = class SettingsHelpers {
     const newSettings = await new Settings(merged);
     const data = await newSettings.save();
 
-    const nGuild = this.client.guilds.get(data.guildID);
-    this.client.logger.log(`Default settings saved for guild ${nGuild} (${nGuild.id})`);
+    await this.client.shard.broadcastEval(`
+      const nGuild = this.guilds.get('${data.guildID}');
+
+      this.logger.log(
+        'Default settings saved for guild "' + nGuild.name + '" (' + nGuild.id + ')'
+      );
+    `);
     return data;
   }
 
@@ -98,8 +112,16 @@ module.exports = class SettingsHelpers {
     const newCommand = await new Command(merged);
     const data = await newCommand.save();
 
-    const cUser = this.client.users.get(data.userID);
-    this.client.logger.log(`${cUser.tag} (${cUser.id}) ran command ${data.command}`, 'cmd');
+    await this.client.shard.broadcastEval(`
+      const cUser = this.users.get('${data.userID}');
+    
+      this.logger.log(
+        '"' + cUser.tag + '" (' + cUser.id + ') ran the command "${data.command}"',
+        'cmd'
+      );
+    `);
+    // const cUser = this.client.users.get(data.userID);
+    // this.client.logger.log(`${cUser.tag} (${cUser.id}) ran command ${data.command}`, 'cmd');
     return data;
   }
 

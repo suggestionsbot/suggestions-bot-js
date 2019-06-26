@@ -158,6 +158,16 @@ class ErrorHandler {
     channel.send(embed).then(m => m.delete(5000)).catch(err => this.client.logger.error(err));
   }
 
+  adminCommandIsDisabled(command, channel) {
+
+    const embed = new RichEmbed()
+      .setTitle('Error')
+      .setDescription(`The command \`${command.help.name}\` is currently disabled by the bot developer for maintenance!`)
+      .setColor(this.colors.red);
+
+    channel.send(embed).then(m => m.delete(5000)).catch(err => this.client.logger.error(err));
+  }
+
   commandGuildOnly(command, channel) {
 
     const embed = new RichEmbed()
@@ -221,6 +231,15 @@ class ErrorHandler {
     const embed = new RichEmbed()
       .setTitle('Error')
       .setDescription('No staff roles exist! Please create them or contact a server administrator to handle suggestions.')
+      .setColor(this.colors.red);
+
+    channel.send(embed).then(m => m.delete(5000)).catch(err => this.client.logger.error(err));
+  }
+
+  noRejectedResponse(channel) {
+    const embed = new RichEmbed()
+      .setTitle('Error')
+      .setDescription('A response is required for rejecting this suggestion!')
       .setColor(this.colors.red);
 
     channel.send(embed).then(m => m.delete(5000)).catch(err => this.client.logger.error(err));

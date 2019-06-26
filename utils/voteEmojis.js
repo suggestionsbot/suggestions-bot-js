@@ -3,36 +3,42 @@ module.exports = [
     id: 0,
     name: 'defaultEmojis',
     fullName: 'Defaults',
-    emojis: ['nerdSuccess', 'nerdError']
+    emojis: ['nerdSuccess', 'nerdError'],
+    custom: true
   },
   {
     id: 1,
     name: 'oldDefaults',
     fullName: 'Old Defaults',
-    emojis: ['✅', '❌']
+    emojis: ['✅', '❌'],
+    custom: false
   },
   {
     id: 2,
     name: 'thumbsEmojis',
     fullName: 'Thumbs',
-    emojis: ['👍', '👎']
+    emojis: ['👍', '👎'],
+    custom: false
   },
   {
     id: 3,
     name: 'arrowsEmojis',
     fullName: 'Arrows',
-    emojis: ['⬆', '⬇']
+    emojis: ['⬆', '⬇'],
+    custom: false
   },
   {
     id: 4,
     name: 'greenEmojis',
     fullName: 'Green',
-    emojis: ['✅', '❎']
+    emojis: ['✅', '❎'],
+    custom: false
   },
   {
     id: 5,
     name: 'fancyEmojis',
     fullName: 'Fancy',
-    emojis: ['nerdApprove', 'nerdDisapprove']
+    emojis: ['nerdApprove', 'nerdDisapprove'],
+    custom: true
   }
 ];
