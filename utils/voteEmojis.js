@@ -3,7 +3,7 @@ module.exports = [
     id: 0,
     name: 'defaultEmojis',
     fullName: 'Defaults',
-    emojis: ['nerdSuccess', 'nerdError'],
+    emojis: ['578409088157876255', '578409123876438027'],
     custom: true
   },
   {
@@ -38,7 +38,7 @@ module.exports = [
     id: 5,
     name: 'fancyEmojis',
     fullName: 'Fancy',
-    emojis: ['nerdApprove', 'nerdDisapprove'],
+    emojis: ['555537247881920521', '555537277200367627'],
     custom: true
   }
 ];

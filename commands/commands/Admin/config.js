@@ -6,7 +6,7 @@ module.exports = class ConfigCommand extends Command {
     super(client, {
       name: 'config',
       category: 'Admin',
-      description: 'View a text-based version of the bot configuration for the guild.',
+      description: 'View and change various configurable options of the bot.',
       aliases: ['conf', 'settings'],
       usage: 'config [setting] [value]',
       adminOnly: true,
@@ -17,7 +17,7 @@ module.exports = class ConfigCommand extends Command {
 
   async run(message, args, settings) {
 
-    const { embedColor, discord } = this.client.config;
+    const { embedColor } = this.client.config;
     const { help: { usage, name } } = this;
 
     const setting = args[0],
@@ -26,13 +26,13 @@ module.exports = class ConfigCommand extends Command {
     const {
       prefix,
       staffRoles,
-      voteEmojis,
       responseRequired,
       disabledCommands,
       dmResponses
     } = settings;
 
     let {
+      voteEmojis,
       suggestionsLogs,
       suggestionsChannel,
       staffSuggestionsChannel
@@ -161,9 +161,27 @@ module.exports = class ConfigCommand extends Command {
         if (sRole) {
           try {
             await this.client.settings.updateGuildStaffRoles(updateRole, false);
-            configEmbed.setDescription(`<:nerdSuccess:490708616056406017> Removed **${verified.name}** from the staff roles.`);
+            await this.client.shard.broadcastEval(`
+              const { RichEmbed } = require('discord.js');
+              const { embedColor } = this.config;
 
-            message.channel.send(configEmbed).then(m => m.delete(5000));
+              (async () => {
+                const emoji = this.emojis.get('578409088157876255');
+                const guild = this.guilds.get('${message.guild.id}');
+                const channel = this.channels.get('${message.channel.id}');
+                const msg = await channel.fetchMessages('${message.id}');
+
+                const configEmbed = new RichEmbed()
+                  .setAuthor(guild, guild.iconURL)
+                  .setColor(embedColor)
+                  .setFooter('Guild: ' + guild.id)
+                  .setTimestamp();
+
+                configEmbed.setAuthor(guild + '| Staff Roles', guild.iconURL);
+                configEmbed.setDescription(emoji + ' Removed **${verified.name}** from the staff roles.');
+                return channel.send(configEmbed).then(m => m.delete(5000));
+              })();
+            `);
           } catch (err) {
             this.client.logger.error(err.stack);
             return message.channel.send(`An error occurred: **${err.message}**`);
@@ -171,9 +189,27 @@ module.exports = class ConfigCommand extends Command {
         } else {
           try {
             await this.client.settings.updateGuildStaffRoles(updateRole, true);
-            configEmbed.setDescription(`<:nerdSuccess:490708616056406017> Added **${verified.name}** to the staff roles.`);
+            await this.client.shard.broadcastEval(`
+              const { RichEmbed } = require('discord.js');
+              const { embedColor } = this.config;
 
-            message.channel.send(configEmbed).then(m => m.delete(5000));
+              (async () => {
+                const emoji = this.emojis.get('578409088157876255');
+                const guild = this.guilds.get('${message.guild.id}');
+                const channel = this.channels.get('${message.channel.id}');
+                const msg = await channel.fetchMessages('${message.id}');
+
+                const configEmbed = new RichEmbed()
+                  .setAuthor(guild, guild.iconURL)
+                  .setColor(embedColor)
+                  .setFooter('Guild: ' + guild.id)
+                  .setTimestamp();
+
+                configEmbed.setAuthor(guild + '| Staff Roles', guild.iconURL);
+                configEmbed.setDescription(emoji + ' Added **${verified.name}** to the staff roles.');
+                return channel.send(configEmbed).then(m => m.delete(5000));
+              })();
+            `);
           } catch (err) {
             this.client.logger.error(err.stack);
             return message.channel.send(`An error occurred: **${err.message}**`);
@@ -203,83 +239,85 @@ module.exports = class ConfigCommand extends Command {
       break;
     }
     case 'emojis': {
+      if (!voteEmojis) voteEmojis = 'defaultEmojis';
       configEmbed.setAuthor(`${message.guild} | Vote Emojis`, message.guild.iconURL);
 
       const setID = parseInt(updated);
 
-      if (updated) {
-        const filter = set => set.id === setID;
-        const foundSet = this.client.voteEmojis.find(filter);
-        const emojiSet = foundSet.emojis;
+      await this.client.shard.broadcastEval(`
+        const { RichEmbed } = require('discord.js');
+        const { embedColor, discord } = this.config;
 
-        if (!foundSet) return this.client.errors.voteEmojiNotFound(updated, message.channel);
+        (async () => {
+          if ('${voteEmojis}' == false) voteEmojis = 'defaultEmojis';
 
-        try {
-          await this.client.settings.updateGuild(message.guild, { voteEmojis: foundSet.name });
-          configEmbed.setDescription(`The default vote emojis have been changed to ${emojiSet.join(' ')}.`);
+          const guild = this.guilds.get('${message.guild.id}');
+          const channel = this.channels.get('${message.channel.id}');
+          const msg = await channel.fetchMessages('${message.id}');
 
-          return message.channel.send(configEmbed).then(m => m.delete(5000));
-        } catch (err) {
-          this.client.logger.error(err.stack);
-          return message.channel.send(`An error occurred: **${err.message}**`);
-        }
-      }
+          const configEmbed = new RichEmbed()
+            .setAuthor(guild, guild.iconURL)
+            .setColor(embedColor)
+            .setFooter('Guild: ' + guild.id)
+            .setTimestamp();
 
-      const emojiSets = this.client.voteEmojis.map(set => {
-        let emojis = set.emojis;
+          configEmbed.setAuthor(guild + '| Vote Emojis', guild.iconURL);
 
-        if (set.custom) {
-          emojis = emojis.map(e => {
-          //   this.client.shard.broadcastEval(`this.emojis.find(e => e.name === '${e}');`)
-          //     .then(data => {
-          //       // return e = `<:${data[0].name}:${data[0].id}>`;
-          //       const { name, id } = data[0];
-          //       const emoji = `<:${name}:${id}>`;
-          //       e = emoji;
-          //     })
-          //     .catch(err => {
-          //       this.client.logger.error(err.stack);
-          //       return message.channel.send(`An error occurred: **${err.message}**`);
-          //     });
+          if ('${updated}' !== 'undefined') {
+            const filter = set => set.id === ${setID};
+            const foundSet = this.voteEmojis.find(filter);
+            if (!foundSet) return this.errors.voteEmojiNotFound('${updated}', channel);
+            const emojiSet = foundSet.emojis.map(e => {
+              const found = this.emojis.get(e);
+              if (found) return found;
+              else return e;
+            });
 
-            const data = this.client.shard.broadcastEval(`this.emojis.find(e => e.name === '${e}')`);
-            const { name, id } = data[0];
+            try {
+              await this.settings.updateGuild(guild, { voteEmojis: foundSet.name });
+              configEmbed.setDescription('The default vote emojis have been changed to ' + emojiSet.join(' '));
+    
+              return channel.send(configEmbed).then(m => m.delete(5000));
+            } catch (err) {
+              this.logger.error(err.stack);
+              return channel.send('An error occurred: **' + err.message + '**');
+            }
+          }
 
-            // console.log(emojis);
-            console.log(name, id);
+          const emojiSets = this.voteEmojis.map(set => {
+            let emojiSet = set.emojis,
+              view = '';
+            
+            if (set.custom) {
+              emojiSet = emojiSet.map(e => {
+                return this.emojis.get(e);
+              });
+            }
+
+            if ('${voteEmojis}' === set.name) {
+              return '\`' + set.id + '\`:' + emojiSet.join(' ') + '***(Currently Using)***' + \`
+              
+              \`;
+            } else {
+              return '\`' + set.id + '\`:' + emojiSet.join(' ') + \`
+
+              \`;
+            }
           });
 
-          // emojis = emojis.map(e => {
-          //   e = 'hello';
-          //   return e;
-          // });
-        }
+          configEmbed.setDescription(\`
+           **Voting Emojis**
+           Choose from \` + this.voteEmojis.length + \` different emoji sets to be used for voting in your guild.
+           
+           \` +
+           emojiSets.join(' ') + \`You can do \` + '\`${prefix + name} emojis [id]\`' + \` to set the desired emojis.
 
-        // console.log(emojis);
-        
-        if (settings.voteEmojis === set.name) {
-          return `\`${set.id}\`: ${emojis[0] ? emojis.join(' ') : 'Not found'} ***(Currently Using)***`;
-        } else if (!this.client.voteEmojis.length && set.id === 0) {
-          return `\`${set.id}\`: ${emojis.join(' ').concat(' ', '***(Currently Using)***')}`;
-        } else {
-          return `\`${set.id}\`: ${emojis[0] ? emojis.join(' ') : 'Not found'}`;
-        }
-      });
-
-      return;
-
-      configEmbed.setDescription(`
-        **Voting Emojis**
-        Choose from ${this.client.voteEmojis.length} different emoji sets to be used for voting in your guild.
-
-        ${emojiSets.join('\n\n')}
-
-        You can do \`${prefix + name} emojis [id]\` to set the desired emojis.
-
-        Submit new emoji set suggestions any time by joining our Discord server: ${discord}
-        `);
-
-      message.channel.send(configEmbed);
+           Submit new emoji set suggestions any time by joining our Dicord server: \` + discord
+          );
+          
+          return channel.send(configEmbed);
+        })();
+      `);
       break;
     }
     case 'responses': {
@@ -346,9 +384,27 @@ module.exports = class ConfigCommand extends Command {
         if (foundCmd) {
           try {
             await this.client.settings.updateGuildCommands(enabledCommand, false);
-            configEmbed.setDescription(`<:nerdSuccess:490708616056406017> Enabled the **${cmd.help.name}** command.`);
+            await this.client.shard.broadcastEval(`
+              const { RichEmbed } = require('discord.js');
+              const { embedColor } = this.config;
 
-            message.channel.send(configEmbed).then(m => m.delete(5000));
+              (async () => {
+                const emoji = this.emojis.get('578409088157876255');
+                const guild = this.guilds.get('${message.guild.id}');
+                const channel = this.channels.get('${message.channel.id}');
+                const msg = await channel.fetchMessages('${message.id}');
+
+                const configEmbed = new RichEmbed()
+                  .setAuthor(guild, guild.iconURL)
+                  .setColor(embedColor)
+                  .setFooter('Guild: ' + guild.id)
+                  .setTimestamp();
+
+                configEmbed.setAuthor(guild + '| Disabled Commands', guild.iconURL);
+                configEmbed.setDescription(emoji + ' Enabled the **${cmd.help.name}** command.');
+                return channel.send(configEmbed).then(m => m.delete(5000));
+              })();
+            `);
           } catch (err) {
             this.client.logger.error(err.stack);
             return message.channel.send(`An error occurred: **${err.message}**`);
@@ -356,9 +412,27 @@ module.exports = class ConfigCommand extends Command {
         } else {
           try {
             await this.client.settings.updateGuildCommands(disabledCommand, true);
-            configEmbed.setDescription(`<:nerdSuccess:490708616056406017> Disabled the **${cmd.help.name}** command.`);
+            await this.client.shard.broadcastEval(`
+              const { RichEmbed } = require('discord.js');
+              const { embedColor } = this.config;
 
-            message.channel.send(configEmbed).then(m => m.delete(5000));
+              (async () => {
+                const emoji = this.emojis.get('578409088157876255');
+                const guild = this.guilds.get('${message.guild.id}');
+                const channel = this.channels.get('${message.channel.id}');
+                const msg = await channel.fetchMessages('${message.id}');
+
+                const configEmbed = new RichEmbed()
+                  .setAuthor(guild, guild.iconURL)
+                  .setColor(embedColor)
+                  .setFooter('Guild: ' + guild.id)
+                  .setTimestamp();
+
+                configEmbed.setAuthor(guild + '| Disabled Commands', guild.iconURL);
+                configEmbed.setDescription(emoji + ' Disabled the **${cmd.help.name}** command.');
+                return channel.send(configEmbed).then(m => m.delete(5000));
+              })();
+            `);
           } catch (err) {
             this.client.logger.error(err.stack);
             return message.channel.send(`An error occurred: **${err.message}**`);

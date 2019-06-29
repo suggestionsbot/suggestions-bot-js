@@ -110,7 +110,7 @@ module.exports = class SuggestCommand extends Command {
           const fallbackSet = this.voteEmojis.find(fallback).emojis;  
 
           for (let i = 0; i < emojiSet.length; i++) {
-            const e = this.emojis.find(e => e.name === emojiSet[i]);
+            const e = this.emojis.get(emojiSet[i]);
             if (e) await m.react(e);
             else await m.react(fallbackSet[i]);
           }
@@ -170,12 +170,6 @@ module.exports = class SuggestCommand extends Command {
           return;
         })();
       `);
-
-      // if (!settings.fetchedMessages) {
-      //   const { suggestions, guildID, fetched } = this.client.suggestionsToUpdate;
-      //   for (const s of suggestions) await this.client.suggestions.updateGuildSuggestion(s);
-      //   await this.client.settings.updateGuild(guildID, { fetchedMessages: fetched });
-      // }
     } catch (err) {
       this.client.logger.error(err.stack);
       return message.channel.send(`An error occurred: **${err.message}**.`);

@@ -1,7 +1,5 @@
-const { RichEmbed } = require('discord.js');
 const moment = require('moment');
 const Command = require('../../Command');
-const { stripIndents } = require('common-tags');
 require('moment-duration-format');
 require('moment-timezone');
 moment.suppressDeprecationWarnings = true;

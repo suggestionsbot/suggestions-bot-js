@@ -26,9 +26,11 @@ module.exports = class SettingsHelpers {
      * @param {Object} newSettings - The settings object to be updated.
      */
   async updateGuild(guild, newSettings) {
-    const searchGuild = typeof guild === Object ? guild.id : guild;
-    const data = await Settings
-      .findOne({ guildID: searchGuild });
+    const searchGuild = [
+      { guildID: guild.id },
+      { guildID: guild }
+    ];
+    const data = await Settings.findOne({ $or: searchGuild });
 
     let settings = data;
     // maybe check if settings object is empty, return an error?
@@ -38,7 +40,7 @@ module.exports = class SettingsHelpers {
       else return;
     }
 
-    const updated = await Settings.findOneAndUpdate({ guildID: searchGuild }, settings);
+    const updated = await Settings.findOneAndUpdate({ $or: searchGuild }, settings);
     await this.client.shard.broadcastEval(`
       const sGuild = this.guilds.get('${data.guildID}');
 
