@@ -82,7 +82,7 @@ module.exports = class SuggestionsClient extends Client {
 
   async clean(text) {
     if (text && text.constructor.name == 'Promise') text = await text;
-    if (typeof evaled !== 'string') {
+    if (typeof text !== 'string') {
       text = require('util').inspect(text, {
         depth: 1
       });
@@ -114,5 +114,10 @@ module.exports = class SuggestionsClient extends Client {
       await this.user.setStatus('dnd');
       await this.user.setActivity('in code land...', { type: 'PLAYING' });
     }
+  }
+
+  get voteEmojis() {
+    const emojis = require('../utils/voteEmojis');
+    return emojis;
   }
 };

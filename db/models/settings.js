@@ -31,7 +31,11 @@ const settingsSchema = mongoose.Schema({
     added: Number,
     addedByUsername: String,
     addedByUserID: String
-  }]
+  }],
+  fetchedMessages: {
+    type: Boolean,
+    default: false
+  }
 });
 
 module.exports = mongoose.model('Settings', settingsSchema);

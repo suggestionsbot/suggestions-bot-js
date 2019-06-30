@@ -10,18 +10,15 @@ module.exports = class {
 
     const { guildStatusColors: { deleted } } = this.client.config;
 
-    const gOwner = guild.owner;
-    const bot = guild.me;
-
     const oldServer = new RichEmbed()
       .setTitle('Removed')
       .setDescription(`
-                **ID:** \`${guild.id}\`
-                **Name:** \`${guild}\`
-                **Members:** \`${guild.members.size}\`
-                **Joined:** \`${moment(bot.joinedAt).fromNow()}\`
-                **Owner:** ${gOwner.toString()} \`[${gOwner.user.tag}]\`
-            `)
+        **ID:** \`${guild.id}\`
+        **Name:** \`${guild}\`
+        **Members:** \`${guild.members.size}\`
+        **Joined:** \`${moment(guild.me.joinedAt).fromNow()}\`
+        **Owner:** ${guild.owner} \`[${guild.owner.user.tag}]\`
+      `)
       .setColor(deleted)
       .setTimestamp();
 

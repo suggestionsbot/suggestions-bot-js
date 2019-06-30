@@ -13,7 +13,15 @@ module.exports = class Server {
 
   listen(port) {
     return new Promise((res, rej) => {
-      this.app.listen(port, err => err ? rej(err) : res());
+      // this.app.listen(port, err => err ? rej(err) : res());
+      this.app.listen(port, err => {
+        if (err) {
+          return rej(err);
+        } else {
+          this.client.logger.log(`Bot API opened on https://localhost:${port}`, 'ready');
+          return res();
+        }
+      });
     });
   }
 };

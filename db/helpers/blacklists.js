@@ -11,9 +11,14 @@ module.exports = class BlacklistsHelpers {
      *
      * @param {Object} guild - The guild object.
      */
-  async getGuildBlacklist(guild) {
+  async getGuildBlacklists(guild) {
     const data = await Blacklist
-      .find({ guildID: guild.id });
+      .find({ $and: [
+        { guildID: guild.id },
+        { scope: 'guild' }
+      ] });
+
+    for (const bl of data) if (!bl.scope) bl.scope = 'guild';
 
     return data;
   }
@@ -21,7 +26,7 @@ module.exports = class BlacklistsHelpers {
   /**
      * Get all global blacklists from the database.
      */
-  async getGlobalBlacklist() {
+  async getGlobalBlacklists() {
     const data = await Blacklist.find({ scope: 'global' });
 
     return data;
@@ -29,11 +34,10 @@ module.exports = class BlacklistsHelpers {
 
   /**
      * Get a guild-specific blacklisted user if present in the database.
-     *
-     * @param {Object} guild - The guild object.
      * @param {Object} user - The user object.
+     * @param {Object} guild - The guild object.
      */
-  async checkGuildBlacklist(guild, user) {
+  async checkGuildBlacklist(user, guild) {
     const data = await Blacklist.findOne({
       $and: [
         { guildID: guild.id },
@@ -41,6 +45,39 @@ module.exports = class BlacklistsHelpers {
         { status: true }
       ]
     });
+
+    return data;
+  }
+
+  /**
+   * Get a recent guild-specific blacklisted user if present in the database.
+   * @param {Object} user - The user object.
+   * @param {Object} guild - The guild object.
+   * @param {Boolean} global - If the blacklist search should be global or not
+   */
+  async checkRecentBlacklist(user, guild, global = false) {
+    let data;
+
+    if (global) {
+      data = await Blacklist
+        .findOne({
+          $and: [
+            { guildID: guild.id },
+            { userID: user.id },
+            { scope: 'global' }
+          ]
+        })
+        .sort({ case: -1 });
+    } else {
+      data = await Blacklist
+        .findOne({
+          $and: [
+            { guildID: guild.id },
+            { userID: user.id }
+          ]
+        })
+        .sort({ case: -1 });
+    }
 
     return data;
   }
@@ -74,11 +111,19 @@ module.exports = class BlacklistsHelpers {
     const newBlacklist = await new Blacklist(merged);
     const data = await newBlacklist.save();
 
-    if (user.scope === 'global') {
-      this.client.logger.log(`"${data.issuerUsername}" (${data.issuerID}) has issued a global blacklist for the user "${data.userID}".`);
-    } else {
-      this.client.logger.log(`"${data.issuerUsername}" (${data.issuerID}) has issued a blacklist for the user "${data.userID}".`);
-    }
+    await this.client.shard.broadcastEval(`
+      const issued = this.users.get('${data.userID}');
+      const issuer = this.users.get('${data.issuerID}');
+
+      this.logger.log('"' + issuer.tag + '" (' + issuer.id + ') has issued a ' + '${data.scope}' === 'global' ? 
+        'global blacklist' : 'blacklist' + 'to the user "' + issued.tag + '" (' + issued.id + ').');
+    `);
+
+    // if (user.scope === 'global') {
+    //   this.client.logger.log(`"${data.issuerUsername}" (${data.issuerID}) has issued a global blacklist for the user "${data.userID}".`);
+    // } else {
+    //   this.client.logger.log(`"${data.issuerUsername}" (${data.issuerID}) has issued a blacklist for the user "${data.userID}".`);
+    // }
     return data;
   }
   /**
@@ -91,15 +136,21 @@ module.exports = class BlacklistsHelpers {
     const guildMemberBlacklist = await Blacklist
       .findOne({ $and: query })
       .sort({ case: -1 });
-    const { issuerUsername, issuerID, userID, scope } = guildMemberBlacklist;
 
     const updated = await guildMemberBlacklist.updateOne(data);
 
-    if (scope === 'global') {
-      this.client.logger.log(`"${issuerUsername}" (${issuerID}) has issued a global unblacklist for the user "${userID}".`);
-    } else {
-      this.client.logger.log(`"${issuerUsername}" (${issuerID}) has issued an unblacklist for the user "${userID}".`);
-    }
+    await this.client.shard.broadcastEval(`
+      const issued = this.users.get('${guildMemberBlacklist.userID}');
+      const issuer = this.users.get('${guildMemberBlacklist.issuerID}');
+
+      this.logger.log('"' + issuer.tag + '" (' + issuer.id + ') has issued a ' + '${guildMemberBlacklist.scope}' === 'global' ? 
+        'global unblacklist' : 'unblacklist' + 'on the user "' + issued.tag + '" (' + issued.id + ').');
+    `);
+    // if (scope === 'global') {
+    //   this.client.logger.log(`"${issuerUsername}" (${issuerID}) has issued a global unblacklist for the user "${userID}".`);
+    // } else {
+    //   this.client.logger.log(`"${issuerUsername}" (${issuerID}) has issued an unblacklist for the user "${userID}".`);
+    // }
 
     return updated;
   }

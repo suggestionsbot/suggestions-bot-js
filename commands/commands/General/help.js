@@ -18,23 +18,29 @@ module.exports = class HelpCommand extends Command {
 
   async run(message, args, settings) {
     const { owner, embedColor, discord, website, prefix: defPrefix } = this.client.config;
-    let staffRoles;
+    let staffRoles,
+      staffCheck;
     let { prefix, suggestionsChannel } = settings;
     const { staffRoles: roles } = settings;
+    const configCmdName = this.client.commands.get('config').help.name;
+
+    const botOwner = this.client.users.get(owner);
+    const ownerCheck = this.client.isOwner(message.author.id);
+    const adminCheck = message.member.hasPermission('MANAGE_GUILD');
 
     if (message.guild) {
       suggestionsChannel = message.guild.channels.find(c => c.name === suggestionsChannel) ||
-                message.guild.channels.find(c => c.toString() === suggestionsChannel) ||
-                message.guild.channels.get(suggestionsChannel) || '';
+        message.guild.channels.find(c => c.toString() === suggestionsChannel) ||
+        message.guild.channels.get(suggestionsChannel) || '';
 
       staffRoles = [];
       if (roles) staffRoles = roles.map(role => message.guild.roles.find(r => r.name === role.role || r.id === role.role));
+
+      staffCheck = message.member.hasPermission('MANAGE_GUILD') ||
+        message.member.roles.some(r => staffRoles.includes(r));
     }
 
     if (!message.guild) prefix = defPrefix;
-
-    const cmdSetChannel = await this.client.commands.get('setchannel');
-    const setChannelUsage = cmdSetChannel.help.usage;
 
     const cmds = this.client.commands;
     const cmd = args[0];
@@ -97,22 +103,30 @@ module.exports = class HelpCommand extends Command {
         .addField('📣 Current Prefix', `\`${prefix}\``)
         .addField('💬 Suggestions Channel', suggestionsChannel.toString() ||
           (message.member.hasPermission('MANAGE_GUILD') && !suggestionsChannel ?
-            `***Not set. Use*** \`${prefix + setChannelUsage}\`` :
+            `***Not set. Use*** \`${prefix + configCmdName} <channel> <channel_name>\`` :
             '***Not set. Contact a server administrator.***'))
-        .addField('🤖 General Commands', generalCmds.join(' | '));
-      if (message.member.hasPermission('MANAGE_GUILD') || message.member.roles.some(r => staffRoles.includes(r))) helpEmbed.addField('🗄 Staff Commands', staffCmds.join(' | '));
-      if (message.member.hasPermission('MANAGE_GUILD')) helpEmbed.addField('🛡 Admin Commands', adminCmds.join(' | '));
-      if (this.client.isOwner(message.author.id)) helpEmbed.addField('🔒 Owner Commands', ownerCmds.join(' | '));
+        .addField('🤖 General Commands', this.mapCommands(cmds, 'General').join(' | '));
+      if (staffCheck) helpEmbed.addField('🗄 Staff Commands', this.mapCommands(cmds, 'Staff').join(' | '));
+      if (adminCheck) helpEmbed.addField('🛡 Admin Commands', this.mapCommands(cmds, 'Admin').join(' | '));
+      if (ownerCheck) helpEmbed.addField('🔒 Owner Commands', this.mapCommands(cmds, 'Bot Owner').join(' | '));
     } else {
       helpEmbed.addField('📣 Default Prefix', `\`${this.client.config.prefix}\``)
-        .addField('🤖 General Commands', generalCmds.join(' | '))
-        .addField('🗄 Staff Commands', staffCmds.join(' | '))
-        .addField('🛡 Admin Commands', adminCmds.join(' | '));
-      if (this.client.isOwner(message.author.id)) helpEmbed.addField('🔒 Owner Commands', ownerCmds.join(' | '));
+        .addField('🤖 General Commands', this.mapCommands(cmds, 'General').join(' | '))
+        .addField('🗄 Staff Commands', this.mapCommands(cmds, 'Staff').join(' | '))
+        .addField('🛡 Admin Commands', this.mapCommands(cmds, 'Admin').join(' | '));
+      if (ownerCheck) helpEmbed.addField('🔒 Owner Commands', this.mapCommands(cmds, 'Bot Owner').join(' | '));
     }
     helpEmbed.addField('ℹ Website', website);
-    helpEmbed.addField('❗ Found an issue?', `Please report any issues to <@${owner}> via the Support Discord: ${discord}`);
+    helpEmbed.addField('❗ Found an issue?', `Please report any issues to ${botOwner} via the Support Discord: ${discord}`);
 
     message.channel.send(helpEmbed);
+  }
+
+  mapCommands(commands, category) {
+    return commands
+      .filter(c => c.help.category === category)
+      .map(c => c.help.name)
+      .sort()
+      .map(name => `\`${name}\``);
   }
 };

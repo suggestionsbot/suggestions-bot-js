@@ -1,46 +1,44 @@
-const voteEmojis = client => [
+module.exports = [
   {
     id: 0,
     name: 'defaultEmojis',
     fullName: 'Defaults',
-    emojis: [
-      client.emojis.find(e => e.name === 'nerdSuccess'),
-      client.emojis.find(e => e.name === 'nerdError')
-    ]
+    emojis: ['578409088157876255', '578409123876438027'],
+    custom: true
   },
   {
     id: 1,
     name: 'oldDefaults',
     fullName: 'Old Defaults',
-    emojis: ['✅', '❌']
+    emojis: ['✅', '❌'],
+    custom: false
   },
   {
     id: 2,
     name: 'thumbsEmojis',
     fullName: 'Thumbs',
-    emojis: ['👍', '👎']
+    emojis: ['👍', '👎'],
+    custom: false
   },
   {
     id: 3,
     name: 'arrowsEmojis',
     fullName: 'Arrows',
-    emojis: ['⬆', '⬇']
+    emojis: ['⬆', '⬇'],
+    custom: false
   },
   {
     id: 4,
     name: 'greenEmojis',
     fullName: 'Green',
-    emojis: ['✅', '❎']
+    emojis: ['✅', '❎'],
+    custom: false
   },
   {
     id: 5,
     name: 'fancyEmojis',
     fullName: 'Fancy',
-    emojis: [
-      client.emojis.find(e => e.name === 'nerdApprove'),
-      client.emojis.find(e => e.name === 'nerdDisapprove')
-    ]
+    emojis: ['555537247881920521', '555537277200367627'],
+    custom: true
   }
 ];
-
-module.exports = voteEmojis;

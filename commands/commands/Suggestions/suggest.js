@@ -1,8 +1,6 @@
+/* eslint-disable no-useless-escape */
 const Command = require('../../Command');
-const { RichEmbed } = require('discord.js');
 const crypto = require('crypto');
-const moment = require('moment');
-const { stripIndents } = require('common-tags');
 require('moment-duration-format');
 require('moment-timezone');
 
@@ -25,10 +23,9 @@ module.exports = class SuggestCommand extends Command {
   async run(message, args, settings) {
 
     const { embedColor } = this.client.config;
-    const voteEmojis = this.voteEmojis(this.client);
+    // const voteEmojis = this.voteEmojis(this.client);
 
     let id = crypto.randomBytes(20).toString('hex').slice(12, 20);
-    const time = moment(Date.now());
 
     let verifySuggestion;
     try {
@@ -51,87 +48,131 @@ module.exports = class SuggestCommand extends Command {
     // If the sID exists globally, this will force a new one to be generated
     if (verifySuggestion) id = crypto.randomBytes(20).toString('hex').slice(12, 20);
 
-    const dmEmbed = new RichEmbed()
-      .setAuthor(message.guild, message.guild.iconURL)
-      .setDescription(`Hey, ${sUser}. Your suggestion has been sent to the ${sChannel} channel to be voted on!
-            
-          Please wait until it gets approved or rejected by a staff member.
-      
-          Your suggestion ID (sID) for reference is **${id}**.
-      `)
-      .setColor(embedColor)
-      .setFooter(`Guild ID: ${message.guild.id} | sID: ${id}`)
-      .setTimestamp();
-
     const suggestion = args.join(' ');
     if (!suggestion) return this.client.errors.noUsage(message.channel, this, settings);
 
-    const imageCheck = /(http(s?):)([/|.|\w|\s|-])*\.(?:jpg|gif|png)/.exec(suggestion);
-
-    const sEmbed = new RichEmbed()
-      .setThumbnail(sUser.avatarURL)
-      .setDescription(`
-            **Submitter**
-            ${sUser.tag}
-    
-            **Suggestion**
-            ${suggestion}
-            `)
-      .setColor(embedColor)
-      .setFooter(`User ID: ${sUser.id} | sID: ${id}`)
-      .setTimestamp();
-
-    if (imageCheck) sEmbed.setImage(imageCheck[0]);
-    const sendMsgs = sChannel.permissionsFor(message.guild.me).has('SEND_MESSAGES', false);
-    const reactions = sChannel.permissionsFor(message.guild.me).has('ADD_REACTIONS', false);
-    if (!sendMsgs) return this.client.errors.noChannelPerms(message, sChannel, 'SEND_MESSAGES');
-    if (!reactions) return this.client.errors.noChannelPerms(message, sChannel, 'ADD_REACTIONS');
-
     try {
-      if (settings.dmResponses) sUser.send(dmEmbed);
+
+      await this.client.shard.broadcastEval(`
+        (async () => {
+          const { RichEmbed } = require('discord.js');
+          const { stripIndents } = require('common-tags');
+
+          const senderMessage = await this.channels.get('${message.channel.id}')
+            .fetchMessage('${message.id}');
+          const sUser = this.users.get('${message.author.id}');
+
+          const imageCheck = /(http(s?):)([/|.|\w|\s|-])*\.(?:jpg|gif|png)/.exec("${suggestion}");
+
+          const sEmbed = new RichEmbed()
+            .setThumbnail('${sUser.avatarURL}')
+            .setDescription(stripIndents\`
+              **Submitter**
+              ${sUser.tag}
+
+              **Suggestion**
+              ${suggestion}
+              \`)
+            .setColor('${embedColor}')
+            .setFooter('User ID: ${sUser.id} | sID: ${id}')
+            .setTimestamp();
+
+          const dmEmbed = new RichEmbed()
+            .setAuthor(senderMessage.guild, senderMessage.guild.iconURL)
+            .setDescription(stripIndents\`Hey, ${sUser}. Your suggestion has been sent to the ${sChannel} channel to be voted on!
+                  
+                Please wait until it gets approved or rejected by a staff member.
+            
+                Your suggestion ID (sID) for reference is **${id}**.
+            \`)
+            .setColor('${embedColor}')
+            .setFooter(\`Guild ID: ${message.guild.id} | sID: ${id}\`)
+            .setTimestamp();
+
+          if (imageCheck) sEmbed.setImage(imageCheck[0]);
+
+          const filter = set => set.name === '${emojis}';
+          const defaults = set => set.name === 'defaultEmojis';
+          const fallback = set => set.name === 'oldDefaults';
+
+          const successEmoji = this.emojis.find(e => e.name === 'nerdSuccess');
+
+          const channel = this.channels.get('${sChannel.id}');
+          const sendMsgs = channel.permissionsFor(senderMessage.guild.me).has('SEND_MESSAGES', false);
+          const reactions = channel.permissionsFor(senderMessage.guild.me).has('ADD_REACTIONS', false);
+          if (!sendMsgs) return this.errors.noChannelPerms(senderMessage, channel, 'SEND_MESSAGES');
+          if (!reactions) return this.errors.noChannelPerms(senderMessage, channel, 'ADD_REACTIONS');
+
+          const m = await channel.send(sEmbed);
+
+          const foundSet = this.voteEmojis.find(filter) || this.voteEmojis.find(defaults);
+          const emojiSet = foundSet.emojis;
+          const fallbackSet = this.voteEmojis.find(fallback).emojis;  
+
+          for (let i = 0; i < emojiSet.length; i++) {
+            const e = this.emojis.get(emojiSet[i]);
+            if (e) await m.react(e);
+            else await m.react(fallbackSet[i]);
+          }
+
+          const newSuggestion = {
+            guildID: senderMessage.guild.id,
+            userID: senderMessage.author.id,
+            messageID: m.id,
+            suggestion: "${suggestion}",
+            sID: '${id}',
+            time: m.createdAt.getTime()
+          };
+
+          try {
+            if (${settings.dmResponses}) sUser.send(dmEmbed);
+          } catch (err) {
+            this.logger.error(err.stack);
+            senderMessage.channel.send(stripIndents\`
+              An error occurred DMing you your suggestion information: **err.message**. Please make sure you are able to receive messages from server members.
+      
+              For reference, your suggestion ID (sID) is **${id}**. Please wait for staff member to approve/reject your suggestion.\`
+            );
+          }
+
+          await this.suggestions.submitGuildSuggestion(newSuggestion);
+          if (${settings.dmResponses}) senderMessage.react('✉');
+          else senderMessage.react(successEmoji);
+          senderMessage.delete(3000).catch(O_o=>{});
+
+          if (${settings.fetchedMessages} === false) {
+            const messages = await channel.fetchMessages();
+            const filtered = messages
+              .filter(m => m.embeds.length >= 1 && m.author.id === this.user.id);
+
+            for (const m of filtered.array()) {
+              const footer = m.embeds[0].footer.text.split('sID:');
+              const sID = footer[1].trim();
+
+              const suggestion = await this.suggestions
+                .getGuildSuggestion(m.guild.id, sID);
+              if (!suggestion || suggestion.messageID) break;
+
+              const updateSuggestion = {
+                query: [
+                  { guildID: m.guild.id },
+                  { sID: sID }
+                ],
+                data: { messageID: m.id }
+              };
+
+              await this.suggestions.updateGuildSuggestion(updateSuggestion);
+            }
+
+            await this.settings.updateGuild(senderMessage.guild.id, { fetchedMessages: true });
+          }
+
+          return;
+        })();
+      `);
     } catch (err) {
       this.client.logger.error(err.stack);
-      message.channel.send(stripIndents`
-        An error occurred DMing you your suggestion information: **${err.message}**. Please make sure you are able to receive messages from server members.
-
-        For reference, your suggestion ID (sID) is **${id}**. Please wait for staff member to approve/reject your suggestion.`
-      );
-    }
-
-    const filter = set => set.name === emojis;
-    const defaults = set => set.name === 'defaultEmojis';
-    const fallback = set => set.name === 'oldDefaults';
-    const foundSet = voteEmojis.find(filter) || voteEmojis.find(defaults);
-    const emojiSet = foundSet.emojis;
-    const fallbackSet = voteEmojis.find(fallback).emojis;
-
-    sChannel.send(sEmbed)
-      .then(async msg => {
-        for (let i = 0; i < emojiSet.length; i++) {
-          if (!emojiSet[i]) await msg.react(fallbackSet[i]);
-          else await msg.react(emojiSet[i]);
-        }
-      })
-      .catch(err => {
-        this.client.logger.error(err.stack);
-        return message.channel.send(`An error occurred adding reactions to this suggestion: **${err.message}**.`);
-      });
-
-    const newSuggestion = {
-      guildID: message.guild.id,
-      userID: sUser.id,
-      suggestion,
-      sID: id,
-      newTime: message.createdAt.getTime()
-    };
-
-    try {
-      await this.client.suggestions.submitGuildSuggestion(newSuggestion);
-      if (settings.dmRespones) await message.react('✉');
-      await message.delete(3000).catch(O_o => {});
-    } catch (err) {
-      this.client.logger.error(err.stack);
-      return message.channel.send(`An error occurred saving this suggestion in the database: **${err.message}**.`);
+      return message.channel.send(`An error occurred: **${err.message}**.`);
     }
 
     return;

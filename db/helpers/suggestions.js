@@ -15,7 +15,7 @@ module.exports = class SuggestionsHelpers {
      */
   async getGuildSuggestion(guild, sID) {
     const data = await Suggestion
-      .findOne({ $and: [{ guildID: guild.id, sID: sID }] });
+      .findOne({ $and: [{ guildID: guild.id || guild, sID: sID }] });
 
     return data;
   }
@@ -95,11 +95,15 @@ module.exports = class SuggestionsHelpers {
     const newSuggestion = await new Suggestion(merged);
     const data = await newSuggestion.save();
 
-    const sUser = this.client.users.get(data.userID);
-    const sGuild = this.client.guilds.get(data.guildID);
-    this.client.logger.log(
-      `New suggestion submitted by "${sUser.tag}" (${sUser.id}) in the guild "${sGuild}" (${sGuild.id})`
-    );
+    await this.client.shard.broadcastEval(`
+      const sUser = this.users.get('${data.userID}');
+      const sGuild = this.guilds.get('${data.guildID}');
+
+      this.logger.log(
+        'New suggestions submitted by "' + sUser.tag + '" (' + sUser.id + ') in the guild "' + sGuild.name + '" (' + sGuild.id + ')'
+      );
+    `);
+
     return data;
   }
 
@@ -111,33 +115,24 @@ module.exports = class SuggestionsHelpers {
   async handleGuildSuggestion({ query, data }) {
 
     const guildSuggestion = await Suggestion.findOne({ $and: query });
-    const { guildID, sID } = guildSuggestion;
-
-    const sGuild = this.client.guilds.get(guildID);
+    const { sID } = guildSuggestion;
 
     const updated = await guildSuggestion.updateOne(data);
-    switch (data.status) {
-    case 'approved':
-      this.client.logger.log(`sID ${sID} has been approved in the guild "${sGuild}" (${sGuild.id}).`);
-      if (data.statusReply) {
-        this.client.logger.log(oneLine`
-            sID ${sID} has been approved in the guild "${sGuild}" (${sGuild.id}) 
-            with the response "${data.statusReply}".
-        `);
+
+    await this.client.shard.broadcastEval(`
+      const sGuild = this.guilds.get('${guildSuggestion.guildID}');
+
+      if ("${data.statusReply}" === 'null') {
+        this.logger.log(
+          'sID "${sID}" has been ${data.status} in the guild "' + sGuild.name + '" (' + sGuild.id + ').'
+        );
+      } else {
+        this.logger.log(
+          'sID "${sID}" has been ${data.status} in the guild "' + sGuild.name + '" (' + sGuild.id + ') ' +
+          'with the response "${data.statusReply}".'
+        );
       }
-      break;
-    case 'rejected':
-      this.client.logger.log(`sID ${sID} has been rejected in the guild "${sGuild}" (${sGuild.id}).`);
-      if (data.statusReply) {
-        this.client.logger.log(oneLine`
-            sID ${sID} has been rejected in the guild "${sGuild}" (${sGuild.id}) 
-            with the response "${data.statusReply}".
-        `);
-      }
-      break;
-    default:
-      break;
-    }
+    `);
     return updated;
   }
 
@@ -160,6 +155,18 @@ module.exports = class SuggestionsHelpers {
     this.client.logger.log(
       `sID ${sID} had a note added by ${sUser.tag} (${sUser.id}) "${sGuild}" (${sGuild.id}).`
     );
+    return updated;
+  }
+
+  /**
+   * Update a suggestion with various other properties.
+   *
+   * @param {Object} suggestion - The suggestion object.
+   */
+  async updateGuildSuggestion({ query, data }) {
+    const guildSuggestion = await Suggestion.findOne({ $and: query });
+    const updated = await guildSuggestion.updateOne(data);
+    this.client.logger.log(`${updated.sID} has been updated.`);
     return updated;
   }
 };

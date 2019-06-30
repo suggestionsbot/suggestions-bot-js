@@ -1,3 +1,4 @@
+const { oneLine } = require('common-tags');
 const Command = require('../../Command');
 
 module.exports = class PingCommand extends Command {
@@ -15,8 +16,14 @@ module.exports = class PingCommand extends Command {
 
   async run(message, args) {
     try {
+      const ping = await this.client.shard.fetchClientValues('ping');
+
       const msg = await message.channel.send('🏓 Ping!');
-      return msg.edit(`Pong! Latency is \`${msg.createdTimestamp - message.createdTimestamp}ms\`. API Latency is \`${Math.round(this.client.ping)}ms\`.`);
+      return msg.edit(oneLine`
+        Pong! 
+        Latency is \`${msg.createdTimestamp - message.createdTimestamp}ms\`.
+        API Latency is \`${Math.round(ping[this.client.shard.id])}ms\`.
+      `);
     } catch (e) {
       this.client.logger.error(e);
       return message.channel.send(`Error running this command: **${e.message}**.`);
