@@ -60,6 +60,7 @@ module.exports = class SuggestCommand extends Command {
 
           const senderMessage = await this.channels.get('${message.channel.id}')
             .fetchMessage('${message.id}');
+          if (!senderMessage) return false;
           const sUser = this.users.get('${message.author.id}');
 
           const imageCheck = /(http(s?):)([/|.|\w|\s|-])*\.(?:jpg|gif|png)/.exec("${suggestion}");

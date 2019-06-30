@@ -65,30 +65,6 @@ module.exports = class HelpCommand extends Command {
       return message.channel.send(cmdHelpEmbed);
     }
 
-    const generalCmds = cmds
-      .filter(c => c.conf.ownerOnly === false && c.conf.adminOnly === false && c.conf.staffOnly === false && c.conf.superSecretOnly === false)
-      .map(c => c.help.name)
-      .sort()
-      .map(c => '`' + c + '`');
-
-    const staffCmds = cmds
-      .filter(c => c.conf.staffOnly === true)
-      .map(c => c.help.name)
-      .sort()
-      .map(c => '`' + c + '`');
-
-    const adminCmds = cmds
-      .filter(c => c.conf.adminOnly === true)
-      .map(c => c.help.name)
-      .sort()
-      .map(c => '`' + c + '`');
-
-    const ownerCmds = cmds
-      .filter(c => c.conf.ownerOnly === true)
-      .map(c => c.help.name)
-      .sort()
-      .map(c => '`' + c + '`');
-
     const helpEmbed = new RichEmbed()
       .setTitle('Help Information')
       .setDescription(oneLine`

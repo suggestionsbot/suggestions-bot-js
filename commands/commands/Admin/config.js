@@ -175,6 +175,7 @@ module.exports = class ConfigCommand extends Command {
 
               (async () => {
                 const emoji = this.emojis.get('578409088157876255');
+                if (!emoji) return false;
                 const guild = this.guilds.get('${message.guild.id}');
                 const channel = this.channels.get('${message.channel.id}');
                 const msg = await channel.fetchMessages('${message.id}');
@@ -203,6 +204,7 @@ module.exports = class ConfigCommand extends Command {
 
               (async () => {
                 const emoji = this.emojis.get('578409088157876255');
+                if (!emoji) return false;
                 const guild = this.guilds.get('${message.guild.id}');
                 const channel = this.channels.get('${message.channel.id}');
                 const msg = await channel.fetchMessages('${message.id}');
@@ -260,6 +262,7 @@ module.exports = class ConfigCommand extends Command {
           if ('${voteEmojis}' == false) voteEmojis = 'defaultEmojis';
 
           const guild = this.guilds.get('${message.guild.id}');
+          if (!guild) return false;
           const channel = this.channels.get('${message.channel.id}');
           const msg = await channel.fetchMessages('${message.id}');
 
@@ -398,6 +401,7 @@ module.exports = class ConfigCommand extends Command {
 
               (async () => {
                 const emoji = this.emojis.get('578409088157876255');
+                if (!emoji) return false;
                 const guild = this.guilds.get('${message.guild.id}');
                 const channel = this.channels.get('${message.channel.id}');
                 const msg = await channel.fetchMessages('${message.id}');
@@ -426,6 +430,7 @@ module.exports = class ConfigCommand extends Command {
 
               (async () => {
                 const emoji = this.emojis.get('578409088157876255');
+                if (!emoji) return false;
                 const guild = this.guilds.get('${message.guild.id}');
                 const channel = this.channels.get('${message.channel.id}');
                 const msg = await channel.fetchMessages('${message.id}');

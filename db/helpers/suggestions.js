@@ -98,6 +98,7 @@ module.exports = class SuggestionsHelpers {
     await this.client.shard.broadcastEval(`
       const sUser = this.users.get('${data.userID}');
       const sGuild = this.guilds.get('${data.guildID}');
+      if (!sGuild) return false;
 
       this.logger.log(
         'New suggestions submitted by "' + sUser.tag + '" (' + sUser.id + ') in the guild "' + sGuild.name + '" (' + sGuild.id + ')'
@@ -121,6 +122,7 @@ module.exports = class SuggestionsHelpers {
 
     await this.client.shard.broadcastEval(`
       const sGuild = this.guilds.get('${guildSuggestion.guildID}');
+      if (!sGuild) return false;
 
       if ("${data.statusReply}" === 'null') {
         this.logger.log(
