@@ -14,7 +14,7 @@ module.exports = class ApproveCommand extends Command {
       staffOnly: true,
       guildOnly: false,
       botPermissions: ['MANAGE_MESSAGES'],
-      enabled: true
+      enabled: false
     });
   }
 
