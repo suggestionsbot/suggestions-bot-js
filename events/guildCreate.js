@@ -32,20 +32,20 @@ module.exports = class {
     }
 
     switch (process.env.NODE_ENV) {
-    // 345753533141876737 = Nerd Cave Testing
-    case 'development': {
-      const logGuild = this.client.guilds.get('345753533141876737');
-      const logChannel = logGuild.channels.find(c => c.name === 'server_logs');
-      logChannel.send(newServer);
-      break;
-    }
-    // 480231440932667393 = Nerd Cave Development
-    default: {
-      const logGuild = this.client.guilds.get('480231440932667393');
-      const logChannel = logGuild.channels.find(c => c.name === 'server_logs');
-      logChannel.send(newServer);
-      break;
-    }
+      // 345753533141876737 = Nerd Cave Testing
+      case 'development': {
+        const logGuild = this.client.guilds.get('345753533141876737');
+        const logChannel = logGuild.channels.find(c => c.name === 'server_logs');
+        logChannel.send(newServer);
+        break;
+      }
+      // 480231440932667393 = Nerd Cave Development
+      default: {
+        const logGuild = this.client.guilds.get('480231440932667393');
+        const logChannel = logGuild.channels.find(c => c.name === 'server_logs');
+        logChannel.send(newServer);
+        break;
+      }
     }
   }
 };
