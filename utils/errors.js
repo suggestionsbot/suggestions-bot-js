@@ -244,6 +244,24 @@ class ErrorHandler {
 
     channel.send(embed).then(m => m.delete(5000)).catch(err => this.client.logger.error(err));
   }
+
+  userAlreadyBlacklisted(channel, user) {
+    const embed = new RichEmbed()
+      .setTitle('Error')
+      .setDescription(`\`${user.tag}\` is already blacklisted! Cannot do this`)
+      .setColor(this.colors.red);
+
+    channel.send(embed).then(m => m.delete(5000)).catch(err => this.client.logger.error(err));
+  }
+
+  userNoLongerBlacklisted(channel, user) {
+    const embed = new RichEmbed()
+      .setTitle('Error')
+      .setDescription(`\`${user.tag}\` is no longer blacklisted! Cannot do this`)
+      .setColor(this.colors.red);
+
+    channel.send(embed).then(m => m.delete(5000)).catch(err => this.client.logger.error(err));
+  }
 }
 
 module.exports = ErrorHandler;

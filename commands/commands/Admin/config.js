@@ -21,7 +21,7 @@ module.exports = class ConfigCommand extends Command {
     const { help: { usage, name } } = this;
 
     const setting = args[0],
-      updated = args[1];
+      updated = args.slice(1).join(' ');
 
     const {
       prefix,
@@ -79,7 +79,9 @@ module.exports = class ConfigCommand extends Command {
       configEmbed.setAuthor(`${message.guild} | Suggestions Channel`, message.guild.iconURL);
 
       if (updated) {
-        const verified = message.guild.channels.find(c => c.name === updated) || message.guild.channels.find(c => c.toString() === updated);
+        const verified = message.guild.channels.find(c => c.name === updated) ||
+          message.guild.channels.get(updated) ||
+          message.mentions.channels.first();
         if (!verified) return this.client.errors.channelNotFound(updated, message.channel);
 
         try {
@@ -102,7 +104,9 @@ module.exports = class ConfigCommand extends Command {
       configEmbed.setAuthor(`${message.guild} | Suggestion Logs Channel`, message.guild.iconURL);
 
       if (updated) {
-        const verified = message.guild.channels.find(c => c.name === updated) || message.guild.channels.find(c => c.toString() === updated);
+        const verified = message.guild.channels.find(c => c.name === updated) ||
+          message.guild.channels.get(updated) ||
+          message.mentions.channels.first();
         if (!verified) return this.client.errors.channelNotFound(updated, message.channel);
 
         try {
@@ -125,7 +129,9 @@ module.exports = class ConfigCommand extends Command {
       configEmbed.setAuthor(`${message.guild} | Suggestions Staff Channel`, message.guild.iconURL);
 
       if (updated) {
-        const verified = message.guild.channels.find(c => c.name === updated) || message.guild.channels.find(c => c.toString() === updated);
+        const verified = message.guild.channels.find(c => c.name === updated) ||
+          message.guild.channels.get(updated) ||
+          message.mentions.channels.first();
         if (!verified) return this.client.errors.channelNotFound(updated, message.channel);
 
         try {
@@ -148,7 +154,9 @@ module.exports = class ConfigCommand extends Command {
       configEmbed.setAuthor(`${message.guild} | Staff Roles`, message.guild.iconURL);
 
       if (updated) {
-        const verified = message.guild.roles.find(r => r.name === updated) || message.guild.roles.find(r => r.toString() === updated);
+        const verified = message.guild.roles.find(c => c.name === updated) ||
+          message.roles.channels.get(updated) ||
+          message.mentions.roles.first();
         if (!verified) return this.client.errors.roleNotFound(updated, message.channel);
 
         const filter = r => r.role === verified.id;

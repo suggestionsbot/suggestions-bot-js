@@ -91,7 +91,7 @@ module.exports = class SuggestCommand extends Command {
 
           if (imageCheck) sEmbed.setImage(imageCheck[0]);
 
-          const filter = set => set.name === ${emojis};
+          const filter = set => set.name === '${emojis}';
           const defaults = set => set.name === 'defaultEmojis';
           const fallback = set => set.name === 'oldDefaults';
 

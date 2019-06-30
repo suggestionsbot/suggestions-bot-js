@@ -1,10 +1,6 @@
-const { RichEmbed } = require('discord.js');
-const moment = require('moment');
 const Command = require('../../Command');
-require('moment-duration-format');
-require('moment-timezone');
 
-module.exports = class GsIDCommand extends Command {
+module.exports = class GSIDCommand extends Command {
   constructor(client) {
     super(client, {
       name: 'gsid',
@@ -19,117 +15,120 @@ module.exports = class GsIDCommand extends Command {
 
   async run(message, args, settings) {
 
-    const { embedColor, suggestionColors } = this.client.config;
-
     message.delete().catch(O_o => {});
 
     if (!args[0]) return this.client.errors.noUsage(message.channel, this, settings);
 
-    let sID;
     try {
-      sID = await this.client.suggestions.getGlobalSuggestion(args[0]);
+      await this.client.shard.broadcastEval(`
+        const { RichEmbed } = require('discord.js');
+        const { embedColor, suggestionColors } = this.config;
+        
+        (async () => {
+          const senderMessage = await this.channels.get('${message.channel.id}')
+            .fetchMessage('${message.id}');
+
+          let sID;
+          try {
+            sID = await this.suggestions.getGlobalSuggestion('${args[0]}');
+          } catch (err) {
+            this.logger.error(err.stack);
+            return senderMessage.channel.send('An error occurred: **' + err.message + '**.');
+          }
+
+          if (!sID) return this.errors.noSuggestion(senderMessage.channel, id);
+
+          let submittedOn,
+            updatedOn;
+
+          if (sID.time) submittedOn = sID.time;
+          if (sID.newTime) submittedOn = sID.newTime;
+
+          if (sID.statusUpdated) updatedOn = sID.statusUpdated;
+          if (sID.newStatusUpdated) updatedOn = sID.newStatusUpdated;
+
+          const sUser = this.users.get(sID.userID);
+          const sStaff = this.users.get(sID.staffMemberID);
+          const sGuild = this.guilds.get(sID.guildID);
+
+          const embed = new RichEmbed()
+            .setAuthor(sGuild, sGuild.iconURL)
+            .setTitle('Info for ' + sID.sID)
+            .setFooter('User ID: ' + sUser.id + ' | sID: ' + sID.sID);
+
+          let results,
+            time;
+          if (sID.time && !sID.newTime) time = sID.time;
+          if (!sID.time && sID.newTime) time = sID.newTime;
+
+          if (sID.results.length > 1) results = sID.results
+            .map(r => {
+              return r.emoji + ' **' + r.count + \`**
+              \`;
+            });
+
+          switch (sID.status) {
+            case undefined: {
+              embed.setDescription(\`
+                **Submitter**
+                \` + sUser + \`
+
+                **Suggestion**
+                \` + sID.suggestion
+              );
+              embed.setColor(embedColor);
+              embed.setTimestamp(submittedOn);
+              senderMessage.channel.send(embed);
+              break;
+            }
+            case 'approved': {
+              embed.setDescription(\`
+                **Submitter**
+                \` + sUser + \`
+
+                **Suggestion**
+                \` + sID.suggestion + \`
+
+                **Approved By**
+                \` + sStaff + \`
+
+                **Results**
+                \` + results.join(' ')
+              );
+              embed.setColor(suggestionColors.approved);
+              embed.setTimestamp(updatedOn);
+              senderMessage.channel.send(embed);
+              break;
+            }
+            case 'rejected': {
+              embed.setDescription(\`
+                **Submitter**
+                \` + sUser + \`
+
+                **Suggestion**
+                \` + sID.suggestion + \`
+
+                **Rejected By**
+                \` + sStaff + \`
+
+                **Results**
+                \` + results.join(' ')
+              );
+              embed.setColor(suggestionColors.rejected);
+              embed.setTimestamp(updatedOn);
+              senderMessage.channel.send(embed);
+              break;
+            }
+            default:
+              break;
+          }
+        })();
+      `);
     } catch (err) {
       this.client.logger.error(err.stack);
-      return message.channel.send(`Error querying the database for this suggestion: **${err.message}**.`);
+      return message.channel.send(`An error occurred: **${err.message}**`);
     }
 
-    if (!sID) return this.client.errors.noSuggestion(message.channel, args[0]);
-
-    let submittedOn,
-      updatedOn;
-
-    // if (sID.time) submittedOn = moment(new Date(sID.time)).utc().format('MM/DD/YY @ h:mm A (z)');
-    // if (sID.newTime) submittedOn = moment(new Date(sID.newTime)).utc().format('MM/DD/YY @ h:mm A (z)');
-
-    if (sID.time) submittedOn = sID.time;
-    if (sID.newTime) submittedOn = sID.newTime;
-
-    // if (sID.statusUpdated) updatedOn = moment.utc(new Date(sID.statusUpdated)).format('MM/DD/YY @ h:mm A (z)');
-    // if (sID.newStatusUpdated) updatedOn = moment.utc(new Date(sID.newStatusUpdated)).format('MM/DD/YY @ h:mm A (z)');
-
-    if (sID.statusUpdated) updatedOn = sID.statusUpdated;
-    if (sID.newStatusUpdated) updatedOn = sID.newStatusUpdated;
-
-    const sGuild = this.client.guilds.get(sID.guildID);
-    const sUser = this.client.users.get(sID.userID);
-    const sStaff = this.client.users.get(sID.staffMemberUserID);
-
-    const embed = new RichEmbed()
-      .setAuthor(sGuild, sGuild.iconURL)
-      .setTitle(`Info for sID ${sID.sID}`)
-      .setFooter(`User ID: ${sUser.id} | sID ${sID.sID}`);
-
-    let nResults = [];
-    if (sID.newResults && sID.newResults.length > 1) {
-      const nerdSuccess = this.client.guilds.get('345753533141876737').emojis.find(e => e.name === 'nerdSuccess');
-      const nerdError = this.client.guilds.get('345753533141876737').emojis.find(e => e.name === 'nerdError');
-
-      const nerdApprove = this.client.guilds.get('345753533141876737').emojis.find(e => e.name === 'nerdApprove');
-      const nerdDisapprove = this.client.guilds.get('345753533141876737').emojis.find(e => e.name === 'nerdDisapprove');
-
-      sID.newResults.forEach(result => {
-        if (result.emoji === 'nerdSuccess') result.emoji = nerdSuccess.toString();
-        if (result.emoji === 'nerdError') result.emoji = nerdError.toString();
-        if (result.emoji === 'nerdApprove') result.emoji = nerdApprove.toString();
-        if (result.emoji === 'nerdDisapprove') result.emoji = nerdDisapprove.toString();
-      });
-
-      nResults = sID.newResults.map(r => `${r.emoji} **${r.count}**`);
-    }
-
-    switch (sID.status) {
-    case undefined:
-      embed.setDescription(`
-        **Submitter**
-        ${sUser}
-
-        **Suggestion**
-        ${sID.suggestion}
-      `);
-      embed.setColor(embedColor);
-      embed.setTimestamp(submittedOn);
-      message.channel.send(embed);
-      break;
-    case 'approved':
-      embed.setDescription(`
-        **Submitter**
-        ${sUser}
-
-        **Suggestion**
-        ${sID.suggestion}
-
-        **Approved By**
-        ${sStaff}
-
-        **Results**
-        ${nResults.join('\n') || sID.results}
-    
-        `);
-      embed.setColor(suggestionColors.approved);
-      embed.setTimestamp(updatedOn);
-      message.channel.send(embed);
-      break;
-    case 'rejected':
-      embed.setDescription(`
-        **Submitter**
-        ${sUser}
-
-        **Suggestion**
-        ${sID.suggestion}
-
-        **Rejected By**
-        ${sStaff}
-
-        **Results**
-        ${nResults.join('\n') || sID.results}
-
-        `);
-      embed.setColor(suggestionColors.rejected);
-      embed.setTimestamp(updatedOn);
-      message.channel.send(embed);
-      break;
-    default:
-    }
     return;
   }
 };
