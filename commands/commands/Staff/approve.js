@@ -33,7 +33,8 @@ module.exports = class ApproveCommand extends Command {
 
         let settings;
         const senderMessage = await this.channels.get('${message.channel.id}')
-            .fetchMessage('${message.id}');
+          .fetchMessage('${message.id}');
+        if (!senderMessage) return false;
 
         let sID;
         try {
@@ -130,11 +131,11 @@ module.exports = class ApproveCommand extends Command {
           };
         });
 
-        const nerdSuccess = this.emojis.find(e => e.name === 'nerdSuccess');
-        const nerdError = this.emojis.find(e => e.name === 'nerdError');
+        const nerdSuccess = this.emojis.get('578409088157876255');
+        const nerdError = this.emojis.get('578409123876438027');
 
-        const nerdApprove = this.emojis.find(e => e.name === 'nerdApprove');
-        const nerdDisapprove = this.emojis.find(e => e.name === 'nerdDisapprove');
+        const nerdApprove = this.emojis.get('555537247881920521');
+        const nerdDisapprove = this.emojis.get('555537277200367627');
 
         results.forEach(result => {
           if (result.emoji === 'nerdSuccess') result.emoji = nerdSuccess.toString();

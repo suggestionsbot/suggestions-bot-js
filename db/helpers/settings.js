@@ -43,6 +43,7 @@ module.exports = class SettingsHelpers {
     const updated = await Settings.findOneAndUpdate({ $or: searchGuild }, settings);
     await this.client.shard.broadcastEval(`
       const sGuild = this.guilds.get('${data.guildID}');
+      if (!sGuild) return false;
 
       this.logger.log(
         'Guild "' + sGuild.name + '" (' + sGuild.id + ') updated settings: ${Object.keys(newSettings)}'
@@ -93,6 +94,7 @@ module.exports = class SettingsHelpers {
 
     await this.client.shard.broadcastEval(`
       const nGuild = this.guilds.get('${data.guildID}');
+      if (!nGuild) return false;
 
       this.logger.log(
         'Default settings saved for guild "' + nGuild.name + '" (' + nGuild.id + ')'

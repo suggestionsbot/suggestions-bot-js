@@ -27,6 +27,7 @@ module.exports = class GSIDCommand extends Command {
         (async () => {
           const senderMessage = await this.channels.get('${message.channel.id}')
             .fetchMessage('${message.id}');
+          if (!senderMessage) return false;
 
           let sID;
           try {
