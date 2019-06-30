@@ -121,19 +121,21 @@ module.exports = class SuggestionsHelpers {
     const updated = await guildSuggestion.updateOne(data);
 
     await this.client.shard.broadcastEval(`
-      const sGuild = this.guilds.get('${guildSuggestion.guildID}');
-      if (!sGuild) return false;
+      (() => {
+        const sGuild = this.guilds.get('${guildSuggestion.guildID}');
+        if (!sGuild) return false;
 
-      if ("${data.statusReply}" === 'null') {
-        this.logger.log(
-          'sID "${sID}" has been ${data.status} in the guild "' + sGuild.name + '" (' + sGuild.id + ').'
-        );
-      } else {
-        this.logger.log(
-          'sID "${sID}" has been ${data.status} in the guild "' + sGuild.name + '" (' + sGuild.id + ') ' +
-          'with the response "${data.statusReply}".'
-        );
-      }
+        if ("${data.statusReply}" === 'null') {
+          this.logger.log(
+            'sID "${sID}" has been ${data.status} in the guild "' + sGuild.name + '" (' + sGuild.id + ').'
+          );
+        } else {
+          this.logger.log(
+            'sID "${sID}" has been ${data.status} in the guild "' + sGuild.name + '" (' + sGuild.id + ') ' +
+            'with the response "${data.statusReply}".'
+          );
+        }
+      })();
     `);
     return updated;
   }
@@ -150,13 +152,26 @@ module.exports = class SuggestionsHelpers {
     const { guildID, sID } = guildSuggestion;
     const updatedData = { notes: data };
 
-    const sUser = this.client.users.get(staffMemberID);
-    const sGuild = this.client.guilds.get(guildID);
+    await this.client.shard.broadcastEval(`
+      (() => {
+        const sGuild = this.guilds.get('${guildID}');
+        if (!sGuild) return false;
+        const sUser = this.users.get('${staffMemberID}');
+
+        this.logger.log(
+          'sID "' + ${sID} + '" had a note added by "' + sUser.tag + '" (' + sUser.id + ') in the guild "' +
+          sGuild + '" (' + sGuild.id + ').'
+        );
+      })();
+    `);
+
+    // const sUser = this.client.users.get(staffMemberID);
+    // const sGuild = this.client.guilds.get(guildID);
 
     const updated = await guildSuggestion.updateOne({ $push: updatedData });
-    this.client.logger.log(
-      `sID ${sID} had a note added by ${sUser.tag} (${sUser.id}) "${sGuild}" (${sGuild.id}).`
-    );
+    // this.client.logger.log(
+    //   `sID ${sID} had a note added by ${sUser.tag} (${sUser.id}) "${sGuild}" (${sGuild.id}).`
+    // );
     return updated;
   }
 

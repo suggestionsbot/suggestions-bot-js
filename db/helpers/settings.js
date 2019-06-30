@@ -42,12 +42,14 @@ module.exports = class SettingsHelpers {
 
     const updated = await Settings.findOneAndUpdate({ $or: searchGuild }, settings);
     await this.client.shard.broadcastEval(`
-      const sGuild = this.guilds.get('${data.guildID}');
-      if (!sGuild) return false;
+      (() => {
+        const sGuild = this.guilds.get('${data.guildID}');
+        if (!sGuild) return false;
 
-      this.logger.log(
-        'Guild "' + sGuild.name + '" (' + sGuild.id + ') updated settings: ${Object.keys(newSettings)}'
-      );
+        this.logger.log(
+          'Guild "' + sGuild.name + '" (' + sGuild.id + ') updated settings: ${Object.keys(newSettings)}'
+        );
+      })();
     `);
     return updated;
   }
@@ -93,12 +95,14 @@ module.exports = class SettingsHelpers {
     const data = await newSettings.save();
 
     await this.client.shard.broadcastEval(`
-      const nGuild = this.guilds.get('${data.guildID}');
-      if (!nGuild) return false;
+      (() => {
+        const nGuild = this.guilds.get('${data.guildID}');
+        if (!nGuild) return false;
 
-      this.logger.log(
-        'Default settings saved for guild "' + nGuild.name + '" (' + nGuild.id + ')'
-      );
+        this.logger.log(
+          'Default settings saved for guild "' + nGuild.name + '" (' + nGuild.id + ')'
+        );
+      })();
     `);
     return data;
   }
