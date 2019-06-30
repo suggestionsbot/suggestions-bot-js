@@ -13,8 +13,7 @@ module.exports = class RejectCommand extends Command {
       usage: 'reject <sID> [response]',
       staffOnly: true,
       guildOnly: false,
-      botPermissions: ['MANAGE_MESSAGES'],
-      enabled: true
+      botPermissions: ['MANAGE_MESSAGES']
     });
 
     this.voteEmojis = require('../../../utils/voteEmojis');

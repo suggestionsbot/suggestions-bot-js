@@ -13,8 +13,7 @@ module.exports = class ApproveCommand extends Command {
       usage: 'approve <sID> [response]',
       staffOnly: true,
       guildOnly: false,
-      botPermissions: ['MANAGE_MESSAGES'],
-      enabled: true
+      botPermissions: ['MANAGE_MESSAGES']
     });
   }
 
