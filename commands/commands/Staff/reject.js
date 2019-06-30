@@ -12,8 +12,8 @@ module.exports = class RejectCommand extends Command {
       description: 'Reject a submitted suggestion via the suggestion ID (sID).',
       usage: 'reject <sID> [response]',
       staffOnly: true,
-      botPermissions: ['MANAGE_MESSAGES'],
-      enabled: false
+      guildOnly: false,
+      botPermissions: ['MANAGE_MESSAGES']
     });
 
     this.voteEmojis = require('../../../utils/voteEmojis');
