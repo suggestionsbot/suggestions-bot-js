@@ -271,7 +271,7 @@ module.exports = class ConfigCommand extends Command {
 
           configEmbed.setAuthor(guild + '| Vote Emojis', guild.iconURL);
 
-          if ('${updated}' !== 'undefined') {
+          if ('${updated}' !== '') {
             const filter = set => set.id === ${setID};
             const foundSet = this.voteEmojis.find(filter);
             if (!foundSet) return this.errors.voteEmojiNotFound('${updated}', channel);
