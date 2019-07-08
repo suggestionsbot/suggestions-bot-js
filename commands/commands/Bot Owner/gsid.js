@@ -31,13 +31,13 @@ module.exports = class GSIDCommand extends Command {
 
           let sID;
           try {
-            sID = await this.suggestions.getGlobalSuggestion('${args[0]}');
+            sID = await this.suggestions.getGlobalSuggestion("${args[0]}");
           } catch (err) {
             this.logger.error(err.stack);
             return senderMessage.channel.send('An error occurred: **' + err.message + '**.');
           }
 
-          if (!sID) return this.errors.noSuggestion(senderMessage.channel, id);
+          if (!sID) return this.errors.noSuggestion(senderMessage.channel, "${args[0]}");
 
           let submittedOn,
             updatedOn;

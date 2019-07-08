@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-escape */
 const moment = require('moment');
 const Command = require('../../Command');
 require('moment-duration-format');
@@ -22,12 +23,25 @@ module.exports = class ApproveCommand extends Command {
     message.delete().catch(O_o => {});
 
     const id = args[0];
-    const reply = args.slice(1).join(' ');
     if (!id) return this.client.errors.noUsage(message.channel, this, settings);
+
+    const replyArgs = args.slice(1);
+    for (let i = 0; i < replyArgs.length; i++) {
+      replyArgs[i] = replyArgs[i].replace(/\n/g, '<br/>');
+    }
+
+    const reply = args.slice(1)
+      .join(' ')
+      .replace(/<br ?\/?>/g, '\n')
+      .replace(/"/g, '\\"') || null;
+
+    const cleanedReply = replyArgs.slice(1)
+      .join(' ')
+      .replace(/"/g, '\\"') || null;
 
     await this.client.shard.broadcastEval(`
       (async () => {
-        const { RichEmbed } = require('discord.js');
+        const { Constants, RichEmbed, Guild, Emoji } = require('discord.js');
 
         const { approved } = this.config.suggestionColors;
 
@@ -38,13 +52,14 @@ module.exports = class ApproveCommand extends Command {
 
         let sID;
         try {
-          sID = await this.suggestions.getGlobalSuggestion('${id}');
+          sID = await this.suggestions.getGlobalSuggestion("${id}");
         } catch (err) {
           this.logger.error(err.stack);
           return senderMessage.channel.send('Error querying the database for this suggestion: **' + err.message + '**.');
         }
 
-        if (!sID) return this.errors.noSuggestion(senderMessage.channel, id);
+        if (!sID) return this.errors.noSuggestion(senderMessage.channel, "${id}");
+        
         const {
           userID,
           guildID,
@@ -76,8 +91,6 @@ module.exports = class ApproveCommand extends Command {
         if (!settings.staffRoles) this.logger.log('does not exist yo');
 
         if (!settings.staffRoles) return this.errors.noStaffRoles(senderMessage.channel);
-
-        const reply = "${reply}" || null;
 
         if (messageID === false) {
           return senderMessage.channel.send('Oops! The message ID was not found ' +
@@ -112,7 +125,7 @@ module.exports = class ApproveCommand extends Command {
         const dmEmbed = new RichEmbed()
           .setAuthor(guild, guild.iconURL)
           .setDescription(
-            'Hey ' + sUser.toString() + \`. Your suggestion has been approve by ${message.author}!
+            'Hey ' + sUser.toString() + \`. Your suggestion has been approved by ${message.author}!
 
             Your suggestion ID (sID) for reference was **${id}**.\`
           )
@@ -124,39 +137,40 @@ module.exports = class ApproveCommand extends Command {
         const reactName = reactions.map(e => e._emoji.name);
         const reactCount = reactions.map(e => e.count);
 
-        const results = reactName.map((r, c) => {
+        const results = reactName.map(async (r, c) => {
+          const e = this.findEmojiByName(r);
+          if (e) {
+            const emoji = await this.rest.makeRequest('get', Constants.Endpoints.Guild(e.guild).toString(), true)
+              .then(raw => {
+                const guild = new Guild(this, raw)
+                const emoji = new Emoji(guild, e);
+                return emoji;
+              });
+
+            r = '<:' + emoji.name + ':' + emoji.id + '>';
+          }
+
           return {
             emoji: r,
             count: reactCount[c] - 1 || 0
           };
         });
 
-        const nerdSuccess = this.emojis.get('578409088157876255');
-        const nerdError = this.emojis.get('578409123876438027');
-
-        const nerdApprove = this.emojis.get('555537247881920521');
-        const nerdDisapprove = this.emojis.get('555537277200367627');
-
-        results.forEach(result => {
-          if (result.emoji === 'nerdSuccess') result.emoji = nerdSuccess.toString();
-          if (result.emoji === 'nerdError') result.emoji = nerdError.toString();
-          if (result.emoji === 'nerdApprove') result.emoji = nerdApprove.toString();
-          if (result.emoji === 'nerdDisapprove') result.emoji = nerdDisapprove.toString();
+        const newResults = Array.from(results).map(async r => {
+          const data = await r;
+          return data.emoji + ' **: ' + data.count + '**' + \`
+          \`;
         });
 
-        const newResults = Array.from(results);
-        const view = newResults.map(r => {
-          return r.emoji + ' **: ' + r.count + '**' + \`
-          \`;
-        }).join(' ');
+        const view = await Promise.all(newResults);
 
         const logsEmbed = new RichEmbed()
           .setAuthor(guild.name, guild.iconURL)
           .setDescription(\`
             **Results:**
-          \` + view + \`
+          \` + view.join(' ') + \`
             **Suggestion:**
-          \` + suggestion + \`
+          \` + suggestion.replace(/<br ?\/?>/g, '\n') + \`
 
             **Submitter:**
             \` + sUser.toString() + \`
@@ -169,10 +183,10 @@ module.exports = class ApproveCommand extends Command {
           .setFooter(\`sID: ${id}\`)
           .setTimestamp();
 
-        if (reply !== null) {
+        if ("${cleanedReply}" !== null) {
           dmEmbed.setDescription(\`Hey, sUser. Your suggestion has been approved by ${message.author}!
           
-            Staff response: **\` + reply + \`**
+            Staff response: **${reply}**
                                 
             Your suggestion ID (sID) for reference was **${id}**.
           \`);
@@ -180,9 +194,9 @@ module.exports = class ApproveCommand extends Command {
           logsEmbed
             .setDescription(\`
               **Results:**
-            \` + view + \`
+            \` + view.join(' ') + \`
               **Suggestion:**
-              \` + suggestion + \`
+              \` + suggestion.replace(/<br ?\/?>/g, '\n') + \`
 
               **Submitter:**
               \` + sUser.toString() + \`
@@ -191,7 +205,8 @@ module.exports = class ApproveCommand extends Command {
               ${message.author}
 
               **Response:**
-              \` + reply
+              ${reply}
+              \`
             );
         }
 
@@ -208,7 +223,7 @@ module.exports = class ApproveCommand extends Command {
           data: {
             status: 'approved',
             statusUpdated: senderMessage.createdAt.getTime(),
-            statusReply: reply,
+            statusReply: "${cleanedReply}",
             staffMemberID: senderMessage.author.id,
             results
           }
