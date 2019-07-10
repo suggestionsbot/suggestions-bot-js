@@ -3,7 +3,7 @@ The "Suggestions" bot is a simple and easy to use, but an extensive bot, that's 
 
 Getting the bot up and running is very simple. All you have to do is create and set the suggestions channel, logs channel and some staff roles. Use the `config` command and the various options to set these values. 
 ```bash
-,config channel [channe]> # Configure the suggestions channel. You can either mention/tag the channel or supply the name/ID of the channel
+,config channel [channel] # Configure the suggestions channel. You can either mention/tag the channel or supply the name/ID of the channel
 ,config logs [channel] # Configure the suggestions log channel. Same functionality as setting the suggestions channel
 ,config roles [role] # Add or remove a staff role. Its addition or removal is automatically determined. Same functionality as setting the suggestions channel
 ```
