@@ -10,7 +10,7 @@ module.exports = class ConfigCommand extends Command {
       aliases: ['conf', 'settings'],
       usage: 'config [setting] [value]',
       adminOnly: true,
-      botPermissions: ['MANAGE_MESSAGES'],
+      botPermissions: ['MANAGE_MESSAGES', 'USE_EXTERNAL_EMOJIS'],
       guarded: true
     });
   }
@@ -22,6 +22,8 @@ module.exports = class ConfigCommand extends Command {
 
     const setting = args[0],
       updated = args.slice(1).join(' ');
+
+    updated.cleanDoubleQuotes();
 
     const {
       prefix,
@@ -170,12 +172,25 @@ module.exports = class ConfigCommand extends Command {
           try {
             await this.client.settings.updateGuildStaffRoles(updateRole, false);
             await this.client.shard.broadcastEval(`
-              const { RichEmbed } = require('discord.js');
-              const { embedColor } = this.config;
+              const { Constants, RichEmbed, Guild, Emoji  } = require('discord.js');
+              const { embedColor, emojis: { success } } = this.config;
 
               (async () => {
-                const emoji = this.emojis.get('578409088157876255');
-                if (!emoji) return false;
+                let emoji;
+                const e = this.findEmojiByID(success);
+                if (e) {
+                  const data = await this.rest.makeRequest('get', Constants.Endpoints.Guild(e.guild).toString(), true)
+                    .then(raw => {
+                      const guild = new Guild(this, raw)
+                      const emoji = new Emoji(guild, e);
+                      return emoji;
+                    });
+
+                  emoji = '<:' + data.name + ':' + data.id + '>';
+                } else {
+                  emoji = '✅';
+                }
+
                 const guild = this.guilds.get('${message.guild.id}');
                 const channel = this.channels.get('${message.channel.id}');
                 const msg = await channel.fetchMessages('${message.id}');
@@ -199,12 +214,25 @@ module.exports = class ConfigCommand extends Command {
           try {
             await this.client.settings.updateGuildStaffRoles(updateRole, true);
             await this.client.shard.broadcastEval(`
-              const { RichEmbed } = require('discord.js');
-              const { embedColor } = this.config;
+              const { Constants, RichEmbed, Guild, Emoji  } = require('discord.js');
+              const { embedColor, emojis: { success } } = this.config;
 
               (async () => {
-                const emoji = this.emojis.get('578409088157876255');
-                if (!emoji) return false;
+                let emoji;
+                const e = this.findEmojiByID(success);
+                if (e) {
+                  const data = await this.rest.makeRequest('get', Constants.Endpoints.Guild(e.guild).toString(), true)
+                    .then(raw => {
+                      const guild = new Guild(this, raw)
+                      const emoji = new Emoji(guild, e);
+                      return emoji;
+                    });
+
+                  emoji = '<:' + data.name + ':' + data.id + '>';
+                } else {
+                  emoji = '✅';
+                }
+
                 const guild = this.guilds.get('${message.guild.id}');
                 const channel = this.channels.get('${message.channel.id}');
                 const msg = await channel.fetchMessages('${message.id}');
@@ -255,12 +283,10 @@ module.exports = class ConfigCommand extends Command {
       const setID = parseInt(updated);
 
       await this.client.shard.broadcastEval(`
-        const { RichEmbed } = require('discord.js');
+        const { Constants, RichEmbed, Guild, Emoji } = require('discord.js');
         const { embedColor, discord } = this.config;
 
         (async () => {
-          if ('${voteEmojis}' == false) voteEmojis = 'defaultEmojis';
-
           const guild = this.guilds.get('${message.guild.id}');
           if (!guild) return false;
           const channel = this.channels.get('${message.channel.id}');
@@ -278,11 +304,23 @@ module.exports = class ConfigCommand extends Command {
             const filter = set => set.id === ${setID};
             const foundSet = this.voteEmojis.find(filter);
             if (!foundSet) return this.errors.voteEmojiNotFound('${updated}', channel);
-            const emojiSet = foundSet.emojis.map(e => {
-              const found = this.emojis.get(e);
-              if (found) return found;
-              else return e;
+            const emojis = foundSet.emojis.map(async e => {
+              const found = this.findEmojiByID(e);
+              if (found) {
+                const emoji = await this.rest.makeRequest('get', Constants.Endpoints.Guild(found.guild).toString(), true)
+                  .then(raw => {
+                    const guild = new Guild(this, raw)
+                    const emoji = new Emoji(guild, found);
+                    return emoji;
+                  });
+
+                return '<:' + emoji.name + ':' + emoji.id + '>';
+              } else {
+                return e;
+              }
             });
+
+            const emojiSet = await Promise.all(emojis);
 
             try {
               await this.settings.updateGuild(guild, { voteEmojis: foundSet.name });
@@ -295,33 +333,54 @@ module.exports = class ConfigCommand extends Command {
             }
           }
 
-          const emojiSets = this.voteEmojis.map(set => {
+          let voteEmojis = '${voteEmojis}';
+          const filter = set => set.name === voteEmojis;
+          const foundSet = this.voteEmojis.find(filter);
+          if (!voteEmojis || !foundSet) voteEmojis = 'defaultEmojis';
+
+          const emojiSets = this.voteEmojis.map(async set => {
             let emojiSet = set.emojis,
               view = '';
             
             if (set.custom) {
-              emojiSet = emojiSet.map(e => {
-                return this.emojis.get(e);
+              emojiSet = emojiSet.map(async e => {
+                const found = this.findEmojiByID(e);
+                if (found) {
+                  const emoji = await this.rest.makeRequest('get', Constants.Endpoints.Guild(found.guild).toString(), true)
+                    .then(raw => {
+                      const guild = new Guild(this, raw)
+                      const emoji = new Emoji(guild, found);
+                      return emoji;
+                    });
+
+                  return '<:' + emoji.name + ':' + emoji.id + '>';
+                } else {
+                  return e;
+                }
               });
             }
 
-            if ('${voteEmojis}' === set.name) {
-              return '\`' + set.id + '\`:' + emojiSet.join(' ') + '***(Currently Using)***' + \`
+            const emojiSetView = await Promise.all(emojiSet);
+
+            if (voteEmojis === set.name) {
+              return '\`' + set.id + '\`:' + emojiSetView.join(' ') + '***(Currently Using)***' + \`
               
               \`;
             } else {
-              return '\`' + set.id + '\`:' + emojiSet.join(' ') + \`
+              return '\`' + set.id + '\`:' + emojiSetView.join(' ') + \`
 
               \`;
             }
           });
+
+          const mainView = await Promise.all(emojiSets);
 
           configEmbed.setDescription(\`
            **Voting Emojis**
            Choose from \` + this.voteEmojis.length + \` different emoji sets to be used for voting in your guild.
            
            \` +
-           emojiSets.join(' ') + \`You can do \` + '\`${prefix + name} emojis [id]\`' + \` to set the desired emojis.
+           mainView.join(' ') + \`You can do \` + '\`${prefix + name} emojis [id]\`' + \` to set the desired emojis.
 
            Submit new emoji set suggestions any time by joining our Dicord server: \` + discord
           );

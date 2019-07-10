@@ -13,7 +13,7 @@ module.exports = class RejectCommand extends Command {
       usage: 'reject <sID> [response]',
       staffOnly: true,
       guildOnly: false,
-      botPermissions: ['MANAGE_MESSAGES']
+      botPermissions: ['MANAGE_MESSAGES', 'USE_EXTERNAL_EMOJIS']
     });
 
     this.voteEmojis = require('../../../utils/voteEmojis');
@@ -24,12 +24,25 @@ module.exports = class RejectCommand extends Command {
     message.delete().catch(O_o => {});
 
     const id = args[0];
-    const reply = args.slice(1).join(' ');
     if (!id) return this.client.errors.noUsage(message.channel, this, settings);
+
+    const replyArgs = args.slice(1);
+    for (let i = 0; i < replyArgs.length; i++) {
+      replyArgs[i] = replyArgs[i].replace(/\n/g, '<br/>');
+    }
+
+    const reply = args.slice(1)
+      .join(' ')
+      .replace(/<br ?\/?>/g, '\n')
+      .replace(/"/g, '\\"') || null;
+
+    const cleanedReply = replyArgs
+      .join(' ')
+      .replace(/"/g, '\\"') || null;
 
     await this.client.shard.broadcastEval(`
       (async () => {
-        const { RichEmbed } = require('discord.js');
+        const { Constants, RichEmbed, Guild, Emoji } = require('discord.js');
 
         const { rejected } = this.config.suggestionColors;
 
@@ -40,13 +53,14 @@ module.exports = class RejectCommand extends Command {
 
         let sID;
         try {
-          sID = await this.suggestions.getGlobalSuggestion('${id}');
+          sID = await this.suggestions.getGlobalSuggestion("${id}");
         } catch (err) {
           this.logger.error(err.stack);
           return senderMessage.channel.send('Error querying the database for this suggestion: **' + err.message + '**.');
         }
 
-        if (!sID) return this.errors.noSuggestion(senderMessage.channel, id);
+        if (!sID) return this.errors.noSuggestion(senderMessage.channel, "${id}");
+        
         const {
           userID,
           guildID,
@@ -75,13 +89,9 @@ module.exports = class RejectCommand extends Command {
           return senderMessage.channel.send("An error occurred: **" + error.message + "**");
         }
 
-        if (!settings.staffRoles) this.logger.log('does not exist yo');
-
         if (!settings.staffRoles) return this.errors.noStaffRoles(senderMessage.channel);
 
-        const reply = "${reply}" || null;
-
-        if (!reply && (settings.responseRequired === true)) return this.errors.noRejectedResponse(senderMessage.channel);
+        if (("${cleanedReply}" === false) && (settings.responseRequired === true)) return this.errors.noRejectedResponse(senderMessage.channel);
 
         if (messageID === false) {
           return senderMessage.channel.send('Oops! The message ID was not found ' +
@@ -89,6 +99,8 @@ module.exports = class RejectCommand extends Command {
           this.config.discord
           );
         }
+
+        const cleanedSuggestion = suggestion.cleanLineBreaks();
 
         const suggestionsChannel = guild.channels.find(c => c.name === settings.suggestionsChannel) ||
           guild.channels.get(settings.suggestionsChannel);
@@ -116,7 +128,7 @@ module.exports = class RejectCommand extends Command {
         const dmEmbed = new RichEmbed()
           .setAuthor(guild, guild.iconURL)
           .setDescription(
-            'Hey ' + sUser.toString() + \`. Your suggestion has been approve by ${message.author}!
+            'Hey ' + sUser.toString() + \`. Your suggestion has been rejected by ${message.author}!
 
             Your suggestion ID (sID) for reference was **${id}**.\`
           )
@@ -128,39 +140,41 @@ module.exports = class RejectCommand extends Command {
         const reactName = reactions.map(e => e._emoji.name);
         const reactCount = reactions.map(e => e.count);
 
-        const results = reactName.map((r, c) => {
+        const results = reactName.map(async (r, c) => {
+          const e = this.findEmojiByName(r);
+          if (e) {
+            const emoji = await this.rest.makeRequest('get', Constants.Endpoints.Guild(e.guild).toString(), true)
+              .then(raw => {
+                const guild = new Guild(this, raw)
+                const emoji = new Emoji(guild, e);
+                return emoji;
+              });
+
+            r = '<:' + emoji.name + ':' + emoji.id + '>';
+          }
+
           return {
             emoji: r,
             count: reactCount[c] - 1 || 0
           };
         });
 
-        const nerdSuccess = this.emojis.get('578409088157876255');
-        const nerdError = this.emojis.get('578409123876438027');
-
-        const nerdApprove = this.emojis.get('555537247881920521');
-        const nerdDisapprove = this.emojis.get('555537277200367627');
-
-        results.forEach(result => {
-          if (result.emoji === 'nerdSuccess') result.emoji = nerdSuccess.toString();
-          if (result.emoji === 'nerdError') result.emoji = nerdError.toString();
-          if (result.emoji === 'nerdApprove') result.emoji = nerdApprove.toString();
-          if (result.emoji === 'nerdDisapprove') result.emoji = nerdDisapprove.toString();
+        const newResults = Array.from(results).map(async r => {
+          const data = await r;
+          return data.emoji + ' **: ' + data.count + '**' + \`
+          \`;
         });
 
-        const newResults = Array.from(results);
-        const view = newResults.map(r => {
-          return r.emoji + ' **: ' + r.count + '**' + \`
-          \`;
-        }).join(' ');
+        const view = await Promise.all(newResults);
+        const savedResults = await Promise.all(results);
 
         const logsEmbed = new RichEmbed()
           .setAuthor(guild.name, guild.iconURL)
           .setDescription(\`
             **Results:**
-          \` + view + \`
+          \` + view.join(' ') + \`
             **Suggestion:**
-            \` + suggestion + \`
+            \` + cleanedSuggestion + \`
 
             **Submitter:**
             \` + sUser.toString() + \`
@@ -173,10 +187,10 @@ module.exports = class RejectCommand extends Command {
           .setFooter(\`sID: ${id}\`)
           .setTimestamp();
 
-        if (reply !== null) {
+        if ("${cleanedReply}" !== null) {
           dmEmbed.setDescription(\`Hey, sUser. Your suggestion has been rejected by ${message.author}!
           
-            Staff response: **\` + reply + \`**
+            Staff response: **${reply}**
                                 
             Your suggestion ID (sID) for reference was **${id}**.
           \`);
@@ -184,9 +198,9 @@ module.exports = class RejectCommand extends Command {
           logsEmbed
             .setDescription(\`
               **Results:**
-            \` + view + \`
+            \` + view.join(' ') + \`
               **Suggestion:**
-              \` + suggestion + \`
+              \` + cleanedSuggestion + \`
 
               **Submitter:**
               \` + sUser.toString() + \`
@@ -195,14 +209,17 @@ module.exports = class RejectCommand extends Command {
               ${message.author}
 
               **Response:**
-              \` + reply
+              ${reply}
+              \`
             );
         }
 
         const sendMsgs = suggestionsLogs.permissionsFor(guild.me).has('SEND_MESSAGES', false);
         const addReactions = suggestionsLogs.permissionsFor(guild.me).has('ADD_REACTIONS', false);
-        if (!sendMsgs) return senderMessage.channel.send("I can't send messages in the " + suggestionsLogs.toString() + "channel! Make sure I have the \`Send Messages\` permission.");
-        if (!addReactions) return senderMessage.channel.send("I can't add reactions in the " + suggestionsLogs.toString() + "channel! Make sure I have the \`Add Reactions\` permission.");
+        const extReactions = suggestionsLogs.permissionsFor(senderMessage.guild.me).has('USE_EXTERNAL_EMOJIS', false);
+        if (!sendMsgs) return this.errors.noChannelPerms(senderMessage, suggestionsLogs, 'SEND_MESSAGES');
+        if (!addReactions) return this.errors.noChannelPerms(senderMessage, suggestionsLogs, 'ADD_REACTIONS');
+        if (!extReactions) return this.errors.noChannelPerms(senderMessage, suggestionsLogs, 'USE_EXTERNAL_EMOJIS');
 
         const approveSuggestion = {
           query: [
@@ -212,9 +229,9 @@ module.exports = class RejectCommand extends Command {
           data: {
             status: 'rejected',
             statusUpdated: senderMessage.createdAt.getTime(),
-            statusReply: reply,
+            statusReply: "${cleanedReply}",
             staffMemberID: senderMessage.author.id,
-            results
+            results: savedResults
           }
         };
 

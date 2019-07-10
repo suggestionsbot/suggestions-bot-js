@@ -1,36 +1,43 @@
-<h1 id="suggestions">Suggestions</h1>
-<p>The &quot;Suggestions&quot; bot is a simple and easy to use, but extensive bot, that&#39;s built to be the only tool for suggestions you need in your Discord server.</p>
-<p>Getting the bot up and running is very simple. All you have to do is set a suggestions channel, logs channel and add some staff roles. Run these two commands with the channels you want. Make sure they have the <code>ADD_REACTIONS</code> and <code>SEND_MESSAGES</code> permissions in both of those channels before proceeding. </p>
-<pre><code>,setchannel <span class="hljs-tag">&lt;<span class="hljs-name">channel</span>&gt;</span>
-,setlogs <span class="hljs-tag">&lt;<span class="hljs-name">channel</span>&gt;</span>
-</code></pre><p>Once that&#39;s set up, users can begin submitting suggestions! For approving/rejecting suggestions, just visit the &quot;Suggestion Management&quot; section below.</p>
+<h1>Suggestions</h1>
+<p>The "Suggestions" bot is a simple and easy to use, but an extensive bot, that's built to be the only tool for suggestions you need in your Discord server.</p>
+<p>Getting the bot up and running is very simple. All you have to do is create and set the suggestions channel, logs channel and some staff roles. Use the <code>config</code> command and the various options to set these values.</p>
+<pre><code class="language-bash">,config channel [channel] <span class="hljs-comment"># Configure the suggestions channel. You can either mention/tag the channel or supply the name/ID of the channel</span>
+,config logs [channel] <span class="hljs-comment"># Configure the suggestions log channel. Same functionality as setting the suggestions channel</span>
+,config roles [role] <span class="hljs-comment"># Add or remove a staff role. Its addition or removal is automatically determined. Same functionality as setting the suggestions channel</span>
+</code></pre>
+<p>Make sure that the bot has the base permissions for proper functionality. The Suggestions bot will only have the permissions it needs and nothing more.
+Once that's set up, users can begin submitting suggestions! For approving/rejecting suggestions, just visit the "Suggestion Management" section below.</p>
 <p>Adding a new suggestion is simple. Use <code>,suggest &lt;suggestion&gt;</code> to type out your suggestion. Once submitted, the suggestion will be posted in a <code>#suggestions</code> channel (or the channel you set above) by default on your server where users will then be able to vote via reactions (read below to set custom channels).</p>
 <p>If you need to check the current bot prefix, simply mention the bot or mention the bot with the <code>prefix</code> command. Examples:</p>
-<pre><code><span class="hljs-variable">@Suggestions</span><span class="hljs-number">#2602</span> 
-<span class="hljs-variable">@Suggestions</span><span class="hljs-number">#2602</span> prefix
-</code></pre><p>You should get a response similar to this:</p>
-<pre><code>[<span class="hljs-number">2</span>:<span class="hljs-number">44</span> PM] BOT Suggestions: My prefix <span class="hljs-keyword">in</span> <span class="hljs-keyword">this</span> guild <span class="hljs-keyword">is</span> ,
-</code></pre><h4 id="suggested-usage">Suggested Usage</h4>
-<p>With the setup above, it&#39;s recommended to disable the <code>SEND_MESSAGES</code> and <code>ADD_REACTIONS</code> permissions for <code>@everyone</code> and give those explicit permissions to the bot. In this case, the suggestions and logs channel may be kept clean and only the vote reactions can be used.</p>
-<h4 id="suggestion-management">Suggestion Management</h4>
-<p>Allow staff members in your Discord to manage suggestions via approving and rejecting them via specific roles. Simply add some roles using <code>,role add &lt;role&gt;</code> and from there, suggestions can be managed.</p>
+<pre><code>@Suggestions#2602 
+@Suggestions#2602 prefix
+</code></pre>
+<p>You should get a response similar to this:</p>
+<pre><code>My prefix in this guild is ,
+</code></pre>
+<h4>Suggested Usage</h4>
+<p>With the setup above, it's recommended to disable the <code>SEND_MESSAGES</code> and <code>ADD_REACTIONS</code> permissions for <code>@everyone</code> and give those explicit permissions to the bot's role. In this case, the suggestions and logs channel may be kept clean and only the vote reactions can be used.</p>
+<h4>Suggestion Management</h4>
+<p>Allow staff members in your Discord to manage suggestions via approving and rejecting them via specific roles. Simply add some roles using <code>,config roles &lt;role&gt;</code> and from there, suggestions can be managed by any members in those set roles.</p>
 <p><em>By default, users with the <code>MANAGE_GUILD</code> permission can manage suggestions.</em></p>
-<h4 id="staff-suggestions">Staff Suggestions</h4>
-<p>Allow zero interference with user suggestions allowing staff members to suggest and vote on matter internally with no interruptions. Read more on about this via our <a href="https://docs.suggestionsbot.com/docs/staff-suggestions.html">Staff Suggestions</a>&#39;s page in the documentation.</p>
-<h4 id="custom-configuration">Custom Configuration</h4>
-<p>Server owners can change the default prefix and suggestions channel of the Suggestions along with a wider range of configuration. Here are a few:</p>
+<h4>Staff Suggestions</h4>
+<p>Allow zero interference with user suggestions allowing staff members to suggest and vote on matter internally with no interruptions. Read more on about this via our <a href="https://docs.suggestionsbot.com/docs/staff-suggestions.html">Staff Suggestions</a>'s page in the documentation.</p>
+<h4>Custom Configuration</h4>
+<p>Server owners can change the default prefix and suggestions channel of the Suggestions bot along with a wider range of configuration via the <code>config</code> command. Here are a few examples:</p>
 <ul>
-<li><code>,setprefix &lt;prefix&gt;</code> allows you to the change the bot&#39;s prefix</li>
-<li><code>,setchannel &lt;channel&gt;</code> allows you to change the suggestions channel</li>
-<li><code>,setlogs &lt;channel&gt;</code> allows you to set the channel where suggestions will be logged after approval/rejection</li>
-<li><code>,setvotes &lt;id&gt;</code> allows you to set the default emoji set used for voting (these are added as reactions to the suggestion)</li>
+<li><code>,config prefix [prefix]</code> allows you to the change the bot's prefix</li>
+<li><code>,config channel [channel]</code> allows you to change the suggestions channel</li>
+<li><code>,config emojis [id]</code> allows view all available emoji sets and choose one of them to your liking</li>
+<li><code>,config dmResponses [true|false]</code> allows you to configure if DM responses should be sent to your users when a suggestion is submitted, approved, rejected, or a note has been added</li>
 </ul>
 <p><em>User must have the <code>MANAGE_GUILD</code> permission to change these settings</em></p>
-<h4 id="suggestions-features-reporting-bugs-and-receiving-support">Suggestions Features, Reporting Bugs and Receiving Support</h4>
-<p>If there is ever an error or bug or you wish to suggest something new to the bot, then you may join our Support Discord (just click <a href="https://discord.gg/g7wr8xb">here</a>!). Follow the single super-easy step once you join and then head over to the <code>#support</code> channel if you need help, <code>#bug_reports</code> if found a bug or simply discuss and post a suggestion the same way you would submit a new suggestion as described above!</p>
-<h4 id="future-features">Future Features</h4>
+<h4>Suggestions Features, Reporting Bugs and Receiving Support</h4>
+<p>If there is ever an error or bug or you wish to suggest something new to the bot, then you may join our Support Discord (just click <a href="https://discord.gg/g7wr8xb">here</a>!). Follow the single super-easy step once you join and then head over to the <code>#support</code> channel if you need help, <code>#bug_reports</code> if found a bug or simply discuss (both channels located under then <code>🚨Suggestions Bot</code> category) and post a suggestion the same way you would submit a new suggestion as described above!</p>
+<h4>Future Features</h4>
 <ul>
-<li>Leave suggestions in the Support Discord</li>
+<li>Support for creating custom emoji sets</li>
+<li>Dashboard for managing, viewing and sharing suggestions</li>
+<li>Leave suggestions in the Discord</li>
 </ul>
 <p><em>You can also mention the bot in place of the prefix to use commands!</em>
-  Read the website for more information and unlock the full usage of the bot! <a href="https://suggestionsbot.com">https://suggestionsbot.com</a></p>
+Read the website for more information and unlock the full usage of the bot! <a href="https://suggestionsbot.com">https://suggestionsbot.com</a></p>

@@ -84,3 +84,15 @@ String.prototype.toProperCase = function() {
 Array.prototype.random = function() {
   return this[Math.floor(Math.random() * this.length)];
 };
+
+String.prototype.cleanLineBreaks = function() {
+  return this.replace(/<br ?\/?>/g, '\n');
+};
+
+String.prototype.cleanDoubleQuotes = function() {
+  return this.replace(/"/g, '\\"');
+};
+
+String.prototype.replaceWithBreakTags = function() {
+  return this.replace(/\n/g, '<br/>');
+};

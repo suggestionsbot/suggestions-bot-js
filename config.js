@@ -40,7 +40,7 @@ module.exports = {
     { name: 'Discord Bot List (DiscordBotList.com)', link: 'https://discordbotlist.com/bots/474051954998509571', voting: true },
     { name: 'Divine Discord Bot List', link: 'https://divinediscordbots.com/bots/474051954998509571', voting: true },
     { name: 'botlist.space', link: 'https://botlist.space/bot/474051954998509571', voting: true },
-    { name: 'Discord Bot List by Terminal.ink', link: 'https://ls.terminal.ink/bots/474051954998509571', voting: true },
+    { name: 'Discord Apps', link: 'https://discordapps.dev/en-GB/bots/474051954998509571', voting: true },
     { name: 'Bots For Discord', link: 'https://botsfordiscord.com/bots/474051954998509571', voting: true }
   ],
   patreon: process.env.PATREON,
@@ -53,5 +53,8 @@ module.exports = {
     prefix: process.env.PREFIX,
     suggestionsChannel: process.env.SUGGESTIONSCHANNEL,
     suggestionsLogs: process.env.SUGGESTIONSLOGS
+  },
+  emojis: {
+    success: '578409088157876255'
   }
 };

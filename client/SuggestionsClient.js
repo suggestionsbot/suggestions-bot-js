@@ -1,4 +1,4 @@
-const { Client, Collection } = require('discord.js');
+const { Client, Collection, Constants, Guild, Emoji } = require('discord.js');
 const Mongoose = require('../db/mongoose');
 
 // Stores for handling various functions
@@ -119,5 +119,47 @@ module.exports = class SuggestionsClient extends Client {
   get voteEmojis() {
     const emojis = require('../utils/voteEmojis');
     return emojis;
+  }
+
+  findEmojiByID(id) {
+    const temp = this.emojis.get(id);
+    if (!temp) return null;
+
+    // Clone the object because it is modified right after, so as to not affect the cache in client.emojis
+    const emoji = Object.assign({}, temp);
+    // Circular references can't be returned outside of eval, so change it to the id
+    if (emoji.guild) emoji.guild = emoji.guild.id;
+    // A new object will be constructed, so simulate raw data by adding this property back
+    emoji.require_colons = emoji.requireColons;
+
+    return emoji;
+  }
+
+  findEmojiByName(name) {
+    const temp = this.emojis.find(e => e.name === name);
+    if (!temp) return null;
+
+    // Clone the object because it is modified right after, so as to not affect the cache in client.emojis
+    const emoji = Object.assign({}, temp);
+    // Circular references can't be returned outside of eval, so change it to the id
+    if (emoji.guild) emoji.guild = emoji.guild.id;
+    // A new object will be constructed, so simulate raw data by adding this property back
+    emoji.require_colons = emoji.requireColons;
+
+    return emoji;
+  }
+
+  findEmojiByString(string) {
+    const temp = this.emojis.find(e => e.toString() === string);
+    if (!temp) return null;
+
+    // Clone the object because it is modified right after, so as to not affect the cache in client.emojis
+    const emoji = Object.assign({}, temp);
+    // Circular references can't be returned outside of eval, so change it to the id
+    if (emoji.guild) emoji.guild = emoji.guild.id;
+    // A new object will be constructed, so simulate raw data by adding this property back
+    emoji.require_colons = emoji.requireColons;
+
+    return emoji;
   }
 };

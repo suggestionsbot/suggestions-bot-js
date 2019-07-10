@@ -96,13 +96,15 @@ module.exports = class SuggestionsHelpers {
     const data = await newSuggestion.save();
 
     await this.client.shard.broadcastEval(`
-      const sUser = this.users.get('${data.userID}');
-      const sGuild = this.guilds.get('${data.guildID}');
-      if (!sGuild) return false;
+      (async () => {
+        const sUser = this.users.get('${data.userID}');
+        const sGuild = this.guilds.get('${data.guildID}');
+        if (!sGuild) return false;
 
-      this.logger.log(
-        'New suggestions submitted by "' + sUser.tag + '" (' + sUser.id + ') in the guild "' + sGuild.name + '" (' + sGuild.id + ')'
-      );
+        this.logger.log(
+          'New suggestions submitted by "' + sUser.tag + '" (' + sUser.id + ') in the guild "' + sGuild.name + '" (' + sGuild.id + ')'
+        );
+      })();
     `);
 
     return data;
