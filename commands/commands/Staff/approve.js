@@ -14,7 +14,7 @@ module.exports = class ApproveCommand extends Command {
       usage: 'approve <sID> [response]',
       staffOnly: true,
       guildOnly: false,
-      botPermissions: ['MANAGE_MESSAGES']
+      botPermissions: ['MANAGE_MESSAGES', 'USE_EXTERNAL_EMOJIS']
     });
   }
 
@@ -27,17 +27,16 @@ module.exports = class ApproveCommand extends Command {
 
     const replyArgs = args.slice(1);
     for (let i = 0; i < replyArgs.length; i++) {
-      replyArgs[i] = replyArgs[i].replace(/\n/g, '<br/>');
+      replyArgs[i] = replyArgs[i].replaceWithBreakTags();
     }
 
-    const reply = args.slice(1)
-      .join(' ')
-      .replace(/<br ?\/?>/g, '\n')
-      .replace(/"/g, '\\"') || null;
+    const reply = args.slice(1).join(' ');
+    reply.cleanLineBreaks();
+    reply.cleanDoubleQuotes() || null;
 
-    const cleanedReply = replyArgs.slice(1)
+    const cleanedReply = replyArgs
       .join(' ')
-      .replace(/"/g, '\\"') || null;
+      .cleanDoubleQuotes() || null;
 
     await this.client.shard.broadcastEval(`
       (async () => {
@@ -88,8 +87,6 @@ module.exports = class ApproveCommand extends Command {
           return senderMessage.channel.send("An error occurred: **" + error.message + "**");
         }
 
-        if (!settings.staffRoles) this.logger.log('does not exist yo');
-
         if (!settings.staffRoles) return this.errors.noStaffRoles(senderMessage.channel);
 
         if (messageID === false) {
@@ -98,6 +95,8 @@ module.exports = class ApproveCommand extends Command {
           this.config.discord
           );
         }
+
+        const cleanedSuggestion = suggestion.cleanLineBreaks();
 
         const suggestionsChannel = guild.channels.find(c => c.name === settings.suggestionsChannel) ||
           guild.channels.get(settings.suggestionsChannel);
@@ -163,6 +162,7 @@ module.exports = class ApproveCommand extends Command {
         });
 
         const view = await Promise.all(newResults);
+        const savedResults = await Promise.all(results);
 
         const logsEmbed = new RichEmbed()
           .setAuthor(guild.name, guild.iconURL)
@@ -170,7 +170,7 @@ module.exports = class ApproveCommand extends Command {
             **Results:**
           \` + view.join(' ') + \`
             **Suggestion:**
-          \` + suggestion.replace(/<br ?\/?>/g, '\n') + \`
+          \` + cleanedSuggestion + \`
 
             **Submitter:**
             \` + sUser.toString() + \`
@@ -196,7 +196,7 @@ module.exports = class ApproveCommand extends Command {
               **Results:**
             \` + view.join(' ') + \`
               **Suggestion:**
-              \` + suggestion.replace(/<br ?\/?>/g, '\n') + \`
+              \` + cleanedSuggestion + \`
 
               **Submitter:**
               \` + sUser.toString() + \`
@@ -212,8 +212,10 @@ module.exports = class ApproveCommand extends Command {
 
         const sendMsgs = suggestionsLogs.permissionsFor(guild.me).has('SEND_MESSAGES', false);
         const addReactions = suggestionsLogs.permissionsFor(guild.me).has('ADD_REACTIONS', false);
-        if (!sendMsgs) return senderMessage.channel.send("I can't send messages in the " + suggestionsLogs.toString() + "channel! Make sure I have the \`Send Messages\` permission.");
-        if (!addReactions) return senderMessage.channel.send("I can't add reactions in the " + suggestionsLogs.toString() + "channel! Make sure I have the \`Add Reactions\` permission.");
+        const extReactions = suggestionsLogs.permissionsFor(senderMessage.guild.me).has('USE_EXTERNAL_EMOJIS', false);
+        if (!sendMsgs) return this.errors.noChannelPerms(senderMessage, suggestionsLogs, 'SEND_MESSAGES');
+        if (!addReactions) return this.errors.noChannelPerms(senderMessage, suggestionsLogs, 'ADD_REACTIONS');
+        if (!extReactions) return this.errors.noChannelPerms(senderMessage, suggestionsLogs, 'USE_EXTERNAL_EMOJIS');
 
         const approveSuggestion = {
           query: [
@@ -225,7 +227,7 @@ module.exports = class ApproveCommand extends Command {
             statusUpdated: senderMessage.createdAt.getTime(),
             statusReply: "${cleanedReply}",
             staffMemberID: senderMessage.author.id,
-            results
+            results: savedResults
           }
         };
 

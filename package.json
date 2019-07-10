@@ -30,8 +30,8 @@
     "klaw": "^2.1.1",
     "moment": "^2.24.0",
     "moment-duration-format": "^2.3.2",
-    "moment-timezone": "^0.5.25",
-    "mongoose": "^5.5.13",
+    "moment-timezone": "^0.5.26",
+    "mongoose": "^5.6.4",
     "node-fetch": "^2.6.0",
     "passport": "^0.4.0",
     "passport-headerapikey": "^1.1.0"

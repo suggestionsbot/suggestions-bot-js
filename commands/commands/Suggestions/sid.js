@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-escape */
 const Command = require('../../Command');
 
 module.exports = class SIDCommand extends Command {
@@ -7,7 +8,7 @@ module.exports = class SIDCommand extends Command {
       category: 'Suggestions',
       description: 'View the information of a specific guild suggestion by their sID.',
       usage: 'sid <sID>',
-      botPermissions: ['MANAGE_MESSAGES']
+      botPermissions: ['MANAGE_MESSAGES', 'USE_EXTERNAL_EMOJIS']
     });
   }
 
@@ -19,7 +20,7 @@ module.exports = class SIDCommand extends Command {
 
     try {
       await this.client.shard.broadcastEval(`
-        const { RichEmbed } = require('discord.js');
+        const { Constants, RichEmbed, Guild, Emoji } = require('discord.js');
         const { embedColor, suggestionColors } = this.config;
         
         (async () => {
@@ -55,16 +56,43 @@ module.exports = class SIDCommand extends Command {
             .setTitle('Info for ' + sID.sID)
             .setFooter('User ID: ' + sUser.id + ' | sID: ' + sID.sID);
 
+          const suggestion = sID.suggestion.cleanLineBreaks();
+
           let results,
             time;
           if (sID.time && !sID.newTime) time = sID.time;
           if (!sID.time && sID.newTime) time = sID.newTime;
 
-          if (sID.results.length > 1) results = sID.results
-            .map(r => {
-              return r.emoji + ' **' + r.count + \`**
-              \`;
-            });
+          if (sID.results.length > 1) {
+            results = sID.results
+              .map(async r => {
+                let e = this.findEmojiByString(r.emoji);
+                if (e) {
+                  const emoji = await this.rest.makeRequest('get', Constants.Endpoints.Guild(e.guild).toString(), true)
+                    .then(raw => {
+                      const guild = new Guild(this, raw)
+                      const emoji = new Emoji(guild, e);
+                      return emoji;
+                    });
+
+                  r.emoji = '<:' + emoji.name + ':' + emoji.id + '>';
+                }
+
+                return {
+                  emoji: r.emoji,
+                  count: r.count
+                };
+              });
+          }
+
+          const newResults = Array.from(results).map(async r => {
+            const data = await r;
+            return data.emoji + ' **: ' + data.count + '**' + \`
+            \`;
+          });
+  
+          const view = await Promise.all(newResults);
+          const savedResults = await Promise.all(results);
 
           switch (sID.status) {
             case undefined: {
@@ -73,7 +101,7 @@ module.exports = class SIDCommand extends Command {
                 \` + sUser + \`
 
                 **Suggestion**
-                \` + sID.suggestion
+                \` + suggestion
               );
               embed.setColor(embedColor);
               embed.setTimestamp(submittedOn);
@@ -86,13 +114,13 @@ module.exports = class SIDCommand extends Command {
                 \` + sUser + \`
 
                 **Suggestion**
-                \` + sID.suggestion + \`
+                \` + suggestion + \`
 
                 **Approved By**
                 \` + sStaff + \`
 
                 **Results**
-                \` + results.join(' ')
+                \` + view.join(' ')
               );
               embed.setColor(suggestionColors.approved);
               embed.setTimestamp(updatedOn);
@@ -105,13 +133,13 @@ module.exports = class SIDCommand extends Command {
                 \` + sUser + \`
 
                 **Suggestion**
-                \` + sID.suggestion + \`
+                \` + suggestion + \`
 
                 **Rejected By**
                 \` + sStaff + \`
 
                 **Results**
-                \` + results.join(' ')
+                \` + view.join(' ')
               );
               embed.setColor(suggestionColors.rejected);
               embed.setTimestamp(updatedOn);

@@ -4,7 +4,7 @@ module.exports = class ArianaCommand extends Command {
   constructor(client) {
     super(client, {
       name: 'ariana',
-      category: 'Owner',
+      category: 'Bot Owner',
       description: 'Much love to Ariana Grande <3',
       ownerOnly: true,
       guildOnly: false

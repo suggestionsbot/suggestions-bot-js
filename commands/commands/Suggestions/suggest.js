@@ -16,7 +16,7 @@ module.exports = class SuggestCommand extends Command {
         usages: 3,
         duration: 60
       },
-      botPermissions: ['MANAGE_MESSAGES', 'EMBED_LINKS', 'ADD_REACTIONS']
+      botPermissions: ['MANAGE_MESSAGES', 'EMBED_LINKS', 'ADD_REACTIONS', 'USE_EXTERNAL_EMOJIS']
     });
     this.voteEmojis = require('../../../utils/voteEmojis');
   }
@@ -48,20 +48,19 @@ module.exports = class SuggestCommand extends Command {
     // If the sID exists globally, this will force a new one to be generated
     if (verifySuggestion) id = crypto.randomBytes(20).toString('hex').slice(12, 20);
 
-    const suggestion = args
-      .join(' ')
-      .replace(/<br ?\/?>/g, '\n')
-      .replace(/"/g, '\\"');
+    const suggestion = args.join(' ');
+    suggestion.replaceWithBreakTags();
+    suggestion.cleanDoubleQuotes();
     if (!suggestion) return this.client.errors.noUsage(message.channel, this, settings);
 
     const suggestionArgs = args;
     for (let i = 0; i < suggestionArgs.length; i++) {
-      suggestionArgs[i] = suggestionArgs[i].replace(/\n/g, '<br/>');
+      suggestionArgs[i] = suggestionArgs[i].replaceWithBreakTags();
     }
 
     const cleanedSuggestion = suggestionArgs
       .join(' ')
-      .replace(/"/g, '\\"');
+      .cleanDoubleQuotes();
 
     try {
 
@@ -111,26 +110,32 @@ module.exports = class SuggestCommand extends Command {
           const channel = this.channels.get('${sChannel.id}');
           const sendMsgs = channel.permissionsFor(senderMessage.guild.me).has('SEND_MESSAGES', false);
           const reactions = channel.permissionsFor(senderMessage.guild.me).has('ADD_REACTIONS', false);
+          const extReactions = channel.permissionsFor(senderMessage.guild.me).has('USE_EXTERNAL_EMOJIS', false);
           if (!sendMsgs) return this.errors.noChannelPerms(senderMessage, channel, 'SEND_MESSAGES');
           if (!reactions) return this.errors.noChannelPerms(senderMessage, channel, 'ADD_REACTIONS');
+          if (!extReactions) return this.errors.noChannelPerms(senderMessage, channel, 'USE_EXTERNAL_EMOJIS');
 
           const m = await channel.send(sEmbed);
 
           const foundSet = this.voteEmojis.find(filter) || this.voteEmojis.find(defaults);
           const emojiSet = foundSet.emojis;
-          const fallbackSet = this.voteEmojis.find(fallback).emojis;  
+          const fallbackSet = this.voteEmojis.find(fallback).emojis;
 
           for (const emoji of emojiSet) {
             const e = this.findEmojiByID(emoji);
-            if (e) {
-              await this.rest.makeRequest('get', Constants.Endpoints.Guild(e.guild).toString(), true)
-                .then(async raw => {
-                  const guild = new Guild(this, raw)
-                  const emoji = new Emoji(guild, e);
-                  return await m.react(emoji);
-                });
-            } else {
-              await m.react(fallbackSet[i]);
+            try {
+              if (e) {
+                await this.rest.makeRequest('get', Constants.Endpoints.Guild(e.guild).toString(), true)
+                  .then(async raw => {
+                    const guild = new Guild(this, raw)
+                    const gEmoji = new Emoji(guild, e);
+                    return await m.react(gEmoji);
+                  });
+              } else {
+                await m.react(emoji);
+              }
+            } catch (error) {
+              await m.react(fallbackSet[emojiSet.indexOf(emoji)]);
             }
           }
 
@@ -163,7 +168,7 @@ module.exports = class SuggestCommand extends Command {
             senderMessage.react('✉');
           } {
             // senderMessage.react(successEmoji);
-            const e = this.findEmojiByName('${success}');
+            const e = this.findEmojiByID('${success}');
             if (e) {
               const emoji = await this.rest.makeRequest('get', Constants.Endpoints.Guild(e.guild).toString(), true)
               .then(raw => {

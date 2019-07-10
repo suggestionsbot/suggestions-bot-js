@@ -4,7 +4,7 @@
 `474051954998509571`
 
 ### INVITE:
-[https://discordapp.com/oauth2/authorize?client_id=474051954998509571&scope=bot&permissions=93248](https://discordapp.com/oauth2/authorize?client_id=474051954998509571&scope=bot&permissions=93248)
+[https://discordapp.com/oauth2/authorize?client_id=474051954998509571&scope=bot&permissions=355392](https://discordapp.com/oauth2/authorize?client_id=474051954998509571&scope=bot&permissions=355392)
 
 #### PREFIX:
 , (or custom)
