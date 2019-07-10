@@ -24,5 +24,5 @@ The only suggestions bot you'll ever need. Simple usage and management of sugges
 - [https://discordbotlist.com/bots/474051954998509571](https://discordbotlist.com/bots/474051954998509571)
 - [https://divinediscordbots.com/bots/474051954998509571](https://divinediscordbots.com/bots/474051954998509571)
 - [https://botlist.space/bot/474051954998509571](https://botlist.space/bot/474051954998509571)
-- [https://ls.terminal.ink/bots/474051954998509571](https://ls.terminal.ink/bots/474051954998509571)
+- [https://discordapps.dev/en-GB/bots/474051954998509571](https://discordapps.dev/en-GB/bots/474051954998509571)
 - [https://botsfordiscord.com/bots/474051954998509571](https://botsfordiscord.com/bots/474051954998509571)
