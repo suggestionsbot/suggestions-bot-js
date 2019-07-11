@@ -35,5 +35,13 @@ module.exports = class Mongoose {
     mongoose.connection.on('disconnected', () => {
       this.client.logger.log('Mongoose connection disconnected');
     });
+
+    mongoose.connection.on('close', () => {
+      console.log('Mongoose connection closed');
+    });
+  }
+
+  async close() {
+    await this.connection.close();
   }
 };
