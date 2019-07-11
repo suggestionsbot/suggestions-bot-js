@@ -47,8 +47,10 @@ module.exports = class RejectCommand extends Command {
         const { rejected } = this.config.suggestionColors;
 
         let settings;
-        const senderMessage = await this.channels.get('${message.channel.id}')
-          .fetchMessage('${message.id}');
+        const channel = this.channels.get('${message.channel.id}');
+        if (!channel) return false;
+
+        const senderMessage = await channel.fetchMessage('${message.id}');
         if (!senderMessage) return false;
 
         let sID;

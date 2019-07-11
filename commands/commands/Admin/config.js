@@ -43,9 +43,22 @@ module.exports = class ConfigCommand extends Command {
     let roles = [];
     try {
       roles = message.guild.roles.filter(role => staffRoles.map(r => r.role).includes(role.id));
-      suggestionsChannel = message.guild.channels.find(c => c.name === suggestionsChannel) || (message.guild.channels.find(c => c.toString() === suggestionsChannel)) || (message.guild.channels.get(suggestionsChannel)) || '';
-      suggestionsLogs = message.guild.channels.find(c => c.name === suggestionsLogs) || message.guild.channels.find(c => c.toString() === suggestionsLogs) || message.guild.channels.get(suggestionsLogs) || '';
-      staffSuggestionsChannel = message.guild.channels.find(c => c.name === staffSuggestionsChannel) || (message.guild.channels.find(c => c.toString() === staffSuggestionsChannel)) || (message.guild.channels.find(c => c.id === staffSuggestionsChannel)) || '';
+
+      suggestionsChannel = message.guild.channels.find(c => c.name === suggestionsChannel) || 
+        (message.guild.channels.find(c => c.toString() === suggestionsChannel)) || 
+        (message.guild.channels.get(suggestionsChannel)) ||
+        '';
+
+      suggestionsLogs = message.guild.channels.find(c => c.name === suggestionsLogs) ||
+        message.guild.channels.find(c => c.toString() === suggestionsLogs) ||
+          message.guild.channels.get(suggestionsLogs) ||
+          '';
+          
+      staffSuggestionsChannel = message.guild.channels.find(c => c.name === staffSuggestionsChannel) ||
+        (message.guild.channels.find(c => c.toString() === staffSuggestionsChannel)) ||
+        (message.guild.channels.find(c => c.id === staffSuggestionsChannel)) ||
+        '';
+        
     } catch (err) {
       this.client.logger.error(err.stack);
       return message.channel.send(err.message);
@@ -192,7 +205,8 @@ module.exports = class ConfigCommand extends Command {
                 }
 
                 const guild = this.guilds.get('${message.guild.id}');
-                const channel = this.channels.get('${message.channel.id}');
+                if (!guild) return;
+                const channel = guild.channels.get('${message.channel.id}');
                 const msg = await channel.fetchMessages('${message.id}');
 
                 const configEmbed = new RichEmbed()
@@ -234,7 +248,8 @@ module.exports = class ConfigCommand extends Command {
                 }
 
                 const guild = this.guilds.get('${message.guild.id}');
-                const channel = this.channels.get('${message.channel.id}');
+                if (!guild) return;
+                const channel = guild.channels.get('${message.channel.id}');
                 const msg = await channel.fetchMessages('${message.id}');
 
                 const configEmbed = new RichEmbed()
@@ -289,7 +304,7 @@ module.exports = class ConfigCommand extends Command {
         (async () => {
           const guild = this.guilds.get('${message.guild.id}');
           if (!guild) return false;
-          const channel = this.channels.get('${message.channel.id}');
+          const channel = guild.channels.get('${message.channel.id}');
           const msg = await channel.fetchMessages('${message.id}');
 
           const configEmbed = new RichEmbed()
@@ -455,14 +470,28 @@ module.exports = class ConfigCommand extends Command {
           try {
             await this.client.settings.updateGuildCommands(enabledCommand, false);
             await this.client.shard.broadcastEval(`
-              const { RichEmbed } = require('discord.js');
-              const { embedColor } = this.config;
+              const { Constants, RichEmbed, Guild, Emoji } = require('discord.js');
+              const { embedColor, emojis: { success } } = this.config;
 
               (async () => {
-                const emoji = this.emojis.get('578409088157876255');
-                if (!emoji) return false;
+                let emoji;
+                const e = this.findEmojiByID(success);
+                if (e) {
+                  const data = await this.rest.makeRequest('get', Constants.Endpoints.Guild(e.guild).toString(), true)
+                    .then(raw => {
+                      const guild = new Guild(this, raw)
+                      const emoji = new Emoji(guild, e);
+                      return emoji;
+                    });
+
+                  emoji = '<:' + data.name + ':' + data.id + '>';
+                } else {
+                  emoji = '✅';
+                }
+
                 const guild = this.guilds.get('${message.guild.id}');
-                const channel = this.channels.get('${message.channel.id}');
+                if (!guild) return false;
+                const channel = guild.channels.get('${message.channel.id}');
                 const msg = await channel.fetchMessages('${message.id}');
 
                 const configEmbed = new RichEmbed()
@@ -484,14 +513,28 @@ module.exports = class ConfigCommand extends Command {
           try {
             await this.client.settings.updateGuildCommands(disabledCommand, true);
             await this.client.shard.broadcastEval(`
-              const { RichEmbed } = require('discord.js');
-              const { embedColor } = this.config;
+              const { Constants, RichEmbed, Guild, Emoji } = require('discord.js');
+              const { embedColor, emojis: { success } } = this.config;
 
               (async () => {
-                const emoji = this.emojis.get('578409088157876255');
-                if (!emoji) return false;
+                let emoji;
+                const e = this.findEmojiByID(success);
+                if (e) {
+                  const data = await this.rest.makeRequest('get', Constants.Endpoints.Guild(e.guild).toString(), true)
+                    .then(raw => {
+                      const guild = new Guild(this, raw)
+                      const emoji = new Emoji(guild, e);
+                      return emoji;
+                    });
+
+                  emoji = '<:' + data.name + ':' + data.id + '>';
+                } else {
+                  emoji = '✅';
+                }
+
                 const guild = this.guilds.get('${message.guild.id}');
-                const channel = this.channels.get('${message.channel.id}');
+                if (!guild) return false;
+                const channel = guild.channels.get('${message.channel.id}');
                 const msg = await channel.fetchMessages('${message.id}');
 
                 const configEmbed = new RichEmbed()

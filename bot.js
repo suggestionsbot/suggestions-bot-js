@@ -63,14 +63,12 @@ process.on('unhandledRejection', err => {
   client.logger.error(`Unhandled Rejection: \n ${msg}`);
 });
 
-process.on('SIGTERM', async () => {
-  client.logger.log('SIGTERM signal received.');
+process.on('SIGINT', async () => {
+  client.logger.log('SIGINT signal received.');
   client.logger.log('Bot shutting down...');
-  await client.mongoose.connection.close();
-  await client.destroy(() => {
-    client.logger.log('Bot has shut down.');
-    process.exit(0);
-  });
+  await client.mongoose.close();
+  await client.destroy();
+  await process.exit(0);
 });
 
 // <String>.toPropercase() returns a proper-cased string such as:
