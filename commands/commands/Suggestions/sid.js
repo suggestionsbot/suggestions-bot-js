@@ -66,7 +66,7 @@ module.exports = class SIDCommand extends Command {
           if (sID.results.length > 1) {
             results = sID.results
               .map(async r => {
-                let e = this.findEmojiByString(r.emoji);
+                let e = this.findEmojiByString.call(this, r.emoji);
                 if (e) {
                   const emoji = await this.rest.makeRequest('get', Constants.Endpoints.Guild(e.guild).toString(), true)
                     .then(raw => {

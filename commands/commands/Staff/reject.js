@@ -95,7 +95,7 @@ module.exports = class RejectCommand extends Command {
 
         if (("${cleanedReply}" === false) && (settings.responseRequired === true)) return this.errors.noRejectedResponse(senderMessage.channel);
 
-        if (messageID === false) {
+        if (messageID === undefined) {
           return senderMessage.channel.send('Oops! The message ID was not found ' +
           'for this suggestion! Please contact the developer via the Support Discord: ' +
           this.config.discord
@@ -143,7 +143,7 @@ module.exports = class RejectCommand extends Command {
         const reactCount = reactions.map(e => e.count);
 
         const results = reactName.map(async (r, c) => {
-          const e = this.findEmojiByName(r);
+          const e = this.findEmojiByName.call(this, r);
           if (e) {
             const emoji = await this.rest.makeRequest('get', Constants.Endpoints.Guild(e.guild).toString(), true)
               .then(raw => {
