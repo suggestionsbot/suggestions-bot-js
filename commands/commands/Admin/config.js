@@ -190,7 +190,7 @@ module.exports = class ConfigCommand extends Command {
 
               (async () => {
                 let emoji;
-                const e = this.findEmojiByID(success);
+                const e = this.findEmojiByID.call(this, success);
                 if (e) {
                   const data = await this.rest.makeRequest('get', Constants.Endpoints.Guild(e.guild).toString(), true)
                     .then(raw => {
@@ -215,7 +215,7 @@ module.exports = class ConfigCommand extends Command {
                   .setFooter('Guild: ' + guild.id)
                   .setTimestamp();
 
-                configEmbed.setAuthor(guild + '| Staff Roles', guild.iconURL);
+                configEmbed.setAuthor(guild + ' | Staff Roles', guild.iconURL);
                 configEmbed.setDescription(emoji + ' Removed **${verified.name}** from the staff roles.');
                 return channel.send(configEmbed).then(m => m.delete(5000));
               })();
@@ -233,7 +233,7 @@ module.exports = class ConfigCommand extends Command {
 
               (async () => {
                 let emoji;
-                const e = this.findEmojiByID(success);
+                const e = this.findEmojiByID.call(this, success);
                 if (e) {
                   const data = await this.rest.makeRequest('get', Constants.Endpoints.Guild(e.guild).toString(), true)
                     .then(raw => {
@@ -258,7 +258,7 @@ module.exports = class ConfigCommand extends Command {
                   .setFooter('Guild: ' + guild.id)
                   .setTimestamp();
 
-                configEmbed.setAuthor(guild + '| Staff Roles', guild.iconURL);
+                configEmbed.setAuthor(guild + ' | Staff Roles', guild.iconURL);
                 configEmbed.setDescription(emoji + ' Added **${verified.name}** to the staff roles.');
                 return channel.send(configEmbed).then(m => m.delete(5000));
               })();
@@ -313,14 +313,14 @@ module.exports = class ConfigCommand extends Command {
             .setFooter('Guild: ' + guild.id)
             .setTimestamp();
 
-          configEmbed.setAuthor(guild + '| Vote Emojis', guild.iconURL);
+          configEmbed.setAuthor(guild + ' | Vote Emojis', guild.iconURL);
 
           if ('${updated}' !== '') {
             const filter = set => set.id === ${setID};
             const foundSet = this.voteEmojis.find(filter);
             if (!foundSet) return this.errors.voteEmojiNotFound('${updated}', channel);
             const emojis = foundSet.emojis.map(async e => {
-              const found = this.findEmojiByID(e);
+              const found = this.findEmojiByID.call(this, e);
               if (found) {
                 const emoji = await this.rest.makeRequest('get', Constants.Endpoints.Guild(found.guild).toString(), true)
                   .then(raw => {
@@ -359,7 +359,7 @@ module.exports = class ConfigCommand extends Command {
             
             if (set.custom) {
               emojiSet = emojiSet.map(async e => {
-                const found = this.findEmojiByID(e);
+                const found = this.findEmojiByID.call(this, e);
                 if (found) {
                   const emoji = await this.rest.makeRequest('get', Constants.Endpoints.Guild(found.guild).toString(), true)
                     .then(raw => {
@@ -475,7 +475,7 @@ module.exports = class ConfigCommand extends Command {
 
               (async () => {
                 let emoji;
-                const e = this.findEmojiByID(success);
+                const e = this.findEmojiByID.call(this, success);
                 if (e) {
                   const data = await this.rest.makeRequest('get', Constants.Endpoints.Guild(e.guild).toString(), true)
                     .then(raw => {
@@ -500,7 +500,7 @@ module.exports = class ConfigCommand extends Command {
                   .setFooter('Guild: ' + guild.id)
                   .setTimestamp();
 
-                configEmbed.setAuthor(guild + '| Disabled Commands', guild.iconURL);
+                configEmbed.setAuthor(guild + ' | Disabled Commands', guild.iconURL);
                 configEmbed.setDescription(emoji + ' Enabled the **${cmd.help.name}** command.');
                 return channel.send(configEmbed).then(m => m.delete(5000));
               })();
@@ -518,7 +518,7 @@ module.exports = class ConfigCommand extends Command {
 
               (async () => {
                 let emoji;
-                const e = this.findEmojiByID(success);
+                const e = this.findEmojiByID.call(this, success);
                 if (e) {
                   const data = await this.rest.makeRequest('get', Constants.Endpoints.Guild(e.guild).toString(), true)
                     .then(raw => {
@@ -543,7 +543,7 @@ module.exports = class ConfigCommand extends Command {
                   .setFooter('Guild: ' + guild.id)
                   .setTimestamp();
 
-                configEmbed.setAuthor(guild + '| Disabled Commands', guild.iconURL);
+                configEmbed.setAuthor(guild + ' | Disabled Commands', guild.iconURL);
                 configEmbed.setDescription(emoji + ' Disabled the **${cmd.help.name}** command.');
                 return channel.send(configEmbed).then(m => m.delete(5000));
               })();

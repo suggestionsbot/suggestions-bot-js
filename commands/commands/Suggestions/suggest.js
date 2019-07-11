@@ -122,7 +122,7 @@ module.exports = class SuggestCommand extends Command {
           const fallbackSet = this.voteEmojis.find(fallback).emojis;
 
           for (const emoji of emojiSet) {
-            const e = this.findEmojiByID(emoji);
+            const e = this.findEmojiByID.call(this, emoji);
             try {
               if (e) {
                 await this.rest.makeRequest('get', Constants.Endpoints.Guild(e.guild).toString(), true)
@@ -156,7 +156,7 @@ module.exports = class SuggestCommand extends Command {
             }
           } catch (err) {
             this.logger.error(err.stack);
-            senderMessage.channel.send(stripIndents\`✅
+            senderMessage.channel.send(stripIndents\`
               An error occurred DMing you your suggestion information: **err.message**. Please make sure you are able to receive messages from server members.
       
               For reference, your suggestion ID (sID) is **${id}**. Please wait for staff member to approve/reject your suggestion.\`
@@ -167,8 +167,7 @@ module.exports = class SuggestCommand extends Command {
           if (${settings.dmResponses} === true) {
             senderMessage.react('✉');
           } {
-            // senderMessage.react(successEmoji);
-            const e = this.findEmojiByID('${success}');
+            const e = this.findEmojiByID.call(this, '${success}');
             if (e) {
               const emoji = await this.rest.makeRequest('get', Constants.Endpoints.Guild(e.guild).toString(), true)
               .then(raw => {
@@ -191,9 +190,8 @@ module.exports = class SuggestCommand extends Command {
               const footer = m.embeds[0].footer.text.split('sID:');
               const sID = footer[1].trim();
 
-              const suggestion = await this.suggestions
-                .getGuildSuggestion(m.guild.id, sID);
-              if (!suggestion || suggestion.messageID) break;
+              const suggestion = await this.suggestions.getGuildSuggestion(m.guild.id, sID);
+              if (!suggestion) break;
 
               const updateSuggestion = {
                 query: [
