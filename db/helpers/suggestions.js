@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const { oneLine } = require('common-tags');
 const { Suggestion } = require('../models');
 
 module.exports = class SuggestionsHelpers {

@@ -114,6 +114,7 @@ module.exports = class BlacklistsHelpers {
     await this.client.shard.broadcastEval(`
       const issued = this.users.get('${data.userID}');
       const issuer = this.users.get('${data.issuerID}');
+      if (!issued || !issuer) false;
 
       this.logger.log('"' + issuer.tag + '" (' + issuer.id + ') has issued a ' + '${data.scope}' === 'global' ? 
         'global blacklist' : 'blacklist' + 'to the user "' + issued.tag + '" (' + issued.id + ').');

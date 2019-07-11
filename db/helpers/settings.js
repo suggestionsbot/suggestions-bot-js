@@ -122,6 +122,7 @@ module.exports = class SettingsHelpers {
 
     await this.client.shard.broadcastEval(`
       const cUser = this.users.get('${data.userID}');
+      if (!cUser) false;
     
       this.logger.log(
         '"' + cUser.tag + '" (' + cUser.id + ') ran the command "${data.command}"',
