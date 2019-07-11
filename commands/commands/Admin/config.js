@@ -433,7 +433,7 @@ module.exports = class ConfigCommand extends Command {
         const cmd = this.client.commands.get(updated);
         if (!cmd) return this.client.errors.commandNotFound(updated, message.channel);
         if (cmd.conf.guarded) return this.client.errors.commandIsGuarded(cmd, message.channel);
-        if (cmd.conf.ownerOnly || cmd.conf.superSecretOnly) return this.client.errors.commandNotFound(cmd, message.channel);
+        if (cmd.conf.ownerOnly || cmd.conf.superSecretOnly) return;
 
         const disabledCommand = {
           query: { guildID: message.guild.id },
