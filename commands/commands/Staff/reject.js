@@ -114,7 +114,7 @@ module.exports = class RejectCommand extends Command {
         try {
           sMessage = await suggestionsChannel.fetchMessage(messageID);
         } catch (err) {
-          this.client.logger.error(err.stack);
+          this.logger.error(err.stack);
           return message.channel.send('The suggestion message was not found!')
             .then(m => m.delete(5000));
         }
