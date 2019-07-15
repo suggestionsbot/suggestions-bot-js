@@ -185,8 +185,8 @@ module.exports = class ApproveCommand extends Command {
           .setFooter(\`sID: ${id}\`)
           .setTimestamp();
 
-        if ("${cleanedReply}" !== null) {
-          dmEmbed.setDescription(\`Hey, sUser. Your suggestion has been approved by ${message.author}!
+        if ("${cleanedReply}" !== "null") {
+          dmEmbed.setDescription('Hey, ' + sUser + \`. Your suggestion has been approved by ${message.author}!
           
             Staff response: **${reply}**
                                 

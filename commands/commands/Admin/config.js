@@ -17,8 +17,9 @@ module.exports = class ConfigCommand extends Command {
 
   async run(message, args, settings) {
 
-    const { embedColor } = this.client.config;
+    const { embedColor, docs } = this.client.config;
     const { help: { usage, name } } = this;
+    const confDocs = `${docs}/docs/configuration.html`;
 
     const setting = args[0],
       updated = args.slice(1).join(' ');
@@ -87,6 +88,7 @@ module.exports = class ConfigCommand extends Command {
       }
 
       configEmbed.setDescription(`Current prefix: \`${prefix}\``);
+      configEmbed.addField('More Information', `[Link](${confDocs}#prefix)`);
       message.channel.send(configEmbed);
       break;
     }
@@ -112,6 +114,7 @@ module.exports = class ConfigCommand extends Command {
 
       if (!suggestionsChannel) return this.client.errors.noSuggestions(message.channel);
       configEmbed.setDescription(`Current suggestions channel: ${suggestionsChannel}`);
+      configEmbed.addField('More Information', `[Link](${confDocs}#suggestions-channel)`);
       message.channel.send(configEmbed);
       break;
     }
@@ -137,6 +140,7 @@ module.exports = class ConfigCommand extends Command {
 
       if (!suggestionsLogs) return this.client.errors.noSuggestionsLogs(message.channel);
       configEmbed.setDescription(`Current suggestions logs channel: ${suggestionsLogs}`);
+      configEmbed.addField('More Information', `[Link](${confDocs}#suggestions-logs-channel)`);
       message.channel.send(configEmbed);
       break;
     }
@@ -162,6 +166,7 @@ module.exports = class ConfigCommand extends Command {
 
       if (!staffSuggestionsChannel) return this.client.errors.noStaffSuggestions(message.channel);
       configEmbed.setDescription(`Current staff suggestions channel: ${staffSuggestionsChannel}`);
+      configEmbed.addField('More Information', `[Link](${confDocs}#staff-suggestions-channel)`);
       message.channel.send(configEmbed);
       break;
     }
@@ -230,7 +235,7 @@ module.exports = class ConfigCommand extends Command {
             await this.client.shard.broadcastEval(`
               const { Constants, RichEmbed, Guild, Emoji  } = require('discord.js');
               const { embedColor, emojis: { success } } = this.config;
-
+              
               (async () => {
                 let emoji;
                 const e = this.findEmojiByID.call(this, success);
@@ -287,6 +292,7 @@ module.exports = class ConfigCommand extends Command {
         .addField('Admins', admins);
 
       if (staffRoles.length >= 1) configEmbed.addField('Staff Roles', viewRoles);
+      configEmbed.addField('More Information', `[Link](${confDocs}#staff-roles)`);
 
       message.channel.send(configEmbed);
       break;
@@ -299,7 +305,8 @@ module.exports = class ConfigCommand extends Command {
 
       await this.client.shard.broadcastEval(`
         const { Constants, RichEmbed, Guild, Emoji } = require('discord.js');
-        const { embedColor, discord } = this.config;
+        const { embedColor, discord, docs } = this.config;
+        const confDocs = docs + '/docs/configuration.html';
 
         (async () => {
           const guild = this.guilds.get('${message.guild.id}');
@@ -400,6 +407,7 @@ module.exports = class ConfigCommand extends Command {
            Submit new emoji set suggestions any time by joining our Dicord server: \` + discord
           );
           
+          configEmbed.addField('More Information', '[Link](' + confDocs + '#vote-emojis)');
           return channel.send(configEmbed);
         })();
       `);
@@ -438,6 +446,7 @@ module.exports = class ConfigCommand extends Command {
       }
 
       configEmbed.setDescription(`Rejection responses are currently **${responseRequired ? 'required' : 'not required'}**.`);
+      configEmbed.addField('More Information', `[Link](${confDocs}#rejection-responses)`);
       message.channel.send(configEmbed);
       break;
     }
@@ -471,7 +480,8 @@ module.exports = class ConfigCommand extends Command {
             await this.client.settings.updateGuildCommands(enabledCommand, false);
             await this.client.shard.broadcastEval(`
               const { Constants, RichEmbed, Guild, Emoji } = require('discord.js');
-              const { embedColor, emojis: { success } } = this.config;
+              const { embedColor, emojis: { success }, docs } = this.config;
+              const confDocs = docs + '/docs/configuration.html';
 
               (async () => {
                 let emoji;
@@ -502,6 +512,7 @@ module.exports = class ConfigCommand extends Command {
 
                 configEmbed.setAuthor(guild + ' | Disabled Commands', guild.iconURL);
                 configEmbed.setDescription(emoji + ' Enabled the **${cmd.help.name}** command.');
+                configEmbed.addField('More Information', '[Link](' + confDocs + '#disabled-commands)');
                 return channel.send(configEmbed).then(m => m.delete(5000));
               })();
             `);
@@ -514,7 +525,8 @@ module.exports = class ConfigCommand extends Command {
             await this.client.settings.updateGuildCommands(disabledCommand, true);
             await this.client.shard.broadcastEval(`
               const { Constants, RichEmbed, Guild, Emoji } = require('discord.js');
-              const { embedColor, emojis: { success } } = this.config;
+              const { embedColor, emojis: { success }, docs } = this.config;
+              const confDocs = docs + '/docs/configuration.html';
 
               (async () => {
                 let emoji;
@@ -545,6 +557,7 @@ module.exports = class ConfigCommand extends Command {
 
                 configEmbed.setAuthor(guild + ' | Disabled Commands', guild.iconURL);
                 configEmbed.setDescription(emoji + ' Disabled the **${cmd.help.name}** command.');
+                configEmbed.addField('More Information', '[Link](' + confDocs + '#disabled-commands)');
                 return channel.send(configEmbed).then(m => m.delete(5000));
               })();
             `);
@@ -558,8 +571,8 @@ module.exports = class ConfigCommand extends Command {
 
       if (!disabledCommands || disabledCommands.length < 1) return this.client.errors.noDisabledCommands(message.channel);
 
-      configEmbed
-        .setDescription(disabledCommands.map(c => `\`${c.command}\``).join(' | '));
+      configEmbed.setDescription(disabledCommands.map(c => `\`${c.command}\``).join(' | '));
+      configEmbed.addField('More Information', `[Link](${confDocs}#disabled-commands)`);
 
       message.channel.send(configEmbed);
       break;
@@ -618,7 +631,7 @@ module.exports = class ConfigCommand extends Command {
       }
 
       configEmbed.setDescription(`DM responses are currently **${dmResponses ? 'enabled' : 'disabled' }**.`);
-
+      configEmbed.addField('More Information', `[Link](${confDocs}#dm-responses)`);
       message.channel.send(configEmbed);
       break;
     }
@@ -628,6 +641,8 @@ module.exports = class ConfigCommand extends Command {
         To view more information on a specific configuration option: \`${prefix + name} [setting]\`.
         
         For updating a specific configuration option: \`${prefix + usage}\`
+
+        [More Information](${confDocs})
         `)
         .addField('Prefix', `\`${prefix + name} prefix\``, true)
         .addField('Suggestions Channel', `\`${prefix + name} channel\``, true)

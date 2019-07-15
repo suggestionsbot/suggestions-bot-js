@@ -69,9 +69,11 @@ module.exports = class SuggestCommand extends Command {
           const { Constants, RichEmbed, Guild, Emoji } = require('discord.js');
           const { stripIndents } = require('common-tags');
 
-          const senderMessage = await this.channels.get('${message.channel.id}')
-            .fetchMessage('${message.id}');
-          if (!senderMessage) return false;
+          let senderMessage;
+          const senderChannel = this.channels.get('${message.channel.id}');
+          if (!senderChannel) return false;
+          else senderMessage = await senderChannel.fetchMessage('${message.id}');
+
           const sUser = this.users.get('${message.author.id}');
 
           const imageCheck = /(http(s?):)([/|.|\w|\s|-])*\.(?:jpg|gif|png)/.exec("${cleanedSuggestion}");
@@ -166,7 +168,7 @@ module.exports = class SuggestCommand extends Command {
           await this.suggestions.submitGuildSuggestion(newSuggestion);
           if (${settings.dmResponses} === true) {
             senderMessage.react('✉');
-          } {
+          } else {
             const e = this.findEmojiByID.call(this, '${success}');
             if (e) {
               const emoji = await this.rest.makeRequest('get', Constants.Endpoints.Guild(e.guild).toString(), true)
