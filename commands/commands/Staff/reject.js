@@ -189,8 +189,8 @@ module.exports = class RejectCommand extends Command {
           .setFooter(\`sID: ${id}\`)
           .setTimestamp();
 
-        if ("${cleanedReply}" !== null) {
-          dmEmbed.setDescription(\`Hey, sUser. Your suggestion has been rejected by ${message.author}!
+        if ("${cleanedReply}" !== "null") {
+          dmEmbed.setDescription('Hey, ' + sUser + \`. Your suggestion has been rejected by ${message.author}!
           
             Staff response: **${reply}**
                                 

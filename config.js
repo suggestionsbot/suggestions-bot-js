@@ -24,6 +24,7 @@ module.exports = {
   embedColor: process.env.DEFAULT_COLOR,
   discord: process.env.DISCORD,
   website: process.env.WEBSITE,
+  docs: process.env.DOCS,
   invite: process.env.INVITE,
   giphyKey: process.env.GIPHY,
   suggestionColors: {

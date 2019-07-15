@@ -48,8 +48,10 @@ module.exports = class BlacklistCommand extends Command {
           };
 
           (async () => {
-            const senderMessage = await this.channels.get('${message.channel.id}')
-              .fetchMessage('${message.id}');
+            let senderMessage; = 
+            const senderChannel = this.channels.get('${message.channel.id}');
+            if (!senderChannel) return false;
+            else senderMessage = await senderChannel.fetchMessage('${message.id}');
 
             let gBlacklists;
             try {
