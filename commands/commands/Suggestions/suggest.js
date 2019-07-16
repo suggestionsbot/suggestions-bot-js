@@ -79,7 +79,6 @@ module.exports = class SuggestCommand extends Command {
           const imageCheck = /(http(s?):)([/|.|\w|\s|-])*\.(?:jpg|gif|png)/.exec("${cleanedSuggestion}");
 
           const sEmbed = new RichEmbed()
-            .setThumbnail('${sUser.avatarURL}')
             .setDescription(stripIndents\`
               **Submitter**
               ${sUser.tag}
@@ -90,6 +89,8 @@ module.exports = class SuggestCommand extends Command {
             .setColor('${embedColor}')
             .setFooter('User ID: ${sUser.id} | sID: ${id}')
             .setTimestamp();
+
+          if (sUser.avatar) sEmbed.setThumbnail('${sUser.avatarURL}');
 
           const dmEmbed = new RichEmbed()
             .setAuthor(senderMessage.guild, senderMessage.guild.iconURL)
