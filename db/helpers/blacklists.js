@@ -1,9 +1,18 @@
 const mongoose = require('mongoose');
+const { oneLine } = require('common-tags');
 const { Blacklist } = require('../models');
 
 module.exports = class BlacklistsHelpers {
   constructor(client) {
     this.client = client;
+  }
+
+  /**
+   * Get the length of all blacklists.
+   */
+  async getTotalBlacklists() {
+    const data = await Blacklist.find({});
+    return data.length;
   }
 
   /**
@@ -111,14 +120,22 @@ module.exports = class BlacklistsHelpers {
     const newBlacklist = await new Blacklist(merged);
     const data = await newBlacklist.save();
 
-    await this.client.shard.broadcastEval(`
-      const issued = this.users.get('${data.userID}');
-      const issuer = this.users.get('${data.issuerID}');
-      if (!issued || !issuer) false;
+    const issued = this.client.users.get(data.userID);
+    const issuer = this.client.users.get(data.issuerID);
 
-      this.logger.log('"' + issuer.tag + '" (' + issuer.id + ') has issued a ' + '${data.scope}' === 'global' ? 
-        'global blacklist' : 'blacklist' + 'to the user "' + issued.tag + '" (' + issued.id + ').');
+    this.client.logger.log(oneLine`
+      "${issuer.tag}" (${issuer.id}) has issued a ${data.scope === 'global' ? 'global blacklist ' : 'guild blacklist '}
+      to the user "${issued.tag}" (${issued.id}).
     `);
+
+    // await this.client.shard.broadcastEval(`
+    //   const issued = this.client.users.get('${data.userID}');
+    //   const issuer = this.client.users.get('${data.issuerID}');
+    //   if (!issued || !issuer) false;
+
+    //   this.logger.log('"' + issuer.tag + '" (' + issuer.id + ') has issued a ' + '${data.scope}' === 'global' ?
+    //     'global blacklist' : 'blacklist' + 'to the user "' + issued.tag + '" (' + issued.id + ').');
+    // `);
 
     // if (user.scope === 'global') {
     //   this.client.logger.log(`"${data.issuerUsername}" (${data.issuerID}) has issued a global blacklist for the user "${data.userID}".`);
@@ -140,13 +157,21 @@ module.exports = class BlacklistsHelpers {
 
     const updated = await guildMemberBlacklist.updateOne(data);
 
-    await this.client.shard.broadcastEval(`
-      const issued = this.users.get('${guildMemberBlacklist.userID}');
-      const issuer = this.users.get('${guildMemberBlacklist.issuerID}');
+    const issued = this.client.users.get(data.userID);
+    const issuer = this.client.users.get(data.issuerID);
 
-      this.logger.log('"' + issuer.tag + '" (' + issuer.id + ') has issued a ' + '${guildMemberBlacklist.scope}' === 'global' ? 
-        'global unblacklist' : 'unblacklist' + 'on the user "' + issued.tag + '" (' + issued.id + ').');
+    this.client.logger.log(oneLine`
+      "${issuer.tag}" (${issuer.id}) has issued a ${data.scope === 'global' ? 'global blacklist ' : 'guild blacklist '}
+      to the user "${issued.tag}" (${issued.id}).
     `);
+
+    // await this.client.shard.broadcastEval(`
+    //   const issued = this.client.users.get('${guildMemberBlacklist.userID}');
+    //   const issuer = this.client.users.get('${guildMemberBlacklist.issuerID}');
+
+    //   this.logger.log('"' + issuer.tag + '" (' + issuer.id + ') has issued a ' + '${guildMemberBlacklist.scope}' === 'global' ?
+    //     'global unblacklist' : 'unblacklist' + 'on the user "' + issued.tag + '" (' + issued.id + ').');
+    // `);
     // if (scope === 'global') {
     //   this.client.logger.log(`"${issuerUsername}" (${issuerID}) has issued a global unblacklist for the user "${userID}".`);
     // } else {

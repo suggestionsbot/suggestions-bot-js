@@ -19,14 +19,14 @@ module.exports = class HelpCommand extends Command {
   async run(message, args, settings) {
     const { owner, embedColor, discord, website, prefix: defPrefix } = this.client.config;
     let staffRoles,
-      staffCheck;
+      staffCheck,
+      adminCheck;
     let { prefix, suggestionsChannel } = settings;
     const { staffRoles: roles } = settings;
     const configCmdName = this.client.commands.get('config').help.name;
 
     const botOwner = this.client.users.get(owner);
     const ownerCheck = this.client.isOwner(message.author.id);
-    const adminCheck = message.member.hasPermission('MANAGE_GUILD');
 
     if (message.guild) {
       suggestionsChannel = message.guild.channels.find(c => c.name === suggestionsChannel) ||
@@ -34,10 +34,12 @@ module.exports = class HelpCommand extends Command {
         message.guild.channels.get(suggestionsChannel) || '';
 
       staffRoles = [];
-      if (roles) staffRoles = roles.map(role => message.guild.roles.find(r => r.name === role.role || r.id === role.role));
+      if (roles) staffRoles = roles.map(({ role }) => message.guild.roles.get(role));
 
       staffCheck = message.member.hasPermission('MANAGE_GUILD') ||
         message.member.roles.some(r => staffRoles.includes(r));
+
+      adminCheck = message.member.hasPermission('MANAGE_GUILD');
     }
 
     if (!message.guild) prefix = defPrefix;

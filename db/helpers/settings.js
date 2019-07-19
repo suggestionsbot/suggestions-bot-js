@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { oneLine } = require('common-tags');
 const { Blacklist, Command, Settings, Suggestion } = require('../models');
 
 module.exports = class SettingsHelpers {
@@ -31,6 +32,7 @@ module.exports = class SettingsHelpers {
       { guildID: guild }
     ];
     const data = await Settings.findOne({ $or: searchGuild });
+    const { guildID } = data;
 
     let settings = data;
     // maybe check if settings object is empty, return an error?
@@ -41,16 +43,26 @@ module.exports = class SettingsHelpers {
     }
 
     const updated = await Settings.findOneAndUpdate({ $or: searchGuild }, settings);
-    await this.client.shard.broadcastEval(`
-      (() => {
-        const sGuild = this.guilds.get('${data.guildID}');
-        if (!sGuild) return false;
+    await this.client.shard.broadcastEval(`this.guilds.get('${guildID}')`)
+      .then(guildArray => {
+        const found = guildArray.find(g => g);
+        if (!found) return false;
 
-        this.logger.log(
-          'Guild "' + sGuild.name + '" (' + sGuild.id + ') updated settings: ${Object.keys(newSettings)}'
-        );
-      })();
-    `);
+        this.client.logger.log(oneLine`
+          Guild "${found.name}" (${found.id}) updated settings: ${Object.keys(newSettings)}
+        `);
+      });
+
+    // await this.client.shard.broadcastEval(`
+    //   (() => {
+    //     const sGuild = this.guilds.get('${data.guildID}');
+    //     if (!sGuild) return false;
+
+    //     this.logger.log(
+    //       'Guild "' + sGuild.name + '" (' + sGuild.id + ') updated settings: ${Object.keys(newSettings)}'
+    //     );
+    //   })();
+    // `);
     return updated;
   }
 
@@ -93,17 +105,28 @@ module.exports = class SettingsHelpers {
 
     const newSettings = await new Settings(merged);
     const data = await newSettings.save();
+    const { guildID } = data;
 
-    await this.client.shard.broadcastEval(`
-      (() => {
-        const nGuild = this.guilds.get('${data.guildID}');
-        if (!nGuild) return false;
+    await this.client.shard.broadcastEval(`this.guilds.get('${guildID}')`)
+      .then(guildArray => {
+        const found = guildArray.find(g => g);
+        if (!found) return false;
 
-        this.logger.log(
-          'Default settings saved for guild "' + nGuild.name + '" (' + nGuild.id + ')'
-        );
-      })();
-    `);
+        this.client.logger.log(oneLine`
+          Default settings saved for guild "${found.name}" (${found.id}).
+        `);
+      });
+
+    // await this.client.shard.broadcastEval(`
+    //   (() => {
+    //     const nGuild = this.guilds.get('${data.guildID}');
+    //     if (!nGuild) return false;
+
+    //     this.logger.log(
+    //       'Default settings saved for guild "' + nGuild.name + '" (' + nGuild.id + ')'
+    //     );
+    //   })();
+    // `);
     return data;
   }
 
@@ -120,15 +143,18 @@ module.exports = class SettingsHelpers {
     const newCommand = await new Command(merged);
     const data = await newCommand.save();
 
-    await this.client.shard.broadcastEval(`
-      const cUser = this.users.get('${data.userID}');
-      if (!cUser) false;
-    
-      this.logger.log(
-        '"' + cUser.tag + '" (' + cUser.id + ') ran the command "${data.command}"',
-        'cmd'
-      );
-    `);
+    const cUser = this.client.users.get(data.userID);
+    this.client.logger.log(`"${cUser.tag}" (${cUser.id}) ran the command "${data.command}"`, 'cmd');
+
+    // await this.client.shard.broadcastEval(`
+    //   const cUser = this.users.get('${data.userID}');
+    //   if (!cUser) false;
+
+    //   this.logger.log(
+    //     '"' + cUser.tag + '" (' + cUser.id + ') ran the command "${data.command}"',
+    //     'cmd'
+    //   );
+    // `);
     // const cUser = this.client.users.get(data.userID);
     // this.client.logger.log(`${cUser.tag} (${cUser.id}) ran command ${data.command}`, 'cmd');
     return data;

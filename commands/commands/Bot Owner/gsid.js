@@ -1,3 +1,5 @@
+const { Constants, RichEmbed, Guild, Emoji } = require('discord.js');
+const { stripIndent } = require('common-tags');
 const Command = require('../../Command');
 
 module.exports = class GSIDCommand extends Command {
@@ -15,146 +17,145 @@ module.exports = class GSIDCommand extends Command {
 
   async run(message, args, settings) {
 
+    const { embedColor, suggestionColors } = this.client.config;
+
     message.delete().catch(O_o => {});
 
     if (!args[0]) return this.client.errors.noUsage(message.channel, this, settings);
 
+    let sID;
     try {
-      await this.client.shard.broadcastEval(`
-        const { Constants, RichEmbed, Guild, Emoji } = require('discord.js');
-        const { embedColor, suggestionColors } = this.config;
-        
-        (async () => {
-          const senderMessage = await this.channels.get('${message.channel.id}')
-            .fetchMessage('${message.id}');
-          if (!senderMessage) return false;
-
-          let sID;
-          try {
-            sID = await this.suggestions.getGlobalSuggestion("${args[0]}");
-          } catch (err) {
-            this.logger.error(err.stack);
-            return senderMessage.channel.send('An error occurred: **' + err.message + '**.');
-          }
-
-          if (!sID) return this.errors.noSuggestion(senderMessage.channel, "${args[0]}");
-
-          let submittedOn,
-            updatedOn;
-
-          if (sID.time) submittedOn = sID.time;
-          if (sID.newTime) submittedOn = sID.newTime;
-
-          if (sID.statusUpdated) updatedOn = sID.statusUpdated;
-          if (sID.newStatusUpdated) updatedOn = sID.newStatusUpdated;
-
-          const sUser = this.users.get(sID.userID);
-          const sStaff = this.users.get(sID.staffMemberID);
-          const sGuild = this.guilds.get(sID.guildID);
-
-          const embed = new RichEmbed()
-            .setAuthor(sGuild, sGuild.iconURL)
-            .setTitle('Info for ' + sID.sID)
-            .setFooter('User ID: ' + sUser.id + ' | sID: ' + sID.sID);
-
-          const suggestion = sID.suggestion.cleanLineBreaks();
-
-          let results,
-            time;
-          if (sID.time && !sID.newTime) time = sID.time;
-          if (!sID.time && sID.newTime) time = sID.newTime;
-
-          if (sID.results.length > 1) {
-            results = sID.results
-              .map(async r => {
-                let e = this.findEmojiByString.call(this, r.emoji);
-                if (e) {
-                  const emoji = await this.rest.makeRequest('get', Constants.Endpoints.Guild(e.guild).toString(), true)
-                    .then(raw => {
-                      const guild = new Guild(this, raw)
-                      const emoji = new Emoji(guild, e);
-                      return emoji;
-                    });
-
-                  r.emoji = '<:' + emoji.name + ':' + emoji.id + '>';
-                }
-
-                return {
-                  emoji: r.emoji,
-                  count: r.count
-                };
-              });
-          }
-
-          const newResults = Array.from(results).map(async r => {
-            const data = await r;
-            return data.emoji + ' **: ' + data.count + '**' + \`
-            \`;
-          });
-  
-          const view = await Promise.all(newResults);
-          const savedResults = await Promise.all(results);
-
-          switch (sID.status) {
-            case undefined: {
-              embed.setDescription(\`
-                **Submitter**
-                \` + sUser + \`
-
-                **Suggestion**
-                \` + suggestion
-              );
-              embed.setColor(embedColor);
-              embed.setTimestamp(submittedOn);
-              senderMessage.channel.send(embed);
-              break;
-            }
-            case 'approved': {
-              embed.setDescription(\`
-                **Submitter**
-                \` + sUser + \`
-
-                **Suggestion**
-                \` + suggestion + \`
-
-                **Approved By**
-                \` + sStaff + \`
-
-                **Results**
-                \` + view.join(' ')
-              );
-              embed.setColor(suggestionColors.approved);
-              embed.setTimestamp(updatedOn);
-              senderMessage.channel.send(embed);
-              break;
-            }
-            case 'rejected': {
-              embed.setDescription(\`
-                **Submitter**
-                \` + sUser + \`
-
-                **Suggestion**
-                \` + suggestion + \`
-
-                **Rejected By**
-                \` + sStaff + \`
-
-                **Results**
-                \` + view.join(' ')
-              );
-              embed.setColor(suggestionColors.rejected);
-              embed.setTimestamp(updatedOn);
-              senderMessage.channel.send(embed);
-              break;
-            }
-            default:
-              break;
-          }
-        })();
-      `);
+      sID = await this.client.suggestions.getGlobalSuggestion(args[0]);
     } catch (err) {
       this.client.logger.error(err.stack);
       return message.channel.send(`An error occurred: **${err.message}**`);
+    }
+
+    if (!sID) return this.client.errors.noSuggestion(message.channel, args[0]);
+
+    let updatedOn;
+
+    if (sID.statusUpdated) updatedOn = sID.statusUpdated;
+    if (sID.newStatusUpdated) updatedOn = sID.newStatusUpdated;
+
+    const sUser = this.client.users.get(sID.userID);
+    const sStaff = this.client.users.get(sID.staffMemberID);
+
+    const sGuild = await this.client.shard.broadcastEval(`this.guilds.get('${sID.guildID}')`)
+      .then(guildArray => {
+        const found = guildArray.find(g => g);
+        if (!found) return;
+        return found;
+      })
+      .catch(error => {
+        this.client.logger.error(error.stack);
+        return message.channel.send(`An error occurred: **${error.message}**`);
+      });
+
+    const guildIconURL = `https://cdn.discordapp.com/icons/${sGuild.id}/${sGuild.icon}.png?size=1024`;
+
+    const embed = new RichEmbed()
+      .setAuthor(sGuild.name, guildIconURL)
+      .setTitle(`Info for ${sID.sID}`)
+      .setFooter(`User ID: ${sUser.id} | sID: ${sID.sID}`);
+
+    let view,
+      time;
+    if (sID.time && !sID.newTime) time = sID.time;
+    if (!sID.time && sID.newTime) time = sID.newTime;
+
+    if (sID.results.length > 1) {
+      const results = sID.results.map(async r => {
+        await this.client.shard.broadcastEval(`this.findEmojiByString.call(this, '${r.emoji}')`)
+          .then(async emojiArray => {
+            const found = emojiArray.find(e => e);
+            if (!found) return r.emoji = '**N/A';
+
+            const emoji = await this.client.rest.makeRequest('get', Constants.Endpoints.Guild(found.guild).toString(), true)
+              .then(raw => {
+                const guild = new Guild(this.client, raw);
+                const gEmoji = new Emoji(guild, found);
+                return gEmoji;
+              });
+
+            r.emoji = `<:${emoji.name}:${emoji.id}>`;
+          })
+          .catch(error => {
+            this.client.logger.error(error.stack);
+            return message.channel.send(`An error occurred: **${error.message}**`);
+          });
+
+        return {
+          emoji: r.emoji,
+          count: r.count
+        };
+      });
+
+      const newResults = results.map(async r => {
+        const data = await r;
+        return `${data.emoji}**: ${data.count}**`;
+      });
+
+      view = await Promise.all(newResults);
+    }
+
+    switch (sID.status) {
+    case undefined: {
+      embed
+        .setDescription(stripIndent`
+          **Submitter**
+          ${sUser}
+
+          **Suggestion**
+          ${sID.suggestion}
+        `)
+        .setColor(embedColor)
+        .setTimestamp(time);
+      message.channel.send(embed);
+      break;
+    }
+    case 'approved': {
+      embed
+        .setDescription(stripIndent`
+          **Submitter**
+          ${sUser}
+
+          **Suggestion**
+          ${sID.suggestion}
+
+          **Approved By**
+          ${sStaff}
+
+          **Results**
+          ${view.join('\n')}
+        `)
+        .setColor(suggestionColors.approved)
+        .setTimestamp(updatedOn);
+      message.channel.send(embed);
+      break;
+    }
+    case 'rejected': {
+      embed
+        .setDescription(stripIndent`
+          **Submitter**
+          ${sUser}
+
+          **Suggestion**
+          ${sID.suggestion}
+
+          **Rejected By**
+          ${sStaff}
+
+          **Results**
+          ${view.join('\n')}
+        `)
+        .setColor(suggestionColors.rejected)
+        .setTimestamp(updatedOn);
+      message.channel.send(embed);
+      break;
+    }
+    default:
+      break;
     }
 
     return;

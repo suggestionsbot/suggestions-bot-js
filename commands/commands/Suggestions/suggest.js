@@ -1,4 +1,6 @@
 /* eslint-disable no-useless-escape */
+const { Constants, RichEmbed, Guild, Emoji } = require('discord.js');
+const { oneLine, stripIndent } = require('common-tags');
 const crypto = require('crypto');
 require('moment-duration-format');
 require('moment-timezone');
@@ -18,12 +20,17 @@ module.exports = class SuggestCommand extends Command {
       },
       botPermissions: ['MANAGE_MESSAGES', 'EMBED_LINKS', 'ADD_REACTIONS', 'USE_EXTERNAL_EMOJIS']
     });
-    this.voteEmojis = require('../../../utils/voteEmojis');
   }
 
   async run(message, args, settings) {
 
     const { embedColor, emojis: { success } } = this.client.config;
+    const { suggestionsChannel, voteEmojis: emojis } = settings;
+    const suggestion = args.join(' ');
+
+    if (!suggestion) return this.client.errors.noUsage(message.channel, this, settings);
+
+    const imageCheck = /(http(s?):)([/|.|\w|\s|-])*\.(?:jpg|gif|png)/.exec(suggestion);
 
     let id = crypto.randomBytes(20).toString('hex').slice(12, 20);
 
@@ -35,187 +42,157 @@ module.exports = class SuggestCommand extends Command {
       return message.channel.send(`Error querying the database for this guild's suggestions: **${err.message}**.`);
     }
 
-    const { suggestionsChannel } = settings;
-
     const sUser = message.author;
     const sChannel = message.guild.channels.find(c => c.name === suggestionsChannel) ||
-      message.guild.channels.find(c => c.toString() === suggestionsChannel) ||
       message.guild.channels.get(suggestionsChannel);
     if (!sChannel) return this.client.errors.noSuggestions(message.channel);
 
-    const emojis = settings.voteEmojis;
-
     // If the sID exists globally, this will force a new one to be generated
-    if (verifySuggestion) id = crypto.randomBytes(20).toString('hex').slice(12, 20);
+    do {
+      id = crypto.randomBytes(20).toString('hex').slice(12, 20);
+    } while (verifySuggestion);
 
-    const suggestion = args.join(' ');
-    suggestion.replaceWithBreakTags();
-    suggestion.cleanDoubleQuotes();
-    if (!suggestion) return this.client.errors.noUsage(message.channel, this, settings);
+    const embed = new RichEmbed()
+      .setDescription(stripIndent`
+        **Submitter**
+        ${sUser.tag}
 
-    const suggestionArgs = args;
-    for (let i = 0; i < suggestionArgs.length; i++) {
-      suggestionArgs[i] = suggestionArgs[i].replaceWithBreakTags();
+        **Suggestion**
+        ${suggestion}
+      `)
+      .setThumbnail(sUser.avatarURL)
+      .setColor(embedColor)
+      .setFooter(`User ID: ${sUser.id} | sID: ${id}`)
+      .setTimestamp();
+
+    if (imageCheck) embed.setImage(imageCheck[0]);
+
+    const dmEmbed = new RichEmbed()
+      .setAuthor(message.guild, message.guild.iconURL)
+      .setDescription(stripIndent`Hey, ${sUser}. Your suggestion has been sent to the ${sChannel} channel to be voted on!
+        
+      Please wait until it gets approved or rejected by a staff member.
+
+      Your suggestion ID (sID) for reference is **${id}**.
+      `)
+      .setColor(embedColor)
+      .setFooter(`Guild ID: ${message.guild.id} | sID: ${id}`)
+      .setTimestamp();
+
+    const filter = set => set.name === emojis;
+    const defaults = set => set.name === 'defaultEmojis';
+    const fallback = set => set.name === 'oldDefaults';
+
+    const sendMsgs = sChannel.permissionsFor(message.guild.me).has('SEND_MESSAGES', false);
+    const reactions = sChannel.permissionsFor(message.guild.me).has('ADD_REACTIONS', false);
+    const extReactions = sChannel.permissionsFor(message.guild.me).has('USE_EXTERNAL_EMOJIS', false);
+    if (!sendMsgs) return this.client.errors.nosChannelPerms(message, sChannel, 'SEND_MESSAGES');
+    if (!reactions) return this.client.errors.nosChannelPerms(message, sChannel, 'ADD_REACTIONS');
+    if (!extReactions) return this.client.errors.nosChannelPerms(message, sChannel, 'USE_EXTERNAL_EMOJIS');
+
+    const m = await sChannel.send(embed);
+
+    const foundSet = this.client.voteEmojis.find(filter) || this.client.voteEmojis.find(defaults);
+    const emojiSet = foundSet.emojis;
+    const fallbackSet = this.client.voteEmojis.find(fallback).emojis;
+
+    for (const emoji of emojiSet) {
+      const emojiIndex = emojiSet.indexOf(emoji);
+
+      this.client.shard.broadcastEval(`this.findEmojiByID.call(this, '${emoji}')`)
+        .then(async emojiArray => {
+          const found = emojiArray.find(e => e);
+          if (!found) await m.react(fallbackSet[emojiIndex]);
+
+          return this.client.rest.makeRequest('get', Constants.Endpoints.Guild(found.guild).toString(), true)
+            .then(async raw => {
+              const guild = new Guild(this.client, raw);
+              const gEmoji = new Emoji(guild, found);
+              return await m.react(gEmoji);
+            });
+        })
+        .catch(error => {
+          this.client.logger.error(error.stack);
+          return message.channel.send(`An error occurred: **${error.message}**`);
+        });
     }
 
-    const cleanedSuggestion = suggestionArgs
-      .join(' ')
-      .cleanDoubleQuotes();
+    this.client.shard.broadcastEval(`this.findEmojiByID.call(this, '${success}')`)
+      .then(async emojiArray => {
+        const found = emojiArray.find(e => e);
+        if (!found) return message.react('✅').then(() => message.delete(3000));
+
+        return this.client.rest.makeRequest('get', Constants.Endpoints.Guild(found.guild).toString(), true)
+          .then(async raw => {
+            const guild = new Guild(this.client, raw);
+            const gEmoji = new Emoji(guild, found);
+            return await message.react(gEmoji).then(() => message.delete(3000));
+          });
+      })
+      .catch(error => {
+        this.client.logger.error(error.stack);
+        return message.channel.send(`An error occurred: **${error.message}**`);
+      });
 
     try {
-
-      await this.client.shard.broadcastEval(`
-        (async () => {
-          const { Constants, RichEmbed, Guild, Emoji } = require('discord.js');
-          const { stripIndents } = require('common-tags');
-
-          let senderMessage;
-          const senderChannel = this.channels.get('${message.channel.id}');
-          if (!senderChannel) return false;
-          else senderMessage = await senderChannel.fetchMessage('${message.id}');
-
-          const sUser = this.users.get('${message.author.id}');
-
-          const imageCheck = /(http(s?):)([/|.|\w|\s|-])*\.(?:jpg|gif|png)/.exec("${cleanedSuggestion}");
-
-          const sEmbed = new RichEmbed()
-            .setDescription(stripIndents\`
-              **Submitter**
-              ${sUser.tag}
-
-              **Suggestion**
-              ${suggestion}
-              \`)
-            .setColor('${embedColor}')
-            .setFooter('User ID: ${sUser.id} | sID: ${id}')
-            .setTimestamp();
-
-          if (sUser.avatar) sEmbed.setThumbnail('${sUser.avatarURL}');
-
-          const dmEmbed = new RichEmbed()
-            .setAuthor(senderMessage.guild, senderMessage.guild.iconURL)
-            .setDescription(stripIndents\`Hey, ${sUser}. Your suggestion has been sent to the ${sChannel} channel to be voted on!
-                  
-                Please wait until it gets approved or rejected by a staff member.
-            
-                Your suggestion ID (sID) for reference is **${id}**.
-            \`)
-            .setColor('${embedColor}')
-            .setFooter(\`Guild ID: ${message.guild.id} | sID: ${id}\`)
-            .setTimestamp();
-
-          if (imageCheck) sEmbed.setImage(imageCheck[0]);
-
-          const filter = set => set.name === '${emojis}';
-          const defaults = set => set.name === 'defaultEmojis';
-          const fallback = set => set.name === 'oldDefaults';
-
-          const channel = this.channels.get('${sChannel.id}');
-          const sendMsgs = channel.permissionsFor(senderMessage.guild.me).has('SEND_MESSAGES', false);
-          const reactions = channel.permissionsFor(senderMessage.guild.me).has('ADD_REACTIONS', false);
-          const extReactions = channel.permissionsFor(senderMessage.guild.me).has('USE_EXTERNAL_EMOJIS', false);
-          if (!sendMsgs) return this.errors.noChannelPerms(senderMessage, channel, 'SEND_MESSAGES');
-          if (!reactions) return this.errors.noChannelPerms(senderMessage, channel, 'ADD_REACTIONS');
-          if (!extReactions) return this.errors.noChannelPerms(senderMessage, channel, 'USE_EXTERNAL_EMOJIS');
-
-          const m = await channel.send(sEmbed);
-
-          const foundSet = this.voteEmojis.find(filter) || this.voteEmojis.find(defaults);
-          const emojiSet = foundSet.emojis;
-          const fallbackSet = this.voteEmojis.find(fallback).emojis;
-
-          for (const emoji of emojiSet) {
-            const e = this.findEmojiByID.call(this, emoji);
-            try {
-              if (e) {
-                await this.rest.makeRequest('get', Constants.Endpoints.Guild(e.guild).toString(), true)
-                  .then(async raw => {
-                    const guild = new Guild(this, raw)
-                    const gEmoji = new Emoji(guild, e);
-                    return await m.react(gEmoji);
-                  });
-              } else {
-                await m.react(emoji);
-              }
-            } catch (error) {
-              await m.react(fallbackSet[emojiSet.indexOf(emoji)]);
-            }
-          }
-
-          const newSuggestion = {
-            guildID: senderMessage.guild.id,
-            userID: senderMessage.author.id,
-            messageID: m.id,
-            suggestion: "${cleanedSuggestion}",
-            sID: '${id}',
-            time: m.createdAt.getTime()
-          };
-
-          try {
-            if ((${settings.dmResponses} === true) &&
-              senderMessage.guild.members.get(sUser.id)
-            ) {
-              sUser.send(dmEmbed);
-            }
-          } catch (err) {
-            this.logger.error(err.stack);
-            senderMessage.channel.send(stripIndents\`
-              An error occurred DMing you your suggestion information: **err.message**. Please make sure you are able to receive messages from server members.
-      
-              For reference, your suggestion ID (sID) is **${id}**. Please wait for staff member to approve/reject your suggestion.\`
-            );
-          }
-
-          await this.suggestions.submitGuildSuggestion(newSuggestion);
-          if (${settings.dmResponses} === true) {
-            senderMessage.react('✉');
-          } else {
-            const e = this.findEmojiByID.call(this, '${success}');
-            if (e) {
-              const emoji = await this.rest.makeRequest('get', Constants.Endpoints.Guild(e.guild).toString(), true)
-              .then(raw => {
-                const guild = new Guild(this, raw)
-                const emoji = new Emoji(guild, e);
-                return senderMessage.react(emoji);
-              });
-            } else {
-              senderMessage.react('✅');
-            }
-          }
-          senderMessage.delete(3000).catch(O_o=>{});
-
-          if (${settings.fetchedMessages} === false) {
-            const messages = await channel.fetchMessages();
-            const filtered = messages
-              .filter(m => m.embeds.length >= 1 && m.author.id === this.user.id);
-
-            for (const m of filtered.array()) {
-              const footer = m.embeds[0].footer.text.split('sID:');
-              const sID = footer[1].trim();
-
-              const suggestion = await this.suggestions.getGuildSuggestion(m.guild.id, sID);
-              if (!suggestion) break;
-
-              const updateSuggestion = {
-                query: [
-                  { guildID: m.guild.id },
-                  { sID: sID }
-                ],
-                data: { messageID: m.id }
-              };
-
-              await this.suggestions.updateGuildSuggestion(updateSuggestion);
-            }
-
-            await this.settings.updateGuild(senderMessage.guild.id, { fetchedMessages: true });
-          }
-
-          return;
-        })();
+      if (settings.dmResponses && message.guild.members.get(sUser.id)) sUser.send(dmEmbed);
+    } catch (error) {
+      message.channel.send(oneLine`
+        I could not DM you because you have DMs disabled from server members. However, for reference, your suggestion
+        ID (sID) is **${id}**. Please wait for a staff member to approve/reject your suggestion.
       `);
-    } catch (err) {
-      this.client.logger.error(err.stack);
-      return message.channel.send(`An error occurred: **${err.message}**.`);
+    }
+
+    const newSuggestion = {
+      guildID: message.guild.id,
+      userID: message.author.id,
+      messageID: m.id,
+      suggestion,
+      sID: id,
+      time: m.createdAtTimestamp
+    };
+
+    try {
+      await this.client.suggestions.submitGuildSuggestion(newSuggestion);
+    } catch (error) {
+      this.client.logger.error(error.stack);
+      return message.channel.send(`An error occurred: **${error.message}**`);
+    }
+
+    if (!settings.fetchedMessages) {
+      const messages = await sChannel.fetchMessages();
+      const filtered = messages
+        .filter(msg => msg.embeds.length >= 1 && msg.author.id === this.client.user.id);
+
+      for (const msg of filtered.array()) {
+        const footer = msg.embeds[0].footer.text.split('sID:');
+        const sID = footer[1].trim();
+
+        const data = await this.client.suggestions.getGuildSuggestion(msg.guild.id, sID);
+        if (!data) break;
+
+        const updateSuggestion = {
+          query: [
+            { guildID: m.guild.id },
+            { sID: sID }
+          ],
+          data: { messageID: m.id }
+        };
+
+        try {
+          await this.client.suggestions.updateGuildSuggestion(updateSuggestion);
+        } catch (error) {
+          this.client.logger.error(error.stack);
+          return message.channel.send(`An error occurred: **${error.message}**`);
+        }
+      }
+
+      try {
+        await this.client.settings.updateGuild(message.guild, { fetchedMessages: true });
+      } catch (error) {
+        this.client.logger.error(error.stack);
+        return message.channel.send(`An error occurred: **${error.message}**`);
+      }
     }
 
     return;
