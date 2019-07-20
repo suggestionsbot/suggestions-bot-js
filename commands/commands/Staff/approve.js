@@ -10,7 +10,7 @@ module.exports = class ApproveCommand extends Command {
       description: 'Approve a submitted suggestion via the suggestion ID (sID).',
       usage: 'approve <sID> [response]',
       staffOnly: true,
-      guildOnly: false,
+      guildOnly: true,
       botPermissions: ['MANAGE_MESSAGES', 'USE_EXTERNAL_EMOJIS']
     });
   }

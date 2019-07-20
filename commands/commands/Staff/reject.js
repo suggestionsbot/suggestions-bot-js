@@ -10,7 +10,7 @@ module.exports = class RejectCommand extends Command {
       description: 'Reject a submitted suggestion via the suggestion ID (sID).',
       usage: 'reject <sID> [response]',
       staffOnly: true,
-      guildOnly: false,
+      guildOnly: true,
       botPermissions: ['MANAGE_MESSAGES', 'USE_EXTERNAL_EMOJIS']
     });
 

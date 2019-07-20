@@ -101,7 +101,7 @@ module.exports = class SuggestionsHelpers {
         const found = guildArray.find(g => g);
         if (!found) return false;
 
-        const sUser = this.users.get(userID);
+        const sUser = this.client.users.get(userID);
 
         this.client.logger.log(oneLine`
           New suggestion submitted by "${sUser.tag}" (${sUser.id}) in the guild
@@ -140,7 +140,6 @@ module.exports = class SuggestionsHelpers {
       .then(guildArray => {
         const found = guildArray.find(g => g);
         if (!found) return false;
-
 
         this.client.logger.log(oneLine`
           sID "${sID}" has been ${data.status} in the guild "${found.name}" (${found.id}) 
