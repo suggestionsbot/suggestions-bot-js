@@ -33,13 +33,21 @@ module.exports = class GSIDCommand extends Command {
 
     if (!sID) return this.client.errors.noSuggestion(message.channel, args[0]);
 
-    let updatedOn;
+    let updatedOn,
+      sStaff;
 
     if (sID.statusUpdated) updatedOn = sID.statusUpdated;
     if (sID.newStatusUpdated) updatedOn = sID.newStatusUpdated;
 
-    const sUser = this.client.users.get(sID.userID);
-    const sStaff = this.client.users.get(sID.staffMemberID);
+    const sUser = this.client.users.get(sID.userID) ?
+      this.client.users.get(sID.userID) : await this.client.fetchUser(sID.userID);
+
+    // const sStaff = sID.hasOwnProperty('staffMemberID') ?
+    //   this.client.users.get(sID.staffMemberID) : null;
+    if (sID.hasOwnProperty('staffMemberID')) {
+      sStaff = this.client.users.get(sID.staffMemberID) ||
+        await this.client.fetchUser(sID.staffMemberID);
+    }
 
     const sGuild = await this.client.shard.broadcastEval(`this.guilds.get('${sID.guildID}')`)
       .then(guildArray => {
@@ -69,7 +77,7 @@ module.exports = class GSIDCommand extends Command {
         await this.client.shard.broadcastEval(`this.findEmojiByString.call(this, '${r.emoji}')`)
           .then(async emojiArray => {
             const found = emojiArray.find(e => e);
-            if (!found) return r.emoji = '**N/A';
+            if (!found) return r.emoji = r.emoji || '**N/A**';
 
             const emoji = await this.client.rest.makeRequest('get', Constants.Endpoints.Guild(found.guild).toString(), true)
               .then(raw => {
