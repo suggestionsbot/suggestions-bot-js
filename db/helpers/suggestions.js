@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { oneLine } = require('common-tags');
 const { Suggestion } = require('../models');
 
 module.exports = class SuggestionsHelpers {
@@ -93,18 +94,32 @@ module.exports = class SuggestionsHelpers {
 
     const newSuggestion = await new Suggestion(merged);
     const data = await newSuggestion.save();
+    const { userID, guildID } = data;
 
-    await this.client.shard.broadcastEval(`
-      (async () => {
-        const sUser = this.users.get('${data.userID}');
-        const sGuild = this.guilds.get('${data.guildID}');
-        if (!sGuild) return false;
+    await this.client.shard.broadcastEval(`this.guilds.get('${guildID}')`)
+      .then(guildArray => {
+        const found = guildArray.find(g => g);
+        if (!found) return false;
 
-        this.logger.log(
-          'New suggestions submitted by "' + sUser.tag + '" (' + sUser.id + ') in the guild "' + sGuild.name + '" (' + sGuild.id + ')'
-        );
-      })();
-    `);
+        const sUser = this.users.get(userID);
+
+        this.client.logger.log(oneLine`
+          New suggestion submitted by "${sUser.tag}" (${sUser.id}) in the guild
+          "${found.name}" (${found.id}).
+        `);
+      });
+
+    // await this.client.shard.broadcastEval(`
+    //   (async () => {
+    //     const sUser = this.users.get('${data.userID}');
+    //     const sGuild = this.guilds.get('${data.guildID}');
+    //     if (!sGuild) return false;
+
+    //     this.logger.log(
+    //       'New suggestions submitted by "' + sUser.tag + '" (' + sUser.id + ') in the guild "' + sGuild.name + '" (' + sGuild.id + ')'
+    //     );
+    //   })();
+    // `);
 
     return data;
   }
@@ -117,27 +132,39 @@ module.exports = class SuggestionsHelpers {
   async handleGuildSuggestion({ query, data }) {
 
     const guildSuggestion = await Suggestion.findOne({ $and: query });
-    const { sID } = guildSuggestion;
+    const { sID, guildID } = guildSuggestion;
 
     const updated = await guildSuggestion.updateOne(data);
 
-    await this.client.shard.broadcastEval(`
-      (() => {
-        const sGuild = this.guilds.get('${guildSuggestion.guildID}');
-        if (!sGuild) return false;
+    await this.client.shard.broadcastEval(`this.guilds.get('${guildID}')`)
+      .then(guildArray => {
+        const found = guildArray.find(g => g);
+        if (!found) return false;
 
-        if ("${data.statusReply}" === 'null') {
-          this.logger.log(
-            'sID "${sID}" has been ${data.status} in the guild "' + sGuild.name + '" (' + sGuild.id + ').'
-          );
-        } else {
-          this.logger.log(
-            'sID "${sID}" has been ${data.status} in the guild "' + sGuild.name + '" (' + sGuild.id + ') ' +
-            'with the response "${data.statusReply}".'
-          );
-        }
-      })();
-    `);
+
+        this.client.logger.log(oneLine`
+          sID "${sID}" has been ${data.status} in the guild "${found.name}" (${found.id}) 
+          ${data.statusReply ? `with the response ${data.statusReply}` : ''}.
+        `);
+      });
+
+    // await this.client.shard.broadcastEval(`
+    //   (() => {
+    //     const sGuild = this.guilds.get('${guildSuggestion.guildID}');
+    //     if (!sGuild) return false;
+
+    //     if ("${data.statusReply}" === 'null') {
+    //       this.logger.log(
+    //         'sID "${sID}" has been ${data.status} in the guild "' + sGuild.name + '" (' + sGuild.id + ').'
+    //       );
+    //     } else {
+    //       this.logger.log(
+    //         'sID "${sID}" has been ${data.status} in the guild "' + sGuild.name + '" (' + sGuild.id + ') ' +
+    //         'with the response "${data.statusReply}".'
+    //       );
+    //     }
+    //   })();
+    // `);
     return updated;
   }
 
@@ -153,18 +180,30 @@ module.exports = class SuggestionsHelpers {
     const { guildID, sID } = guildSuggestion;
     const updatedData = { notes: data };
 
-    await this.client.shard.broadcastEval(`
-      (() => {
-        const sGuild = this.guilds.get('${guildID}');
-        if (!sGuild) return false;
-        const sUser = this.users.get('${staffMemberID}');
+    await this.client.shard.broadcastEval(`this.guilds.get('${guildID}')`)
+      .then(guildArray => {
+        const found = guildArray.find(g => g);
+        if (!found) return false;
 
-        this.logger.log(
-          'sID "' + ${sID} + '" had a note added by "' + sUser.tag + '" (' + sUser.id + ') in the guild "' +
-          sGuild + '" (' + sGuild.id + ').'
-        );
-      })();
-    `);
+        const sUser = this.client.users.get(staffMemberID);
+        this.client.logger.log(oneLine`
+          sID "${sID}" had a note added by "${sUser.tag}" (${sUser.id}) in the guild 
+          "${found.name}" (${found.id}).
+        `);
+      });
+
+    // await this.client.shard.broadcastEval(`
+    //   (() => {
+    //     const sGuild = this.guilds.get('${guildID}');
+    //     if (!sGuild) return false;
+    //     const sUser = this.users.get('${staffMemberID}');
+
+    //     this.logger.log(
+    //       'sID "' + ${sID} + '" had a note added by "' + sUser.tag + '" (' + sUser.id + ') in the guild "' +
+    //       sGuild + '" (' + sGuild.id + ').'
+    //     );
+    //   })();
+    // `);
 
     // const sUser = this.client.users.get(staffMemberID);
     // const sGuild = this.client.guilds.get(guildID);
