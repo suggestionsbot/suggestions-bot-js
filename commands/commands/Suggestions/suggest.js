@@ -99,22 +99,26 @@ module.exports = class SuggestCommand extends Command {
     for (const emoji of emojiSet) {
       const emojiIndex = emojiSet.indexOf(emoji);
 
-      this.client.shard.broadcastEval(`this.findEmojiByID.call(this, '${emoji}')`)
-        .then(async emojiArray => {
-          const found = emojiArray.find(e => e);
-          if (!found) await m.react(fallbackSet[emojiIndex]);
+      if (foundSet.custom) {
+        this.client.shard.broadcastEval(`this.findEmojiByID.call(this, '${emoji}')`)
+          .then(async emojiArray => {
+            const found = emojiArray.find(e => e);
+            if (!found) await m.react(fallbackSet[emojiIndex]);
 
-          return this.client.rest.makeRequest('get', Constants.Endpoints.Guild(found.guild).toString(), true)
-            .then(async raw => {
-              const guild = new Guild(this.client, raw);
-              const gEmoji = new Emoji(guild, found);
-              return await m.react(gEmoji);
-            });
-        })
-        .catch(error => {
-          this.client.logger.error(error.stack);
-          return message.channel.send(`An error occurred: **${error.message}**`);
-        });
+            return this.client.rest.makeRequest('get', Constants.Endpoints.Guild(found.guild).toString(), true)
+              .then(async raw => {
+                const guild = new Guild(this.client, raw);
+                const gEmoji = new Emoji(guild, found);
+                return await m.react(gEmoji);
+              });
+          })
+          .catch(error => {
+            this.client.logger.error(error.stack);
+            return message.channel.send(`An error occurred: **${error.message}**`);
+          });
+      } else {
+        await m.react(emoji);
+      }
     }
 
     this.client.shard.broadcastEval(`this.findEmojiByID.call(this, '${success}')`)
