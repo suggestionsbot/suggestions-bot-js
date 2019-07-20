@@ -22,8 +22,8 @@ module.exports = class {
     }
 
     const sChannel = message.guild.channels.find(c => c.name === settings.suggestionsChannel) ||
-            message.guild.channels.find(c => c.toString() === settings.suggestionsChannel) ||
-            message.guild.channels.get(settings.suggestionsChannel);
+      message.guild.channels.find(c => c.toString() === settings.suggestionsChannel) ||
+      message.guild.channels.get(settings.suggestionsChannel);
     if (!sChannel || message.channel.id !== sChannel.id) return;
 
     const reactions = message.reactions.map(r => {

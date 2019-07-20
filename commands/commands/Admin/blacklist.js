@@ -1,5 +1,5 @@
 const { RichEmbed } = require('discord.js');
-const { oneLine } = require('common-tags');
+const { oneLine, stripIndent } = require('common-tags');
 const Command = require('../../Command');
 
 module.exports = class BlacklistCommand extends Command {
@@ -13,8 +13,8 @@ module.exports = class BlacklistCommand extends Command {
       botPermissions: ['MANAGE_MESSAGES', 'EMBED_LINKS']
     });
     this.blStatus = {
-      true: 'True',
-      false: 'False'
+      true: 'Active',
+      false: 'Inactive'
     };
   }
 
@@ -22,97 +22,70 @@ module.exports = class BlacklistCommand extends Command {
 
     const { name } = this.help;
     const { prefix } = settings;
+    const { embedColor } = this.client.config;
 
     message.delete().catch(O_o=>{});
 
-    let gBlacklists;
+    let gBlacklists,
+      total;
     try {
       gBlacklists = await this.client.blacklists.getGuildBlacklists(message.guild);
+      total = await this.client.blacklists.getTotalBlacklists();
     } catch (err) {
       this.client.logger.error(err.stack);
       return message.channel.send(`An error occurred: **${err.message}**`);
     }
 
-    const caseNum = gBlacklists.length + 1;
-    const blEmbed = new RichEmbed().setTimestamp();
+    const caseNum = total + 1;
+    const blEmbed = new RichEmbed()
+      .setColor(embedColor)
+      .setFooter(`Guild: ${message.guild.id}`)
+      .setTimestamp();
 
     if (!args[0]) {
       try {
-        await this.client.shard.broadcastEval(`
-          const { RichEmbed } = require('discord.js');
-          const { embedColor } = this.config;
+        const activeBlacklists = gBlacklists
+          .filter(b => (b.status === true) && (b.scope === 'guild'));
 
-          const blStatus = {
-            true: 'Active',
-            false: 'Inactive'
+        const blacklists = activeBlacklists.map(blacklist => {
+          let time;
+          const issued = this.client.users.get(blacklist.userID);
+          const issuer = this.client.users.get(blacklist.issuerID);
+          const num = blacklist.case;
+          const reason = blacklist.reason;
+          const caseStatus = this.blStatus[blacklist.status];
+          if (blacklist.time && !blacklist.newTime) time = new Date(blacklist.time);
+          if (!blacklist.time && blacklist.newTime) time = new Date(blacklist.newTime);
+
+          const value = `
+            **User:** ${issued.tag} \`[${issued.id}]\` 
+            **Reason:** ${reason}
+            **Issuer:** ${issuer.tag} \`[${issuer.id}]\` 
+            **Status:** ${caseStatus} 
+            **Issued:** ${time.toLocaleDateString()}
+          `;
+
+          return {
+            name: `Case #${num}`,
+            value
           };
+        });
 
-          (async () => {
-            let senderMessage; = 
-            const senderChannel = this.channels.get('${message.channel.id}');
-            if (!senderChannel) return false;
-            else senderMessage = await senderChannel.fetchMessage('${message.id}');
+        for (const blacklist of blacklists) blEmbed.addField(blacklist.name, blacklist.value);
 
-            let gBlacklists;
-            try {
-              gBlacklists = await this.blacklists.getGuildBlacklists(senderMessage.guild);
-            } catch (err) {
-              this.logger.error(err.stack);
-              return senderMessage.channel.send('An error occurred: **' + err.message + '**');
-            }
+        blEmbed.setAuthor(`${message.guild} | Blacklisted Users`, message.guild.iconURL);
+        blEmbed.setDescription(stripIndent`
+          These users are currently blacklisted from using any of the bot commands in this guild.
 
-            const caseNum = gBlacklists.length + 1;
-            const blEmbed = new RichEmbed()
-              .setColor(embedColor)
-              .setFooter('Guild: ' + senderMessage.guild.id)
-              .setTimestamp();
-
-            const activeBlacklists = gBlacklists
-              .filter(bl => (bl.status === true) && (bl.scope === 'guild'));
-            const blacklists = activeBlacklists.map(blacklist => {
-              let time;
-              const issued = this.users.get(blacklist.userID);
-              const issuer = this.users.get(blacklist.issuerID);
-              const num = blacklist.case;
-              const reason = blacklist.reason;
-              const caseStatus = blStatus[blacklist.status];
-              if (blacklist.time && !blacklist.newTime) time = new Date(blacklist.time);
-              if (!blacklist.time && blacklist.newTime) time = new Date(blacklist.newTime);
-
-              const value = \`**User:** \` + issued.tag + \`
-                **Reason:** \` + reason + \`
-                **Issuer:** \` + issuer.tag + \`
-                **Status:** \` + caseStatus + \`
-                **Issued:** \` + time.toLocaleString() + \`
-                \`;
-
-              return {
-                name: 'Case #' + num,
-                value
-              }
-            });
-
-            for (const blacklist of blacklists) blEmbed.addField(blacklist.name, blacklist.value);
-
-            blEmbed.setAuthor(senderMessage.guild + '| Blacklisted Users', senderMessage.guild.iconURL)
-            blEmbed.setDescription(\`
-              These users are currently blacklisted from using any of the bot command's in this guild.
-            
-              Use \` + '\`${prefix + name} help\`' + ' for more information.'
-            );
-
-            // if (gBlacklists.length === 0) {
-            //   return senderMessage.channel.send('There are no user blacklists! Use ' + '\`${prefix + name} help\`' + ' for more information.')
-            //     .then(m => m.delete(5000));
-            // }
-
-            if (activeBlacklists.length < 1) {
-              return senderMessage.channel.send(\`There are currently no active blacklisted users. Use \` + '\`${prefix + name} help\`' + ' for more information.');
-            }
-
-            return senderMessage.channel.send(blEmbed);
-          })();
+          Use \`${prefix + name} help\` for more information.
         `);
+
+        if (activeBlacklists.length < 1) {
+          return message.channel.send(`There are currently no active blacklisted users. Use \`${prefix + name} help\` for more information.`)
+            .then(m => m.delete(5000));
+        }
+
+        message.channel.send(blEmbed);
       } catch (err) {
         this.client.logger.error(err.stack);
         return message.channel.send(`An error occurred: **${err.message}**`);
@@ -155,7 +128,7 @@ module.exports = class BlacklistCommand extends Command {
 
 
       const dmBlacklistAdd = new RichEmbed()
-        .setDescription(`
+        .setDescription(stripIndent`
           Hello ${blUser},
 
           You have been blacklisted by ${message.author} from using any of the ${this.client.user}'s commands in the guild **${message.guild}**.
@@ -202,7 +175,7 @@ module.exports = class BlacklistCommand extends Command {
       blEmbed.addField('Issuer', `${message.author} \`[${message.author.id}]\``);
 
       const dmBlacklistRemove = new RichEmbed()
-        .setDescription(`
+        .setDescription(stripIndent`
           Hello ${blUser},
 
           You have been unblacklisted by ${message.author}. This means you are now able to use the ${this.client.user}'s commands in the guild **${message.guild}**.
