@@ -190,7 +190,7 @@ module.exports = class ConfigCommand extends Command {
 
       if (updated) {
         const verified = message.guild.roles.find(c => c.name === updated) ||
-          message.guild.roles.channels.get(updated) ||
+          message.guild.roles.get(updated) ||
           message.mentions.roles.first();
         if (!verified) return this.client.errors.roleNotFound(updated, message.channel);
 
