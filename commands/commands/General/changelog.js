@@ -19,10 +19,10 @@ module.exports = class ChangelogCommand extends Command {
 
     const { embedColor, discord } = this.client.config;
 
-    this.client.shard.broadcastEval('this.channels.get("60232659761325673")')
+    this.client.shard.broadcastEval('this.channels.get("602326597613256734")')
       .then(async channelArr => {
-        let found = channelArr.find(c => c);
-        if (!found) found = message.guild.channels.find(c => c.name === 'changelog');
+        const found = channelArr.find(c => c);
+        if (!found) return message.channel.send('The official changelog channel was not found!');
 
         await found.fetchMessages().catch(error => {
           this.client.logger.error(error.message);
