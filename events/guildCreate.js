@@ -38,10 +38,19 @@ module.exports = class {
       break;
     }
     // 480231440932667393 = Nerd Cave Development
+    // 602332466476482616 = server_logs
     default: {
-      const logGuild = this.client.guilds.get('480231440932667393');
-      const logChannel = logGuild.channels.find(c => c.name === 'server_logs');
-      logChannel.send(newServer);
+      // const logGuild = this.client.guilds.get('480231440932667393');
+      // const logChannel = logGuild.channels.find(c => c.name === 'server_logs');
+      // logChannel.send(newServer);
+      this.client.shard.broadcastEval('this.channels.get("602332466476482616");')
+        .then(channelArr => {
+          const found = channelArr.find(c => c);
+          if (!found) return;
+
+          found.send(newServer);
+        })
+        .catch(err => this.client.logger.error(err));
       break;
     }
     }

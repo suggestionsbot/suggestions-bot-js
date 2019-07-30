@@ -71,6 +71,7 @@ module.exports = class GSIDCommand extends Command {
       time;
     if (sID.time && !sID.newTime) time = sID.time;
     if (!sID.time && sID.newTime) time = sID.newTime;
+    if (!sID.time && !sID.newTime) time = sID._id.getTimestamp();
 
     if (sID.results.length > 1) {
       const results = sID.results.map(async r => {

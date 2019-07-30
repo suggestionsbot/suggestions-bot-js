@@ -19,38 +19,35 @@ module.exports = class ChangelogCommand extends Command {
 
     const { embedColor, discord } = this.client.config;
 
-    const g = this.client.guilds.get('480231440932667393') || this.client.guilds.get('345753533141876737');
-    const c = g.channels.find(ch => ch.name === 'updates');
+    this.client.shard.broadcastEval('this.channels.get("60232659761325673")')
+      .then(async channelArr => {
+        let found = channelArr.find(c => c);
+        if (!found) found = message.guild.channels.find(c => c.name === 'changelog');
 
-    const fetchedMessages = await c.fetchMessages({ limit: 100 }).catch(err => {
-      this.client.logger.error(err);
-      return message.channel.send(`There was an error fetching messages from the \`#${c.name}\` channel: **${err.message}**.`);
-    });
+        await found.fetchMessages().catch(error => {
+          this.client.logger.error(error.message);
+          return message.channel.send(`An error occurred: **${error.message}&+**`);
+        });
 
-    fetchedMessages.forEach(async msg => {
-      const embed = msg.embeds[0];
-      if (!embed) return;
+        const m = found.lastMessage;
+        if (!m) return message.channel.send('No previous changelogs were found in the official changelog channel!');
 
-      const update = embed.description;
-      const date = embed.fields[0].value;
+        const changelogEmbed = new RichEmbed()
+          .setTitle(`${this.client.user.username}'s Changelog 🗄`)
+          .setThumbnail(this.client.user.avatarURL)
+          .setDescription(m.embeds[0].description)
+          .addField('Date', m.embeds[0].fields[0].value)
+          .setColor(embedColor);
 
-      const prefix = '**>**';
-      const ver = version;
-      if (!update.includes(ver)) return;
-      const rawUpdate = update.toString().split('\n');
-      const updates = rawUpdate.filter(u => u.startsWith(prefix));
+        changelogEmbed.addField('More Information', `Please check our ${found || `#${found.name}`} channel at ${discord} for previous updates!`);
 
-      const changelogEmbed = new RichEmbed()
-        .setTitle(`${this.client.user.username}'s Changelog 🗄`)
-        .setThumbnail(this.client.user.avatarURL)
-        .setDescription(updates.join('\n'))
-        .addField('Date', date)
-        .setColor(embedColor);
+        return message.channel.send(changelogEmbed);
+      })
+      .catch(error => {
+        this.client.logger.error(error.message);
+        return message.channel.send(`An error occurred: **${error.message}**`);
+      });
 
-      if (message.guild.id === '480231440932667393') changelogEmbed.addField('More Information', `Please check our ${c.toString()} channel at ${discord} for previous updates!`);
-      else changelogEmbed.addField('More Information', `Please check our \`#${c.name}\` channel at ${discord} for previous updates!`);
-
-      return message.channel.send(changelogEmbed);
-    });
+    return;
   }
 };

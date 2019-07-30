@@ -46,7 +46,7 @@ module.exports = class CommandHandler {
     if (gBlacklisted) return this.client.emit('userBlacklisted', message.author, null, cmd, gBlacklisted.status);
 
     if (message.guild) {
-      const blacklisted = await this.client.blacklists.checkGuildBlacklist(message.guild, message.author);
+      const blacklisted = await this.client.blacklists.checkGuildBlacklist(message.author, message.guild);
       if (blacklisted) return this.client.emit('userBlacklisted', message.author, message.guild, cmd);
     }
 

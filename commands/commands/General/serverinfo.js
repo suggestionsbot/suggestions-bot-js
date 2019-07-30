@@ -54,8 +54,17 @@ module.exports = class GuildInfoCommand extends Command {
     const lastSuggestion = sortedSuggestions[0];
 
     let lastDate;
-    if (lastSuggestion.time) lastDate = moment.utc(new Date(lastSuggestion.time)).format('MM/DD/YY');
-    if (lastSuggestion.newTime) lastDate = moment.utc(new Date(lastSuggestion.newTime)).format('MM/DD/YY');
+    if (lastSuggestion.time && !lastSuggestion.newTime) {
+      // lastDate = moment.utc(new Date(lastSuggestion.time)).format('MM/DD/YY');
+      lastDate = new Date(lastSuggestion.time).toLocaleDateString();
+    }
+    if (lastSuggestion.newTime && !lastSuggestion.time) {
+      // lastDate = moment.utc(new Date(lastSuggestion.newTime)).format('MM/DD/YY');
+      lastDate = new Date(lastSuggestion.newTime).toLocaleDateString();
+    }
+    if (!lastSuggestion.time && !lastSuggestion.newTime) {
+      lastDate = new Date(lastSuggestion._id.getTimestamp()).toLocaleDateString();
+    }
 
     const lastsID = lastSuggestion.sID;
     const lastSuggestionInfo = `${lastsID} (${lastDate})`;

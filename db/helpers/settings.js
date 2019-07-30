@@ -13,7 +13,6 @@ module.exports = class SettingsHelpers {
      * @param {Object} guild - The guild object.
      */
   async getGuild(guild) {
-    // const data = await Settings.findOne({ guildID: guild.id || guild });
     const data = await Settings.findOne({ guildID: typeof guild === String ? guild : guild.id });
 
     if (data && data._id) return data;

@@ -58,6 +58,7 @@ module.exports = class HelpCommand extends Command {
         .setTitle(`${cmdHelp.name} | Help Information`)
         .setDescription(cmdHelp.description)
         .addField('Category', `\`${cmdHelp.category}\``, true)
+        .addField('Guild Only', `\`${cmdConf.guildOnly ? 'True' : 'False'}\``, true)
         .setColor(embedColor)
         .setFooter('<> = Required | [] = Optional')
         .setTimestamp();

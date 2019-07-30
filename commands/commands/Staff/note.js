@@ -128,7 +128,7 @@ module.exports = class NoteCommand extends Command {
       data: {
         note,
         staffMemberID: message.author.id,
-        noteAdded: message.createdAt.getTime()
+        noteAdded: message.createdTimestamp
       }
     };
 
