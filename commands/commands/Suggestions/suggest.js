@@ -1,5 +1,5 @@
 /* eslint-disable no-useless-escape */
-const { Constants, RichEmbed, Guild, Emoji } = require('discord.js');
+const { Constants, RichEmbed, Guild, Emoji, Util: { escapeMarkdown } } = require('discord.js');
 const { oneLine, stripIndent } = require('common-tags');
 const crypto = require('crypto');
 require('moment-duration-format');
@@ -55,7 +55,7 @@ module.exports = class SuggestCommand extends Command {
     const embed = new RichEmbed()
       .setDescription(stripIndent`
         **Submitter**
-        ${sUser.tag}
+        ${escapeMarkdown(sUser.tag)}
 
         **Suggestion**
         ${suggestion}
@@ -153,7 +153,7 @@ module.exports = class SuggestCommand extends Command {
       messageID: m.id,
       suggestion,
       sID: id,
-      time: m.createdAtTimestamp
+      time: m.createdTimestamp
     };
 
     try {

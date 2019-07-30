@@ -222,7 +222,7 @@ module.exports = class SuggestionsHelpers {
   async updateGuildSuggestion({ query, data }) {
     const guildSuggestion = await Suggestion.findOne({ $and: query });
     const updated = await guildSuggestion.updateOne(data);
-    this.client.logger.log(`${updated.sID} has been updated.`);
+    this.client.logger.log(`${guildSuggestion.sID} has been updated.`);
     return updated;
   }
 };

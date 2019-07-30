@@ -107,6 +107,15 @@ module.exports = class RejectCommand extends Command {
       .setFooter(`Guild ID: ${guild.id} | sID: ${id}`)
       .setTimestamp();
 
+    if (reply) {
+      dmEmbed
+        .setDescription(stripIndent`Hey, ${submitter}. Your suggestion has been rejected by ${message.author}!
+      
+        **Staff Response:** ${reply}
+
+        Your suggestion ID (sID) for reference was **${id}**.`);
+    }
+
     const reactions = embed.message.reactions;
     const reactName = reactions.map(e => e._emoji.name);
     const reactCount = reactions.map(e => e.count);
@@ -214,7 +223,7 @@ module.exports = class RejectCommand extends Command {
       ],
       data: {
         status: 'rejected',
-        statusUpdated: message.createdAtTimestamp,
+        statusUpdated: message.createdTimestamp,
         statusReply: reply,
         staffMemberID: message.author.id,
         results: savedResults
