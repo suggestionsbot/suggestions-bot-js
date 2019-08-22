@@ -15,7 +15,7 @@ module.exports = class NoteCommand extends Command {
       usage: 'note <sID> <note>',
       staffOnly: true,
       guildOnly: false,
-      botPermissions: ['MANAGE_MESSAGES']
+      botPermissions: ['MANAGE_MESSAGES'],
       enabled: false
     });
   }
