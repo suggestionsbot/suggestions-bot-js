@@ -86,9 +86,9 @@ module.exports = class SuggestCommand extends Command {
     const sendMsgs = sChannel.permissionsFor(message.guild.me).has('SEND_MESSAGES', false);
     const reactions = sChannel.permissionsFor(message.guild.me).has('ADD_REACTIONS', false);
     const extReactions = sChannel.permissionsFor(message.guild.me).has('USE_EXTERNAL_EMOJIS', false);
-    if (!sendMsgs) return this.client.errors.nosChannelPerms(message, sChannel, 'SEND_MESSAGES');
-    if (!reactions) return this.client.errors.nosChannelPerms(message, sChannel, 'ADD_REACTIONS');
-    if (!extReactions) return this.client.errors.nosChannelPerms(message, sChannel, 'USE_EXTERNAL_EMOJIS');
+    if (!sendMsgs) return this.client.errors.noChannelPerms(message, sChannel, 'SEND_MESSAGES');
+    if (!reactions) return this.client.errors.noChannelPerms(message, sChannel, 'ADD_REACTIONS');
+    if (!extReactions) return this.client.errors.noChannelPerms(message, sChannel, 'USE_EXTERNAL_EMOJIS');
 
     const m = await sChannel.send(embed);
 
