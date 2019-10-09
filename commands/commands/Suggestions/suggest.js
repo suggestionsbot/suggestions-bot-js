@@ -12,7 +12,7 @@ module.exports = class SuggestCommand extends Command {
     super(client, {
       name: 'suggest',
       category: 'Suggestions',
-      description: 'Submit a new suggestion',
+      description: 'Submit a new suggestion.',
       usage: 'suggest <suggestion>',
       throttling: {
         usages: 3,
@@ -86,9 +86,9 @@ module.exports = class SuggestCommand extends Command {
     const sendMsgs = sChannel.permissionsFor(message.guild.me).has('SEND_MESSAGES', false);
     const reactions = sChannel.permissionsFor(message.guild.me).has('ADD_REACTIONS', false);
     const extReactions = sChannel.permissionsFor(message.guild.me).has('USE_EXTERNAL_EMOJIS', false);
-    if (!sendMsgs) return this.client.errors.nosChannelPerms(message, sChannel, 'SEND_MESSAGES');
-    if (!reactions) return this.client.errors.nosChannelPerms(message, sChannel, 'ADD_REACTIONS');
-    if (!extReactions) return this.client.errors.nosChannelPerms(message, sChannel, 'USE_EXTERNAL_EMOJIS');
+    if (!sendMsgs) return this.client.errors.noChannelPerms(message, sChannel, 'SEND_MESSAGES');
+    if (!reactions) return this.client.errors.noChannelPerms(message, sChannel, 'ADD_REACTIONS');
+    if (!extReactions) return this.client.errors.noChannelPerms(message, sChannel, 'USE_EXTERNAL_EMOJIS');
 
     const m = await sChannel.send(embed);
 
@@ -103,7 +103,7 @@ module.exports = class SuggestCommand extends Command {
         this.client.shard.broadcastEval(`this.findEmojiByID.call(this, '${emoji}')`)
           .then(async emojiArray => {
             const found = emojiArray.find(e => e);
-            if (!found) await m.react(fallbackSet[emojiIndex]);
+            if (!found || !message.guild.me.hasPermission('USE_EXTERNAL_EMOJIS')) await m.react(fallbackSet[emojiIndex]);
 
             return this.client.rest.makeRequest('get', Constants.Endpoints.Guild(found.guild).toString(), true)
               .then(async raw => {

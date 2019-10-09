@@ -31,7 +31,7 @@
     "moment": "^2.24.0",
     "moment-duration-format": "^2.3.2",
     "moment-timezone": "^0.5.26",
-    "mongoose": "^5.6.7",
+    "mongoose": "^5.7.3",
     "node-fetch": "^2.6.0",
     "passport": "^0.4.0",
     "passport-headerapikey": "^1.1.0"

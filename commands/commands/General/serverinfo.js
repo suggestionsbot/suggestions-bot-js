@@ -37,37 +37,6 @@ module.exports = class GuildInfoCommand extends Command {
       this.client.logger.error(err);
       return message.channel.send(`Error querying the database for this guild's suggestions: **${err.message}**.`);
     });
-    const sortedSuggestions = gSuggestions.sort((a, b) => b._id.getTimestamp() - a._id.getTimestamp());
-
-    let approved = 0;
-    let rejected = 0;
-    for (const i in gSuggestions) {
-      if (gSuggestions[i].status === 'approved') approved++;
-      if (gSuggestions[i].status === 'rejected') rejected++;
-    }
-
-    const suggestions = [];
-    if (gSuggestions.length >= 1) suggestions.push(`Total: \`${gSuggestions.length}\``);
-    if (approved >= 1) suggestions.push(`Approved: \`${approved}\``);
-    if (rejected >= 1) suggestions.push(`Rejected: \`${rejected}\``);
-
-    const lastSuggestion = sortedSuggestions[0];
-
-    let lastDate;
-    if (lastSuggestion.time && !lastSuggestion.newTime) {
-      // lastDate = moment.utc(new Date(lastSuggestion.time)).format('MM/DD/YY');
-      lastDate = new Date(lastSuggestion.time).toLocaleDateString();
-    }
-    if (lastSuggestion.newTime && !lastSuggestion.time) {
-      // lastDate = moment.utc(new Date(lastSuggestion.newTime)).format('MM/DD/YY');
-      lastDate = new Date(lastSuggestion.newTime).toLocaleDateString();
-    }
-    if (!lastSuggestion.time && !lastSuggestion.newTime) {
-      lastDate = new Date(lastSuggestion._id.getTimestamp()).toLocaleDateString();
-    }
-
-    const lastsID = lastSuggestion.sID;
-    const lastSuggestionInfo = `${lastsID} (${lastDate})`;
 
     const serverEmbed = new RichEmbed()
       .setTitle(message.guild)
@@ -81,6 +50,38 @@ module.exports = class GuildInfoCommand extends Command {
       .setTimestamp();
 
     if (gSuggestions.length >= 1) {
+      const sortedSuggestions = gSuggestions.sort((a, b) => b._id.getTimestamp() - a._id.getTimestamp());
+
+      let approved = 0;
+      let rejected = 0;
+      for (const i in gSuggestions) {
+        if (gSuggestions[i].status === 'approved') approved++;
+        if (gSuggestions[i].status === 'rejected') rejected++;
+      }
+
+      const suggestions = [];
+      if (gSuggestions.length >= 1) suggestions.push(`Total: \`${gSuggestions.length}\``);
+      if (approved >= 1) suggestions.push(`Approved: \`${approved}\``);
+      if (rejected >= 1) suggestions.push(`Rejected: \`${rejected}\``);
+
+      const lastSuggestion = sortedSuggestions[0];
+
+      let lastDate;
+      if (lastSuggestion.time && !lastSuggestion.newTime) {
+        // lastDate = moment.utc(new Date(lastSuggestion.time)).format('MM/DD/YY');
+        lastDate = new Date(lastSuggestion.time).toLocaleDateString();
+      }
+      if (lastSuggestion.newTime && !lastSuggestion.time) {
+        // lastDate = moment.utc(new Date(lastSuggestion.newTime)).format('MM/DD/YY');
+        lastDate = new Date(lastSuggestion.newTime).toLocaleDateString();
+      }
+      if (!lastSuggestion.time && !lastSuggestion.newTime) {
+        lastDate = new Date(lastSuggestion._id.getTimestamp()).toLocaleDateString();
+      }
+
+      const lastsID = lastSuggestion.sID;
+      const lastSuggestionInfo = `${lastsID} (${lastDate})`;
+
       serverEmbed.addField('Suggestions', suggestions.join('\n'));
       serverEmbed.addField('Last Suggestion (sID)', lastSuggestionInfo);
     }

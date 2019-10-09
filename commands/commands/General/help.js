@@ -90,7 +90,7 @@ module.exports = class HelpCommand extends Command {
       if (ownerCheck) helpEmbed.addField('🔒 Owner Commands', this.mapCommands(cmds, 'Bot Owner').join(' | '));
     } else {
       helpEmbed.addField('📣 Default Prefix', `\`${this.client.config.prefix}\``)
-        .addField('🤖 General Commands', this.mapCommands(cmds, 'General').join(' | '))
+        .addField('🤖 General Commands', this.mapRegularCommands(cmds).join(' | '))
         .addField('🗄 Staff Commands', this.mapCommands(cmds, 'Staff').join(' | '))
         .addField('🛡 Admin Commands', this.mapCommands(cmds, 'Admin').join(' | '));
       if (ownerCheck) helpEmbed.addField('🔒 Owner Commands', this.mapCommands(cmds, 'Bot Owner').join(' | '));
@@ -107,5 +107,16 @@ module.exports = class HelpCommand extends Command {
       .map(c => c.help.name)
       .sort()
       .map(name => `\`${name}\``);
+  }
+
+  mapRegularCommands(commands) {
+    return commands
+      .filter(c => !c.conf.adminOnly
+        && !c.conf.ownerOnly
+        && !c.conf.staffOnly
+        && !c.conf.superSecretOnly
+      )
+      .map(c => c.help.name)
+      .sort();
   }
 };

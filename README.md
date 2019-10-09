@@ -45,7 +45,7 @@ Server owners can change the default prefix and suggestions channel of the Sugge
 *User must have the `MANAGE_GUILD` permission to change these settings*
 
 #### Suggestions Features, Reporting Bugs and Receiving Support
-If there is ever an error or bug or you wish to suggest something new to the bot, then you may join our Support Discord (just click [here](https://discord.gg/g7wr8xb)!). Follow the single super-easy step once you join and then head over to the `#support` channel if you need help, `#bug_reports` if found a bug or simply discuss (both channels located under then `🚨Suggestions Bot` category) and post a suggestion the same way you would submit a new suggestion as described above!
+If there is ever an error or bug or you wish to suggest something new to the bot, then you may join our Support Discord (just click [here](https://discord.gg/ntXkRan)!). Follow the single super-easy step once you join and then head over to the `#support` channel if you need help, `#bug_reports` if found a bug or simply discuss (both channels located under then `🚨Suggestions Bot` category) and post a suggestion the same way you would submit a new suggestion as described above!
 
 #### Future Features
 - Support for creating custom emoji sets

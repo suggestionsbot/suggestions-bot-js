@@ -52,7 +52,7 @@ module.exports = class RejectCommand extends Command {
         .catch(err => this.logger.error(err.stack));
     }
 
-    const submitter = this.client.users.get(userID);
+    const submitter = await this.client.fetchUser(userID).catch(err => this.client.logger.error(err));
     const guild = message.guild ? message.guild : this.client.guilds.get(guildID);
 
     try {
