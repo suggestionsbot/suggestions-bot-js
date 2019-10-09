@@ -96,7 +96,7 @@ module.exports = class HelpCommand extends Command {
       if (ownerCheck) helpEmbed.addField('🔒 Owner Commands', this.mapCommands(cmds, 'Bot Owner').join(' | '));
     }
     helpEmbed.addField('ℹ Website', website);
-    helpEmbed.addField('❗ Found an issue?', `Please report any issues to ${botOwner} via the Support Discord: ${discord}`);
+    helpEmbed.addField('❗ Found an issue?', `Please report any issues to **Support Team** via the Support Discord: ${discord}`);
 
     message.channel.send(helpEmbed);
   }
