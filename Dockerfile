@@ -1,4 +1,4 @@
-FROM node:latest
+FROM node:10.16.3
 
 #Update container and install vim
 RUN ["apt-get", "update"]

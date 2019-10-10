@@ -12,7 +12,7 @@ module.exports = class SuggestCommand extends Command {
     super(client, {
       name: 'suggest',
       category: 'Suggestions',
-      description: 'Submit a new suggestion',
+      description: 'Submit a new suggestion.',
       usage: 'suggest <suggestion>',
       throttling: {
         usages: 3,
@@ -103,7 +103,7 @@ module.exports = class SuggestCommand extends Command {
         this.client.shard.broadcastEval(`this.findEmojiByID.call(this, '${emoji}')`)
           .then(async emojiArray => {
             const found = emojiArray.find(e => e);
-            if (!found) await m.react(fallbackSet[emojiIndex]);
+            if (!found || !message.guild.me.hasPermission('USE_EXTERNAL_EMOJIS')) await m.react(fallbackSet[emojiIndex]);
 
             return this.client.rest.makeRequest('get', Constants.Endpoints.Guild(found.guild).toString(), true)
               .then(async raw => {

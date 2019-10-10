@@ -8,7 +8,7 @@ module.exports = class BlacklistCommand extends Command {
       name: 'blacklist',
       category: 'Admin',
       description: 'Add or remove a user from the bot blacklist (guild-only).',
-      usage: 'blacklist <add/remove> <user ID> <reason>',
+      usage: 'blacklist <add/remove> <@User/User ID> <reason>',
       adminOnly: true,
       botPermissions: ['MANAGE_MESSAGES', 'EMBED_LINKS']
     });
@@ -133,7 +133,7 @@ module.exports = class BlacklistCommand extends Command {
 
           You have been blacklisted by ${message.author} from using any of the ${this.client.user}'s commands in the guild **${message.guild}**.
           
-          This blackist does not expire and can only be removed at the discretion of a server administrator. You may find the reason below.
+          This blacklist does not expire and can only be removed at the discretion of a server administrator. You may find the reason below.
 
           **Reason:** ${reason}
           `)

@@ -52,10 +52,12 @@ module.exports = class CommandHandler {
 
     const roles = settings.staffRoles;
     let staffRoles;
-    if (roles && message.guild) {
+    if ((roles.length > 1) && message.guild) {
       staffRoles = message.guild.roles
         .filter(role => roles.map(r => r.role).includes(role.id))
         .map(r => r);
+    } else {
+      staffRoles = null;
     }
 
     let staffCheck,

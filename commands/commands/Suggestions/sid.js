@@ -37,11 +37,9 @@ module.exports = class SIDCommand extends Command {
     if (sID.statusUpdated) updatedOn = sID.statusUpdated;
     if (sID.newStatusUpdated) updatedOn = sID.newStatusUpdated;
 
-    const sUser = this.client.users.get(sID.userID);
-    // const sStaff = this.client.users.get(sID.staffMemberID);
+    const sUser = await this.client.fetchUser(sID.userID).catch(err => this.client.logger.error(err));
     if (sID.hasOwnProperty('staffMemberID')) {
-      sStaff = this.client.users.get(sID.staffMemberID) ||
-        await this.client.fetchUser(sID.staffMemberID);
+      sStaff = await this.client.fetchUser(sID.staffMemberID).catch(err => this.client.logger.error(err));
     }
 
 

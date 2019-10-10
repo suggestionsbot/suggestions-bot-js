@@ -41,6 +41,8 @@ module.exports = class NoteCommand extends Command {
 
     if (!sID) return this.client.errors.noSuggestion(message.channel, id);
 
+    const sUser = await this.client.fetchUser(userID).catch(err => this.client.logger.error(err));
+
     if (!message.guild) {
       try {
         guild = await this.client.shard.broadcastEval(`this.client.guilds.get('${sID.guildID}');`);
@@ -67,8 +69,7 @@ module.exports = class NoteCommand extends Command {
         .catch(err => this.client.logger.error(err.stack));
     }
 
-    const sUser = guild.members.get(userID);
-    if (!sUser) {
+    if (!guild.member(userID)) {
       message.channel.send(`**${sUser.tag}** is no longer in the guild, but a note will still be added to the suggestion.`)
         .then(msg => msg.delete(3000))
         .catch(err => this.client.logger.error(err.stack));

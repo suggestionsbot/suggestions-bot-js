@@ -20,7 +20,7 @@ module.exports = class PatronsCommand extends Command {
 
     const patrons = [
       'Kyle',
-      'Ethan'
+      'Skelmis'
     ];
 
     const patronsEmbed = new RichEmbed()

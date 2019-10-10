@@ -36,13 +36,13 @@ module.exports = {
     deleted: '#FF4500'
   },
   voteSites: [
-    { name: 'Discord Bot List (DiscordBots.org)', link: 'https://discordbots.org/bot/474051954998509571', voting: true },
-    { name: 'Discord Bots', link: 'https://discord.bots.gg/bots/474051954998509571', voting: false },
-    { name: 'Discord Bot List (DiscordBotList.com)', link: 'https://discordbotlist.com/bots/474051954998509571', voting: true },
-    { name: 'Divine Discord Bot List', link: 'https://divinediscordbots.com/bots/474051954998509571', voting: true },
+    { name: 'discordbots.org', link: 'https://discordbots.org/bot/474051954998509571', voting: true },
+    { name: 'discord.bots.gg', link: 'https://discord.bots.gg/bots/474051954998509571', voting: false },
+    { name: 'discordbotlist.com', link: 'https://discordbotlist.com/bots/474051954998509571', voting: true },
+    { name: 'divinediscordbots.com', link: 'https://divinediscordbots.com/bots/474051954998509571', voting: true },
     { name: 'botlist.space', link: 'https://botlist.space/bot/474051954998509571', voting: true },
-    { name: 'Discord Apps', link: 'https://discordapps.dev/en-GB/bots/474051954998509571', voting: true },
-    { name: 'Bots For Discord', link: 'https://botsfordiscord.com/bots/474051954998509571', voting: true }
+    { name: 'discordapps.dev', link: 'https://discordapps.dev/en-GB/bots/474051954998509571', voting: true },
+    { name: 'botsforddiscord.com', link: 'https://botsfordiscord.com/bots/474051954998509571', voting: true }
   ],
   patreon: process.env.PATREON,
   superSecretUsers: [

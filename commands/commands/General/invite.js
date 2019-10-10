@@ -22,21 +22,21 @@ module.exports = class InviteCommand extends Command {
       .setAuthor('Bot Invite Information', this.client.user.avatarURL)
       .setDescription(`Hello ${message.author},
         
-                **Before inviting, you need** \`MANAGE SERVER\` **or** \`ADMINISTRATOR\` **permissions to add bots to a server.** 
-            
-                **Bot Invite:**
-                ${invite}
+          **Before inviting, you need** \`MANAGE SERVER\` **or** \`ADMINISTRATOR\` **permissions to add bots to a server.** 
+      
+          **Bot Invite:**
+          ${invite}
 
-                **Website:**
-                ${website}
+          **Website:**
+          ${website}
 
-                **Support Server:**
-                ${discord}
-            `)
+          **Support Server:**
+          ${discord}
+      `)
       .setColor(embedColor)
       .setTimestamp();
 
-    if (message.guildOnly) await message.react('📧').then(message.delete(2500));
+    if (message.guild) await message.react('📧').then(message.delete(2500));
     await message.author.send(dmEmbed).catch(err => {
       this.client.logger.error(err);
       return message.reply('you have DMs disabled! I could not send you the invite link. Enable them to receive the bot invite link.');

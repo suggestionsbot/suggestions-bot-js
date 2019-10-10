@@ -12,7 +12,7 @@ module.exports = class MySuggestionsCommand extends Command {
       description: 'View your own suggestions data or another user\'s data in this guild.',
       botPermissions: ['MANAGE_MESSAGES'],
       aliases: ['mysuggestions'],
-      usage: 'suggestions <@User>',
+      usage: 'suggestions [@User]',
       guildOnly: false
     });
   }
@@ -23,7 +23,9 @@ module.exports = class MySuggestionsCommand extends Command {
 
     await message.delete().catch(O_o => {});
 
-    const sUser = message.mentions.users.first() || this.client.users.get(args[0]) || message.author;
+    const sUser = message.mentions.users.first() ||
+      await this.client.fetchUser(args[0]).catch(err => this.client.logger.error(err)) ||
+      message.author;
 
     let gSuggestions;
     try {
