@@ -1,4 +1,4 @@
-const { RichEmbed } = require('discord.js');
+const { RichEmbed, Constants } = require('discord.js');
 const moment = require('moment');
 
 module.exports = class {
@@ -30,25 +30,22 @@ module.exports = class {
     }
 
     switch (process.env.NODE_ENV) {
-    // 345753533141876737 = Nerd Cave Testing
+    // 498627833233539086 = #server logs / Nerd Cave Testing
     case 'development': {
-      const logGuild = this.client.guilds.get('345753533141876737');
-      const logChannel = logGuild.channels.find(c => c.name === 'server_logs');
-      logChannel.send(newServer);
+      this.client.shard.broadcastEval(`this.channels.get("498627833233539086").send({ embed: ${JSON.stringify(newServer)} });`)
+        .then(async channelArr => {
+          const found = channelArr.find(c => c);
+          if (!found) return this.client.logger.error('Could not find server logs channel.');
+        })
+        .catch(err => this.client.logger.error(err));
       break;
     }
-    // 480231440932667393 = Nerd Cave Development
-    // 602332466476482616 = server_logs
+    // 602332466476482616 = #server logs / Nerd Cave Development
     default: {
-      // const logGuild = this.client.guilds.get('480231440932667393');
-      // const logChannel = logGuild.channels.find(c => c.name === 'server_logs');
-      // logChannel.send(newServer);
-      this.client.shard.broadcastEval('this.channels.get("602332466476482616");')
-        .then(channelArr => {
+      this.client.shard.broadcastEval(`this.channels.get("602332466476482616").send({ embed: ${JSON.stringify(newServer)} });`)
+        .then(async channelArr => {
           const found = channelArr.find(c => c);
-          if (!found) return;
-
-          found.send(newServer);
+          if (!found) return this.client.logger.error('Could not find server logs channel');
         })
         .catch(err => this.client.logger.error(err));
       break;

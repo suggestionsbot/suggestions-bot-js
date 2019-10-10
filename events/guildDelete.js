@@ -29,30 +29,26 @@ module.exports = class {
     }
 
     switch (process.env.NODE_ENV) {
-    // 345753533141876737 = Nerd Cave Testing
+    // 498627833233539086 = #server logs / Nerd Cave Testing
     case 'development': {
-      const logGuild = this.client.guilds.get('345753533141876737');
-      const logChannel = logGuild.channels.find(c => c.name === 'server_logs');
-      await logChannel.send(oldServer);
-      break;
-    }
-    // 480231440932667393 = Nerd Cave Development
-    // 602332466476482616 = server_logs
-    default: {
-      // const logGuild = this.client.guilds.get('480231440932667393');
-      // const logChannel = logGuild.channels.find(c => c.name === 'server_logs');
-      // await logChannel.send(oldServer);
-      this.client.shard.broadcastEval('this.channels.get("602332466476482616");')
+      this.client.shard.broadcastEval(`this.channels.get("498627833233539086").send({ embed: ${JSON.stringify(oldServer)} });`)
         .then(async channelArr => {
           const found = channelArr.find(c => c);
-          if (!found) return;
-
-          await found.send(oldServer);
+          if (!found) return this.client.logger.error('Could not find server logs channel');
+        })
+        .catch(err => this.client.logger.error(err));
+      break;
+    }
+    // 602332466476482616 = #server logs / Nerd Cave Development
+    default: {
+      this.client.shard.broadcastEval(`this.channels.get("602332466476482616").send({ embed: ${JSON.stringify(oldServer)} });`)
+        .then(async channelArr => {
+          const found = channelArr.find(c => c);
+          if (!found) return this.client.logger.error('Could not find server logs channel');
         })
         .catch(err => this.client.logger.error(err));
       break;
     }
     }
-
   }
 };

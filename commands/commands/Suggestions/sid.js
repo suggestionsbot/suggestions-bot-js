@@ -39,8 +39,7 @@ module.exports = class SIDCommand extends Command {
 
     const sUser = await this.client.fetchUser(sID.userID).catch(err => this.client.logger.error(err));
     if (sID.hasOwnProperty('staffMemberID')) {
-      sStaff = this.client.users.get(sID.staffMemberID) ||
-        await this.client.fetchUser(sID.staffMemberID);
+      sStaff = await this.client.fetchUser(sID.staffMemberID).catch(err => this.client.logger.error(err));
     }
 
 

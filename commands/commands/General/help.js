@@ -25,7 +25,6 @@ module.exports = class HelpCommand extends Command {
     const { staffRoles: roles } = settings;
     const configCmdName = this.client.commands.get('config').help.name;
 
-    const botOwner = this.client.users.get(owner);
     const ownerCheck = this.client.isOwner(message.author.id);
 
     if (message.guild) {
@@ -83,13 +82,16 @@ module.exports = class HelpCommand extends Command {
         .addField('💬 Suggestions Channel', suggestionsChannel.toString() ||
           (message.member.hasPermission('MANAGE_GUILD') && !suggestionsChannel ?
             `***Not set. Use*** \`${prefix + configCmdName} <channel> <channel_name>\`` :
-            '***Not set. Contact a server administrator.***'))
-        .addField('🤖 General Commands', this.mapCommands(cmds, 'General').join(' | '));
+            '***Not set. Contact a server administrator.***'
+          )
+        )
+        .addField('🤖 General Commands', this.mapRegularCommands(cmds).join(' | '));
       if (staffCheck) helpEmbed.addField('🗄 Staff Commands', this.mapCommands(cmds, 'Staff').join(' | '));
       if (adminCheck) helpEmbed.addField('🛡 Admin Commands', this.mapCommands(cmds, 'Admin').join(' | '));
       if (ownerCheck) helpEmbed.addField('🔒 Owner Commands', this.mapCommands(cmds, 'Bot Owner').join(' | '));
     } else {
-      helpEmbed.addField('📣 Default Prefix', `\`${this.client.config.prefix}\``)
+      helpEmbed
+        .addField('📣 Default Prefix', `\`${this.client.config.prefix}\``)
         .addField('🤖 General Commands', this.mapRegularCommands(cmds).join(' | '))
         .addField('🗄 Staff Commands', this.mapCommands(cmds, 'Staff').join(' | '))
         .addField('🛡 Admin Commands', this.mapCommands(cmds, 'Admin').join(' | '));
@@ -116,7 +118,7 @@ module.exports = class HelpCommand extends Command {
         && !c.conf.staffOnly
         && !c.conf.superSecretOnly
       )
-      .map(c => c.help.name)
+      .map(c => `\`${c.help.name}\``)
       .sort();
   }
 };
