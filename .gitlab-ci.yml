@@ -15,7 +15,7 @@ before_script:
   - chmod 700 ~/.ssh
   - eval $(ssh-agent -s)
   - ssh-keyscan $SSH_HOST >> ~/.ssh/known_hosts
-  - bash -c 'ssh-add <(echo "$SSH_PRIVATE_KEY" | base64 -d)'
+  - bash -c 'ssh-add <(echo "$SSH_PRIVATE_KEY")'
 stages:
   - test
   - deploy
