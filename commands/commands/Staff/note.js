@@ -41,6 +41,12 @@ module.exports = class NoteCommand extends Command {
 
     if (!sID) return this.client.errors.noSuggestion(message.channel, id);
 
+    const {
+      userID,
+      messageID,
+      status
+    } = sID;
+
     const sUser = await this.client.fetchUser(userID).catch(err => this.client.logger.error(err));
 
     if (!message.guild) {
@@ -56,12 +62,6 @@ module.exports = class NoteCommand extends Command {
 
     const suggestionsChannel = guild.channels.find(c => c.name === settings.suggestionsChannel) ||
       (guild.channels.get(settings.suggestionsChannel));
-
-    const {
-      userID,
-      messageID,
-      status
-    } = sID;
 
     if (status === 'approved' || status === 'rejected') {
       return message.channel.send(`sID **${id}** has already been approved or rejected. Cannot do this action again.`)

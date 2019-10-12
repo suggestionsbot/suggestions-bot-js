@@ -169,6 +169,7 @@ module.exports = class SuggestCommand extends Command {
         .filter(msg => msg.embeds.length >= 1 && msg.author.id === this.client.user.id);
 
       for (const msg of filtered.array()) {
+        if (!msg.embeds[0].footer) return;
         const footer = msg.embeds[0].footer.text.split('sID:');
         const sID = footer[1].trim();
 
