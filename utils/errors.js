@@ -83,8 +83,9 @@ class ErrorHandler {
 
   noUsage(channel, cmd, settings) {
 
-    const { embedColor, prefix } = this.client.config;
-    if (!channel.guild) settings.prefix = prefix;
+    const { embedColor } = this.client.config;
+    let { prefix } = this.client.config;
+    if (channel.guild) prefix = settings.prefix;
 
     const embed = new RichEmbed()
       .setTitle(`${cmd.help.name} | Help Information`)
