@@ -52,12 +52,12 @@ module.exports = class CommandHandler {
 
     const roles = settings.staffRoles;
     let staffRoles;
-    if ((roles.length > 1) && message.guild) {
+    if ((roles.length > 0) && message.guild) {
       staffRoles = message.guild.roles
         .filter(role => roles.map(r => r.role).includes(role.id))
         .map(r => r);
     } else {
-      staffRoles = null;
+      staffRoles = [];
     }
 
     let staffCheck,
@@ -65,6 +65,7 @@ module.exports = class CommandHandler {
 
     if (message.guild) {
       if (staffRoles) staffCheck = message.member.roles.some(r => staffRoles.map(sr => sr.id).includes(r.id));
+      else staffCheck = message.member.hasPermission('MANAGE_GUILD');
       adminCheck = message.member.hasPermission('MANAGE_GUILD');
     }
 
@@ -79,7 +80,7 @@ module.exports = class CommandHandler {
       if (cmd.conf.ownerOnly && !ownerCheck) return;
       if (cmd.conf.adminOnly && !adminCheck) return this.client.errors.noPerms(message, 'MANAGE_GUILD');
       if (cmd.conf.staffOnly && !staffCheck && !adminCheck) {
-        if (staffRoles) return this.client.errors.noSuggestionsPerms(message, staffRoles);
+        if (staffRoles.length > 0) return this.client.errors.noSuggestionsPerms(message, staffRoles);
         else return this.client.errors.noPerms(message, 'MANAGE_GUILD');
       }
     }
