@@ -1,5 +1,6 @@
 const { Constants, RichEmbed, Guild, Emoji  } = require('discord.js');
 const { stripIndent } = require('common-tags');
+const _ = require('lodash');
 const Command = require('../../Command');
 
 module.exports = class ConfigCommand extends Command {
@@ -90,13 +91,13 @@ module.exports = class ConfigCommand extends Command {
 
       if (updated) {
         try {
-          if (!settings.hasOwnProperty('_id')) await this.createNewGuild(message.guild);
+          if (updated.length > 5) return this.client.errors.invalidPrefixLength(message.channel, updated);
           await this.client.settings.updateGuild(message.guild, { prefix: updated });
           configEmbed.setDescription(`${successEmoji} Prefix has been updated to: \`${updated}\``);
 
           return message.channel.send(configEmbed).then(m => m.delete(5000));
         } catch (err) {
-          this.client.logger.error(err);
+          this.client.logger.error(err.stack);
           return message.channel.send(`An error occurred: **${err.message}**`);
         }
       }
@@ -116,7 +117,6 @@ module.exports = class ConfigCommand extends Command {
         if (!verified) return this.client.errors.channelNotFound(updated, message.channel);
 
         try {
-          if (!settings.hasOwnProperty('_id')) await this.createNewGuild(message.guild);
           await this.client.settings.updateGuild(message.guild, { suggestionsChannel: verified.id });
           configEmbed.setDescription(`${successEmoji} Suggestions channel has been updated to: ${verified}`);
 
@@ -143,7 +143,6 @@ module.exports = class ConfigCommand extends Command {
         if (!verified) return this.client.errors.channelNotFound(updated, message.channel);
 
         try {
-          if (!settings.hasOwnProperty('_id')) await this.createNewGuild(message.guild);
           await this.client.settings.updateGuild(message.guild, { suggestionsLogs: verified.id });
           configEmbed.setDescription(`${successEmoji} Suggestion logs channel has been updated to: ${verified}`);
 
@@ -170,7 +169,6 @@ module.exports = class ConfigCommand extends Command {
         if (!verified) return this.client.errors.channelNotFound(updated, message.channel);
 
         try {
-          if (!settings.hasOwnProperty('_id')) await this.createNewGuild(message.guild);
           await this.client.settings.updateGuild(message.guild, { staffSuggestionsChannel: verified.id });
           configEmbed.setDescription(`${successEmoji} Suggestions staff channel has been updated to: ${verified}`);
 
@@ -206,7 +204,6 @@ module.exports = class ConfigCommand extends Command {
         if (sRole) {
           try {
             configEmbed.setDescription(`${successEmoji} Removed **${verified.name}** from the staff roles.`);
-            if (!settings.hasOwnProperty('_id')) await this.createNewGuild(message.guild);
             await this.client.settings.updateGuildStaffRoles(updateRole, false);
             message.channel.send(configEmbed).then(m => m.delete(5000));
           } catch (error) {
@@ -216,7 +213,6 @@ module.exports = class ConfigCommand extends Command {
         } else {
           try {
             configEmbed.setDescription(`${successEmoji} Added **${verified.name}** to the staff roles.`);
-            if (!settings.hasOwnProperty('_id')) await this.createNewGuild(message.guild);
             await this.client.settings.updateGuildStaffRoles(updateRole, true);
             message.channel.send(configEmbed).then(m => m.delete(5000));
           } catch (error) {
@@ -286,7 +282,6 @@ module.exports = class ConfigCommand extends Command {
 
         try {
           const emojiSet = await Promise.all(emojis);
-          if (!settings.hasOwnProperty('_id')) await this.createNewGuild(message.guild);
           await this.client.settings.updateGuild(message.guild, { voteEmojis: foundSet.name });
           configEmbed.setDescription(`${successEmoji} The default vote emojis have been changed to ${emojiSet.join(' ')}`);
           message.channel.send(configEmbed).then(m => m.delete(5000));
@@ -353,7 +348,6 @@ module.exports = class ConfigCommand extends Command {
         switch (updated) {
         case 'true':
           try {
-            if (!settings.hasOwnProperty('_id')) await this.createNewGuild(message.guild);
             await this.client.settings.updateGuild(message.guild, { responseRequired: true });
             configEmbed.setDescription(`${successEmoji} Responses required set to \`true\`. This means a response **is required** when using the \`reject\` command.`);
             message.channel.send(configEmbed).then(m => m.delete(5000));
@@ -413,7 +407,6 @@ module.exports = class ConfigCommand extends Command {
         if (foundCmd) {
           try {
             configEmbed.setDescription(`${successEmoji} Enabled the **${cmd.help.name}** command.`);
-            if (!settings.hasOwnProperty('_id')) await this.createNewGuild(message.guild);
             await this.client.settings.updateGuildCommands(enabledCommand, false);
             message.channel.send(configEmbed).then(m => m.delete(5000));
           } catch (err) {
@@ -423,7 +416,6 @@ module.exports = class ConfigCommand extends Command {
         } else {
           try {
             configEmbed.setDescription(`${successEmoji} Disabled the **${cmd.help.name}** command.`);
-            if (!settings.hasOwnProperty('_id')) await this.createNewGuild(message.guild);
             await this.client.settings.updateGuildCommands(disabledCommand, true);
             message.channel.send(configEmbed).then(m => m.delete(5000));
           } catch (err) {
@@ -449,7 +441,6 @@ module.exports = class ConfigCommand extends Command {
         switch (updated) {
         case 'true': {
           try {
-            if (!settings.hasOwnProperty('_id')) await this.createNewGuild(message.guild);
             await this.client.settings.updateGuild(message.guild, { dmResponses: true });
             configEmbed.setDescription(stripIndent`
                 ${successEmoji} DM responses have been enabled. The bot will DM users when these actions happen:
@@ -469,7 +460,6 @@ module.exports = class ConfigCommand extends Command {
         }
         case 'false': {
           try {
-            if (!settings.hasOwnProperty('_id')) await this.createNewGuild(message.guild);
             await this.client.settings.updateGuild(message.guild, { dmResponses: false });
             configEmbed.setDescription(stripIndent`
                 ${successEmoji} DM responses have been disabled. The bot will *not* DM users when these actions happen:
@@ -525,15 +515,5 @@ module.exports = class ConfigCommand extends Command {
     }
 
     return;
-  }
-
-  async createNewGuild(guild) {
-    const newSettings = { guildID: guild.id };
-
-    try {
-      await this.client.settings.createGuild(newSettings);
-    } catch (err) {
-      return this.client.logger.error(err.stack);
-    }
   }
 };

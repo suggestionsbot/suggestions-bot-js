@@ -21,14 +21,6 @@ module.exports = class {
       .setColor(created)
       .setTimestamp();
 
-    const newSettings = { guildID: guild.id };
-
-    try {
-      await this.client.settings.createGuild(newSettings);
-    } catch (err) {
-      return this.client.logger.error(err.stack);
-    }
-
     switch (process.env.NODE_ENV) {
     // 498627833233539086 = #server logs / Nerd Cave Testing
     case 'development': {

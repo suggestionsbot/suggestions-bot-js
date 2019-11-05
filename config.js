@@ -54,7 +54,11 @@ module.exports = {
     prefix: process.env.PREFIX,
     suggestionsChannel: process.env.SUGGESTIONSCHANNEL,
     suggestionsLogs: process.env.SUGGESTIONSLOGS,
-    staffRoles: []
+    staffRoles: [],
+    disabledCommands: [],
+    responseRequired: false,
+    dmResponses: true,
+    fetchedMessages: false
   },
   emojis: {
     success: '578409088157876255'
