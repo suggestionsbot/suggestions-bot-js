@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const { oneLine } = require('common-tags');
+const _ = require('lodash');
 const { Blacklist, Command, Settings, Suggestion } = require('../models');
 
 module.exports = class SettingsHelpers {
@@ -15,8 +16,14 @@ module.exports = class SettingsHelpers {
   async getGuild(guild) {
     const data = await Settings.findOne({ guildID: typeof guild === String ? guild : guild.id });
 
-    if (data && data._id) return data;
-    else return this.client.config.defaultSettings;
+    if (data !== null) {
+      return data;
+    } else {
+      return {
+        guildID: guild.id,
+        ...this.client.config.defaultSettings
+      };
+    }
   }
 
   /**
@@ -30,7 +37,8 @@ module.exports = class SettingsHelpers {
       { guildID: guild.id },
       { guildID: guild }
     ];
-    const data = await Settings.findOne({ $or: searchGuild });
+    let data = await Settings.findOne({ $or: searchGuild });
+    if (!data) data = await this.client.settings.createGuild({ guildID: guild.id });
     const { guildID } = data;
 
     let settings = data;

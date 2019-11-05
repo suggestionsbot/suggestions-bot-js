@@ -28,6 +28,7 @@
     "giphy-api": "^2.0.1",
     "hastebin-gen": "^2.0.5",
     "klaw": "^2.1.1",
+    "lodash": "^4.17.15",
     "moment": "^2.24.0",
     "moment-duration-format": "^2.3.2",
     "moment-timezone": "^0.5.27",

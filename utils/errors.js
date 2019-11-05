@@ -263,6 +263,15 @@ class ErrorHandler {
 
     channel.send(embed).then(m => m.delete(5000)).catch(err => this.client.logger.error(err));
   }
+
+  invalidPrefixLength(channel, prefix) {
+    const embed = new RichEmbed()
+      .setTitle('Error')
+      .setDescription(`The prefix \`${prefix}\` is too long. It cannot be greater than **5** characters!`)
+      .setColor(this.colors.red);
+
+    channel.send(embed).then(m => m.delete(5000)).catch(err => this.client.logger.error(err));
+  }
 }
 
 module.exports = ErrorHandler;
