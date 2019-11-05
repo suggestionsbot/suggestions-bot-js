@@ -17,15 +17,7 @@ before_script:
   - ssh-keyscan $SSH_HOST >> ~/.ssh/known_hosts
   - bash -c 'ssh-add <(echo "$SSH_PRIVATE_KEY")'
 stages:
-  - test
   - deploy
-
-test:
-  stage: test
-  only:
-    - development
-  script:
-    - echo "Run tests in this section"
 
 deploy:
   stage: deploy
