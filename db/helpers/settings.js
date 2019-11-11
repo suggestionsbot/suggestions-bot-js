@@ -1,11 +1,27 @@
+require('dotenv-flow').config();
 const mongoose = require('mongoose');
+const cachegoose = require('cachegoose');
+
 const { oneLine } = require('common-tags');
-const _ = require('lodash');
 const { Blacklist, Command, Settings, Suggestion } = require('../models');
+
+cachegoose(mongoose, {
+  engine: 'redis',
+  port: process.env.REDIS_PORT,
+  host: process.env.REDIS_HOSTNAME,
+  password: process.env.REDIS_PASSWORD
+});
 
 module.exports = class SettingsHelpers {
   constructor(client) {
     this.client = client;
+  }
+
+  _guildQuery(guild) {
+    return [
+      { guildID: guild.id },
+      { guildID: guild }
+    ];
   }
 
   /**
@@ -14,16 +30,18 @@ module.exports = class SettingsHelpers {
      * @param {Object} guild - The guild object.
      */
   async getGuild(guild) {
-    const data = await Settings.findOne({ guildID: typeof guild === String ? guild : guild.id });
+    const data = await Settings.findOne({ $or: this._guildQuery(guild) })
+      // we're going to keep it as 0 because guild settings don't always change
+      .cache(0, guild.id);
 
-    if (data !== null) {
-      return data;
-    } else {
+    if (data === null) {
       return {
         guildID: guild.id,
         ...this.client.config.defaultSettings
       };
     }
+
+    return data;
   }
 
   /**
@@ -33,12 +51,9 @@ module.exports = class SettingsHelpers {
      * @param {Object} newSettings - The settings object to be updated.
      */
   async updateGuild(guild, newSettings) {
-    const searchGuild = [
-      { guildID: guild.id },
-      { guildID: guild }
-    ];
-    let data = await Settings.findOne({ $or: searchGuild });
-    if (!data) data = await this.client.settings.createGuild({ guildID: guild.id });
+    // let data = await Settings.findOne({ $or: this._guildQuery(guild) });
+    let data = await this.getGuild(guild);
+    if (!data) data = await this.createGuild({ guildID: guild.id });
     const { guildID } = data;
 
     let settings = data;
@@ -49,7 +64,12 @@ module.exports = class SettingsHelpers {
       else return;
     }
 
-    const updated = await Settings.findOneAndUpdate({ $or: searchGuild }, settings);
+    const updated = await Settings
+      .findOneAndUpdate({ $or: this._guildQuery(guild) }, settings);
+
+    // clear the cache for updated settings to show
+    cachegoose.clearCache(guild.id);
+
     await this.client.shard.broadcastEval(`this.guilds.get('${guildID}')`)
       .then(guildArray => {
         const found = guildArray.find(g => g);
@@ -60,16 +80,6 @@ module.exports = class SettingsHelpers {
         `);
       });
 
-    // await this.client.shard.broadcastEval(`
-    //   (() => {
-    //     const sGuild = this.guilds.get('${data.guildID}');
-    //     if (!sGuild) return false;
-
-    //     this.logger.log(
-    //       'Guild "' + sGuild.name + '" (' + sGuild.id + ') updated settings: ${Object.keys(newSettings)}'
-    //     );
-    //   })();
-    // `);
     return updated;
   }
 
@@ -124,16 +134,6 @@ module.exports = class SettingsHelpers {
         `);
       });
 
-    // await this.client.shard.broadcastEval(`
-    //   (() => {
-    //     const nGuild = this.guilds.get('${data.guildID}');
-    //     if (!nGuild) return false;
-
-    //     this.logger.log(
-    //       'Default settings saved for guild "' + nGuild.name + '" (' + nGuild.id + ')'
-    //     );
-    //   })();
-    // `);
     return data;
   }
 
@@ -150,20 +150,9 @@ module.exports = class SettingsHelpers {
     const newCommand = await new Command(merged);
     const data = await newCommand.save();
 
-    const cUser = this.client.users.get(data.userID);
+    const cUser = await this.client.fetchUser(data.userID);
     this.client.logger.log(`"${cUser.tag}" (${cUser.id}) ran the command "${data.command}"`, 'cmd');
 
-    // await this.client.shard.broadcastEval(`
-    //   const cUser = this.users.get('${data.userID}');
-    //   if (!cUser) false;
-
-    //   this.logger.log(
-    //     '"' + cUser.tag + '" (' + cUser.id + ') ran the command "${data.command}"',
-    //     'cmd'
-    //   );
-    // `);
-    // const cUser = this.client.users.get(data.userID);
-    // this.client.logger.log(`${cUser.tag} (${cUser.id}) ran command ${data.command}`, 'cmd');
     return data;
   }
 
@@ -179,6 +168,7 @@ module.exports = class SettingsHelpers {
         { guildID: guild.guildID }
       ]
     });
+    cachegoose.clearCache(guild.id || guild.guildName);
     this.client.logger.log(`Settings data deleted for guild ${guild.name || guild.guildName} (${guild.id || guild.guildID})`);
 
     await Suggestion.deleteMany({
