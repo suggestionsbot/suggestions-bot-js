@@ -11,11 +11,11 @@ module.exports = class {
     let guildOwner;
 
     try {
-      guildOwner = await this.client.fetchUser(guild.ownerID)
+      guildOwner = await this.client.fetchUser(guild.ownerID);
     } catch (error) {
       this.client.logger.error(error.stack);
     }
-    
+
     const newServer = new RichEmbed()
       .setTitle('Added')
       .setDescription(`

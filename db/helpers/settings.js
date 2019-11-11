@@ -1,6 +1,7 @@
 require('dotenv-flow').config();
 const mongoose = require('mongoose');
 const cachegoose = require('cachegoose');
+const _ = require('lodash');
 
 const { oneLine } = require('common-tags');
 const { Blacklist, Command, Settings, Suggestion } = require('../models');
@@ -30,12 +31,12 @@ module.exports = class SettingsHelpers {
      * @param {Object} guild - The guild object.
      */
   async getGuild(guild) {
-    const data = await Settings.findOne({ $or: this._guildQuery(guild) })
+    let data = await Settings.findOne({ $or: this._guildQuery(guild) })
       // we're going to keep it as 0 because guild settings don't always change
       .cache(0, guild.id);
 
-    if (data === null) {
-      return {
+    if (data == null) {
+      data = {
         guildID: guild.id,
         ...this.client.config.defaultSettings
       };
@@ -53,7 +54,7 @@ module.exports = class SettingsHelpers {
   async updateGuild(guild, newSettings) {
     // let data = await Settings.findOne({ $or: this._guildQuery(guild) });
     let data = await this.getGuild(guild);
-    if (!data) data = await this.createGuild({ guildID: guild.id });
+    // if (!data) data = await this.createGuild({ guildID: guild.id });
     const { guildID } = data;
 
     let settings = data;
@@ -63,6 +64,9 @@ module.exports = class SettingsHelpers {
       if (data[key] !== newSettings[key]) settings[key] = newSettings[key];
       else return;
     }
+
+    const dataCheck = await Settings.findOne({ $or: this._guildQuery(guild) });
+    if (!dataCheck) data = await this.createGuild({ guildID: guild.id });
 
     const updated = await Settings
       .findOneAndUpdate({ $or: this._guildQuery(guild) }, settings);
