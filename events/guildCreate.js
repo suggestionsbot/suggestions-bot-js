@@ -8,7 +8,14 @@ module.exports = class {
 
   async run(guild) {
     const { guildStatusColors: { created } } = this.client.config;
+    let guildOwner;
 
+    try {
+      guildOwner = await this.client.fetchUser(guild.ownerID)
+    } catch (error) {
+      this.client.logger.error(error.stack);
+    }
+    
     const newServer = new RichEmbed()
       .setTitle('Added')
       .setDescription(`
@@ -16,7 +23,7 @@ module.exports = class {
         **Name:** \`${guild.name}\`
         **Members:** \`${guild.members.size}\`
         **Created:** \`${moment(guild.createdAt).fromNow()}\`
-        **Owner:** ${guild.owner} \`[${guild.owner.user.tag}]\`
+        **Owner:** ${guildOwner} \`[${guildOwner.tag}]\`
       `)
       .setColor(created)
       .setTimestamp();

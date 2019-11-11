@@ -1,4 +1,3 @@
-const { RichEmbed } = require('discord.js');
 const { version } = require('../package.json');
 require('dotenv-flow').config();
 
@@ -35,79 +34,12 @@ module.exports = class {
 
     this.client.botPresence();
 
-    // this.client.shard.broadcastEval(`
-    //   if (this.shard.id === 0) this.dashboard.app.listen(process.env.API_PORT);
-    // `);
-
     // If the bot was invited to a guild while it was offline, the "ready" event will
     // be emitted (ONLY IN PRODUCTION)
     if (process.env.NODE_ENV === 'production') {
 
       // handle posting stats to bot lists
       require('../utils/voting')(this.client);
-
-      try {
-        await this.client.shard.broadcastEval(`
-          (() => {
-            try {
-              this.guilds.forEach(async g => {
-                const { guildID } = await this.settings.getGuild(g);
-                if (!guildID) this.emit('guildCreate', g);
-              });
-            } catch (err) {
-              this.logger.error(err.stack);
-            }
-          })();
-        `);
-
-      } catch (error) {
-        this.client.logger.error(error.stack);
-      }
-
-      // let allSettings;
-      // try {
-      //   allSettings = await this.client.settings.getAllSettings();
-      // } catch (err) {
-      //   this.client.logger.error(err.stack);
-      // }
-
-      // allSettings.map(async e => {
-      //   const g = this.client.guilds.get(e.guildID);
-      //   if (!g) {
-      //     try {
-      //       await this.client.settings.deleteGuild(e);
-      //     } catch (err) {
-      //       this.client.logger.error(err);
-      //     }
-
-      //     const oldServer = new RichEmbed()
-      //       .setTitle('Removed')
-      //       .setDescription(`
-      //                   **ID:** \`${e.guildID}\`
-      //                   **Name:** \`${e.guildName}\`
-      //                   **Owner:** <@${e.guildOwnerID}>
-      //                   `)
-      //       .setColor('#FF4500')
-      //       .setTimestamp();
-
-      //     switch (process.env.NODE_ENV) {
-      //     // 345753533141876737 = Nerd Cave Testing
-      //     case 'development': {
-      //       const logGuild = this.client.guilds.get('345753533141876737');
-      //       const logChannel = logGuild.channels.find(c => c.name === 'server_logs');
-      //       logChannel.send(oldServer);
-      //       break;
-      //     }
-      //     // 480231440932667393 = Nerd Cave Development
-      //     default: {
-      //       const logGuild = this.client.guilds.get('480231440932667393');
-      //       const logChannel = logGuild.channels.find(c => c.name === 'server_logs');
-      //       logChannel.send(oldServer);
-      //       break;
-      //     }
-      //     }
-      //   }
-      // });
     }
   }
 };
