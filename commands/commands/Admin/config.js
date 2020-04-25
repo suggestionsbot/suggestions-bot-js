@@ -1,6 +1,5 @@
 const { Constants, RichEmbed, Guild, Emoji  } = require('discord.js');
 const { stripIndent } = require('common-tags');
-const _ = require('lodash');
 const Command = require('../../Command');
 
 module.exports = class ConfigCommand extends Command {
