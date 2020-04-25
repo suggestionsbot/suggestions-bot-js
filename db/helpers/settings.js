@@ -31,9 +31,9 @@ module.exports = class SettingsHelpers {
      * @param {Object} guild - The guild object.
      */
   async getGuild(guild) {
-    let data = await Settings.findOne({ $or: this._guildQuery(guild) })
+    let data = await Settings.findOne({ $or: this._guildQuery(guild) });
       // we're going to keep it as 0 because guild settings don't always change
-      .cache(0, guild.id);
+      // .cache(0, guild.id);
 
     if (data == null) {
       data = {
