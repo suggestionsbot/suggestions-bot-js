@@ -1,17 +1,17 @@
 require('dotenv-flow').config();
 const mongoose = require('mongoose');
-const cachegoose = require('cachegoose');
+// const cachegoose = require('cachegoose');
 const _ = require('lodash');
 
 const { oneLine } = require('common-tags');
 const { Blacklist, Command, Settings, Suggestion } = require('../models');
 
-cachegoose(mongoose, {
-  engine: 'redis',
-  port: process.env.REDIS_PORT,
-  host: process.env.REDIS_HOSTNAME,
-  password: process.env.REDIS_PASSWORD
-});
+// cachegoose(mongoose, {
+//   engine: 'redis',
+//   port: process.env.REDIS_PORT,
+//   host: process.env.REDIS_HOSTNAME,
+//   password: process.env.REDIS_PASSWORD
+// });
 
 module.exports = class SettingsHelpers {
   constructor(client) {
@@ -72,7 +72,7 @@ module.exports = class SettingsHelpers {
       .findOneAndUpdate({ $or: this._guildQuery(guild) }, settings);
 
     // clear the cache for updated settings to show
-    cachegoose.clearCache(guild.id);
+    // cachegoose.clearCache(guild.id);
 
     await this.client.shard.broadcastEval(`this.guilds.get('${guildID}')`)
       .then(guildArray => {
@@ -172,7 +172,7 @@ module.exports = class SettingsHelpers {
         { guildID: guild.guildID }
       ]
     });
-    cachegoose.clearCache(guild.id || guild.guildName);
+    // cachegoose.clearCache(guild.id || guild.guildName);
     this.client.logger.log(`Settings data deleted for guild ${guild.name || guild.guildName} (${guild.id || guild.guildID})`);
 
     await Suggestion.deleteMany({

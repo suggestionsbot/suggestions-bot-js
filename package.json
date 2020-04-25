@@ -1,6 +1,6 @@
 {
   "name": "suggestions-bot",
-  "version": "2.8.9",
+  "version": "2.9.0",
   "description": "The only suggestions bot you'll ever need. Simple usage and management of suggestions for public and staff use.",
   "main": "sharding.js",
   "scripts": {
@@ -22,8 +22,8 @@
     "cachegoose": "^8.0.0",
     "chalk": "^2.4.2",
     "common-tags": "^1.8.0",
-    "dblapi.js": "^2.3.0",
-    "discord.js": "^11.5.1",
+    "dblapi.js": "^2.4.0",
+    "discord.js": "^11.6.4",
     "dotenv-flow": "^0.1.0",
     "express": "^4.17.1",
     "giphy-api": "^2.0.1",
@@ -32,8 +32,8 @@
     "lodash": "^4.17.15",
     "moment": "^2.24.0",
     "moment-duration-format": "^2.3.2",
-    "moment-timezone": "^0.5.27",
-    "mongoose": "^5.7.9",
+    "moment-timezone": "^0.5.28",
+    "mongoose": "^5.9.10",
     "node-fetch": "^2.6.0",
     "passport": "^0.4.0",
     "passport-headerapikey": "^1.2.0"
