@@ -1,4 +1,4 @@
-const { RichEmbed } = require('discord.js');
+const { MessageEmbed } = require('discord.js');
 const moment = require('moment');
 const Command = require('../../Command');
 require('moment-duration-format');
@@ -24,7 +24,7 @@ module.exports = class MySuggestionsCommand extends Command {
     await message.delete().catch(O_o => {});
 
     const sUser = message.mentions.users.first() ||
-      await this.client.fetchUser(args[0]).catch(err => this.client.logger.error(err)) ||
+      await this.client.users.fetch(args[0]).catch(err => this.client.logger.error(err)) ||
       message.author;
 
     let gSuggestions;
@@ -40,7 +40,7 @@ module.exports = class MySuggestionsCommand extends Command {
 
     if (gSuggestions.length === 0) {
       return message.channel.send(`No suggestions data exists for **${sUser.tag}**${message.guild ? ' in this guild' : ''}!`)
-        .then(msg => msg.delete(3000))
+        .then(msg => msg.delete({ timeout: 3000 }))
         .catch(err => this.client.logger.error(err.stack));
     }
 
@@ -70,19 +70,19 @@ module.exports = class MySuggestionsCommand extends Command {
       joinedOn = moment.utc(message.guild.members.get(sUser.id).joinedAt).format('MM/DD/YY @ h:mm A (z)');
     }
 
-    const embed = new RichEmbed()
+    const embed = new MessageEmbed()
       .setColor(embedColor)
-      .setThumbnail(sUser.avatarURL)
+      .setThumbnail(sUser.avatarURL())
       .addField('User', `${sUser} \`[${sUser.id}]\``)
       .setTimestamp();
 
     if (message.guild) {
       embed
-        .setAuthor(`${sUser.tag} | ${message.guild}`, sUser.avatarURL)
+        .setAuthor(`${sUser.tag} | ${message.guild}`, sUser.avatarURL())
         .addField('Created On', createdOn)
         .addField('Joined', joinedOn);
     } else {
-      embed.setAuthor(`${sUser.tag} | Global Statistics`, sUser.avatarURL);
+      embed.setAuthor(`${sUser.tag} | Global Statistics`, sUser.avatarURL());
     }
 
     if (gSuggestions.length >= 1) {

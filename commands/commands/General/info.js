@@ -1,4 +1,4 @@
-const { RichEmbed } = require('discord.js');
+const { MessageEmbed } = require('discord.js');
 const Command = require('../../Command');
 const { version, description } = require('../../../package.json');
 
@@ -19,16 +19,16 @@ module.exports = class InfoCommand extends Command {
 
     const { embedColor, discord, owner, website } = this.client.config;
 
-    const embed = new RichEmbed()
+    const embed = new MessageEmbed()
       .setTitle(this.client.user.username)
       .setDescription(description)
       .setColor(embedColor)
-      .setThumbnail(this.client.user.avatarURL)
+      .setThumbnail(this.client.user.avatarURL())
       .addField('Bot Author', `<@${owner}>`)
       .addField('Support Discord', discord)
       .addField('Website', website)
       .addField('Bot Version', version)
-      .setFooter('© 2019 Nerd Cave Development');
+      .setFooter('© 2020 Nerd Cave Development');
 
     return message.channel.send(embed);
   }

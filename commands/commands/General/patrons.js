@@ -9,14 +9,15 @@ module.exports = class PatronsCommand extends Command {
       description: 'View Patrons that support Nerd Cave Development.',
       botPermissions: ['EMBED_LINKS'],
       guildOnly: false,
-      guarded: true
+      guarded: true,
+      enabled: false
     });
   }
 
   async run(message, args) {
 
     const { embedColor, patreon } = this.client.config;
-    const patreonEmoji = this.client.guilds.get('345753533141876737').emojis.find(e => e.name === 'patreon');
+    const patreonEmoji = this.client.guilds.cache.get('345753533141876737').emojis.find(e => e.name === 'patreon');
 
     const patrons = [
       'Kyle',

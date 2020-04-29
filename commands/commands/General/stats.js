@@ -1,4 +1,4 @@
-const { RichEmbed, version: discordVersion } = require('discord.js');
+const { MessageEmbed, version: discordVersion } = require('discord.js');
 const moment = require('moment');
 const Command = require('../../Command');
 const { version } = require('../../../package.json');
@@ -21,15 +21,15 @@ module.exports = class StatsCommand extends Command {
     const { embedColor } = this.client.config;
 
     const memUsage = (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2);
-    const shardID = this.client.shard.id;
+    const shardID = message.guild.shardID;
 
     let guildSize,
       userSize,
       shardUptime;
 
     const promises = [
-      this.client.shard.fetchClientValues('guilds.size'),
-      this.client.shard.broadcastEval('this.guilds.reduce((prev, guild) => prev + guild.memberCount, 0)'),
+      this.client.shard.fetchClientValues('guilds.cache.size'),
+      this.client.shard.broadcastEval('this.guilds.cache.reduce((prev, guild) => prev + guild.memberCount, 0)'),
       this.client.shard.fetchClientValues('uptime')
     ];
 
@@ -38,14 +38,14 @@ module.exports = class StatsCommand extends Command {
 
       guildSize = (resolved[0].reduce((prev, count) => prev + count, 0)).toLocaleString();
       userSize = (resolved[1].reduce((prev, count) => prev + count, 0)).toLocaleString();
-      shardUptime = moment.duration(resolved[2][this.client.shard.id]).format(' D [days], H [hrs], m [mins], s [secs]');
+      shardUptime = moment.duration(resolved[2][shardID]).format(' D [days], H [hrs], m [mins], s [secs]');
     } catch (err) {
       this.client.logger.error(err.stack);
       return message.channel.send(`An error occurred: **${err.message}**`);
     }
 
-    const embed = new RichEmbed()
-      .setAuthor(`${this.client.user.username} v${version}`, this.client.user.avatarURL)
+    const embed = new MessageEmbed()
+      .setAuthor(`${this.client.user.username} v${version}`, this.client.user.avatarURL())
       .setColor(embedColor)
       .addField('Guilds', guildSize, true)
       .addField('Users', userSize, true)

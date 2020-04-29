@@ -96,12 +96,12 @@ module.exports = class SuggestionsHelpers {
     const data = await newSuggestion.save();
     const { userID, guildID } = data;
 
-    await this.client.shard.broadcastEval(`this.guilds.get('${guildID}')`)
+    await this.client.shard.broadcastEval(`this.guilds.cache.get('${guildID}')`)
       .then(guildArray => {
         const found = guildArray.find(g => g);
         if (!found) return false;
 
-        const sUser = this.client.users.get(userID);
+        const sUser = this.client.users.cache.get(userID);
 
         this.client.logger.log(oneLine`
           New suggestion submitted by "${sUser.tag}" (${sUser.id}) in the guild
@@ -136,7 +136,7 @@ module.exports = class SuggestionsHelpers {
 
     const updated = await guildSuggestion.updateOne(data);
 
-    await this.client.shard.broadcastEval(`this.guilds.get('${guildID}')`)
+    await this.client.shard.broadcastEval(`this.guilds.cache.get('${guildID}')`)
       .then(guildArray => {
         const found = guildArray.find(g => g);
         if (!found) return false;
@@ -179,12 +179,12 @@ module.exports = class SuggestionsHelpers {
     const { guildID, sID } = guildSuggestion;
     const updatedData = { notes: data };
 
-    await this.client.shard.broadcastEval(`this.guilds.get('${guildID}')`)
+    await this.client.shard.broadcastEval(`this.guilds.cache.get('${guildID}')`)
       .then(guildArray => {
         const found = guildArray.find(g => g);
         if (!found) return false;
 
-        const sUser = this.client.users.get(staffMemberID);
+        const sUser = this.client.users.cache.get(staffMemberID);
         this.client.logger.log(oneLine`
           sID "${sID}" had a note added by "${sUser.tag}" (${sUser.id}) in the guild 
           "${found.name}" (${found.id}).

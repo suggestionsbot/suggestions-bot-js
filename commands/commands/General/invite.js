@@ -1,4 +1,4 @@
-const { RichEmbed } = require('discord.js');
+const { MessageEmbed } = require('discord.js');
 const Command = require('../../Command');
 
 module.exports = class InviteCommand extends Command {
@@ -18,8 +18,8 @@ module.exports = class InviteCommand extends Command {
 
     const { embedColor, discord, invite, website } = this.client.config;
 
-    const dmEmbed = new RichEmbed()
-      .setAuthor('Bot Invite Information', this.client.user.avatarURL)
+    const dmEmbed = new MessageEmbed()
+      .setAuthor('Bot Invite Information', this.client.user.avatarURL())
       .setDescription(`Hello ${message.author},
         
           **Before inviting, you need** \`MANAGE SERVER\` **or** \`ADMINISTRATOR\` **permissions to add bots to a server.** 
@@ -36,7 +36,7 @@ module.exports = class InviteCommand extends Command {
       .setColor(embedColor)
       .setTimestamp();
 
-    if (message.guild) await message.react('📧').then(message.delete(2500));
+    if (message.guild) await message.react('📧').then(() => message.delete({ timeout: 2500 }));
     await message.author.send(dmEmbed).catch(err => {
       this.client.logger.error(err);
       return message.reply('you have DMs disabled! I could not send you the invite link. Enable them to receive the bot invite link.');

@@ -1,4 +1,4 @@
-const { RichEmbed } = require('discord.js');
+const { MessageEmbed } = require('discord.js');
 const moment = require('moment');
 const Command = require('../../Command');
 require('moment-duration-format');
@@ -38,7 +38,7 @@ module.exports = class GuildInfoCommand extends Command {
       return message.channel.send(`Error querying the database for this guild's suggestions: **${err.message}**.`);
     });
 
-    const serverEmbed = new RichEmbed()
+    const serverEmbed = new MessageEmbed()
       .setTitle(message.guild)
       .setThumbnail(srvIcon)
       .setColor(embedColor)
