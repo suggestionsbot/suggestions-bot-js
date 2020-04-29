@@ -21,7 +21,7 @@ module.exports = class {
 
     let guildCount;
     try {
-      guildCount = await this.client.shard.fetchClientValues('guilds.size')
+      guildCount = await this.client.shard.fetchClientValues('guilds.cache.size')
         .then(res => res.reduce((prev, count) => prev + count, 0));
     } catch (error) {
       guildCount = this.client.guilds.size;
@@ -30,7 +30,7 @@ module.exports = class {
     await this.client.logger.log(`Version ${version} of the bot loaded.`);
     await this.client.logger.log(`${versions[process.env.NODE_ENV]} version of the bot loaded.`);
     this.client.mongoose.init(); // initialize connection to the database
-    await this.client.logger.log(`Logged in as ${this.client.user.tag} (${this.client.user.id}) in ${guildCount} server(s) on shard ${this.client.shard.id}.`, 'ready');
+    await this.client.logger.log(`Logged in as ${this.client.user.tag} (${this.client.user.id}) in ${guildCount} server(s) on shard ${this.client.shard.ids[0]}.`, 'ready');
 
     this.client.botPresence();
 

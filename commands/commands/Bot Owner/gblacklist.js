@@ -1,4 +1,4 @@
-const { RichEmbed } = require('discord.js');
+const { MessageEmbed } = require('discord.js');
 const { oneLine, stripIndent } = require('common-tags');
 const Command = require('../../Command');
 
@@ -39,7 +39,7 @@ module.exports = class GBlacklistCommand extends Command {
     }
 
     const caseNum = total + 1;
-    const blEmbed = new RichEmbed()
+    const blEmbed = new MessageEmbed()
       .setColor(embedColor)
       .setTimestamp();
 
@@ -49,8 +49,8 @@ module.exports = class GBlacklistCommand extends Command {
 
       const blacklists = activeBlacklists.map(blacklist => {
         let time;
-        const issued = this.client.users.get(blacklist.userID);
-        const issuer = this.client.users.get(blacklist.issuerID);
+        const issued = this.client.users.cache.get(blacklist.userID);
+        const issuer = this.client.users.cache.get(blacklist.issuerID);
         const num = blacklist.case;
         const reason = blacklist.reason;
         const caseStatus = this.blStatus[blacklist.status];
@@ -83,7 +83,7 @@ module.exports = class GBlacklistCommand extends Command {
       if (activeBlacklists.length < 1) {
         return message.channel.send(oneLine`There are currently no active blacklisted users globally. 
           Use \`${prefix + name} help\` for more information.`)
-          .then(m => m.delete(5000));
+          .then(m => m.delete({ timeout: 5000 }));
       }
 
       return message.channel.send(blEmbed);
@@ -91,27 +91,27 @@ module.exports = class GBlacklistCommand extends Command {
 
     if (args[0] === 'help') return this.client.errors.noUsage(message.channel, this, settings);
 
-    const blUser = this.client.users.get(args[1]) || message.mentions.users.first();
+    const blUser = this.client.users.cache.get(args[1]) || message.mentions.users.first();
     const reason = args.slice(2).join(' ');
 
     if (!blUser) return this.client.errors.userNotFound(args[1], message.channel);
     if (blUser.id === message.author.id) {
       return message.channel.send('You cannot issue a blacklist to yourself!')
-        .then(m => m.delete(5000))
+        .then(m => m.delete({ timeout: 5000 }))
         .catch(e => this.client.logger.error(e.stack));
     }
 
     switch(args[0]) {
     case 'add': {
       if (!blUser) return this.client.errors.userNotFound(args[1], message.channel);
-      if (!reason) return message.channel.send('Please provide a reason!').then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
+      if (!reason) return message.channel.send('Please provide a reason!').then(msg => msg.delete({ timeout: 5000 })).catch(err => this.client.logger.error(err.stack));
 
       const newBlacklist = {
         guildID: message.guild.id,
         userID: blUser.id,
         reason: reason,
         issuerID: message.author.id,
-        newTime: message.createdAt.getTime(),
+        newTime: message.createdAtTimestamp,
         status: true,
         case: caseNum,
         scope: 'global'

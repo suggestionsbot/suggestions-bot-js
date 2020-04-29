@@ -1,4 +1,4 @@
-const { RichEmbed, TextChannel, Guild, Constants } = require('discord.js');
+const { MessageEmbed, TextChannel, Guild, Constants } = require('discord.js');
 const Command = require('../../Command');
 const { version } = require('../../../package.json');
 require('dotenv-flow').config();
@@ -31,18 +31,18 @@ module.exports = class ChangelogCommand extends Command {
             const guild = new Guild(this.client, raw);
             const channel = new TextChannel(guild, found);
 
-            if (channel.messages.size === 0) {
-              await channel.fetchMessages().catch(error => {
+            if (channel.messages.cache.size === 0) {
+              await channel.messages.fetch().catch(error => {
                 this.client.logger.error(error.message);
                 return message.channel.send(`An error occurred: **${error.message}&+**`);
               });
             }
 
-            const m = channel.messages.filter(msg => msg.embeds.length >= 1).first();
+            const m = channel.messages.cache.filter(msg => msg.embeds.length >= 1).first();
 
-            const changelogEmbed = new RichEmbed()
+            const changelogEmbed = new MessageEmbed()
               .setTitle(`${this.client.user.username}'s Changelog 🗄`)
-              .setThumbnail(this.client.user.avatarURL)
+              .setThumbnail(this.client.user.avatarURL())
               .setDescription(m.embeds[0].description)
               .addField('Date', m.embeds[0].fields[0].value)
               .setColor(embedColor);

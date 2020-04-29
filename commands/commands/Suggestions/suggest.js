@@ -1,5 +1,5 @@
 /* eslint-disable no-useless-escape */
-const { Constants, RichEmbed, Guild, Emoji, Util: { escapeMarkdown } } = require('discord.js');
+const { Constants, MessageEmbed, Guild, Emoji, Util: { escapeMarkdown } } = require('discord.js');
 const { oneLine, stripIndent } = require('common-tags');
 const crypto = require('crypto');
 require('moment-duration-format');
@@ -43,8 +43,8 @@ module.exports = class SuggestCommand extends Command {
     }
 
     const sUser = message.author;
-    const sChannel = message.guild.channels.find(c => c.name === suggestionsChannel) ||
-      message.guild.channels.get(suggestionsChannel);
+    const sChannel = message.guild.channels.cache.find(c => c.name === suggestionsChannel) ||
+      message.guild.channels.cache.get(suggestionsChannel);
     if (!sChannel) return this.client.errors.noSuggestions(message.channel);
 
     // If the sID exists globally, this will force a new one to be generated
@@ -52,7 +52,7 @@ module.exports = class SuggestCommand extends Command {
       id = crypto.randomBytes(20).toString('hex').slice(12, 20);
     } while (verifySuggestion);
 
-    const embed = new RichEmbed()
+    const embed = new MessageEmbed()
       .setDescription(stripIndent`
         **Submitter**
         ${escapeMarkdown(sUser.tag)}
@@ -60,15 +60,15 @@ module.exports = class SuggestCommand extends Command {
         **Suggestion**
         ${suggestion}
       `)
-      .setThumbnail(sUser.avatarURL)
+      .setThumbnail(sUser.avatarURL())
       .setColor(embedColor)
       .setFooter(`User ID: ${sUser.id} | sID: ${id}`)
       .setTimestamp();
 
     if (imageCheck) embed.setImage(imageCheck[0]);
 
-    const dmEmbed = new RichEmbed()
-      .setAuthor(message.guild, message.guild.iconURL)
+    const dmEmbed = new MessageEmbed()
+      .setAuthor(message.guild, message.guild.iconURL())
       .setDescription(stripIndent`Hey, ${sUser}. Your suggestion has been sent to the ${sChannel} channel to be voted on!
         
       Please wait until it gets approved or rejected by a staff member.
@@ -124,13 +124,13 @@ module.exports = class SuggestCommand extends Command {
     this.client.shard.broadcastEval(`this.findEmojiByID.call(this, '${success}')`)
       .then(async emojiArray => {
         const found = emojiArray.find(e => e);
-        if (!found) return message.react('✅').then(() => message.delete(3000));
+        if (!found) return message.react('✅').then(() => message.delete({ timeout: 3000 }));
 
         return this.client.rest.makeRequest('get', Constants.Endpoints.Guild(found.guild).toString(), true)
           .then(async raw => {
             const guild = new Guild(this.client, raw);
             const gEmoji = new Emoji(guild, found);
-            return await message.react(gEmoji).then(() => message.delete(3000));
+            return await message.react(gEmoji).then(() => message.delete({ timeout: 3000 }));
           });
       })
       .catch(error => {
@@ -139,7 +139,7 @@ module.exports = class SuggestCommand extends Command {
       });
 
     try {
-      if (settings.dmResponses && message.guild.members.get(sUser.id)) sUser.send(dmEmbed);
+      if (settings.dmResponses && message.guild.members.cache.get(sUser.id)) sUser.send(dmEmbed);
     } catch (error) {
       message.channel.send(oneLine`
         I could not DM you because you have DMs disabled from server members. However, for reference, your suggestion
@@ -164,7 +164,7 @@ module.exports = class SuggestCommand extends Command {
     }
 
     if (!settings.fetchedMessages) {
-      const messages = await sChannel.fetchMessages();
+      const messages = await sChannel.messages.fetch();
       const filtered = messages
         .filter(msg => msg.embeds.length >= 1 && msg.author.id === this.client.user.id);
 

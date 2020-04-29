@@ -1,4 +1,4 @@
-const { Constants, RichEmbed, Guild, Emoji } = require('discord.js');
+const { Constants, MessageEmbed, Guild, Emoji } = require('discord.js');
 const { stripIndent } = require('common-tags');
 const Command = require('../../Command');
 
@@ -39,13 +39,13 @@ module.exports = class GSIDCommand extends Command {
     if (sID.statusUpdated) updatedOn = sID.statusUpdated;
     if (sID.newStatusUpdated) updatedOn = sID.newStatusUpdated;
 
-    const sUser = await this.client.fetchUser(sID.userID).catch(err => this.client.logger.error(err));
+    const sUser = await this.client.users.fetch(sID.userID).catch(err => this.client.logger.error(err));
 
     if (sID.hasOwnProperty('staffMemberID')) {
-      sStaff = await this.client.fetchUser(sID.staffMemberID).catch(err => this.client.logger.error(err));
+      sStaff = await this.client.users.fetch(sID.staffMemberID).catch(err => this.client.logger.error(err));
     }
 
-    const sGuild = await this.client.shard.broadcastEval(`this.guilds.get('${sID.guildID}')`)
+    const sGuild = await this.client.shard.broadcastEval(`this.guilds.cache.get('${sID.guildID}')`)
       .then(guildArray => {
         const found = guildArray.find(g => g);
         if (!found) return;
@@ -58,7 +58,7 @@ module.exports = class GSIDCommand extends Command {
 
     const guildIconURL = `https://cdn.discordapp.com/icons/${sGuild.id}/${sGuild.icon}.png?size=1024`;
 
-    const embed = new RichEmbed()
+    const embed = new MessageEmbed()
       .setAuthor(sGuild.name, guildIconURL)
       .setTitle(`Info for ${sID.sID}`)
       .setFooter(`User ID: ${sUser.id} | sID: ${sID.sID}`);

@@ -1,4 +1,4 @@
-const { RichEmbed } = require('discord.js');
+const { MessageEmbed } = require('discord.js');
 const moment = require('moment');
 
 module.exports = class {
@@ -18,12 +18,12 @@ module.exports = class {
       this.client.logger.error(error.stack);
     }
 
-    const oldServer = new RichEmbed()
+    const oldServer = new MessageEmbed()
       .setTitle('Removed')
       .setDescription(`
         **ID:** \`${guild.id}\`
         **Name:** \`${guild}\`
-        **Members:** \`${guild.members.size}\`
+        **Members:** \`${guild.members.cache.size}\`
         **Joined:** \`${moment(guild.me.joinedAt).fromNow()}\`
         **Owner:** ${guildOwner} \`[${guildOwner.tag}]\`
       `)
@@ -39,7 +39,7 @@ module.exports = class {
     switch (process.env.NODE_ENV) {
     // 498627833233539086 = #server logs / Nerd Cave Testing
     case 'development': {
-      this.client.shard.broadcastEval(`this.channels.get("498627833233539086").send({ embed: ${JSON.stringify(oldServer)} });`)
+      this.client.shard.broadcastEval(`this.channels.cache.get("498627833233539086").send({ embed: ${JSON.stringify(oldServer)} });`)
         .then(async channelArr => {
           const found = channelArr.find(c => c);
           if (!found) return this.client.logger.error('Could not find server logs channel');
@@ -47,9 +47,9 @@ module.exports = class {
         .catch(err => this.client.logger.error(err));
       break;
     }
-    // 602332466476482616 = #server logs / Nerd Cave Development
+    // 602332466476482616 = #server logs / Suggestions
     default: {
-      this.client.shard.broadcastEval(`this.channels.get("602332466476482616").send({ embed: ${JSON.stringify(oldServer)} });`)
+      this.client.shard.broadcastEval(`this.channels.cache.get("602332466476482616").send({ embed: ${JSON.stringify(oldServer)} });`)
         .then(async channelArr => {
           const found = channelArr.find(c => c);
           if (!found) return this.client.logger.error('Could not find server logs channel');

@@ -1,4 +1,4 @@
-const { RichEmbed } = require('discord.js');
+const { MessageEmbed } = require('discord.js');
 const Command = require('../../Command');
 require('moment-duration-format');
 require('moment-timezone');
@@ -22,14 +22,14 @@ module.exports = class StaffSuggestCommand extends Command {
     await message.delete().catch(O_o => {});
 
     const sUser = message.member;
-    const sChannel = message.guild.channels.find(c => c.name === settings.staffSuggestionsChannel) ||
-      message.guild.channels.find(c => c.toString() === settings.staffSuggestionsChannel) ||
-      message.guild.channels.get(settings.staffSuggestionsChannel);
+    const sChannel = message.guild.channels.cache.find(c => c.name === settings.staffSuggestionsChannel) ||
+      message.guild.channels.cache.find(c => c.toString() === settings.staffSuggestionsChannel) ||
+      message.guild.channels.cache.get(settings.staffSuggestionsChannel);
     if (!sChannel) return this.client.errors.noStaffSuggestions(message.channel);
 
     if (!settings.staffRoles) return this.client.errors.noStaffRoles(message.channel);
 
-    const embed = new RichEmbed()
+    const embed = new MessageEmbed()
       .setDescription(`Hey, ${sUser.user.tag}. Your suggestion has been added in the ${sChannel} channel to be voted on!`)
       .setColor(embedColor)
       .setAuthor(sUser.displayName)
@@ -39,7 +39,7 @@ module.exports = class StaffSuggestCommand extends Command {
     const suggestion = args.join(' ');
     if (!suggestion) this.client.errors.noUsage(message.channel, this, settings);
 
-    const sEmbed = new RichEmbed()
+    const sEmbed = new MessageEmbed()
       .setDescription(`
       **Submitter**
       ${sUser.user.tag}
@@ -47,7 +47,7 @@ module.exports = class StaffSuggestCommand extends Command {
       **Suggestion**
       ${suggestion}
       `)
-      .setThumbnail(sUser.avatarURL)
+      .setThumbnail(sUser.avatarURL())
       .setColor(embedColor)
       .setFooter(`User ID: ${sUser.id}`)
       .setTimestamp();
@@ -57,7 +57,7 @@ module.exports = class StaffSuggestCommand extends Command {
     if (!sendMsgs) return this.client.errors.noChannelPerms(message, sChannel, 'SEND_MESSAGES');
     if (!reactions) return this.client.errors.noChannelPerms(message, sChannel, 'ADD_REACTIONS');
 
-    message.channel.send(embed).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
+    message.channel.send(embed).then(msg => msg.delete({ timeout: 5000 })).catch(err => this.client.logger.error(err.stack));
 
     this.client.logger.log(`New staff suggestion submitted by "${sUser.user.tag}" (${sUser.id}) in "${message.guild}" (${message.guild.id})`);
 

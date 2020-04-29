@@ -1,4 +1,4 @@
-const { Constants, RichEmbed, Guild, Emoji } = require('discord.js');
+const { Constants, MessageEmbed, Guild, Emoji } = require('discord.js');
 const { stripIndent } = require('common-tags');
 const Command = require('../../Command');
 
@@ -37,14 +37,14 @@ module.exports = class SIDCommand extends Command {
     if (sID.statusUpdated) updatedOn = sID.statusUpdated;
     if (sID.newStatusUpdated) updatedOn = sID.newStatusUpdated;
 
-    const sUser = await this.client.fetchUser(sID.userID).catch(err => this.client.logger.error(err));
+    const sUser = await this.client.users.fetch(sID.userID).catch(err => this.client.logger.error(err));
     if (sID.hasOwnProperty('staffMemberID')) {
-      sStaff = await this.client.fetchUser(sID.staffMemberID).catch(err => this.client.logger.error(err));
+      sStaff = await this.client.users.fetch(sID.staffMemberID).catch(err => this.client.logger.error(err));
     }
 
 
-    const embed = new RichEmbed()
-      .setAuthor(message.guild, message.guild.iconURL)
+    const embed = new MessageEmbed()
+      .setAuthor(message.guild, message.guild.iconURL())
       .setTitle(`Info for ${sID.sID}`)
       .setFooter(`User ID: ${sUser.id} | sID: ${sID.sID}`);
 

@@ -19,7 +19,7 @@ module.exports = class ReloadCommand extends Command {
 
     if (process.env.NODE_ENV === 'production') {
       return message.channel.send('This command can only be used in a development environment!')
-        .then(msg => msg.delete(5000))
+        .then(msg => msg.delete({ timeout: 5000 }))
         .catch(err => this.client.logger.error(err.stack));
     }
 
@@ -31,7 +31,7 @@ module.exports = class ReloadCommand extends Command {
     if (!args[0]) return this.client.errors.noUsage(message.channel, this, settings);
 
     const cmd = this.client.commands.get(args[0]) || this.client.commands.get(this.client.aliases.get(args[0]));
-    if (!cmd) return message.channel.send(`The command \`${args[0]}\` does not exist.`).then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
+    if (!cmd) return message.channel.send(`The command \`${args[0]}\` does not exist.`).then(msg => msg.delete({ timeout: 5000 })).catch(err => this.client.logger.error(err.stack));
 
     let response = await this.client.commandHandler.unloadCommand(cmd.conf.location, cmd.help.name);
     if (response) {

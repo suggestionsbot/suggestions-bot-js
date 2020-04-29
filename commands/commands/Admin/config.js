@@ -1,4 +1,4 @@
-const { Constants, RichEmbed, Guild, Emoji  } = require('discord.js');
+const { Constants, MessageEmbed, Guild, Emoji  } = require('discord.js');
 const { stripIndent } = require('common-tags');
 const Command = require('../../Command');
 
@@ -42,7 +42,7 @@ module.exports = class ConfigCommand extends Command {
 
     let roles = [];
     try {
-      roles = message.guild.roles.filter(role => staffRoles.map(r => r.role).includes(role.id));
+      roles = message.guild.roles.cache.filter(role => staffRoles.map(r => r.role).includes(role.id));
 
       suggestionsChannel = message.guild.channels.find(c => c.name === suggestionsChannel) ||
         (message.guild.channels.get(suggestionsChannel)) ||
@@ -61,7 +61,7 @@ module.exports = class ConfigCommand extends Command {
       return message.channel.send(err.message);
     }
 
-    const configEmbed = new RichEmbed()
+    const configEmbed = new MessageEmbed()
       .setAuthor(message.guild, message.guild.iconURL)
       .setColor(embedColor)
       .setFooter(`Guild: ${message.guild.id}`)
@@ -94,7 +94,7 @@ module.exports = class ConfigCommand extends Command {
           await this.client.settings.updateGuild(message.guild, { prefix: updated });
           configEmbed.setDescription(`${successEmoji} Prefix has been updated to: \`${updated}\``);
 
-          return message.channel.send(configEmbed).then(m => m.delete(5000));
+          return message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
         } catch (err) {
           this.client.logger.error(err.stack);
           return message.channel.send(`An error occurred: **${err.message}**`);
@@ -119,7 +119,7 @@ module.exports = class ConfigCommand extends Command {
           await this.client.settings.updateGuild(message.guild, { suggestionsChannel: verified.id });
           configEmbed.setDescription(`${successEmoji} Suggestions channel has been updated to: ${verified}`);
 
-          return message.channel.send(configEmbed).then(m => m.delete(5000));
+          return message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
         } catch (err) {
           this.client.logger.error(err);
           return message.channel.send(`An error occurred: **${err.message}**`);
@@ -145,7 +145,7 @@ module.exports = class ConfigCommand extends Command {
           await this.client.settings.updateGuild(message.guild, { suggestionsLogs: verified.id });
           configEmbed.setDescription(`${successEmoji} Suggestion logs channel has been updated to: ${verified}`);
 
-          return message.channel.send(configEmbed).then(m => m.delete(5000));
+          return message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
         } catch (err) {
           this.client.logger.error(err);
           return message.channel.send(`An error occurred: **${err.message}**`);
@@ -171,7 +171,7 @@ module.exports = class ConfigCommand extends Command {
           await this.client.settings.updateGuild(message.guild, { staffSuggestionsChannel: verified.id });
           configEmbed.setDescription(`${successEmoji} Suggestions staff channel has been updated to: ${verified}`);
 
-          return message.channel.send(configEmbed).then(m => m.delete(5000));
+          return message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
         } catch (err) {
           this.client.logger.error(err);
           return message.channel.send(`An error occurred: **${err.message}**`);
@@ -188,8 +188,8 @@ module.exports = class ConfigCommand extends Command {
       configEmbed.setAuthor(`${message.guild} | Staff Roles`, message.guild.iconURL);
 
       if (updated) {
-        const verified = message.guild.roles.find(c => c.name === updated) ||
-          message.guild.roles.get(updated) ||
+        const verified = message.guild.roles.cache.find(c => c.name === updated) ||
+          message.guild.roles.cache.get(updated) ||
           message.mentions.roles.first();
         if (!verified) return this.client.errors.roleNotFound(updated, message.channel);
 
@@ -204,7 +204,7 @@ module.exports = class ConfigCommand extends Command {
           try {
             configEmbed.setDescription(`${successEmoji} Removed **${verified.name}** from the staff roles.`);
             await this.client.settings.updateGuildStaffRoles(updateRole, false);
-            message.channel.send(configEmbed).then(m => m.delete(5000));
+            message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
           } catch (error) {
             this.client.logger.error(error.stack);
             return message.channel.send(`An error occurred: **${error.message}**`);
@@ -213,7 +213,7 @@ module.exports = class ConfigCommand extends Command {
           try {
             configEmbed.setDescription(`${successEmoji} Added **${verified.name}** to the staff roles.`);
             await this.client.settings.updateGuildStaffRoles(updateRole, true);
-            message.channel.send(configEmbed).then(m => m.delete(5000));
+            message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
           } catch (error) {
             this.client.logger.error(error.stack);
             return message.channel.send(`An error occurred: **${error.message}**`);
@@ -283,7 +283,7 @@ module.exports = class ConfigCommand extends Command {
           const emojiSet = await Promise.all(emojis);
           await this.client.settings.updateGuild(message.guild, { voteEmojis: foundSet.name });
           configEmbed.setDescription(`${successEmoji} The default vote emojis have been changed to ${emojiSet.join(' ')}`);
-          message.channel.send(configEmbed).then(m => m.delete(5000));
+          message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
         } catch (error) {
           this.client.logger.error(error.stack);
           return message.channel.send(`An error occurred: **${error.message}**`);
@@ -349,7 +349,7 @@ module.exports = class ConfigCommand extends Command {
           try {
             await this.client.settings.updateGuild(message.guild, { responseRequired: true });
             configEmbed.setDescription(`${successEmoji} Responses required set to \`true\`. This means a response **is required** when using the \`reject\` command.`);
-            message.channel.send(configEmbed).then(m => m.delete(5000));
+            message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
           } catch (err) {
             this.client.logger.error(err.stack);
             return message.channel.send(`Error setting required responses: **${err.message}**.`);
@@ -360,7 +360,7 @@ module.exports = class ConfigCommand extends Command {
             if (!settings.hasOwnProperty('_id')) await this.createNewGuild(message.guild);
             await this.client.settings.updateGuild(message.guild, { responseRequired: false });
             configEmbed.setDescription(`${successEmoji} Responses required set to \`false\`. This means a response **is not required** when using the \`reject\` command.`);
-            message.channel.send(configEmbed).then(m => m.delete(5000));
+            message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
           } catch (err) {
             this.client.logger.error(err.stack);
             return message.channel.send(`Error setting required responses: **${err.message}**.`);
@@ -407,7 +407,7 @@ module.exports = class ConfigCommand extends Command {
           try {
             configEmbed.setDescription(`${successEmoji} Enabled the **${cmd.help.name}** command.`);
             await this.client.settings.updateGuildCommands(enabledCommand, false);
-            message.channel.send(configEmbed).then(m => m.delete(5000));
+            message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
           } catch (err) {
             this.client.logger.error(err.stack);
             return message.channel.send(`An error occurred: **${err.message}**`);
@@ -416,7 +416,7 @@ module.exports = class ConfigCommand extends Command {
           try {
             configEmbed.setDescription(`${successEmoji} Disabled the **${cmd.help.name}** command.`);
             await this.client.settings.updateGuildCommands(disabledCommand, true);
-            message.channel.send(configEmbed).then(m => m.delete(5000));
+            message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
           } catch (err) {
             this.client.logger.error(err.stack);
             return message.channel.send(`An error occurred: **${err.message}**`);
@@ -450,7 +450,7 @@ module.exports = class ConfigCommand extends Command {
                   - Suggestion note added
               `);
 
-            message.channel.send(configEmbed).then(m => m.delete(5000));
+            message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
           } catch (err) {
             this.client.logger.error(err.stack);
             return message.channel.send(`An error occurred: **${err.message}**.`);
@@ -469,7 +469,7 @@ module.exports = class ConfigCommand extends Command {
                   - Suggestion note added
               `);
 
-            message.channel.send(configEmbed).then(m => m.delete(5000));
+            message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
           } catch (err) {
             this.client.logger.error(err.stack);
             return message.channel.send(`An error occurred: **${err.message}**.`);

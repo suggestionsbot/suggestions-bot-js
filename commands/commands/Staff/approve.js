@@ -1,4 +1,4 @@
-const { Constants, RichEmbed, Guild, Emoji, Util: { escapeMarkdown } } = require('discord.js');
+const { Constants, MessageEmbed, Guild, Emoji, Util: { escapeMarkdown } } = require('discord.js');
 const { stripIndent } = require('common-tags');
 const Command = require('../../Command');
 
@@ -46,12 +46,12 @@ module.exports = class ApproveCommand extends Command {
 
     if (status === 'approved') {
       return message.channel.send(`sID **${id}** has already been approved. Cannot do this action again.`)
-        .then(msg => msg.delete(3000))
+        .then(msg => msg.delete({ timeout: 3000 }))
         .catch(err => this.logger.error(err.stack));
     }
 
-    const submitter = await this.client.fetchUser(userID).catch(err => this.client.logger.error(err));
-    const guild = message.guild ? message.guild : this.client.guilds.get(guildID);
+    const submitter = await this.client.users.fetch(userID).catch(err => this.client.logger.error(err));
+    const guild = message.guild ? message.guild : this.client.guilds.cache.get(guildID);
 
     try {
       settings = await this.client.settings.getGuild(guild);
@@ -67,37 +67,37 @@ module.exports = class ApproveCommand extends Command {
         Please contact the developer via the Support Discord: ${discord}`);
     }
 
-    const suggestionsChannel = guild.channels.find(c => c.name === settings.suggestionsChannel) ||
-      guild.channels.get(settings.suggestionsChannel);
+    const suggestionsChannel = guild.channels.cache.find(c => c.name === settings.suggestionsChannel) ||
+      guild.channels.cache.get(settings.suggestionsChannel);
 
-    const suggestionsLogs = guild.channels.find(c => c.name === settings.suggestionsLogs) ||
-      guild.channels.get(settings.suggestionsLogs);
+    const suggestionsLogs = guild.channels.cache.find(c => c.name === settings.suggestionsLogs) ||
+      guild.channels.cache.get(settings.suggestionsLogs);
 
     if (!suggestionsLogs) return this.client.errors.noSuggestionsLogs(message.channel);
 
     if (!guild.member(userID)) {
       message.channel.send(`**${submitter.tag}** is no longer in the guild, but their suggestion will still be approved.`)
-        .then(msg => msg.delete(3000))
+        .then(msg => msg.delete({ timeout: 3000 }))
         .catch(err => this.logger.error(err.stack));
     }
 
     let sMessage;
     try {
-      sMessage = await suggestionsChannel.fetchMessage(messageID);
+      sMessage = await suggestionsChannel.messages.fetch(messageID);
     } catch (err) {
       this.client.logger.error(err.stack);
       return message.channel.send('The suggestion message was not found!')
-        .then(m => m.delete(5000));
+        .then(m => m.delete({ timeout: 5000 }));
     }
 
     const embed = sMessage.embeds[0];
 
-    const approvedEmbed = new RichEmbed(embed)
+    const approvedEmbed = new MessageEmbed(embed)
       .setTitle('Suggestion Approved')
       .setColor(approved);
 
-    const dmEmbed = new RichEmbed()
-      .setAuthor(guild, guild.iconURL)
+    const dmEmbed = new MessageEmbed()
+      .setAuthor(guild, guild.iconURL())
       .setDescription(stripIndent`Hey, ${submitter}. Your suggestion has been approved by ${message.author}!
       
       Your suggestion ID (sID) for reference was **${id}**.`)
@@ -168,8 +168,8 @@ module.exports = class ApproveCommand extends Command {
       return message.channel.send(`An error occurred: **${error.message}**`);
     }
 
-    const logsEmbed = new RichEmbed()
-      .setAuthor(guild, guild.iconURL)
+    const logsEmbed = new MessageEmbed()
+      .setAuthor(guild, guild.iconURL())
       .setDescription(stripIndent`
         **Results**
         ${view.join('\n')}
@@ -229,11 +229,11 @@ module.exports = class ApproveCommand extends Command {
     };
 
     try {
-      message.channel.send(`Suggestion **${id}** has been approved.`).then(m => m.delete(5000));
-      sMessage.edit(approvedEmbed).then(m => m.delete(5000));
+      message.channel.send(`Suggestion **${id}** has been approved.`).then(m => m.delete({ timeout: 5000 }));
+      sMessage.edit(approvedEmbed).then(m => m.delete({ timeout: 5000 }));
       suggestionsLogs.send(logsEmbed);
       try {
-        if ((settings.dmResponses === true) && guild.members.get(submitter.id)) submitter.send(dmEmbed);
+        if ((settings.dmResponses === true) && guild.members.cache.get(submitter.id)) submitter.send(dmEmbed);
       } catch (err) {
         message.channel.send(`**${submitter.tag}** has DMs disabled, but their suggestion will still be approved.`);
       }
@@ -241,7 +241,7 @@ module.exports = class ApproveCommand extends Command {
       await this.client.suggestions.handleGuildSuggestion(approveSuggestion);
     } catch (error) {
       this.client.logger.error(error.stack);
-      message.delete(3000).catch(O_o=>{});
+      message.delete({ timeout: 3000 }).catch(O_o=>{});
       return message.channel.send(`An error occurred: **${error.message}**`);
     }
 
