@@ -1,3 +1,4 @@
+require('dotenv-flow').config();
 const { Client, Collection, Constants, Guild, Emoji } = require('discord.js');
 const Mongoose = require('../db/mongoose');
 
@@ -38,6 +39,10 @@ module.exports = class SuggestionsClient extends Client {
     this.errors = new ErrorHandler(this);
 
     this.dashboard = new DashboardClient(this);
+
+    this.eventLoader.init();
+
+    this.commandLoader.init();
   }
 
   /**
