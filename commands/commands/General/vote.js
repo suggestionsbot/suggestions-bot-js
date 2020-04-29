@@ -1,4 +1,4 @@
-const { RichEmbed } = require('discord.js');
+const { MessageEmbed } = require('discord.js');
 const Command = require('../../Command');
 
 module.exports = class VoteCommand extends Command {
@@ -24,7 +24,7 @@ module.exports = class VoteCommand extends Command {
         return `**${i++})** [**${site.name}**](${site.link})`;
       }).join('\n');
 
-    const voteEmbed = new RichEmbed()
+    const voteEmbed = new MessageEmbed()
       .setTitle('Vote Information')
       .setDescription(`
                 Vote for the ${this.client.user}'s bot on our vote sites list below!

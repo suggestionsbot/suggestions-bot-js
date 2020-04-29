@@ -49,8 +49,8 @@ module.exports = class BlacklistCommand extends Command {
 
         const blacklists = activeBlacklists.map(blacklist => {
           let time;
-          const issued = this.client.users.get(blacklist.userID);
-          const issuer = this.client.users.get(blacklist.issuerID);
+          const issued = this.client.users.cache.get(blacklist.userID);
+          const issuer = this.client.users.cache.get(blacklist.issuerID);
           const num = blacklist.case;
           const reason = blacklist.reason;
           const caseStatus = this.blStatus[blacklist.status];
@@ -96,7 +96,7 @@ module.exports = class BlacklistCommand extends Command {
 
     if (args[0] === 'help') return this.client.errors.noUsage(message.channel, this, settings);
 
-    const blUser = this.client.users.get(args[1]) || message.mentions.users.first();
+    const blUser = this.client.users.cache.get(args[1]) || message.mentions.users.first();
     const reason = args.slice(2).join(' ');
 
     if (!blUser) return this.client.errors.userNotFound(args[1], message.channel);
@@ -108,14 +108,18 @@ module.exports = class BlacklistCommand extends Command {
 
     switch(args[0]) {
     case 'add': {
-      if (!reason) return message.channel.send('Please provide a reason!').then(msg => msg.delete(5000)).catch(err => this.client.logger.error(err.stack));
+      if (!reason) {
+        return message.channel.send('Please provide a reason!')
+          .then(msg => msg.delete({ timeout: 5000 }))
+          .catch(err => this.client.logger.error(err.stack));
+      }
 
       const newBlacklist = {
         guildID: message.guild.id,
         userID: blUser.id,
         reason: reason,
         issuerID: message.author.id,
-        newTime: message.createdAt.getTime(),
+        newTime: message.createdTimestamp,
         status: true,
         case: caseNum
       };

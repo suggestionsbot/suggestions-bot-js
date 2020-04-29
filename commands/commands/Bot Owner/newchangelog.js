@@ -1,4 +1,4 @@
-const { RichEmbed } = require('discord.js');
+const { MessageEmbed } = require('discord.js');
 const Command = require('../../Command');
 
 module.exports = class NewChangelogCommand extends Command {
@@ -22,8 +22,8 @@ module.exports = class NewChangelogCommand extends Command {
 
     const channel = message.guild.channels.find(c => c.name === 'changelog');
 
-    const embed = new RichEmbed()
-      .setAuthor(message.author.tag, message.author.avatarURL)
+    const embed = new MessageEmbed()
+      .setAuthor(message.author.tag, message.author.avatarURL())
       .setDescription(changes)
       .addField('Date', new Date().toLocaleDateString())
       .setColor(embedColor);
@@ -38,6 +38,8 @@ module.exports = class NewChangelogCommand extends Command {
       if (confirmation === 'submit') {
         await message.channel.bulkDelete(2);
         return channel.send(embed);
+      } else {
+        await message.channel.bulkDelete(2);
       }
     } catch (err) {
       this.client.logger.error(err.message);

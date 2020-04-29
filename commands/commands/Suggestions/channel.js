@@ -14,9 +14,9 @@ module.exports = class ChannelCommand extends Command {
 
     await message.delete().catch(O_o => {});
 
-    const validation = message.guild.channels.find(c => c.name === settings.suggestionsChannel) ||
-            message.guild.channels.find(c => c.toString() === settings.suggestionsChannel) ||
-            message.guild.channels.get(settings.suggestionsChannel);
+    const validation = message.guild.channels.cache.find(c => c.name === settings.suggestionsChannel) ||
+            message.guild.channels.cache.find(c => c.toString() === settings.suggestionsChannel) ||
+            message.guild.channels.cache.get(settings.suggestionsChannel);
 
     if (!validation) return message.channel.send('There is no suggestions channel set or I can\'t find the default one.');
 

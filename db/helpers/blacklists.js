@@ -120,8 +120,8 @@ module.exports = class BlacklistsHelpers {
     const newBlacklist = await new Blacklist(merged);
     const data = await newBlacklist.save();
 
-    const issued = this.client.users.get(data.userID);
-    const issuer = this.client.users.get(data.issuerID);
+    const issued = this.client.users.cache.get(data.userID);
+    const issuer = this.client.users.cache.get(data.issuerID);
 
     this.client.logger.log(oneLine`
       "${issuer.tag}" (${issuer.id}) has issued a ${data.scope === 'global' ? 'global blacklist ' : 'guild blacklist '}
@@ -157,8 +157,8 @@ module.exports = class BlacklistsHelpers {
 
     const updated = await guildMemberBlacklist.updateOne(data);
 
-    const issued = this.client.users.get(data.userID);
-    const issuer = this.client.users.get(data.issuerID);
+    const issued = this.client.users.cache.get(data.userID);
+    const issuer = this.client.users.cache.get(data.issuerID);
 
     this.client.logger.log(oneLine`
       "${issuer.tag}" (${issuer.id}) has issued a ${data.scope === 'global' ? 'global blacklist ' : 'guild blacklist '}

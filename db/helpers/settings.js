@@ -32,8 +32,8 @@ module.exports = class SettingsHelpers {
      */
   async getGuild(guild) {
     let data = await Settings.findOne({ $or: this._guildQuery(guild) });
-      // we're going to keep it as 0 because guild settings don't always change
-      // .cache(0, guild.id);
+    // we're going to keep it as 0 because guild settings don't always change
+    // .cache(0, guild.id);
 
     if (data == null) {
       data = {
@@ -74,7 +74,7 @@ module.exports = class SettingsHelpers {
     // clear the cache for updated settings to show
     // cachegoose.clearCache(guild.id);
 
-    await this.client.shard.broadcastEval(`this.guilds.get('${guildID}')`)
+    await this.client.shard.broadcastEval(`this.guilds.cache.get('${guildID}')`)
       .then(guildArray => {
         const found = guildArray.find(g => g);
         if (!found) return false;
@@ -128,7 +128,7 @@ module.exports = class SettingsHelpers {
     const data = await newSettings.save();
     const { guildID } = data;
 
-    await this.client.shard.broadcastEval(`this.guilds.get('${guildID}')`)
+    await this.client.shard.broadcastEval(`this.guilds.cache.get('${guildID}')`)
       .then(guildArray => {
         const found = guildArray.find(g => g);
         if (!found) return false;

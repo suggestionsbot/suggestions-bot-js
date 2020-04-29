@@ -1,5 +1,5 @@
 const { oneLine } = require('common-tags');
-const { RichEmbed } = require('discord.js');
+const { MessageEmbed } = require('discord.js');
 const Command = require('../../Command');
 
 module.exports = class HelpCommand extends Command {
@@ -53,7 +53,7 @@ module.exports = class HelpCommand extends Command {
       const cmdHelp = cmdObj.help;
       const cmdConf = cmdObj.conf;
 
-      const cmdHelpEmbed = new RichEmbed()
+      const cmdHelpEmbed = new MessageEmbed()
         .setTitle(`${cmdHelp.name} | Help Information`)
         .setDescription(cmdHelp.description)
         .addField('Category', `\`${cmdHelp.category}\``, true)
@@ -67,7 +67,7 @@ module.exports = class HelpCommand extends Command {
       return message.channel.send(cmdHelpEmbed);
     }
 
-    const helpEmbed = new RichEmbed()
+    const helpEmbed = new MessageEmbed()
       .setTitle('Help Information')
       .setDescription(oneLine`
           View help information for ${this.client.user}.
@@ -98,7 +98,7 @@ module.exports = class HelpCommand extends Command {
       if (ownerCheck) helpEmbed.addField('🔒 Owner Commands', this.mapCommands(cmds, 'Bot Owner').join(' | '));
     }
     helpEmbed.addField('ℹ Website', website);
-    helpEmbed.addField('❗ Found an issue?', `Please report any issues to the **Support Team** via the Support Discord: ${discord}`);
+    helpEmbed.addField('❗ Found an issue?', `Please report any issues directly to the **Support Team** via the Support Discord: ${discord}`);
 
     message.channel.send(helpEmbed);
   }

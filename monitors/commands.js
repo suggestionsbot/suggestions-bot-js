@@ -37,7 +37,7 @@ module.exports = class CommandHandler {
     const args = message.content.slice(newPrefix.length).trim().split(/ +/g);
     const command = args.shift().toLowerCase();
 
-    if (message.guild && !message.member) await message.guild.fetchMember(message.author);
+    if (message.guild && !message.member) await message.guild.members.fetch(message.author);
 
     const cmd = this.client.commands.get(command) || this.client.commands.get(this.client.aliases.get(command));
     if (!cmd) return;
@@ -53,7 +53,7 @@ module.exports = class CommandHandler {
     const roles = settings.staffRoles;
     let staffRoles;
     if ((roles.length > 0) && message.guild) {
-      staffRoles = message.guild.roles
+      staffRoles = message.guild.roles.cache
         .filter(role => roles.map(r => r.role).includes(role.id))
         .map(r => r);
     } else {
@@ -64,7 +64,7 @@ module.exports = class CommandHandler {
       adminCheck;
 
     if (message.guild) {
-      if (staffRoles) staffCheck = message.member.roles.some(r => staffRoles.map(sr => sr.id).includes(r.id));
+      if (staffRoles) staffCheck = message.member.roles.cache.some(r => staffRoles.map(sr => sr.id).includes(r.id));
       else staffCheck = message.member.hasPermission('MANAGE_GUILD');
       adminCheck = message.member.hasPermission('MANAGE_GUILD');
     }
@@ -90,7 +90,7 @@ module.exports = class CommandHandler {
       command: cmd.help.name,
       channel: message.guild ? message.channel.name : null,
       userID: message.author.id,
-      newTime: message.createdAt.getTime()
+      newTime: message.createdTimestamp
     };
 
     if (message.guild) {
@@ -99,7 +99,7 @@ module.exports = class CommandHandler {
         const missing = message.channel.permissionsFor(this.client.user).missing(cmd.conf.botPermissions);
         if (missing.length > 0) {
           this.client.emit('commandBlocked', cmd, `botPermissions: ${missing.join(', ')}`);
-          if (missing.length === 1) return message.reply(`I need the \`${permissions[missing[0]]}\` permission for the \`${cmd.help.name}\` command to work.`).then(msg => msg.delete(5000));
+          if (missing.length === 1) return message.reply(`I need the \`${permissions[missing[0]]}\` permission for the \`${cmd.help.name}\` command to work.`).then(msg => msg.delete({ timeout: 5000 }));
           return message.reply(oneLine`
               I need the following permissions for the \`${cmd.help.name}\` command to work:
               ${missing.map(p => `\`${permissions[p]}\``).join(', ')}

@@ -1,4 +1,4 @@
-const { RichEmbed } = require('discord.js');
+const { MessageEmbed } = require('discord.js');
 const hastebin = require('hastebin-gen');
 const Command = require('../../Command');
 
@@ -21,8 +21,8 @@ module.exports = class EvalCommand extends Command {
     const code = args.join(' ');
     if (!code) return this.client.errors.noUsage(message.channel, this, settings);
 
-    const embed = new RichEmbed().setFooter(`ID: ${message.author.id}`);
-    const exceededEmbed = new RichEmbed().setFooter(`ID: ${message.author.id}`);
+    const embed = new MessageEmbed().setFooter(`ID: ${message.author.id}`);
+    const exceededEmbed = new MessageEmbed().setFooter(`ID: ${message.author.id}`);
 
     try {
       const evaled = eval(code);
@@ -42,7 +42,7 @@ module.exports = class EvalCommand extends Command {
 
         const msg = await message.channel.send(exceededEmbed);
         await msg.react('📧');
-        await msg.delete(2500);
+        await msg.delete({ timeout: 2500 });
         return;
       }
 
@@ -62,7 +62,7 @@ module.exports = class EvalCommand extends Command {
 
         const msg = await message.channel.send(exceededEmbed);
         await msg.react('📧');
-        await msg.delete(5000);
+        await msg.delete({ timeout: 5000 });
         return;
       }
 

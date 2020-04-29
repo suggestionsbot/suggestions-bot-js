@@ -1,4 +1,4 @@
-const { RichEmbed, Constants } = require('discord.js');
+const { MessageEmbed, Constants } = require('discord.js');
 const moment = require('moment');
 
 module.exports = class {
@@ -11,17 +11,17 @@ module.exports = class {
     let guildOwner;
 
     try {
-      guildOwner = await this.client.fetchUser(guild.ownerID);
+      guildOwner = await this.client.users.fetch(guild.ownerID);
     } catch (error) {
       this.client.logger.error(error.stack);
     }
 
-    const newServer = new RichEmbed()
+    const newServer = new MessageEmbed()
       .setTitle('Added')
       .setDescription(`
         **ID:** \`${guild.id}\`
         **Name:** \`${guild.name}\`
-        **Members:** \`${guild.members.size}\`
+        **Members:** \`${guild.members.cache.size}\`
         **Created:** \`${moment(guild.createdAt).fromNow()}\`
         **Owner:** ${guildOwner} \`[${guildOwner.tag}]\`
       `)
@@ -31,7 +31,7 @@ module.exports = class {
     switch (process.env.NODE_ENV) {
     // 498627833233539086 = #server logs / Nerd Cave Testing
     case 'development': {
-      this.client.shard.broadcastEval(`this.channels.get("498627833233539086").send({ embed: ${JSON.stringify(newServer)} });`)
+      this.client.shard.broadcastEval(`this.channels.cache.get("498627833233539086").send({ embed: ${JSON.stringify(newServer)} });`)
         .then(async channelArr => {
           const found = channelArr.find(c => c);
           if (!found) return this.client.logger.error('Could not find server logs channel.');
@@ -39,9 +39,9 @@ module.exports = class {
         .catch(err => this.client.logger.error(err));
       break;
     }
-    // 602332466476482616 = #server logs / Nerd Cave Development
+    // 602332466476482616 = #server logs / Suggestions
     default: {
-      this.client.shard.broadcastEval(`this.channels.get("602332466476482616").send({ embed: ${JSON.stringify(newServer)} });`)
+      this.client.shard.broadcastEval(`this.channels.cache.get("602332466476482616").send({ embed: ${JSON.stringify(newServer)} });`)
         .then(async channelArr => {
           const found = channelArr.find(c => c);
           if (!found) return this.client.logger.error('Could not find server logs channel');

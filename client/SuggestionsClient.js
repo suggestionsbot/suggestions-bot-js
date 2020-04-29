@@ -1,3 +1,4 @@
+require('dotenv-flow').config();
 const { Client, Collection, Constants, Guild, Emoji } = require('discord.js');
 const Mongoose = require('../db/mongoose');
 
@@ -38,6 +39,10 @@ module.exports = class SuggestionsClient extends Client {
     this.errors = new ErrorHandler(this);
 
     this.dashboard = new DashboardClient(this);
+
+    this.eventLoader.init();
+
+    this.commandLoader.init();
   }
 
   /**
@@ -122,7 +127,7 @@ module.exports = class SuggestionsClient extends Client {
   }
 
   findEmojiByID(id) {
-    const temp = this.emojis.get(id);
+    const temp = this.emojis.cache.get(id);
     if (!temp) return null;
 
     // Clone the object because it is modified right after, so as to not affect the cache in client.emojis
@@ -136,7 +141,7 @@ module.exports = class SuggestionsClient extends Client {
   }
 
   findEmojiByName(name) {
-    const temp = this.emojis.find(e => e.name === name);
+    const temp = this.emojis.cache.find(e => e.name === name);
     if (!temp) return null;
 
     // Clone the object because it is modified right after, so as to not affect the cache in client.emojis
@@ -150,7 +155,7 @@ module.exports = class SuggestionsClient extends Client {
   }
 
   findEmojiByString(string) {
-    const temp = this.emojis.find(e => e.toString() === string);
+    const temp = this.emojis.cache.find(e => e.toString() === string);
     if (!temp) return null;
 
     // Clone the object because it is modified right after, so as to not affect the cache in client.emojis

@@ -1,6 +1,10 @@
+if (Number(process.version.slice(1).split('.')[0]) < 8) throw new Error('Node 8.0.0 or higher is required. Update Node on your system.');
+
 require('dotenv-flow').config();
-const logger = require('./utils/logger');
+
 const { ShardingManager } = require('discord.js');
+const logger = require('./utils/logger');
+
 const manager = new ShardingManager('./bot.js', {
   token: process.env.CLIENT_TOKEN,
   totalShards: 'auto',
