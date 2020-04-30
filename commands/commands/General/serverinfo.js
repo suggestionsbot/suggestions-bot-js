@@ -24,19 +24,19 @@ module.exports = class GuildInfoCommand extends Command {
 
     const { embedColor } = this.client.config;
 
-    const icon = message.guild.icon;
-    const id = message.guild.id;
-    const srvIcon = `https://cdn.discordapp.com/icons/${id}/${icon}.png?size=2048`;
-
-    const bot = message.guild.me;
+    const srvIcon = message.guild.iconURL({ format: 'png', size: 2048, dynamic: true });
 
     const createdOn = moment.utc(message.guild.createdAt).format('MM/DD/YY @ h:mm A (z)');
-    const joinedOn = moment.utc(bot.joinedAt).format('MM/DD/YY @ h:mm A (z)');
+    const joinedOn = moment.utc(message.guild.me.joinedAt).format('MM/DD/YY @ h:mm A (z)');
 
-    const gSuggestions = await this.client.suggestions.getGuildSuggestions(message.guild).catch(err => {
-      this.client.logger.error(err);
-      return message.channel.send(`Error querying the database for this guild's suggestions: **${err.message}**.`);
-    });
+    let gSuggestions;
+
+    try {
+      gSuggestions = await this.client.suggestions.getGuildSuggestions(message.guild);
+    } catch (error) {
+      this.client.logger.error(error.stack);
+      return message.channel.send(`An error occurred: **${error.message}**`);
+    }
 
     const serverEmbed = new MessageEmbed()
       .setTitle(message.guild)

@@ -6,7 +6,10 @@ const { oneLine } = require('common-tags');
 
 const SuggestionsClient = require('./client/SuggestionsClient');
 
-const client = new SuggestionsClient({ disableEveryone: true });
+const client = new SuggestionsClient({
+  disableEveryone: true,
+  partials: ['MESSAGE', 'CHANNEL', 'REACTION']
+});
 client.login();
 
 client.on('commandBlocked', (cmd, reason) => {

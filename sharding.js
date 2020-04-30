@@ -6,7 +6,7 @@ const { ShardingManager } = require('discord.js');
 const logger = require('./utils/logger');
 
 const manager = new ShardingManager('./bot.js', {
-  token: process.env.CLIENT_TOKEN,
+  token: process.env.DISCORD_TOKEN,
   totalShards: 'auto',
   respawn: true
 });

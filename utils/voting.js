@@ -6,22 +6,13 @@ module.exports = async (client) => {
 
   const guildsPerShard = await client.shard.fetchClientValues('guilds.size');
   const guildSizeCount = guildsPerShard.reduce((prev, count) => prev + count, 0);
-  // guildSize = guildSize.reduce((prev, count) => prev + count, 0);
 
   setInterval(async () => {
-    // postDBorg();
-    // postBotsGG();
-    // postDBotList();
-    // postDivine();
-    // postBLSpace();
-    // postDiscordApps();
-    // postBfd();
 
     const promises = [
-      postDBorg,
+      postTopgg,
       postBotsGG,
       postDBotList,
-      postDivine,
       postBLSpace,
       postDiscordApps,
       postBfd
@@ -31,20 +22,20 @@ module.exports = async (client) => {
     client.logger.log(`Posted to ${results.length} vote sites.`);
   }, 300000);
 
-  async function postDBorg() {
+  async function postTopgg() {
     // Discord Bots (discordbots.org)
     try {
       const data = {
         shards: guildsPerShard,
-        shard_id: client.shard.id,
+        shard_id: client.shard.ids[0],
         shard_count: client.shard.count
       };
       const body = JSON.stringify(data);
 
-      const posted = await fetch(`https://discordbots.org/api/bots/${client.user.id}/stats`, {
+      const posted = await fetch(`https://top.gg/api/bots/${client.user.id}/stats`, {
         method: 'POST',
         headers: {
-          'Authorization': tokens.dblToken,
+          'Authorization': tokens.topggToken,
           'Content-Type': 'application/json'
         },
         body: body
@@ -63,7 +54,7 @@ module.exports = async (client) => {
       const data = {
         guildCount: guildsPerShard,
         shardCount: client.shard.count,
-        shardId: client.shard.id
+        shardId: client.shard.ids[0]
       };
       const body = JSON.stringify(data);
 
@@ -88,7 +79,7 @@ module.exports = async (client) => {
     try {
       const data = {
         guilds: guildsPerShard,
-        shard_id: client.shard.id
+        shard_id: client.shard.ids[0]
       };
       const body = JSON.stringify(data);
 
@@ -105,28 +96,6 @@ module.exports = async (client) => {
       else client.logger.log('Server count posted to discordbotlist.com!');
     } catch (err) {
       return client.logger.error(`Error posting to discordbotlist.com: ${err.message}`);
-    }
-  }
-
-  async function postDivine() {
-    // Divine Discord Bot List (divinediscordbots.com)
-    const data = { server_count : guildSizeCount };
-    const body = JSON.stringify(data);
-
-    try {
-      const posted = await fetch(`https://divinediscordbots.com/bot/${client.user.id}/stats`, {
-        method: 'POST',
-        headers: {
-          'Authorization': tokens.ddbToken,
-          'Content-Type': 'application/json'
-        },
-        body: body
-      });
-
-      if (!posted.ok) throw new Error(posted.statusText);
-      else client.logger.log('Server count posted to divinediscordbots.com!');
-    } catch (err) {
-      return client.logger.error(`Error posting to divinediscordbots.com: ${err.message}`);
     }
   }
 

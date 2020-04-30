@@ -21,12 +21,12 @@ module.exports = class ChangelogCommand extends Command {
     const { embedColor, discord } = this.client.config;
 
     const channelID = process.env.NODE_ENV === 'production' ? '602326597613256734' : '504074783604998154';
-    this.client.shard.broadcastEval(`this.channels.get('${channelID}')`)
+    this.client.shard.broadcastEval(`this.channels.cache.get('${channelID}')`)
       .then(async channelArr => {
         const found = channelArr.find(c => c);
         if (!found) return message.channel.send('The official changelog channel was not found!');
 
-        return this.client.rest.makeRequest('get', Constants.Endpoints.Guild(found.guild).toString(), true)
+        return this.client.api.guilds(found.guild).get()
           .then(async raw => {
             const guild = new Guild(this.client, raw);
             const channel = new TextChannel(guild, found);

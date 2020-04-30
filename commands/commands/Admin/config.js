@@ -1,4 +1,4 @@
-const { Constants, MessageEmbed, Guild, Emoji  } = require('discord.js');
+const { Constants, MessageEmbed, Guild, GuildEmoji  } = require('discord.js');
 const { stripIndent } = require('common-tags');
 const Command = require('../../Command');
 
@@ -44,16 +44,16 @@ module.exports = class ConfigCommand extends Command {
     try {
       roles = message.guild.roles.cache.filter(role => staffRoles.map(r => r.role).includes(role.id));
 
-      suggestionsChannel = message.guild.channels.find(c => c.name === suggestionsChannel) ||
-        (message.guild.channels.get(suggestionsChannel)) ||
+      suggestionsChannel = message.guild.channels.cache.find(c => c.name === suggestionsChannel) ||
+        (message.guild.channels.cache.get(suggestionsChannel)) ||
         '';
 
-      suggestionsLogs = message.guild.channels.find(c => c.name === suggestionsLogs) ||
-          message.guild.channels.get(suggestionsLogs) ||
+      suggestionsLogs = message.guild.channels.cache.find(c => c.name === suggestionsLogs) ||
+          message.guild.channels.cache.get(suggestionsLogs) ||
           '';
           
-      staffSuggestionsChannel = message.guild.channels.find(c => c.name === staffSuggestionsChannel) ||
-        (message.guild.channels.find(c => c.id === staffSuggestionsChannel)) ||
+      staffSuggestionsChannel = message.guild.channels.cache.find(c => c.name === staffSuggestionsChannel) ||
+        (message.guild.channels.cache.find(c => c.id === staffSuggestionsChannel)) ||
         '';
         
     } catch (err) {
@@ -62,7 +62,7 @@ module.exports = class ConfigCommand extends Command {
     }
 
     const configEmbed = new MessageEmbed()
-      .setAuthor(message.guild, message.guild.iconURL)
+      .setAuthor(message.guild, message.guild.iconURL())
       .setColor(embedColor)
       .setFooter(`Guild: ${message.guild.id}`)
       .setTimestamp();
@@ -72,10 +72,10 @@ module.exports = class ConfigCommand extends Command {
         const found = emojiArray.find(e => e);
         if (!found) return '✅';
 
-        return this.client.rest.makeRequest('get', Constants.Endpoints.Guild(found.guild).toString(), true)
+        return this.client.api.guilds(found.guild).get()
           .then(raw => {
             const guild = new Guild(this.client, raw);
-            const gEmoji = new Emoji(guild, found);
+            const gEmoji = new GuildEmoji(this.client, found, guild);
             return `<:${gEmoji.name}:${gEmoji.id}>`;
           });
       })
@@ -86,7 +86,7 @@ module.exports = class ConfigCommand extends Command {
 
     switch (setting) {
     case 'prefix': {
-      configEmbed.setAuthor(`${message.guild} | Prefix`, message.guild.iconURL);
+      configEmbed.setAuthor(`${message.guild} | Prefix`, message.guild.iconURL());
 
       if (updated) {
         try {
@@ -107,11 +107,11 @@ module.exports = class ConfigCommand extends Command {
       break;
     }
     case 'channel': {
-      configEmbed.setAuthor(`${message.guild} | Suggestions Channel`, message.guild.iconURL);
+      configEmbed.setAuthor(`${message.guild} | Suggestions Channel`, message.guild.iconURL());
 
       if (updated) {
-        const verified = message.guild.channels.find(c => c.name === updated) ||
-          message.guild.channels.get(updated) ||
+        const verified = message.guild.channels.cache.find(c => c.name === updated) ||
+          message.guild.channels.cache.get(updated) ||
           message.mentions.channels.first();
         if (!verified) return this.client.errors.channelNotFound(updated, message.channel);
 
@@ -133,11 +133,11 @@ module.exports = class ConfigCommand extends Command {
       break;
     }
     case 'logs': {
-      configEmbed.setAuthor(`${message.guild} | Suggestion Logs Channel`, message.guild.iconURL);
+      configEmbed.setAuthor(`${message.guild} | Suggestion Logs Channel`, message.guild.iconURL());
 
       if (updated) {
-        const verified = message.guild.channels.find(c => c.name === updated) ||
-          message.guild.channels.get(updated) ||
+        const verified = message.guild.channels.cache.find(c => c.name === updated) ||
+          message.guild.channels.cache.get(updated) ||
           message.mentions.channels.first();
         if (!verified) return this.client.errors.channelNotFound(updated, message.channel);
 
@@ -159,11 +159,11 @@ module.exports = class ConfigCommand extends Command {
       break;
     }
     case 'staffchannel': {
-      configEmbed.setAuthor(`${message.guild} | Suggestions Staff Channel`, message.guild.iconURL);
+      configEmbed.setAuthor(`${message.guild} | Suggestions Staff Channel`, message.guild.iconURL());
 
       if (updated) {
-        const verified = message.guild.channels.find(c => c.name === updated) ||
-          message.guild.channels.get(updated) ||
+        const verified = message.guild.channels.cache.find(c => c.name === updated) ||
+          message.guild.channels.cache.get(updated) ||
           message.mentions.channels.first();
         if (!verified) return this.client.errors.channelNotFound(updated, message.channel);
 
@@ -185,7 +185,7 @@ module.exports = class ConfigCommand extends Command {
       break;
     }
     case 'roles': {
-      configEmbed.setAuthor(`${message.guild} | Staff Roles`, message.guild.iconURL);
+      configEmbed.setAuthor(`${message.guild} | Staff Roles`, message.guild.iconURL());
 
       if (updated) {
         const verified = message.guild.roles.cache.find(c => c.name === updated) ||
@@ -245,7 +245,7 @@ module.exports = class ConfigCommand extends Command {
     }
     case 'emojis': {
       if (!voteEmojis) voteEmojis = 'defaultEmojis';
-      configEmbed.setAuthor(`${message.guild} | Vote Emojis`, message.guild.iconURL);
+      configEmbed.setAuthor(`${message.guild} | Vote Emojis`, message.guild.iconURL());
 
       const setID = parseInt(updated);
 
@@ -261,10 +261,10 @@ module.exports = class ConfigCommand extends Command {
                 const found = emojiArray.find(e => e);
                 if (!found) return '**N/A**';
 
-                const emoji = await this.client.rest.makeRequest('get', Constants.Endpoints.Guild(found.guild).toString(), true)
+                const emoji = await this.client.api.guilds(found.guild).get()
                   .then(raw => {
                     const guild = new Guild(this.client, raw)
-                    const gEmoji = new Emoji(guild, found);
+                    const gEmoji = new GuildEmoji(this.client, found, guild);
                     return gEmoji;
                   });
 
@@ -302,10 +302,10 @@ module.exports = class ConfigCommand extends Command {
                 const found = emojiArray.find(e => e);
                 if (!found) return '**N/A**';
 
-                const emoji = await this.client.rest.makeRequest('get', Constants.Endpoints.Guild(found.guild).toString(), true)
+                const emoji = await this.client.api.guilds(found.guild).get()
                   .then(raw => {
                     const guild = new Guild(this.client, raw)
-                    const gEmoji = new Emoji(guild, found);
+                    const gEmoji = new GuildEmoji(this.client, found, guild);
                     return gEmoji;
                   });
 
@@ -341,7 +341,7 @@ module.exports = class ConfigCommand extends Command {
       break;
     }
     case 'responses': {
-      configEmbed.setAuthor(`${message.guild} | Suggestion Responses`, message.guild.iconURL);
+      configEmbed.setAuthor(`${message.guild} | Suggestion Responses`, message.guild.iconURL());
 
       if (updated) {
         switch (updated) {
@@ -379,7 +379,7 @@ module.exports = class ConfigCommand extends Command {
       break;
     }
     case 'commands': {
-      configEmbed.setAuthor(`${message.guild} | Disabled Commands`, message.guild.iconURL);
+      configEmbed.setAuthor(`${message.guild} | Disabled Commands`, message.guild.iconURL());
 
       if (updated) {
         const cmd = this.client.commands.get(updated);
@@ -434,7 +434,7 @@ module.exports = class ConfigCommand extends Command {
       break;
     }
     case 'dmResponses': {
-      configEmbed.setAuthor(`${message.guild} | DM Responses`, message.guild.iconURL);
+      configEmbed.setAuthor(`${message.guild} | DM Responses`, message.guild.iconURL());
 
       if (updated) {
         switch (updated) {
@@ -442,7 +442,7 @@ module.exports = class ConfigCommand extends Command {
           try {
             await this.client.settings.updateGuild(message.guild, { dmResponses: true });
             configEmbed.setDescription(stripIndent`
-                ${successEmoji} DM responses have been enabled. The bot will DM users when these actions happen:
+                ${successEmoji} DM responses have been **enabled**. The bot will DM users when these actions happen:
                   
                   - Suggestion submitted
                   - Suggestion approved
@@ -461,7 +461,7 @@ module.exports = class ConfigCommand extends Command {
           try {
             await this.client.settings.updateGuild(message.guild, { dmResponses: false });
             configEmbed.setDescription(stripIndent`
-                ${successEmoji} DM responses have been disabled. The bot will *not* DM users when these actions happen:
+                ${successEmoji} DM responses have been **disabled**. The bot will *not* DM users when these actions happen:
                   
                   - Suggestion submitted
                   - Suggestion approved

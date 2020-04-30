@@ -1,5 +1,5 @@
 /* eslint-disable no-useless-escape */
-const { Constants, MessageEmbed, Guild, Emoji, Util: { escapeMarkdown } } = require('discord.js');
+const { Constants, MessageEmbed, Guild, GuildEmoji, Util: { escapeMarkdown } } = require('discord.js');
 const { oneLine, stripIndent } = require('common-tags');
 const crypto = require('crypto');
 require('moment-duration-format');
@@ -105,10 +105,10 @@ module.exports = class SuggestCommand extends Command {
             const found = emojiArray.find(e => e);
             if (!found || !message.guild.me.hasPermission('USE_EXTERNAL_EMOJIS')) await m.react(fallbackSet[emojiIndex]);
 
-            return this.client.rest.makeRequest('get', Constants.Endpoints.Guild(found.guild).toString(), true)
+            return this.client.api.guilds(found.guild).get()
               .then(async raw => {
                 const guild = new Guild(this.client, raw);
-                const gEmoji = new Emoji(guild, found);
+                const gEmoji = new GuildEmoji(this.client, found, guild);
                 return await m.react(gEmoji);
               });
           })
@@ -126,10 +126,10 @@ module.exports = class SuggestCommand extends Command {
         const found = emojiArray.find(e => e);
         if (!found) return message.react('✅').then(() => message.delete({ timeout: 3000 }));
 
-        return this.client.rest.makeRequest('get', Constants.Endpoints.Guild(found.guild).toString(), true)
+        return this.client.api.guilds(found.guild).get()
           .then(async raw => {
             const guild = new Guild(this.client, raw);
-            const gEmoji = new Emoji(guild, found);
+            const gEmoji = new GuildEmoji(this.client, found, guild);
             return await message.react(gEmoji).then(() => message.delete({ timeout: 3000 }));
           });
       })

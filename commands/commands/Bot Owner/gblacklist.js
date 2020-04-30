@@ -111,7 +111,7 @@ module.exports = class GBlacklistCommand extends Command {
         userID: blUser.id,
         reason: reason,
         issuerID: message.author.id,
-        newTime: message.createdAtTimestamp,
+        newTime: message.createdTimestamp,
         status: true,
         case: caseNum,
         scope: 'global'
@@ -127,7 +127,7 @@ module.exports = class GBlacklistCommand extends Command {
         const check = await this.client.blacklists.checkRecentBlacklist(blUser, message.guild, true);
         if (check && check.status) return this.client.errors.userAlreadyBlacklisted(message.channel, blUser);
         await this.client.blacklists.addUserBlacklist(newBlacklist);
-        message.channel.send(blEmbed).then(msg => msg.delete(5000));
+        message.channel.send(blEmbed).then(msg => msg.delete({ timeout: 5000 }));
       } catch (err) {
         this.client.logger.error(err.stack);
         message.channel.send(`An error occurred: **${err.message}**.`);
@@ -153,7 +153,7 @@ module.exports = class GBlacklistCommand extends Command {
         const check = await this.client.blacklists.checkRecentBlacklist(blUser, message.guild, true);
         if (check && !check.status) return this.client.errors.userAlreadyBlacklisted(message.channel, blUser);
         await this.client.blacklists.removeUserBlacklist(removeBlacklist);
-        message.channel.send(blEmbed).then(msg => msg.delete(5000));
+        message.channel.send(blEmbed).then(msg => msg.delete({ timeout: 5000 }));
       } catch (err) {
         this.client.logger.error(err.stack);
         message.channel.send(`An error occurred: **${err.message}**.`);

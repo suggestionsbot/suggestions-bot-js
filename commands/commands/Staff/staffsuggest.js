@@ -21,7 +21,7 @@ module.exports = class StaffSuggestCommand extends Command {
 
     await message.delete().catch(O_o => {});
 
-    const sUser = message.member;
+    const sUser = message.author;
     const sChannel = message.guild.channels.cache.find(c => c.name === settings.staffSuggestionsChannel) ||
       message.guild.channels.cache.find(c => c.toString() === settings.staffSuggestionsChannel) ||
       message.guild.channels.cache.get(settings.staffSuggestionsChannel);
@@ -30,7 +30,7 @@ module.exports = class StaffSuggestCommand extends Command {
     if (!settings.staffRoles) return this.client.errors.noStaffRoles(message.channel);
 
     const embed = new MessageEmbed()
-      .setDescription(`Hey, ${sUser.user.tag}. Your suggestion has been added in the ${sChannel} channel to be voted on!`)
+      .setDescription(`Hey, ${sUser.tag}. Your suggestion has been added in the ${sChannel} channel to be voted on!`)
       .setColor(embedColor)
       .setAuthor(sUser.displayName)
       .setFooter(`User ID: ${sUser.id}`)
@@ -42,7 +42,7 @@ module.exports = class StaffSuggestCommand extends Command {
     const sEmbed = new MessageEmbed()
       .setDescription(`
       **Submitter**
-      ${sUser.user.tag}
+      ${sUser.tag}
 
       **Suggestion**
       ${suggestion}
@@ -59,7 +59,7 @@ module.exports = class StaffSuggestCommand extends Command {
 
     message.channel.send(embed).then(msg => msg.delete({ timeout: 5000 })).catch(err => this.client.logger.error(err.stack));
 
-    this.client.logger.log(`New staff suggestion submitted by "${sUser.user.tag}" (${sUser.id}) in "${message.guild}" (${message.guild.id})`);
+    this.client.logger.log(`New staff suggestion submitted by "${sUser.tag}" (${sUser.id}) in "${message.guild}" (${message.guild.id})`);
 
     return sChannel.send(sEmbed)
       .then(async msg => {

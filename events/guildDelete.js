@@ -37,7 +37,7 @@ module.exports = class {
     }
 
     switch (process.env.NODE_ENV) {
-    // 498627833233539086 = #server logs / Nerd Cave Testing
+    // 498627833233539086 = #server_logs / Nerd Cave Testing
     case 'development': {
       this.client.shard.broadcastEval(`this.channels.cache.get("498627833233539086").send({ embed: ${JSON.stringify(oldServer)} });`)
         .then(async channelArr => {
@@ -47,7 +47,7 @@ module.exports = class {
         .catch(err => this.client.logger.error(err));
       break;
     }
-    // 602332466476482616 = #server logs / Suggestions
+    // 602332466476482616 = #server_logs / Suggestions
     default: {
       this.client.shard.broadcastEval(`this.channels.cache.get("602332466476482616").send({ embed: ${JSON.stringify(oldServer)} });`)
         .then(async channelArr => {

@@ -28,15 +28,15 @@ module.exports = class HelpCommand extends Command {
     const ownerCheck = this.client.isOwner(message.author.id);
 
     if (message.guild) {
-      suggestionsChannel = message.guild.channels.find(c => c.name === suggestionsChannel) ||
-        message.guild.channels.find(c => c.toString() === suggestionsChannel) ||
-        message.guild.channels.get(suggestionsChannel) || '';
+      suggestionsChannel = message.guild.channels.cache.find(c => c.name === suggestionsChannel) ||
+        message.guild.channels.cache.find(c => c.toString() === suggestionsChannel) ||
+        message.guild.channels.cache.get(suggestionsChannel) || '';
 
       staffRoles = [];
-      if (roles) staffRoles = roles.map(({ role }) => message.guild.roles.get(role));
+      if (roles) staffRoles = roles.map(({ role }) => message.guild.roles.cache.get(role));
 
       staffCheck = message.member.hasPermission('MANAGE_GUILD') ||
-        message.member.roles.some(r => staffRoles.includes(r));
+        message.member.roles.cache.some(r => staffRoles.includes(r));
 
       adminCheck = message.member.hasPermission('MANAGE_GUILD');
     }

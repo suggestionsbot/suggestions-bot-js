@@ -1,4 +1,4 @@
-const { RichEmbed } = require('discord.js');
+const { MessageEmbed } = require('discord.js');
 const { oneLine, stripIndent } = require('common-tags');
 const Command = require('../../Command');
 
@@ -37,7 +37,7 @@ module.exports = class BlacklistCommand extends Command {
     }
 
     const caseNum = total + 1;
-    const blEmbed = new RichEmbed()
+    const blEmbed = new MessageEmbed()
       .setColor(embedColor)
       .setFooter(`Guild: ${message.guild.id}`)
       .setTimestamp();
@@ -82,7 +82,7 @@ module.exports = class BlacklistCommand extends Command {
 
         if (activeBlacklists.length < 1) {
           return message.channel.send(`There are currently no active blacklisted users. Use \`${prefix + name} help\` for more information.`)
-            .then(m => m.delete(5000));
+            .then(m => m.delete({ timeout: 5000 }));
         }
 
         message.channel.send(blEmbed);
@@ -102,7 +102,7 @@ module.exports = class BlacklistCommand extends Command {
     if (!blUser) return this.client.errors.userNotFound(args[1], message.channel);
     if (blUser.id === message.author.id) {
       return message.channel.send('You cannot issue a blacklist to yourself!')
-        .then(m => m.delete(5000))
+        .then(m => m.delete({ timeout: 5000 }))
         .catch(e => this.client.logger.error(e.stack));
     }
 
@@ -131,7 +131,7 @@ module.exports = class BlacklistCommand extends Command {
       blEmbed.addField('Issuer', `${message.author} \`[${message.author.id}]\``);
 
 
-      const dmBlacklistAdd = new RichEmbed()
+      const dmBlacklistAdd = new MessageEmbed()
         .setDescription(stripIndent`
           Hello ${blUser},
 
@@ -148,7 +148,7 @@ module.exports = class BlacklistCommand extends Command {
         const check = await this.client.blacklists.checkRecentBlacklist(blUser, message.guild);
         if (check && check.status) return this.client.errors.userAlreadyBlacklisted(message.channel, blUser);
         await this.client.blacklists.addUserBlacklist(newBlacklist);
-        message.channel.send(blEmbed).then(msg => msg.delete(5000));
+        message.channel.send(blEmbed).then(msg => msg.delete({ timeout: 5000 }));
         await blUser.send(dmBlacklistAdd);
       } catch (err) {
         this.client.logger.error(err.stack);
@@ -157,7 +157,7 @@ module.exports = class BlacklistCommand extends Command {
             Bot blacklist has been issued. However, I could not DM **${blUser.tag}** because they either have DMs disabled
             or aren't a member of this server.
           `)
-            .then(m => m.delete(5000));
+            .then(m => m.delete({ timeout: 5000 }));
         }
         message.channel.send(`An error occurred: **${err.message}**.`);
       }
@@ -178,7 +178,7 @@ module.exports = class BlacklistCommand extends Command {
       blEmbed.addField('User ID', `${blUser} \`[${blUser.id}]\``, true);
       blEmbed.addField('Issuer', `${message.author} \`[${message.author.id}]\``);
 
-      const dmBlacklistRemove = new RichEmbed()
+      const dmBlacklistRemove = new MessageEmbed()
         .setDescription(stripIndent`
           Hello ${blUser},
 
@@ -193,7 +193,7 @@ module.exports = class BlacklistCommand extends Command {
         const check = await this.client.blacklists.checkRecentBlacklist(blUser, message.guild);
         if (check && !check.status) return this.client.errors.userNoLongerBlacklisted(message.channel, blUser);
         await this.client.blacklists.removeUserBlacklist(removeBlacklist);
-        message.channel.send(blEmbed).then(msg => msg.delete(5000));
+        message.channel.send(blEmbed).then(msg => msg.delete({ timeout: 5000 }));
         await blUser.send(dmBlacklistRemove);
       } catch (err) {
         this.client.logger.error(err.stack);
@@ -202,7 +202,7 @@ module.exports = class BlacklistCommand extends Command {
             Bot blacklist removal has been issued. However, I could not DM **${blUser.tag}** because they either have DMs disabled
             or aren't a member of this server.
           `)
-            .then(m => m.delete(5000));
+            .then(m => m.delete({ timeout: 5000 }));
         }
         message.channel.send(`An error occurred: **${err.message}**.`);
       }
