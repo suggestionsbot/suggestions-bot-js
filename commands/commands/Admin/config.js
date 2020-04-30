@@ -228,7 +228,7 @@ module.exports = class ConfigCommand extends Command {
         .map(r => r.toString())
         .join('\n') || null;
 
-      const admins = message.guild.members
+      const admins = message.guild.members.cache
         .filter(m => !m.user.bot && m.hasPermission('MANAGE_GUILD'))
         .map(m => m.toString())
         .join('\n');
