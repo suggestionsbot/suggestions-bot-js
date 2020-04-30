@@ -13,7 +13,7 @@ module.exports = class {
     let guildOwner;
 
     try {
-      guildOwner = await this.client.fetchUser(guild.ownerID);
+      guildOwner = await this.client.users.fetch(guild.ownerID);
     } catch (error) {
       this.client.logger.error(error.stack);
     }
@@ -24,7 +24,7 @@ module.exports = class {
         **ID:** \`${guild.id}\`
         **Name:** \`${guild}\`
         **Members:** \`${guild.members.cache.size}\`
-        **Joined:** \`${moment(guild.me.joinedAt).fromNow()}\`
+        **Joined:** \`${moment(this.client.user.joinedAt).fromNow()}\`
         **Owner:** ${guildOwner} \`[${guildOwner.tag}]\`
       `)
       .setColor(deleted)
