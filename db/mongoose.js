@@ -11,8 +11,8 @@ module.exports = class Mongoose {
     const dbOptions = {
       useNewUrlParser: true,
       autoIndex: false,
-      reconnectTries: Number.MAX_VALUE,
-      reconnectInterval: 500,
+      // reconnectTries: Number.MAX_VALUE,
+      // reconnectInterval: 500,
       poolSize: 5,
       connectTimeoutMS: 10000,
       family: 4
@@ -20,6 +20,7 @@ module.exports = class Mongoose {
 
     mongoose.connect(process.env.MONGO_URI, dbOptions);
     mongoose.set('useFindAndModify', false);
+    mongoose.set('useUnifiedTopology', true);
     mongoose.Promise = global.Promise;
 
     this.connection = mongoose.connection;
