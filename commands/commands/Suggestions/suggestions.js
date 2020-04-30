@@ -67,7 +67,7 @@ module.exports = class MySuggestionsCommand extends Command {
 
     if (message.guild) {
       createdOn = moment.utc(message.guild.createdAt).format('MM/DD/YY @ h:mm A (z)');
-      joinedOn = moment.utc(message.guild.members.get(sUser.id).joinedAt).format('MM/DD/YY @ h:mm A (z)');
+      joinedOn = moment.utc(message.guild.members.cache.get(sUser.id).joinedAt).format('MM/DD/YY @ h:mm A (z)');
     }
 
     const embed = new MessageEmbed()

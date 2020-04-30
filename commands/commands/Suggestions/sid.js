@@ -1,4 +1,4 @@
-const { Constants, MessageEmbed, Guild, Emoji } = require('discord.js');
+const { Constants, MessageEmbed, Guild, GuildEmoji } = require('discord.js');
 const { stripIndent } = require('common-tags');
 const Command = require('../../Command');
 
@@ -21,50 +21,50 @@ module.exports = class SIDCommand extends Command {
 
     if (!args[0]) return this.client.errors.noUsage(message.channel, this, settings);
 
-    let sID;
+    let suggestion;
     try {
-      sID = await this.client.suggestions.getGuildSuggestion(message.guild, args[0]);
+      suggestion = await this.client.suggestions.getGuildSuggestion(message.guild, args[0]);
     } catch (err) {
       this.client.logger.error(err.stack);
       return message.channel.send(`An error occurred: **${err.message}**`);
     }
 
-    if (!sID) return this.client.errors.noSuggestion(message.channel, args[0]);
+    if (!suggestion) return this.client.errors.noSuggestion(message.channel, args[0]);
 
     let updatedOn,
       sStaff;
 
-    if (sID.statusUpdated) updatedOn = sID.statusUpdated;
-    if (sID.newStatusUpdated) updatedOn = sID.newStatusUpdated;
+    if (suggestion.statusUpdated) updatedOn = suggestion.statusUpdated;
+    if (suggestion.newStatusUpdated) updatedOn = suggestion.newStatusUpdated;
 
-    const sUser = await this.client.users.fetch(sID.userID).catch(err => this.client.logger.error(err));
-    if (sID.hasOwnProperty('staffMemberID')) {
-      sStaff = await this.client.users.fetch(sID.staffMemberID).catch(err => this.client.logger.error(err));
+    const sUser = await this.client.users.fetch(suggestion.userID).catch(err => this.client.logger.error(err));
+    if (suggestion._doc.hasOwnProperty('staffMemberID')) {
+      sStaff = await this.client.users.fetch(suggestion.staffMemberID).catch(err => this.client.logger.error(err));
     }
 
 
     const embed = new MessageEmbed()
       .setAuthor(message.guild, message.guild.iconURL())
-      .setTitle(`Info for ${sID.sID}`)
-      .setFooter(`User ID: ${sUser.id} | sID: ${sID.sID}`);
+      .setTitle(`Info for ${suggestion.sID}`)
+      .setFooter(`User ID: ${sUser.id} | sID: ${suggestion.sID}`);
 
     let view,
       time;
-    if (sID.time && !sID.newTime) time = sID.time;
-    if (!sID.time && sID.newTime) time = sID.newTime;
-    if (!sID.time && !sID.newTime) time = sID._id.getTimestamp();
+    if (suggestion.time && !suggestion.newTime) time = suggestion.time;
+    if (!suggestion.time && suggestion.newTime) time = suggestion.newTime;
+    if (!suggestion.time && !suggestion.newTime) time = suggestion._id.getTimestamp();
 
-    if (sID.results.length > 1) {
-      const results = sID.results.map(async r => {
+    if (suggestion.results.length > 1) {
+      const results = suggestion.results.map(async r => {
         await this.client.shard.broadcastEval(`this.findEmojiByString.call(this, '${r.emoji}')`)
           .then(async emojiArray => {
             const found = emojiArray.find(e => e);
             if (!found) return r.emoji = r.emoji || '**N/A**';
 
-            const emoji = await this.client.rest.makeRequest('get', Constants.Endpoints.Guild(found.guild).toString(), true)
+            const emoji = await this.client.api.guilds(found.guild).get()
               .then(raw => {
                 const guild = new Guild(this.client, raw);
-                const gEmoji = new Emoji(guild, found);
+                const gEmoji = new GuildEmoji(this.client, found, guild);
                 return gEmoji;
               });
 
@@ -89,7 +89,7 @@ module.exports = class SIDCommand extends Command {
       view = await Promise.all(newResults);
     }
 
-    switch (sID.status) {
+    switch (suggestion.status) {
     case undefined: {
       embed
         .setDescription(stripIndent`
@@ -97,7 +97,7 @@ module.exports = class SIDCommand extends Command {
           ${sUser}
 
           **Suggestion**
-          ${sID.suggestion}
+          ${suggestion.suggestion}
         `)
         .setColor(embedColor)
         .setTimestamp(time);
@@ -111,7 +111,7 @@ module.exports = class SIDCommand extends Command {
           ${sUser}
 
           **Suggestion**
-          ${sID.suggestion}
+          ${suggestion.suggestion}
 
           **Approved By**
           ${sStaff}
@@ -131,7 +131,7 @@ module.exports = class SIDCommand extends Command {
           ${sUser}
 
           **Suggestion**
-          ${sID.suggestion}
+          ${suggestion.suggestion}
 
           **Rejected By**
           ${sStaff}

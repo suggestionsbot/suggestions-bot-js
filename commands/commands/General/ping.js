@@ -16,13 +16,13 @@ module.exports = class PingCommand extends Command {
 
   async run(message, args) {
     try {
-      const ping = await this.client.shard.fetchClientValues('ping');
+      const ping = await this.client.shard.fetchClientValues('ws.ping');
 
       const msg = await message.channel.send('🏓 Ping!');
       return msg.edit(oneLine`
         Pong! 
         Latency is \`${msg.createdTimestamp - message.createdTimestamp}ms\`.
-        API Latency is \`${Math.round(ping[this.client.shard.id])}ms\`.
+        API Latency is \`${Math.round(ping[message.guild.shardID])}ms\`.
       `);
     } catch (e) {
       this.client.logger.error(e);

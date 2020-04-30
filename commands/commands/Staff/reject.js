@@ -1,4 +1,4 @@
-const { Constants, MessageEmbed, Guild, Emoji } = require('discord.js');
+const { Constants, MessageEmbed, Guild, GuildEmoji } = require('discord.js');
 const { stripIndent } = require('common-tags');
 const Command = require('../../Command');
 
@@ -116,7 +116,7 @@ module.exports = class RejectCommand extends Command {
         Your suggestion ID (sID) for reference was **${id}**.`);
     }
 
-    const reactions = embed.message.reactions;
+    const reactions = sMessage.reactions.cache;
     const reactName = reactions.map(e => e._emoji.name);
     const reactCount = reactions.map(e => e.count);
 
@@ -134,10 +134,10 @@ module.exports = class RejectCommand extends Command {
             return;
           }
 
-          const emoji = await this.client.rest.makeRequest('get', Constants.Endpoints.Guild(found.guild).toString(), true)
+          const emoji = await this.client.api.guilds(found.guild).get()
             .then(async raw => {
               const fGuild = new Guild(this.client, raw);
-              const fEmoji = new Emoji(fGuild, found);
+              const fEmoji = new GuildEmoji(this.client, found, fGuild);
               return fEmoji;
             });
 
@@ -235,7 +235,7 @@ module.exports = class RejectCommand extends Command {
       sMessage.edit(rejectedEmbed).then(m => m.delete({ timeout: 5000 }));
       suggestionsLogs.send(logsEmbed);
       try {
-        if ((settings.dmResponses === true) && guild.members.get(submitter.id)) submitter.send(dmEmbed);
+        if ((settings.dmResponses === true) && guild.members.cache.get(submitter.id)) submitter.send(dmEmbed);
       } catch (err) {
         message.channel.send(`**${submitter.tag}** has DMs disabled, but their suggestion will still be rejected.`);
       }

@@ -4,33 +4,34 @@ module.exports = class {
   }
 
   async run(messageReaction, user) {
+    if (messageReaction.partial) await messageReaction.fetch();
 
     const message = messageReaction.message;
     const guild = message.guild;
     if (!guild) return;
-    const member = guild.members.get(user.id);
-    if (!member) message.guild.fetchMember(user);
+    const member = guild.members.cache.get(user.id);
+    if (!member) message.guild.members.fetch(user);
     if (user.bot) return;
 
     let settings;
     try {
       settings = await this.client.settings.getGuild(guild);
       // We need to load the user reactions into cache if not available yet
-      if (messageReaction.users.size < 1) await messageReaction.fetchUsers();
+      if (messageReaction.users.cache.size < 1) await messageReaction.users.fetch();
     } catch (err) {
       return this.client.logger.error(err.stack);
     }
 
-    const sChannel = message.guild.channels.find(c => c.name === settings.suggestionsChannel) ||
-      message.guild.channels.find(c => c.toString() === settings.suggestionsChannel) ||
-      message.guild.channels.get(settings.suggestionsChannel);
-    if (!sChannel || message.channel.id !== sChannel.id) return;
-
-    const reactions = message.reactions.map(r => {
-      return r.users.filter(u => u.id === member.id).size;
+    const sChannel = message.guild.channels.cache.find(c => c.name === settings.suggestionsChannel) ||
+      message.guild.channels.cache.find(c => c.toString() === settings.suggestionsChannel) ||
+      message.guild.channels.cache.get(settings.suggestionsChannel);
+    if (!sChannel || (message.channel.id !== sChannel.id)) return;
+    this.client.logger.log(1);
+    const reactions = message.reactions.cache.map(r => {
+      return r.users.cache.filter(u => u.id === member.id).size;
     });
 
     const reactionCount = reactions.reduce((acc, cur) => acc + cur);
-    if (reactionCount > 1) return await messageReaction.remove(member.id);
+    if (reactionCount > 1) return await messageReaction.users.remove(member.id);
   }
 };

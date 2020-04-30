@@ -2,10 +2,9 @@ require('dotenv-flow').config();
 
 module.exports = {
   botLists: {
-    dblToken: process.env.DBLTOKEN,
+    topggToken: process.env.TOPGGTOKEN,
     botsggToken: process.env.BOTSGG,
     dbl2Token: process.env.DBL2TOKEN,
-    ddbToken: process.env.DDBTOKEN,
     blsToken: process.env.BLSTOKEN,
     termToken: process.env.TERMTOKEN,
     bfdToken: process.env.BFDTOKEN
@@ -36,10 +35,9 @@ module.exports = {
     deleted: '#FF4500'
   },
   voteSites: [
-    { name: 'discordbots.org', link: 'https://discordbots.org/bot/474051954998509571', voting: true },
+    { name: 'top.gg', link: 'https://top.gg/bot/474051954998509571', voting: true },
     { name: 'discord.bots.gg', link: 'https://discord.bots.gg/bots/474051954998509571', voting: false },
     { name: 'discordbotlist.com', link: 'https://discordbotlist.com/bots/474051954998509571', voting: true },
-    { name: 'divinediscordbots.com', link: 'https://divinediscordbots.com/bots/474051954998509571', voting: true },
     { name: 'botlist.space', link: 'https://botlist.space/bot/474051954998509571', voting: true },
     { name: 'discordapps.dev', link: 'https://discordapps.dev/en-GB/bots/474051954998509571', voting: true },
     { name: 'botsforddiscord.com', link: 'https://botsfordiscord.com/bots/474051954998509571', voting: true }

@@ -20,7 +20,7 @@ module.exports = class NewChangelogCommand extends Command {
     const changes = args.join(' ');
     if (!changes) return this.client.errors.noUsage(message.channel, this);
 
-    const channel = message.guild.channels.find(c => c.name === 'changelog');
+    const channel = message.guild.channels.cache.find(c => c.name === 'changelog');
 
     const embed = new MessageEmbed()
       .setAuthor(message.author.tag, message.author.avatarURL())

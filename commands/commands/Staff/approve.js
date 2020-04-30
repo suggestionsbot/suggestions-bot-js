@@ -1,4 +1,4 @@
-const { Constants, MessageEmbed, Guild, Emoji, Util: { escapeMarkdown } } = require('discord.js');
+const { Constants, MessageEmbed, Guild, GuildEmoji, Util: { escapeMarkdown } } = require('discord.js');
 const { stripIndent } = require('common-tags');
 const Command = require('../../Command');
 
@@ -114,7 +114,7 @@ module.exports = class ApproveCommand extends Command {
         Your suggestion ID (sID) for reference was **${id}**.`);
     }
 
-    const reactions = embed.message.reactions;
+    const reactions = sMessage.reactions.cache;
     const reactName = reactions.map(e => e._emoji.name);
     const reactCount = reactions.map(e => e.count);
 
@@ -132,10 +132,10 @@ module.exports = class ApproveCommand extends Command {
             return;
           }
 
-          const emoji = await this.client.rest.makeRequest('get', Constants.Endpoints.Guild(found.guild).toString(), true)
+          const emoji = await this.client.api.guilds(found.guild).get()
             .then(async raw => {
               const fGuild = new Guild(this.client, raw);
-              const fEmoji = new Emoji(fGuild, found);
+              const fEmoji = new GuildEmoji(this.client, found, fGuild);
               return fEmoji;
             });
 

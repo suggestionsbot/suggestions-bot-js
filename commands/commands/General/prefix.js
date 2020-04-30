@@ -12,7 +12,6 @@ module.exports = class PrefixCommand extends Command {
   }
 
   async run(message, args, settings) {
-    if (!message.guild) settings.prefix = this.client.config.prefix;
-    return message.channel.send(`Current prefix: \`${settings.prefix}\``);
+    return message.channel.send(`Current prefix: \`${message.guild ? settings.prefix : this.client.config.prefix}\``);
   }
 };

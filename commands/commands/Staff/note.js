@@ -84,7 +84,7 @@ module.exports = class NoteCommand extends Command {
 
     let sMessage;
     try {
-      sMessage = await suggestionsChannel.fetchMessage(messageID);
+      sMessage = await suggestionsChannel.messages.fetch(messageID);
     } catch (err) {
       this.client.logger.error(err.stack);
       message.channel.send('The suggestion message was not found, but still will be updated!')
