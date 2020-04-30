@@ -26,7 +26,7 @@ module.exports = class {
       message.guild.channels.cache.find(c => c.toString() === settings.suggestionsChannel) ||
       message.guild.channels.cache.get(settings.suggestionsChannel);
     if (!sChannel || (message.channel.id !== sChannel.id)) return;
-    this.client.logger.log(1);
+
     const reactions = message.reactions.cache.map(r => {
       return r.users.cache.filter(u => u.id === member.id).size;
     });
