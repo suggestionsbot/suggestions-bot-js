@@ -154,7 +154,7 @@ module.exports = class SettingsHelpers {
     const newCommand = await new Command(merged);
     const data = await newCommand.save();
 
-    const cUser = await this.client.fetchUser(data.userID);
+    const cUser = await this.client.users.fetch(data.userID);
     this.client.logger.log(`"${cUser.tag}" (${cUser.id}) ran the command "${data.command}"`, 'cmd');
 
     return data;
