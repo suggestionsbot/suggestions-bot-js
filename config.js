@@ -16,7 +16,7 @@ module.exports = {
     password: process.env.DB_PASS,
     name: process.env.DB_NAME
   },
-  prefix: process.env.PREFIX,
+  prefix: ',',
   suggestionsChannel: 'suggestions',
   suggestionsLogs: 'suggestion-logs',
   owner: '158063324699951104',
