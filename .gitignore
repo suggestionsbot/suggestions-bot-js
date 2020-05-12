@@ -6,8 +6,9 @@ package-lock.json
 logs/
 *.log
 
-# Beta command
+# Commands & Events
 commands/commands/Bot\ Owner/beta.js
+events/debug.js
 
 # Miscellaneous
 .tmp/

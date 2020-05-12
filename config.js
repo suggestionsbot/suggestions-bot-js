@@ -17,14 +17,14 @@ module.exports = {
     name: process.env.DB_NAME
   },
   prefix: process.env.PREFIX,
-  suggestionsChannel: process.env.SUGGESTIONSCHANNEL,
-  suggestionsLogs: process.env.SUGGESTIONSLOGS,
-  owner: process.env.OWNER,
-  embedColor: process.env.DEFAULT_COLOR,
-  discord: process.env.DISCORD,
-  website: process.env.WEBSITE,
-  docs: process.env.DOCS,
-  invite: process.env.INVITE,
+  suggestionsChannel: 'suggestions',
+  suggestionsLogs: 'suggestion-logs',
+  owner: '158063324699951104',
+  embedColor: 0xdd9323,
+  discord: 'https://discord.gg/ntXkRan',
+  website: 'https://suggestionsbot.com',
+  docs: 'https://docs.suggestionsbot.com',
+  invite: 'https://discordapp.com/oauth2/authorize?client_id=476928510573805568&scope=bot&permissions=355392',
   giphyKey: process.env.GIPHY,
   suggestionColors: {
     approved: '#00e640',
@@ -42,16 +42,16 @@ module.exports = {
     { name: 'discordapps.dev', link: 'https://discordapps.dev/en-GB/bots/474051954998509571', voting: true },
     { name: 'botsforddiscord.com', link: 'https://botsfordiscord.com/bots/474051954998509571', voting: true }
   ],
-  patreon: process.env.PATREON,
+  patreon: 'https://www.patreon.com/acollierr17',
   superSecretUsers: [
     '214719690855940109', // Lukasz
     '245385436669804547', // Kyle
     '158063324699951104' // Anthony
   ],
   defaultSettings: {
-    prefix: process.env.PREFIX,
-    suggestionsChannel: process.env.SUGGESTIONSCHANNEL,
-    suggestionsLogs: process.env.SUGGESTIONSLOGS,
+    prefix: ',',
+    suggestionsChannel: 'suggestions',
+    suggestionsLogs: 'suggestion-logs',
     staffRoles: [],
     disabledCommands: [],
     responseRequired: false,
