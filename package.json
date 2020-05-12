@@ -19,12 +19,14 @@
   },
   "homepage": "https://suggestionsbot.com",
   "dependencies": {
+    "bufferutil": "^4.0.1",
     "cachegoose": "^8.0.0",
     "chalk": "^2.4.2",
     "common-tags": "^1.8.0",
     "dblapi.js": "^2.4.0",
     "discord.js": "^12.2.0",
     "dotenv-flow": "^0.1.0",
+    "erlpack": "^0.1.3",
     "express": "^4.17.1",
     "giphy-api": "^2.0.1",
     "hastebin-gen": "^2.0.5",
@@ -36,7 +38,9 @@
     "mongoose": "^5.9.10",
     "node-fetch": "^2.6.0",
     "passport": "^0.4.0",
-    "passport-headerapikey": "^1.2.0"
+    "passport-headerapikey": "^1.2.0",
+    "utf-8-validate": "^5.0.2",
+    "zlib-sync": "^0.1.6"
   },
   "devDependencies": {
     "eslint": "^5.16.0"

@@ -8,7 +8,10 @@ const SuggestionsClient = require('./client/SuggestionsClient');
 
 const client = new SuggestionsClient({
   disableEveryone: true,
-  partials: ['MESSAGE', 'CHANNEL', 'REACTION']
+  partials: ['MESSAGE', 'CHANNEL', 'REACTION'],
+  messageSweepInterval: 600,
+  messageCacheLifetime: 300
+
 });
 client.login();
 
