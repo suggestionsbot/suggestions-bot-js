@@ -21,7 +21,7 @@ module.exports = class StatsCommand extends Command {
     const { embedColor } = this.client.config;
 
     const memUsage = (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2);
-    const shardID = message.guild.shardID;
+    const shardID = message.guild ? message.guild.shardID : this.client.shard.ids[0];
 
     let guildSize,
       userSize,
