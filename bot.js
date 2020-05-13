@@ -2,7 +2,11 @@ if (Number(process.version.slice(1).split('.')[0]) < 8) throw new Error('Node 8.
 
 require('dotenv-flow').config();
 
+const { Intents } = require('discord.js');
 const { oneLine } = require('common-tags');
+
+const myIntents = new Intents(Intents.ALL);
+myIntents.remove(['GUILD_PRESENCES']);
 
 const SuggestionsClient = require('./client/SuggestionsClient');
 
@@ -11,7 +15,8 @@ const client = new SuggestionsClient({
   partials: ['MESSAGE', 'CHANNEL', 'REACTION'],
   messageSweepInterval: 600,
   messageCacheLifetime: 300,
-  messageCacheMaxSize: 25
+  messageCacheMaxSize: 25,
+  ws: { intents: myIntents }
 
 });
 client.login();
