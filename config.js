@@ -24,7 +24,7 @@ module.exports = {
   discord: 'https://discord.gg/ntXkRan',
   website: 'https://suggestionsbot.com',
   docs: 'https://docs.suggestionsbot.com',
-  invite: 'https://discordapp.com/oauth2/authorize?client_id=474051954998509571&scope=bot&permissions=355392',
+  invite: process.env.BOT_INVITE,
   giphyKey: process.env.GIPHY,
   suggestionColors: {
     approved: '#00e640',

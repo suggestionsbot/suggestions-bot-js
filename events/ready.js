@@ -20,12 +20,6 @@ module.exports = class {
     }, 60000);
 
     const guildCount = this.client.guilds.cache.size;
-    // try {
-    //   guildCount = await this.client.shard.fetchClientValues('guilds.cache.size')
-    //     .then(res => res.reduce((prev, count) => prev + count, 0));
-    // } catch (error) {
-    //   guildCount = this.client.guilds.cache.size;
-    // }
 
     await this.client.logger.log(`Version ${version} of the bot loaded.`);
     await this.client.logger.log(`${versions[process.env.NODE_ENV]} version of the bot loaded.`);
@@ -40,6 +34,8 @@ module.exports = class {
 
       // handle posting stats to bot lists
       require('../utils/voting')(this.client);
+
+      this.client.setInterval(() => { this.client.sweepMessages(); }, 600000);
     }
   }
 };
