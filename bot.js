@@ -10,7 +10,8 @@ const client = new SuggestionsClient({
   disableEveryone: true,
   partials: ['MESSAGE', 'CHANNEL', 'REACTION'],
   messageSweepInterval: 600,
-  messageCacheLifetime: 300
+  messageCacheLifetime: 300,
+  messageCacheMaxSize: 25
 
 });
 client.login();
