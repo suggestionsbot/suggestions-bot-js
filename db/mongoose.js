@@ -4,15 +4,13 @@ require('dotenv-flow').config();
 module.exports = class Mongoose {
   constructor(client) {
     this.client = client;
-    this.connection;
+    this.connection = false;
   }
 
   async init() {
     const dbOptions = {
       useNewUrlParser: true,
       autoIndex: false,
-      // reconnectTries: Number.MAX_VALUE,
-      // reconnectInterval: 500,
       poolSize: 5,
       connectTimeoutMS: 10000,
       family: 4
@@ -38,7 +36,7 @@ module.exports = class Mongoose {
     });
 
     mongoose.connection.on('close', () => {
-      console.log('Mongoose connection closed');
+      this.client.logger.log.log('Mongoose connection closed');
     });
   }
 

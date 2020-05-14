@@ -31,15 +31,23 @@ module.exports = class SettingsHelpers {
      * @param {Object} guild - The guild object.
      */
   async getGuild(guild) {
-    let data = await Settings.findOne({ $or: this._guildQuery(guild) });
-    // we're going to keep it as 0 because guild settings don't always change
-    // .cache(0, guild.id);
+    let data;
+    const defaultData = {
+      guildID: guild.id,
+      ...this.client.config.defaultSettings
+    };
 
-    if (data == null) {
-      data = {
-        guildID: guild.id,
-        ...this.client.config.defaultSettings
-      };
+    const inMap = guild.settings.has(guild.id);
+
+    if (inMap) {
+      this.client.logger.log('FROM THE CACHE');
+      data = guild.settings.get(guild.id);
+    } else {
+      this.client.logger.log('FROM THE DB');
+      const fetchedData = await Settings.findOne({ $or: this._guildQuery(guild) });
+      if (fetchedData == null) return defaultData;
+      guild.settings.set(guild.id, fetchedData);
+      data = guild.settings.get(guild.id);
     }
 
     return data;
@@ -52,9 +60,7 @@ module.exports = class SettingsHelpers {
      * @param {Object} newSettings - The settings object to be updated.
      */
   async updateGuild(guild, newSettings) {
-    // let data = await Settings.findOne({ $or: this._guildQuery(guild) });
     let data = await this.getGuild(guild);
-    // if (!data) data = await this.createGuild({ guildID: guild.id });
     const { guildID } = data;
 
     let settings = data;
@@ -66,13 +72,12 @@ module.exports = class SettingsHelpers {
     }
 
     const dataCheck = await Settings.findOne({ $or: this._guildQuery(guild) });
-    if (!dataCheck) data = await this.createGuild({ guildID: guild.id });
+    if (!dataCheck) data = await this.createGuild(guild);
 
     const updated = await Settings
       .findOneAndUpdate({ $or: this._guildQuery(guild) }, settings);
 
-    // clear the cache for updated settings to show
-    // cachegoose.clearCache(guild.id);
+    guild.settings.set(guild.id, settings);
 
     await this.client.shard.broadcastEval(`this.guilds.cache.get('${guildID}')`)
       .then(guildArray => {
@@ -93,12 +98,18 @@ module.exports = class SettingsHelpers {
      * @param {Object} guild - The guild object.
      * @param {Boolean} added - To check if the role should be removed or not.
      */
-  async updateGuildStaffRoles(guild, added = true) {
-    const { query, staffRoles } = guild;
-    const guildSettings = await Settings.findOne(query);
+  async updateGuildStaffRoles(data, added = true) {
+    const { guild, staffRoles } = data;
     const updatedData = { staffRoles };
-    if (added) return await guildSettings.updateOne({ $push: updatedData });
-    else return await guildSettings.updateOne({ $pull: updatedData });
+    if (added) {
+      await Settings.findOneAndUpdate({ $or: this._guildQuery(guild) }, { $push: updatedData });
+      const fetched = await Settings.findOne({ $or: this._guildQuery(guild) });
+      guild.settings.set(guild.id, fetched);
+    } else {
+      await Settings.findOneAndUpdate({ $or: this._guildQuery(guild) }, { $pull: updatedData });
+      const fetched = await Settings.findOne({ $or: this._guildQuery(guild) });
+      guild.settings.set(guild.id, fetched);
+    }
   }
 
   /**
@@ -107,12 +118,18 @@ module.exports = class SettingsHelpers {
      * @param {Object} guild - The guild object.
      * @param {Boolean} added - To check if the command should be disabled or not.
      */
-  async updateGuildCommands(guild, added = true) {
-    const { query, disabledCommands } = guild;
-    const guildSettings = await Settings.findOne(query);
+  async updateGuildCommands(data, enabled = true) {
+    const { guild, disabledCommands } = data;
     const updatedData = { disabledCommands };
-    if (added) return await guildSettings.updateOne({ $push: updatedData });
-    else return await guildSettings.updateOne({ $pull: updatedData });
+    if (!enabled) {
+      await Settings.findOneAndUpdate({ $or: this._guildQuery(guild) }, { $pull: updatedData });
+      const fetched = await Settings.findOne({ $or: this._guildQuery(guild) });
+      guild.settings.set(guild.id, fetched);
+    } else {
+      await Settings.findOneAndUpdate({ $or: this._guildQuery(guild) }, { $push: updatedData });
+      const fetched = await Settings.findOne({ $or: this._guildQuery(guild) });
+      guild.settings.set(guild.id, fetched);
+    }
   }
 
   /**
@@ -122,11 +139,13 @@ module.exports = class SettingsHelpers {
      */
   async createGuild(guild) {
     const defaults = { _id: mongoose.Types.ObjectId() };
-    const merged = Object.assign(defaults, guild); // make this into a global function
+    const merged = Object.assign(defaults, { guildID: guild.id }); // make this into a global function
 
     const newSettings = await new Settings(merged);
     const data = await newSettings.save();
     const { guildID } = data;
+
+    guild.settings.set(guild.id, data);
 
     await this.client.shard.broadcastEval(`this.guilds.cache.get('${guildID}')`)
       .then(guildArray => {
@@ -197,33 +216,11 @@ module.exports = class SettingsHelpers {
         { guildID: guild.guildID }
       ]
     });
+
+    guild.settings.delete(guild.id);
     this.client.logger.log(`Blacklist data deleted for guild ${guild.name || guild.guildName} (${guild.id || guild.guildID})`);
 
     this.client.logger.log(`${this.client.user.username} has left a guild: ${guild.name || guild.guildName } (${guild.id || guild.guildID})`);
-  }
-
-  /**
-     * Get all documents in the settings collection
-     * @returns {Promise}
-     */
-  async getAllSettings() {
-    return await Settings.find({});
-  }
-
-  /**
-     * Get all documents in the commands collection.
-     * @returns {Promise}
-     */
-  async getAllCommands() {
-    return await Command.find({});
-  }
-
-  /**
-     * Get all documents in the suggestions collection.
-     * @returns {Promise}
-     */
-  async getAllSuggestions() {
-    return await Suggestion.find({});
   }
 
   /**
