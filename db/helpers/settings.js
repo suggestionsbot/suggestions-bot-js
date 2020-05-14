@@ -40,10 +40,10 @@ module.exports = class SettingsHelpers {
     const inMap = guild.settings.has(guild.id);
 
     if (inMap) {
-      this.client.logger.log('FROM THE CACHE');
+      // this.client.logger.log('FROM THE CACHE');
       data = guild.settings.get(guild.id);
     } else {
-      this.client.logger.log('FROM THE DB');
+      // this.client.logger.log('FROM THE DB');
       const fetchedData = await Settings.findOne({ $or: this._guildQuery(guild) });
       if (fetchedData == null) return defaultData;
       guild.settings.set(guild.id, fetchedData);
