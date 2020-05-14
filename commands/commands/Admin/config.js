@@ -196,7 +196,7 @@ module.exports = class ConfigCommand extends Command {
         const filter = r => r.role === verified.id;
         const sRole = staffRoles.find(filter);
         const updateRole = {
-          query: { guildID: message.guild.id },
+          guild: message.guild,
           staffRoles: { role: verified.id }
         };
 
@@ -388,7 +388,7 @@ module.exports = class ConfigCommand extends Command {
         if (cmd.conf.ownerOnly || cmd.conf.superSecretOnly) return;
 
         const disabledCommand = {
-          query: { guildID: message.guild.id },
+          guild: message.guild,
           disabledCommands: {
             command: cmd.help.name,
             added: Date.now(),
@@ -398,7 +398,7 @@ module.exports = class ConfigCommand extends Command {
         };
 
         const enabledCommand = {
-          query: { guildID: message.guild.id },
+          guild: message.guild,
           disabledCommands: { command: cmd.help.name }
         };
 

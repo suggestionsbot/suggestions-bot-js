@@ -1,6 +1,6 @@
 {
   "name": "suggestions-bot",
-  "version": "2.9.1",
+  "version": "2.9.2",
   "description": "The only suggestions bot you'll ever need. Simple usage and management of suggestions for public and staff use.",
   "main": "sharding.js",
   "scripts": {

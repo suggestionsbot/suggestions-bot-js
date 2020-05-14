@@ -8,6 +8,8 @@ const { oneLine } = require('common-tags');
 const myIntents = new Intents(Intents.ALL);
 myIntents.remove(['GUILD_PRESENCES']);
 
+require('./extensions/Guild');
+
 const SuggestionsClient = require('./client/SuggestionsClient');
 
 const client = new SuggestionsClient({
