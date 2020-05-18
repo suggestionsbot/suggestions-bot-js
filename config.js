@@ -19,7 +19,7 @@ module.exports = {
   prefix: ',',
   suggestionsChannel: 'suggestions',
   suggestionsLogs: 'suggestion-logs',
-  owner: '158063324699951104',
+  owners: ['158063324699951104'],
   embedColor: 0xdd9323,
   discord: 'https://discord.gg/ntXkRan',
   website: 'https://suggestionsbot.com',

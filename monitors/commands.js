@@ -60,17 +60,17 @@ module.exports = class CommandHandler {
       staffRoles = [];
     }
 
+    const superCheck = superSecretUsers.includes(message.author.id);
+    const ownerCheck = this.client.isOwner(message.author.id);
+
     let staffCheck,
       adminCheck;
 
     if (message.guild) {
       if (staffRoles) staffCheck = message.member.roles.cache.some(r => staffRoles.map(sr => sr.id).includes(r.id));
-      else staffCheck = message.member.hasPermission('MANAGE_GUILD');
-      adminCheck = message.member.hasPermission('MANAGE_GUILD');
+      else staffCheck = message.member.hasPermission('MANAGE_GUILD') || ownerCheck;
+      adminCheck = message.member.hasPermission('MANAGE_GUILD') || ownerCheck;
     }
-
-    const superCheck = superSecretUsers.includes(message.author.id);
-    const ownerCheck = this.client.isOwner(message.author.id);
 
     if (!cmd.conf.enabled) return this.client.errors.adminCommandIsDisabled(cmd, message.channel);
     if ((!message.guild && cmd.conf.guildOnly)) return this.client.errors.commandGuildOnly(cmd, message.channel);

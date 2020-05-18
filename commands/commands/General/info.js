@@ -17,14 +17,15 @@ module.exports = class InfoCommand extends Command {
 
   async run(message, args) {
 
-    const { embedColor, discord, owner, website } = this.client.config;
+    const { embedColor, discord, owners, website } = this.client.config;
 
     const embed = new MessageEmbed()
       .setTitle(this.client.user.username)
       .setDescription(description)
       .setColor(embedColor)
       .setThumbnail(this.client.user.avatarURL())
-      .addField('Bot Author', `<@${owner}>`)
+      .addField(owners.length <= 1 ? 'Bot Author' : 'Bot Author(s)',
+        owners.map(o => `<@${o}>`).join(', '))
       .addField('Support Discord', discord)
       .addField('Website', website)
       .addField('Bot Version', version)
