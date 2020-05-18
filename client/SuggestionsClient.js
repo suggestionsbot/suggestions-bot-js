@@ -103,7 +103,7 @@ module.exports = class SuggestionsClient extends Client {
 
   // this method checks if the user ID is a bot owner or not
   isOwner(id) {
-    if (id === this.config.owner) return true;
+    if (this.config.owners.includes(id)) return true;
     else return false;
   }
 

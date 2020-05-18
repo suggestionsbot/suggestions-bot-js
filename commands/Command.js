@@ -23,7 +23,7 @@ module.exports = class Command {
 
   throttle(userID) {
 
-    if (!this.conf.throttling || this.client.config.owner === userID) return;
+    if (!this.conf.throttling || this.client.isOwner(userID)) return;
 
     let throttle = this.conf.throttles.get(userID);
     if (!throttle) {
