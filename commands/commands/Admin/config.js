@@ -347,6 +347,7 @@ module.exports = class ConfigCommand extends Command {
         switch (updated) {
         case 'true':
           try {
+            await this.client.settings.updateGuild(message.guild, { responseRequired: true });
             configEmbed.setDescription(`${successEmoji} Responses required set to \`true\`. This means a response **is required** when using the \`reject\` command.`);
             message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
           } catch (err) {
