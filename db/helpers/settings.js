@@ -30,7 +30,7 @@ module.exports = class SettingsHelpers {
      *
      * @param {Object} guild - The guild object.
      */
-  async getGuild(guild) {
+  async getGuild(guild, newGuild = false) {
     let data;
     const defaultData = {
       guildID: guild.id,
@@ -40,11 +40,10 @@ module.exports = class SettingsHelpers {
     const inMap = guild.settings.has(guild.id);
 
     if (inMap) {
-      // this.client.logger.log('FROM THE CACHE');
       data = guild.settings.get(guild.id);
     } else {
-      // this.client.logger.log('FROM THE DB');
-      const fetchedData = await Settings.findOne({ $or: this._guildQuery(guild) });
+      let fetchedData = await Settings.findOne({ $or: this._guildQuery(guild) });
+      if (newGuild) fetchedData = await this.createGuild(guild);
       if (fetchedData == null) return defaultData;
       guild.settings.set(guild.id, fetchedData);
       data = guild.settings.get(guild.id);
@@ -60,9 +59,7 @@ module.exports = class SettingsHelpers {
      * @param {Object} newSettings - The settings object to be updated.
      */
   async updateGuild(guild, newSettings) {
-    let data = await this.getGuild(guild);
-    const { guildID } = data;
-
+    const data = await this.getGuild(guild);
     let settings = data;
     // maybe check if settings object is empty, return an error?
     if (typeof settings != 'object') settings = {};
@@ -71,15 +68,14 @@ module.exports = class SettingsHelpers {
       else return;
     }
 
-    const dataCheck = await Settings.findOne({ $or: this._guildQuery(guild) });
-    if (!dataCheck) data = await this.createGuild(guild);
+    if (!guild.settings.get(guild.id)) await this.getGuild(guild, true);
 
     const updated = await Settings
-      .findOneAndUpdate({ $or: this._guildQuery(guild) }, settings);
+      .findOneAndUpdate({ $or: this._guildQuery(guild) }, settings, { new: true });
 
-    guild.settings.set(guild.id, settings);
+    guild.settings.set(guild.id, updated);
 
-    await this.client.shard.broadcastEval(`this.guilds.cache.get('${guildID}')`)
+    await this.client.shard.broadcastEval(`this.guilds.cache.get('${guild.id}')`)
       .then(guildArray => {
         const found = guildArray.find(g => g);
         if (!found) return false;
@@ -102,13 +98,13 @@ module.exports = class SettingsHelpers {
     const { guild, staffRoles } = data;
     const updatedData = { staffRoles };
     if (added) {
-      await Settings.findOneAndUpdate({ $or: this._guildQuery(guild) }, { $push: updatedData });
-      const fetched = await Settings.findOne({ $or: this._guildQuery(guild) });
-      guild.settings.set(guild.id, fetched);
+      if (!guild.settings.get(guild.id)) await this.getGuild(guild, true);
+      const updated = await Settings.findOneAndUpdate({ $or: this._guildQuery(guild) }, { $push: updatedData }, { new: true });
+      guild.settings.set(guild.id, updated);
     } else {
-      await Settings.findOneAndUpdate({ $or: this._guildQuery(guild) }, { $pull: updatedData });
-      const fetched = await Settings.findOne({ $or: this._guildQuery(guild) });
-      guild.settings.set(guild.id, fetched);
+      if (!guild.settings.get(guild.id)) await this.getGuild(guild, true);
+      const updated = await Settings.findOneAndUpdate({ $or: this._guildQuery(guild) }, { $pull: updatedData }, { new: true });
+      guild.settings.set(guild.id, updated);
     }
   }
 
@@ -122,13 +118,13 @@ module.exports = class SettingsHelpers {
     const { guild, disabledCommands } = data;
     const updatedData = { disabledCommands };
     if (!enabled) {
-      await Settings.findOneAndUpdate({ $or: this._guildQuery(guild) }, { $pull: updatedData });
-      const fetched = await Settings.findOne({ $or: this._guildQuery(guild) });
-      guild.settings.set(guild.id, fetched);
+      if (!guild.settings.get(guild.id)) await this.getGuild(guild, true);
+      const updated = await Settings.findOneAndUpdate({ $or: this._guildQuery(guild) }, { $pull: updatedData }, { new: true });
+      guild.settings.set(guild.id, updated);
     } else {
-      await Settings.findOneAndUpdate({ $or: this._guildQuery(guild) }, { $push: updatedData });
-      const fetched = await Settings.findOne({ $or: this._guildQuery(guild) });
-      guild.settings.set(guild.id, fetched);
+      if (!guild.settings.get(guild.id)) await this.getGuild(guild, true);
+      const updated = await Settings.findOneAndUpdate({ $or: this._guildQuery(guild) }, { $push: updatedData }, { new: true });
+      guild.settings.set(guild.id, updated);
     }
   }
 
@@ -141,13 +137,12 @@ module.exports = class SettingsHelpers {
     const defaults = { _id: mongoose.Types.ObjectId() };
     const merged = Object.assign(defaults, { guildID: guild.id }); // make this into a global function
 
-    const newSettings = await new Settings(merged);
+    const newSettings = new Settings(merged);
     const data = await newSettings.save();
-    const { guildID } = data;
 
     guild.settings.set(guild.id, data);
 
-    await this.client.shard.broadcastEval(`this.guilds.cache.get('${guildID}')`)
+    await this.client.shard.broadcastEval(`this.guilds.cache.get('${guild.id}')`)
       .then(guildArray => {
         const found = guildArray.find(g => g);
         if (!found) return false;
