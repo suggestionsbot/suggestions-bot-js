@@ -125,7 +125,7 @@ module.exports = class CommandHandler {
 
     try {
       if (throttle) throttle.usages++;
-      if (disabledCommand) return this.client.errors.commandIsDisabled(cmd, message.channel);
+      if (disabledCommand && !ownerCheck) return this.client.errors.commandIsDisabled(cmd, message.channel);
       cmd.run(message, args, settings);
       if (process.env.NODE_ENV === 'production') await this.client.settings.newCommandUsage(newCommand);
     } catch (err) {

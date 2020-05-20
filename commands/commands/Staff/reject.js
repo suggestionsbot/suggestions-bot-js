@@ -171,7 +171,7 @@ module.exports = class RejectCommand extends Command {
     }
 
     const logsEmbed = new MessageEmbed()
-      .setAuthor(guild, guild.iconURL)
+      .setAuthor(guild, guild.iconURL())
       .setDescription(stripIndent`
         **Results**
         ${view.join('\n')}

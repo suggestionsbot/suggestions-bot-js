@@ -4,7 +4,7 @@ module.exports = async (client) => {
 
   const tokens = client.config.botLists;
 
-  const guildsPerShard = await client.shard.fetchClientValues('guilds.size');
+  const guildsPerShard = await client.shard.fetchClientValues('guilds.cache.size');
   const guildSizeCount = guildsPerShard.reduce((prev, count) => prev + count, 0);
 
   setInterval(async () => {
@@ -23,12 +23,13 @@ module.exports = async (client) => {
   }, 300000);
 
   async function postTopgg() {
-    // Discord Bots (discordbots.org)
+    // Discord Bots (top.gg)
     try {
       const data = {
-        shards: guildsPerShard,
-        shard_id: client.shard.ids[0],
-        shard_count: client.shard.count
+        server_count: guildsPerShard
+        // shards: guildsPerShard,
+        // shard_id: client.shard.ids[0],
+        // shard_count: client.shard.count
       };
       const body = JSON.stringify(data);
 
@@ -52,7 +53,7 @@ module.exports = async (client) => {
     // Discord Bot List (discord.bots.gg)
     try {
       const data = {
-        guildCount: guildsPerShard,
+        guildCount: guildSizeCount,
         shardCount: client.shard.count,
         shardId: client.shard.ids[0]
       };
@@ -78,7 +79,7 @@ module.exports = async (client) => {
     // Discord Bot List (discordbotlist.com)
     try {
       const data = {
-        guilds: guildsPerShard,
+        guilds: guildSizeCount,
         shard_id: client.shard.ids[0]
       };
       const body = JSON.stringify(data);
