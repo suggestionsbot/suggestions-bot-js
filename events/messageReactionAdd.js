@@ -10,7 +10,7 @@ module.exports = class {
     const guild = message.guild;
     if (!guild) return;
     const member = guild.members.cache.get(user.id);
-    if (!member) message.guild.members.fetch(user);
+    if (!member) await message.guild.members.fetch(user.id);
     if (user.bot) return;
 
     let settings;

@@ -1,21 +1,6 @@
 require('dotenv-flow').config();
 
 module.exports = {
-  botLists: {
-    topggToken: process.env.TOPGGTOKEN,
-    botsggToken: process.env.BOTSGG,
-    dbl2Token: process.env.DBL2TOKEN,
-    blsToken: process.env.BLSTOKEN,
-    termToken: process.env.TERMTOKEN,
-    bfdToken: process.env.BFDTOKEN
-  },
-  db : {
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASS,
-    name: process.env.DB_NAME
-  },
   prefix: ',',
   suggestionsChannel: 'suggestions',
   suggestionsLogs: 'suggestion-logs',
@@ -24,8 +9,9 @@ module.exports = {
   discord: 'https://discord.gg/ntXkRan',
   website: 'https://suggestionsbot.com',
   docs: 'https://docs.suggestionsbot.com',
-  invite: process.env.BOT_INVITE,
-  giphyKey: process.env.GIPHY,
+  invite: `https://discord.com/oauth2/authorize?client_id=${
+    process.env.NODE_ENV === 'production' ? '474051954998509571' : '476928510573805568'
+  }&scope=bot&permissions=355392`,
   suggestionColors: {
     approved: '#00e640',
     rejected: '#cf000f'

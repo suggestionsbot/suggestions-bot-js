@@ -80,7 +80,7 @@ module.exports = class HelpCommand extends Command {
         .addField('📣 Current Prefix', `\`${prefix}\``)
         .addField('💬 Suggestions Channel', suggestionsChannel.toString() ||
           (message.member.hasPermission('MANAGE_GUILD') && !suggestionsChannel ?
-            `***Not set. Use*** \`${prefix + configCmdName} <channel> <channel_name>\`` :
+            `***Not set. Use*** \`${prefix + configCmdName} channel <#channel_name>\`` :
             '***Not set. Contact a server administrator.***'
           )
         )

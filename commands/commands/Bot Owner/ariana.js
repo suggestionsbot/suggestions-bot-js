@@ -1,3 +1,8 @@
+require('dotenv-flow').config();
+const giphy = require('giphy-api')({
+  apiKey: process.env.GIPHY,
+  https: true
+});
 const Command = require('../../Command');
 
 module.exports = class ArianaCommand extends Command {
@@ -12,11 +17,7 @@ module.exports = class ArianaCommand extends Command {
   }
 
   async run(message, args) {
-
-    const { giphyKey } = this.client.config;
-
-    const giphy = require('giphy-api')(giphyKey);
-    const query = 'ariana grande';
+    const query = '@arianagrande';
 
     try {
       const { data } = await giphy.random(query);

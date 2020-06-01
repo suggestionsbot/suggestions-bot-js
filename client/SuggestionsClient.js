@@ -107,6 +107,23 @@ module.exports = class SuggestionsClient extends Client {
     else return false;
   }
 
+  // this method checks if the user ID has the "MANAGE_GUILD" permission or "ADMINISTRATOR" permission
+  isAdmin(member) {
+    return member.hasPermission(['ADMINISTRATOR', 'MANAGE_GUILD']);
+  }
+
+  async isStaff(guild, user) {
+    const member = await guild.members.fetch(user.id);
+    if (!member) return false;
+    let staffCheck;
+    const adminCheck = this.isAdmin(member) || this.isOwner(member.id);
+    const staffRoles = guild.settings.get(guild.id).staffRoles;
+    if (staffRoles) staffCheck = member.roles.cache.some(r => staffRoles.map(sr => sr.id).includes(r.id)) || adminCheck;
+    else staffCheck = adminCheck;
+
+    return staffCheck;
+  }
+
   // Updates the presence depending on production or development
   async botPresence() {
     const { prefix } = this.config;

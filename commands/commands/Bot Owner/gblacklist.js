@@ -21,9 +21,14 @@ module.exports = class GBlacklistCommand extends Command {
 
   async run(message, args, settings) {
 
-    const { embedColor } = this.client.config;
+    const { embedColor, owners } = this.client.config;
     const { prefix } = settings;
     const { name } = this.help;
+
+    const guarded = [
+      message.author.id,
+      ...owners
+    ];
 
     message.delete().catch(O_o=>{});
 
@@ -47,10 +52,10 @@ module.exports = class GBlacklistCommand extends Command {
       const activeBlacklists = gBlacklists
         .filter(b => (b.status === true) && (b.scope === 'global'));
 
-      const blacklists = activeBlacklists.map(blacklist => {
+      const blacklists = activeBlacklists.map(async blacklist => {
         let time;
-        const issued = this.client.users.cache.get(blacklist.userID);
-        const issuer = this.client.users.cache.get(blacklist.issuerID);
+        const issued = this.client.users.fetch(blacklist.userID);
+        const issuer = this.client.users.fetch(blacklist.issuerID);
         const num = blacklist.case;
         const reason = blacklist.reason;
         const caseStatus = this.blStatus[blacklist.status];
@@ -71,7 +76,9 @@ module.exports = class GBlacklistCommand extends Command {
         };
       });
 
-      for (const blacklist of blacklists) blEmbed.addField(blacklist.name, blacklist.value);
+      const mappedBlacklists = await Promise.all(blacklists);
+
+      for (const blacklist of mappedBlacklists) blEmbed.addField(blacklist.name, blacklist.value);
 
       blEmbed.setAuthor(`${message.guild} | Blacklisted Users`, message.guild.iconURL);
       blEmbed.setDescription(stripIndent`
@@ -90,13 +97,13 @@ module.exports = class GBlacklistCommand extends Command {
     }
 
     if (args[0] === 'help') return this.client.errors.noUsage(message.channel, this, settings);
-
-    const blUser = this.client.users.cache.get(args[1]) || message.mentions.users.first();
+    let blUser = message.mentions.users.size > 1 ? message.mentions.users.first().id : args[1];
+    blUser = await this.client.users.fetch(blUser);
     const reason = args.slice(2).join(' ');
 
     if (!blUser) return this.client.errors.userNotFound(args[1], message.channel);
-    if (blUser.id === message.author.id) {
-      return message.channel.send('You cannot issue a blacklist to yourself!')
+    if (guarded.includes(blUser.id) || await this.client.isStaff(message.guild, blUser)) {
+      return message.channel.send('You cannot issue a blacklist to yourself or a guarded user!')
         .then(m => m.delete({ timeout: 5000 }))
         .catch(e => this.client.logger.error(e.stack));
     }
@@ -141,7 +148,10 @@ module.exports = class GBlacklistCommand extends Command {
           { userID: blUser.id },
           { status: true }
         ],
-        data: { status: false }
+        data: {
+          status: false,
+          issuerID: message.author.id
+        }
       };
 
       blEmbed.setTitle(`${this.client.user.username} | Blacklisted User Removed`);

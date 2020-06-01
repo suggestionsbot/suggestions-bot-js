@@ -91,6 +91,7 @@ module.exports = class SuggestCommand extends Command {
     if (!extReactions) return this.client.errors.noChannelPerms(message, sChannel, 'USE_EXTERNAL_EMOJIS');
 
     const m = await sChannel.send(embed);
+    const mID = m.id;
 
     const foundSet = this.client.voteEmojis.find(filter) || this.client.voteEmojis.find(defaults);
     const emojiSet = foundSet.emojis;
@@ -98,6 +99,7 @@ module.exports = class SuggestCommand extends Command {
 
     for (const emoji of emojiSet) {
       const emojiIndex = emojiSet.indexOf(emoji);
+      if (!m) await sChannel.messages.fetch(mID);
 
       if (foundSet.custom) {
         this.client.shard.broadcastEval(`this.findEmojiByID.call(this, '${emoji}')`)
@@ -147,6 +149,7 @@ module.exports = class SuggestCommand extends Command {
       `);
     }
 
+    if (!m) await sChannel.messages.fetch(mID);
     const newSuggestion = {
       guildID: message.guild.id,
       userID: message.author.id,
