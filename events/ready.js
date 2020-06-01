@@ -33,7 +33,7 @@ module.exports = class {
     if (process.env.NODE_ENV === 'production') {
 
       // handle posting stats to bot lists
-      if (this.client.shards.ids[0] === 0) require('../utils/voting')(this.client);
+      if (this.client.shard.ids[0] === 0) require('../utils/voting')(this.client);
 
       this.client.setInterval(() => { this.client.sweepMessages(); }, 600000);
     }
