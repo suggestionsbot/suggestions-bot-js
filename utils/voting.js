@@ -1,8 +1,7 @@
+require('dotenv-flow').config();
 const fetch = require('node-fetch');
 
 module.exports = async (client) => {
-
-  const tokens = client.config.botLists;
 
   const guildsPerShard = await client.shard.fetchClientValues('guilds.cache.size');
   const guildSizeCount = guildsPerShard.reduce((prev, count) => prev + count, 0);
@@ -25,18 +24,13 @@ module.exports = async (client) => {
   async function postTopgg() {
     // Discord Bots (top.gg)
     try {
-      const data = {
-        server_count: guildsPerShard
-        // shards: guildsPerShard,
-        // shard_id: client.shard.ids[0],
-        // shard_count: client.shard.count
-      };
+      const data = { server_count: guildsPerShard };
       const body = JSON.stringify(data);
 
       const posted = await fetch(`https://top.gg/api/bots/${client.user.id}/stats`, {
         method: 'POST',
         headers: {
-          'Authorization': tokens.topggToken,
+          'Authorization': process.env.TOPGGTOKEN,
           'Content-Type': 'application/json'
         },
         body: body
@@ -62,7 +56,7 @@ module.exports = async (client) => {
       const posted = await fetch(`https://discord.bots.gg/api/v1/bots/${client.user.id}/stats`, {
         method: 'POST',
         headers: {
-          'Authorization': tokens.botsggToken,
+          'Authorization': process.env.BOTSGG,
           'Content-Type': 'application/json'
         },
         body: body
@@ -78,16 +72,13 @@ module.exports = async (client) => {
   async function postDBotList() {
     // Discord Bot List (discordbotlist.com)
     try {
-      const data = {
-        guilds: guildSizeCount,
-        shard_id: client.shard.ids[0]
-      };
+      const data = { guilds: guildSizeCount };
       const body = JSON.stringify(data);
 
       const posted = await fetch(`https://discordbotlist.com/api/bots/${client.user.id}/stats`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bot ${tokens.dbl2Token}`,
+          'Authorization': `Bot ${process.env.DBL2TOKEN}`,
           'Content-Type': 'application/json'
         },
         body: body
@@ -109,7 +100,7 @@ module.exports = async (client) => {
       const posted = await fetch(`https://api.botlist.space/v1/bots/${client.user.id}`, {
         method: 'POST',
         headers: {
-          'Authorization': tokens.blsToken,
+          'Authorization': process.env.BLSTOKEN,
           'Content-type': 'application/json'
         },
         body: body
@@ -131,7 +122,7 @@ module.exports = async (client) => {
       const posted = await fetch(`https://api.discordapps.dev/api/v2/bots/${client.user.id}`, {
         method: 'POST',
         headers: {
-          'Authorization': tokens.termToken,
+          'Authorization': process.env.TERMTOKEN,
           'Content-Type': 'application/json'
         },
         body: body
@@ -153,7 +144,7 @@ module.exports = async (client) => {
       const posted = await fetch(`https://botsfordiscord.com/api/bot/${client.user.id}`, {
         method: 'POST',
         headers: {
-          'Authorization': tokens.bfdToken,
+          'Authorization': process.env.BFDTOKEN,
           'Content-Type': 'application/json'
         },
         body: body

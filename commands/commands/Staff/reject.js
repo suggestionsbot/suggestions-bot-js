@@ -77,10 +77,14 @@ module.exports = class RejectCommand extends Command {
 
     if (!suggestionsLogs) return this.client.errors.noSuggestionsLogs(message.channel);
 
-    if (!guild.member(userID)) {
-      message.channel.send(`**${submitter.tag}** is no longer in the guild, but their suggestion will still be rejected.`)
-        .then(msg => msg.delete({ timeout: 3000 }))
-        .catch(err => this.logger.error(err.stack));
+    try {
+      if (!await guild.members.fetch(userID)) {
+        message.channel.send(`**${submitter.tag}** is no longer in the guild, but their suggestion will still be approved.`)
+          .then(msg => msg.delete({ timeout: 3000 }));
+      }
+    } catch (error) {
+      this.client.logger.error(error.stack);
+      return message.channel.send(`An error occurred: **${error.message}**`);
     }
 
     let sMessage;
