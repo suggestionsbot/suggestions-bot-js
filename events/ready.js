@@ -1,5 +1,6 @@
-const { version } = require('../package.json');
 require('dotenv-flow').config();
+const { Util } = require('discord.js');
+const { version } = require('../package.json');
 
 const versions = {
   production: 'Production',
@@ -31,9 +32,12 @@ module.exports = class {
     // If the bot was invited to a guild while it was offline, the "ready" event will
     // be emitted (ONLY IN PRODUCTION)
     if (process.env.NODE_ENV === 'production') {
-
       // handle posting stats to bot lists
-      if (this.client.shard.ids[0] === 0) require('../utils/voting')(this.client);
+      const recommendedShardCount = await Util.fetchRecommendedShards(process.env.DISCORD_TOKEN);
+      if (this.client.shard.count === recommendedShardCount) {
+        require('../utils/voting')(this.client);
+        this.client.logger.log('ALL SHARDS SPAWNED AND READY', 'ready');
+      }
 
       this.client.setInterval(() => { this.client.sweepMessages(); }, 600000);
     }
