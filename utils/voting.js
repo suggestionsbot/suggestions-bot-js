@@ -18,7 +18,6 @@ module.exports = async (client) => {
     ];
 
     for (const site of promises) await site();
-
     // const results = await Promise.all(promises);
     // client.logger.log(`Posted to ${results.length} vote sites.`);
   }, 300000);
