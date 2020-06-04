@@ -17,8 +17,10 @@ module.exports = async (client) => {
       postBfd
     ];
 
-    const results = await Promise.all(promises);
-    client.logger.log(`Posted to ${results.length} vote sites.`);
+    for (const site of promises) await site();
+
+    // const results = await Promise.all(promises);
+    // client.logger.log(`Posted to ${results.length} vote sites.`);
   }, 300000);
 
   async function postTopgg() {

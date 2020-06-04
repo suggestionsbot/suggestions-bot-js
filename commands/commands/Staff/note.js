@@ -70,13 +70,10 @@ module.exports = class NoteCommand extends Command {
     }
 
     try {
-      if (!await guild.members.fetch(userID)) {
-        message.channel.send(`**${sUser.tag}** is no longer in the guild, but their suggestion will still be approved.`)
-          .then(msg => msg.delete({ timeout: 3000 }));
-      }
+      await guild.members.fetch(userID);
     } catch (error) {
-      this.client.logger.error(error.stack);
-      return message.channel.send(`An error occurred: **${error.message}**`);
+      message.channel.send(`**${sUser.tag}** is no longer in the guild, but this note will still be added to their suggestion.`)
+        .then(msg => msg.delete({ timeout: 3000 }));
     }
 
     if (!messageID) {

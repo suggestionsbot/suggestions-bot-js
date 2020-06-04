@@ -17,7 +17,7 @@ module.exports = class HelpCommand extends Command {
   }
 
   async run(message, args, settings) {
-    const { embedColor, discord, website, prefix: defPrefix, surveyURL } = this.client.config;
+    const { embedColor, discord, website, prefix: defPrefix } = this.client.config;
     let staffRoles,
       staffCheck,
       adminCheck;
@@ -98,8 +98,6 @@ module.exports = class HelpCommand extends Command {
     }
     helpEmbed.addField('ℹ Website', website);
     helpEmbed.addField('❗ Found an issue?', `Please report any issues directly to the **Support Team** via the Support Discord: ${discord}`);
-    helpEmbed.addField('📝 Survey', oneLine`Want to participate in our 2020 survey with the chance to win **Discord Nitro**?
-      Check the Google Form [here](${surveyURL})! For more information, check out our Discord linked above.`);
 
     message.channel.send(helpEmbed);
   }

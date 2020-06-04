@@ -76,13 +76,10 @@ module.exports = class ApproveCommand extends Command {
     if (!suggestionsLogs) return this.client.errors.noSuggestionsLogs(message.channel);
 
     try {
-      if (!await guild.members.fetch(userID)) {
-        message.channel.send(`**${submitter.tag}** is no longer in the guild, but their suggestion will still be approved.`)
-          .then(msg => msg.delete({ timeout: 3000 }));
-      }
+      await guild.members.fetch(userID);
     } catch (error) {
-      this.client.logger.error(error.stack);
-      return message.channel.send(`An error occurred: **${error.message}**`);
+      message.channel.send(`**${submitter.tag}** is no longer in the guild, but their suggestion will still be approved.`)
+        .then(msg => msg.delete({ timeout: 3000 }));
     }
 
     let sMessage;
