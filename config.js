@@ -47,5 +47,4 @@ module.exports = {
   emojis: {
     success: '578409088157876255'
   },
-  surveyURL: 'https://forms.gle/KJXgSG8pzgFgdumZ9'
 };
