@@ -22,7 +22,7 @@ module.exports = class InviteCommand extends Command {
       .setAuthor('Bot Invite Information', this.client.user.avatarURL())
       .setDescription(`Hello ${message.author},
         
-          **Before inviting, you need** \`MANAGE SERVER\` **or** \`ADMINISTRATOR\` **permissions to add bots to a server.** 
+          **Before inviting, you need the** \`MANAGE SERVER\` **or** \`ADMINISTRATOR\` **permissions to add bots to a server.** 
       
           **Bot Invite:**
           ${invite}

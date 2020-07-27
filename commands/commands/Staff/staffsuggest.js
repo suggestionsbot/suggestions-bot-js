@@ -17,7 +17,7 @@ module.exports = class StaffSuggestCommand extends Command {
 
   async run(message, args, settings) {
 
-    const { embedColor } = this.client.config;
+    const { embedColor, staffChannelPermissions } = this.client.config;
 
     await message.delete().catch(O_o => {});
 
@@ -30,9 +30,9 @@ module.exports = class StaffSuggestCommand extends Command {
     if (!settings.staffRoles) return this.client.errors.noStaffRoles(message.channel);
 
     const embed = new MessageEmbed()
-      .setDescription(`Hey, ${sUser.tag}. Your suggestion has been added in the ${sChannel} channel to be voted on!`)
+      .setAuthor(sUser.tag, sUser.displayAvatarURL())
+      .setDescription(`Hey, ${sUser}. Your suggestion has been added in the ${sChannel} channel to be voted on!`)
       .setColor(embedColor)
-      .setAuthor(sUser.displayName)
       .setFooter(`User ID: ${sUser.id}`)
       .setTimestamp();
 
@@ -52,10 +52,8 @@ module.exports = class StaffSuggestCommand extends Command {
       .setFooter(`User ID: ${sUser.id}`)
       .setTimestamp();
 
-    const sendMsgs = sChannel.permissionsFor(message.guild.me).has('SEND_MESSAGES', false);
-    const reactions = sChannel.permissionsFor(message.guild.me).has('ADD_REACTIONS', false);
-    if (!sendMsgs) return this.client.errors.noChannelPerms(message, sChannel, 'SEND_MESSAGES');
-    if (!reactions) return this.client.errors.noChannelPerms(message, sChannel, 'ADD_REACTIONS');
+    const missingPermissions = sChannel.permissionsFor(this.client.user).missing(staffChannelPermissions);
+    if (missingPermissions.length > 0) return this.client.errors.noChannelPerms(message, sChannel, missingPermissions);
 
     message.channel.send(embed).then(msg => msg.delete({ timeout: 5000 })).catch(err => this.client.logger.error(err.stack));
 

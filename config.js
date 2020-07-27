@@ -47,4 +47,7 @@ module.exports = {
   emojis: {
     success: '578409088157876255'
   },
+  defaultPermissions: 355392,
+  logsPermissions: 84992,
+  staffChannelPermissions: 85056
 };

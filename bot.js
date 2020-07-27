@@ -21,6 +21,7 @@ const client = new SuggestionsClient({
   ws: { intents: myIntents }
 
 });
+
 client.login();
 
 client.on('commandBlocked', (cmd, reason) => {

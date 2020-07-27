@@ -1,5 +1,6 @@
 const { MessageEmbed } = require('discord.js');
 const permissions = require('./perms');
+const { stripIndents } = require('common-tags');
 
 class ErrorHandler {
   constructor(client) {
@@ -47,8 +48,10 @@ class ErrorHandler {
     message.channel.send(embed).then(m => m.delete({ timeout: 5000 })).catch(err => this.client.logger.error(err));
   }
 
-  noChannelPerms(message, channel, perm) {
-    message.channel.send(`I am missing a permission in the ${channel} channel! Make sure I have \`${permissions[perm]} (${perm})\`.`).then(msg => msg.delete({ timeout: 5000 }));
+  noChannelPerms(message, channel, perms) {
+    return message.channel.send(stripIndents`I am missing these permissions in the ${channel} channel! Make sure I have them: 
+      ${perms.length > 1 ? perms.map(p => `\`${permissions[p]}\``).join(', ') : `\`${permissions[perms[0]]}\``}
+    `).then(m => m.delete({ timeout: 5000 }));
   }
 
   noSuggestions(channel) {

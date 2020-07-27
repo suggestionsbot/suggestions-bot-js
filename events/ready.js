@@ -35,7 +35,8 @@ module.exports = class {
       // handle posting stats to bot lists
       const recommendedShardCount = await Util.fetchRecommendedShards(process.env.DISCORD_TOKEN);
       if (this.client.shard.count === recommendedShardCount) {
-        require('../utils/voting')(this.client);
+        // require('../utils/voting')(this.client);
+        this.client.votePoster.startInterval();
         this.client.logger.log('ALL SHARDS SPAWNED AND READY', 'ready');
       }
 

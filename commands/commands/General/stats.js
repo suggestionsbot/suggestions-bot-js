@@ -20,17 +20,18 @@ module.exports = class StatsCommand extends Command {
 
     const { embedColor } = this.client.config;
 
-    const memUsage = (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2);
     const shardID = message.guild ? message.guild.shardID : this.client.shard.ids[0];
 
     let guildSize,
       userSize,
-      shardUptime;
+      shardUptime,
+      memUsage;
 
     const promises = [
       this.client.shard.fetchClientValues('guilds.cache.size'),
       this.client.shard.broadcastEval('this.guilds.cache.reduce((prev, guild) => prev + guild.memberCount, 0)'),
-      this.client.shard.fetchClientValues('uptime')
+      this.client.shard.fetchClientValues('uptime'),
+      this.client.shard.broadcastEval('(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)')
     ];
 
     try {
@@ -39,6 +40,7 @@ module.exports = class StatsCommand extends Command {
       guildSize = (resolved[0].reduce((prev, count) => prev + count, 0)).toLocaleString();
       userSize = (resolved[1].reduce((prev, count) => prev + count, 0)).toLocaleString();
       shardUptime = moment.duration(resolved[2][shardID]).format(' D [days], H [hrs], m [mins], s [secs]');
+      memUsage = resolved[3].reduce((prev, count) => prev + count, 0)
     } catch (err) {
       this.client.logger.error(err.stack);
       return message.channel.send(`An error occurred: **${err.message}**`);
