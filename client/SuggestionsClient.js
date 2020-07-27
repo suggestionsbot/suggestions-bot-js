@@ -1,6 +1,6 @@
 require('dotenv-flow').config();
 const { Client, Collection } = require('discord.js');
-const { Poster } = require('dbots');
+// const { Poster } = require('dbots');
 const Mongoose = require('../db/mongoose');
 
 // Stores for handling various functions
@@ -45,18 +45,18 @@ module.exports = class SuggestionsClient extends Client {
 
     this.commandLoader.init();
 
-    this.votePoster = new Poster({
-      client: this,
-      apiKeys: {
-        discordbotsgg: process.env.BOTSGG,
-        topgg: process.env.TOPGGTOKEN,
-        discordappsdev: process.env.TERMTOKEN,
-        discordbotlist: process.env.DBL2TOKEN,
-        spacebotslist: process.env.BLSTOKEN,
-        botsfordiscord: process.env.BFDTOKEN
-      },
-      clientLibrary: 'discord.js'
-    });
+    // this.votePoster = new Poster({
+    //   client: this,
+    //   apiKeys: {
+    //     discordbotsgg: process.env.BOTSGG,
+    //     topgg: process.env.TOPGGTOKEN,
+    //     discordappsdev: process.env.TERMTOKEN,
+    //     discordbotlist: process.env.DBL2TOKEN,
+    //     spacebotslist: process.env.BLSTOKEN,
+    //     botsfordiscord: process.env.BFDTOKEN
+    //   },
+    //   clientLibrary: 'discord.js'
+    // });
   }
 
   /**
