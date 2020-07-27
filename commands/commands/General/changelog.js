@@ -32,13 +32,13 @@ module.exports = class ChangelogCommand extends Command {
             const channel = new TextChannel(guild, found);
 
             if (channel.messages.cache.size === 0) {
-              await channel.messages.fetch().catch(error => {
+              await channel.messages.fetch({ limit: 5 }).catch(error => {
                 this.client.logger.error(error.message);
                 return message.channel.send(`An error occurred: **${error.message}&+**`);
               });
             }
 
-            const m = channel.messages.cache.filter(msg => msg.embeds.length >= 1).first();
+            const m = channel.messages.cache.first();
 
             const changelogEmbed = new MessageEmbed()
               .setTitle(`${this.client.user.username}'s Changelog 🗄`)
@@ -53,7 +53,7 @@ module.exports = class ChangelogCommand extends Command {
           });
       })
       .catch(error => {
-        this.client.logger.error(error.message);
+        this.client.logger.error(error.stack);
         return message.channel.send(`An error occurred: **${error.message}**`);
       });
 

@@ -1,4 +1,4 @@
-const { Constants, MessageEmbed, Guild, GuildEmoji, Util: { escapeMarkdown } } = require('discord.js');
+const { MessageEmbed, Guild, GuildEmoji, Util: { escapeMarkdown } } = require('discord.js');
 const { stripIndent } = require('common-tags');
 const Command = require('../../Command');
 
@@ -19,7 +19,7 @@ module.exports = class ApproveCommand extends Command {
 
     message.delete().catch(O_o => {});
 
-    const { discord, suggestionColors: { approved } } = this.client.config;
+    const { discord, suggestionColors: { approved }, logsPermissions } = this.client.config;
     let sID;
 
     const id = args[0];
@@ -208,12 +208,8 @@ module.exports = class ApproveCommand extends Command {
         `);
     }
 
-    const sendMsgs = suggestionsLogs.permissionsFor(this.client.user).has('SEND_MESSAGES', false);
-    const addReactions = suggestionsLogs.permissionsFor(this.client.user).has('ADD_REACTIONS', false);
-    const extReactions = suggestionsLogs.permissionsFor(this.client.user).has('USE_EXTERNAL_EMOJIS', false);
-    if (!sendMsgs) return this.client.errors.noChannelPerms(message, suggestionsLogs, 'SEND_MESSAGES');
-    if (!addReactions) return this.client.errors.noChannelPerms(message, suggestionsLogs, 'ADD_REACTIONS');
-    if (!extReactions) return this.client.errors.noChannelPerms(message, suggestionsLogs, 'USE_EXTERNAL_EMOJIS');
+    const missingPermissions = suggestionsLogs.permissionsFor(this.client.user).missing(logsPermissions);
+    if (missingPermissions.length > 0) return this.client.errors.noChannelPerms(message, suggestionsLogs, missingPermissions);
 
     const approveSuggestion = {
       query: [

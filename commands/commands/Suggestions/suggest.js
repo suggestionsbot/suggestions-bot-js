@@ -1,11 +1,12 @@
 /* eslint-disable no-useless-escape */
-const { Constants, MessageEmbed, Guild, GuildEmoji, Util: { escapeMarkdown } } = require('discord.js');
+const { MessageEmbed, Guild, GuildEmoji, Util: { escapeMarkdown } } = require('discord.js');
 const { oneLine, stripIndent } = require('common-tags');
 const crypto = require('crypto');
 require('moment-duration-format');
 require('moment-timezone');
 
 const Command = require('../../Command');
+const permissions = require('../../../utils/perms');
 
 module.exports = class SuggestCommand extends Command {
   constructor(client) {
@@ -23,8 +24,7 @@ module.exports = class SuggestCommand extends Command {
   }
 
   async run(message, args, settings) {
-
-    const { embedColor, emojis: { success } } = this.client.config;
+    const { embedColor, emojis: { success }, defaultPermissions } = this.client.config;
     const { suggestionsChannel, voteEmojis: emojis } = settings;
     const suggestion = args.join(' ');
 
@@ -83,12 +83,8 @@ module.exports = class SuggestCommand extends Command {
     const defaults = set => set.name === 'defaultEmojis';
     const fallback = set => set.name === 'oldDefaults';
 
-    const sendMsgs = sChannel.permissionsFor(message.guild.me).has('SEND_MESSAGES', false);
-    const reactions = sChannel.permissionsFor(message.guild.me).has('ADD_REACTIONS', false);
-    const extReactions = sChannel.permissionsFor(message.guild.me).has('USE_EXTERNAL_EMOJIS', false);
-    if (!sendMsgs) return this.client.errors.noChannelPerms(message, sChannel, 'SEND_MESSAGES');
-    if (!reactions) return this.client.errors.noChannelPerms(message, sChannel, 'ADD_REACTIONS');
-    if (!extReactions) return this.client.errors.noChannelPerms(message, sChannel, 'USE_EXTERNAL_EMOJIS');
+    const missingPermissions = sChannel.permissionsFor(this.client.user).missing(defaultPermissions);
+    if (missingPermissions.length > 0) return this.client.errors.noChannelPerms(message, sChannel, missingPermissions);
 
     const m = await sChannel.send(embed);
     const mID = m.id;
@@ -105,12 +101,13 @@ module.exports = class SuggestCommand extends Command {
         this.client.shard.broadcastEval(`this.findEmojiByID.call(this, '${emoji}')`)
           .then(async emojiArray => {
             const found = emojiArray.find(e => e);
-            if (!found || !message.guild.me.hasPermission('USE_EXTERNAL_EMOJIS')) await m.react(fallbackSet[emojiIndex]);
+            if (!found) return await m.react(fallbackSet[emojiIndex]);
 
             return this.client.api.guilds(found.guild).get()
               .then(async raw => {
                 const guild = new Guild(this.client, raw);
                 const gEmoji = new GuildEmoji(this.client, found, guild);
+                if (!this._canUseGuildEmoji(message.guild.me, gEmoji)) return await m.react(fallbackSet[emojiIndex]);
                 return await m.react(gEmoji);
               });
           })
@@ -126,13 +123,14 @@ module.exports = class SuggestCommand extends Command {
     this.client.shard.broadcastEval(`this.findEmojiByID.call(this, '${success}')`)
       .then(async emojiArray => {
         const found = emojiArray.find(e => e);
-        if (!found) return message.react('✅').then(() => message.delete({ timeout: 3000 }));
+        if (!found) return message.react('✅');
 
         return this.client.api.guilds(found.guild).get()
           .then(async raw => {
             const guild = new Guild(this.client, raw);
             const gEmoji = new GuildEmoji(this.client, found, guild);
-            return await message.react(gEmoji).then(() => message.delete({ timeout: 3000 }));
+            if (!this._canUseGuildEmoji(message.guild.me, gEmoji)) return message.react('✅');
+            return await message.react(gEmoji);
           });
       })
       .catch(error => {
@@ -161,7 +159,9 @@ module.exports = class SuggestCommand extends Command {
 
     try {
       await this.client.suggestions.submitGuildSuggestion(newSuggestion);
+      await message.delete({ timeout: 5000 });
     } catch (error) {
+      if (error.message === 'Unknown Message') return;
       this.client.logger.error(error.stack);
       return message.channel.send(`An error occurred: **${error.message}**`);
     }
@@ -204,5 +204,20 @@ module.exports = class SuggestCommand extends Command {
     }
 
     return;
+  }
+
+  _canUseGuildEmoji(guildMember, guildEmoji) {
+    let canUseGuildEmoji = false;
+    for (const role of guildMember.roles.cache) {
+      if (guildEmoji.roles.cache.size === 0) {
+        canUseGuildEmoji = true;
+        break;
+      }
+      if (guildEmoji.roles.cache.has(role.id)) {
+        canUseGuildEmoji = true;
+        break;
+      }
+    }
+    return canUseGuildEmoji;
   }
 };
