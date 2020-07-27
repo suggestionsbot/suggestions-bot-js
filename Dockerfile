@@ -1,4 +1,4 @@
-FROM node:12.18.3
+FROM node:lts
 
 #Update container and install vim
 RUN ["apt-get", "update"]
