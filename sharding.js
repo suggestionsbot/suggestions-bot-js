@@ -2,12 +2,14 @@ if (Number(process.version.slice(1).split('.')[0]) < 8) throw new Error('Node 8.
 
 require('dotenv-flow').config();
 
+const { DISCORD_TOKEN, NODE_ENV } = process.env;
+
 const { ShardingManager } = require('discord.js');
 const logger = require('./utils/logger');
 
 const manager = new ShardingManager('./bot.js', {
-  token: process.env.DISCORD_TOKEN,
-  totalShards: 2,
+  token: DISCORD_TOKEN,
+  totalShards: NODE_ENV === 'production' ? 'auto' : 2,
   respawn: true
 });
 
