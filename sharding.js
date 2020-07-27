@@ -7,7 +7,7 @@ const logger = require('./utils/logger');
 
 const manager = new ShardingManager('./bot.js', {
   token: process.env.DISCORD_TOKEN,
-  totalShards: 'auto',
+  totalShards: 2,
   respawn: true
 });
 
