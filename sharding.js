@@ -9,8 +9,9 @@ const logger = require('./utils/logger');
 
 const manager = new ShardingManager('./bot.js', {
   token: DISCORD_TOKEN,
-  totalShards: NODE_ENV === 'production' ? 'auto' : 2,
-  respawn: true
+  totalShards: NODE_ENV === 'production' ? 'auto' : 1,
+  respawn: true,
+  mode: 'worker'
 });
 
 manager.spawn();
