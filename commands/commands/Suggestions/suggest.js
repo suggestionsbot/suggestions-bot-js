@@ -48,9 +48,8 @@ module.exports = class SuggestCommand extends Command {
     if (!sChannel) return this.client.errors.noSuggestions(message.channel);
 
     // If the sID exists globally, this will force a new one to be generated
-    do {
-      id = crypto.randomBytes(20).toString('hex').slice(12, 20);
-    } while (verifySuggestion);
+    do id = crypto.randomBytes(20).toString('hex').slice(12, 20);
+    while (verifySuggestion);
 
     const embed = new MessageEmbed()
       .setDescription(stripIndent`
@@ -115,9 +114,8 @@ module.exports = class SuggestCommand extends Command {
             this.client.logger.error(error.stack);
             return message.channel.send(`An error occurred: **${error.message}**`);
           });
-      } else {
+      } else
         await m.react(emoji);
-      }
     }
 
     this.client.shard.broadcastEval(`this.findEmojiByID.call(this, '${success}')`)
