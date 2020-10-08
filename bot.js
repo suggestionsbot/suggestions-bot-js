@@ -6,7 +6,7 @@ const { Intents } = require('discord.js');
 const { oneLine } = require('common-tags');
 
 const myIntents = new Intents(Intents.ALL);
-myIntents.remove(['GUILD_PRESENCES']);
+myIntents.remove(['GUILD_PRESENCES', 'GUILD_MEMBERS']);
 
 require('./extensions/Guild');
 
