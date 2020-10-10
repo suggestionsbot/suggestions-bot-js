@@ -11,7 +11,7 @@ const manager = new ShardingManager('./bot.js', {
   token: DISCORD_TOKEN,
   totalShards: NODE_ENV === 'production' ? 'auto' : 1,
   respawn: true,
-  mode: 'worker'
+  mode: 'process'
 });
 
 manager.spawn();
