@@ -39,9 +39,9 @@ module.exports = class SettingsHelpers {
 
     const inMap = guild.settings.has(guild.id);
 
-    if (inMap) {
+    if (inMap)
       data = guild.settings.get(guild.id);
-    } else {
+    else {
       let fetchedData = await Settings.findOne({ $or: this._guildQuery(guild) });
       if (newGuild) fetchedData = await this.createGuild(guild);
       if (fetchedData == null) return defaultData;
@@ -75,15 +75,8 @@ module.exports = class SettingsHelpers {
 
     guild.settings.set(guild.id, updated);
 
-    await this.client.shard.broadcastEval(`this.guilds.cache.get('${guild.id}')`)
-      .then(guildArray => {
-        const found = guildArray.find(g => g);
-        if (!found) return false;
-
-        this.client.logger.log(oneLine`
-          Guild "${found.name}" (${found.id}) updated settings: ${Object.keys(newSettings)}
-        `);
-      });
+    const fetchedGuild = await this.client.shard.fetchGuild(guild.id);
+    this.client.logger.log(`Guild "${fetchedGuild.name}" (${fetchedGuild.id}) updated settings: ${Object.keys(newSettings)}`);
 
     return updated;
   }
@@ -142,15 +135,8 @@ module.exports = class SettingsHelpers {
 
     guild.settings.set(guild.id, data);
 
-    await this.client.shard.broadcastEval(`this.guilds.cache.get('${guild.id}')`)
-      .then(guildArray => {
-        const found = guildArray.find(g => g);
-        if (!found) return false;
-
-        this.client.logger.log(oneLine`
-          Default settings saved for guild "${found.name}" (${found.id}).
-        `);
-      });
+    const fetchedGuild = await this.client.shard.fetchGuild(guild.id);
+    this.client.logger.log(`Default settings saved for guild "${fetchedGuild.name}" (${fetchedGuild.id}).`);
 
     return data;
   }
@@ -168,7 +154,7 @@ module.exports = class SettingsHelpers {
     const newCommand = await new Command(merged);
     const data = await newCommand.save();
 
-    const cUser = await this.client.users.fetch(data.userID);
+    const cUser = await this.client.shard.fetchUser(data.userID);
     this.client.logger.log(`"${cUser.tag}" (${cUser.id}) ran the command "${data.command}"`, 'cmd');
 
     return data;
