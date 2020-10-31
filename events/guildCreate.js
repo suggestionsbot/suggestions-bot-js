@@ -23,32 +23,21 @@ module.exports = class {
         **Name:** \`${guild.name}\`
         **Members:** \`${guild.members.cache.size}\`
         **Created:** \`${moment(guild.createdAt).fromNow()}\`
-        **Owner:** ${guildOwner} \`[${guildOwner.tag}]\`
+        **Owner:** <@${guildOwner.id}> \`[${guildOwner.tag}]\`
       `)
       .setColor(created)
       .setTimestamp();
 
-    switch (process.env.NODE_ENV) {
-    // 498627833233539086 = #server_logs / Nerd Cave Testing
-    case 'development': {
-      this.client.shard.broadcastEval(`this.channels.cache.get("498627833233539086").send({ embed: ${JSON.stringify(newServer)} });`)
-        .then(async channelArr => {
-          const found = channelArr.find(c => c);
-          if (!found) return this.client.logger.error('Could not find server logs channel.');
-        })
-        .catch(err => this.client.logger.error(err));
-      break;
-    }
     // 602332466476482616 = #server_logs / Suggestions
-    default: {
-      this.client.shard.broadcastEval(`this.channels.cache.get("602332466476482616").send({ embed: ${JSON.stringify(newServer)} });`)
-        .then(async channelArr => {
-          const found = channelArr.find(c => c);
-          if (!found) return this.client.logger.error('Could not find server logs channel');
-        })
-        .catch(err => this.client.logger.error(err));
-      break;
-    }
-    }
+    // 498627833233539086 = #server_logs / Nerd Cave Testing
+    this.client.shard.fetchChannel(process.env.NODE_ENV === 'production' ? '602332466476482616' : '498627833233539086')
+      .then(found => {
+        return this.client.api.guilds(found.guild).get()
+          .then(async raw => {
+            const fetchedGuild = new Guild(this.client, raw);
+            const channel = new TextChannel(fetchedGuild, found);
+            return channel.send(newServer);
+          });
+      }).catch(e => this.client.logger.error(e));
   }
 };

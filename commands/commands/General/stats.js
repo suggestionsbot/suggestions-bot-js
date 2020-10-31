@@ -20,7 +20,7 @@ module.exports = class StatsCommand extends Command {
 
     const { embedColor } = this.client.config;
 
-    const shardID = message.guild ? message.guild.shardID : this.client.shard.ids[0];
+    const shardID = message.guild ? message.guild.shardID : this.client.shard.shards[0];
 
     let guildSize,
       userSize,
