@@ -13,7 +13,7 @@ module.exports = class {
     let guildOwner;
 
     try {
-      guildOwner = await this.client.users.fetch(guild.ownerID);
+      guildOwner = await this.client.shard.fetchUser(guild.ownerID);
     } catch (error) {
       this.client.logger.error(error.stack);
     }

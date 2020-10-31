@@ -51,11 +51,11 @@ module.exports = class ConfigCommand extends Command {
       suggestionsLogs = message.guild.channels.cache.find(c => c.name === suggestionsLogs) ||
           message.guild.channels.cache.get(suggestionsLogs) ||
           '';
-          
+
       staffSuggestionsChannel = message.guild.channels.cache.find(c => c.name === staffSuggestionsChannel) ||
         (message.guild.channels.cache.find(c => c.id === staffSuggestionsChannel)) ||
         '';
-        
+
     } catch (err) {
       this.client.logger.error(err.stack);
       return message.channel.send(err.message);
@@ -253,7 +253,7 @@ module.exports = class ConfigCommand extends Command {
         const filter = set => set.id === setID;
         const foundSet = this.client.voteEmojis.find(filter);
         if (!foundSet) return this.client.errors.voteEmojiNotFound(updated, channel);
-        
+
         const emojis = foundSet.emojis.map(async e => {
           if (foundSet.custom) {
             return this.client.shard.broadcastEval(`this.findEmojiByID.call(this, '${e}')`)
@@ -325,7 +325,7 @@ module.exports = class ConfigCommand extends Command {
       });
 
       const mainView = await Promise.all(emojiSets);
-      
+
       configEmbed.setDescription(stripIndent`
         **Voting Emojis**
         Choose from **${this.client.voteEmojis.length}** different emoji sets to be used for voting in your guild.
