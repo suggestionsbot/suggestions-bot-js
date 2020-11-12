@@ -11,13 +11,14 @@ module.exports = class Command {
     adminOnly = false,
     ownerOnly = false,
     superSecretOnly = false,
+    supportOnly = false,
     aliases = new Array(),
     botPermissions = new Array(),
     throttles = new Map(),
     throttling = { usages: 2, duration: 5 } || false
   }) {
     this.client = client;
-    this.conf = { enabled, guarded, guildOnly, staffOnly, adminOnly, ownerOnly, superSecretOnly, aliases, botPermissions, throttles, throttling };
+    this.conf = { enabled, guarded, guildOnly, staffOnly, adminOnly, ownerOnly, superSecretOnly, supportOnly, aliases, botPermissions, throttles, throttling };
     this.help = { name, description, category, usage };
   }
 

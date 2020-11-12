@@ -60,6 +60,8 @@ module.exports = class CommandHandler {
       staffRoles = [];
     }
 
+    const supportCheck = await this.client.isSupport(message.author)
+      .catch(e => this.client.logger.error(e));
     const superCheck = superSecretUsers.includes(message.author.id);
     const ownerCheck = this.client.isOwner(message.author.id);
 
@@ -75,6 +77,7 @@ module.exports = class CommandHandler {
     if (!cmd.conf.enabled) return this.client.errors.adminCommandIsDisabled(cmd, message.channel);
     if ((!message.guild && cmd.conf.guildOnly)) return this.client.errors.commandGuildOnly(cmd, message.channel);
     if (cmd.conf.superSecretOnly && !superCheck) return;
+    if (cmd.conf.supportOnly && !supportCheck) return;
 
     if (message.guild) {
       if (cmd.conf.ownerOnly && !ownerCheck) return;
