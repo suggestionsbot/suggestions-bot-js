@@ -1,5 +1,5 @@
 require('dotenv-flow').config();
-const { Client, Collection } = require('discord.js');
+const { Client, Collection, Guild } = require('discord.js');
 const { Poster } = require('dbots');
 const Mongoose = require('../db/mongoose');
 
@@ -136,6 +136,17 @@ module.exports = class SuggestionsClient extends Client {
     else staffCheck = adminCheck;
 
     return staffCheck;
+  }
+
+  async isSupport(user) {
+    const id = process.env.NODE_ENV === 'production' ? '601219766258106399' : '345753533141876737';
+
+    return this.api.guilds(id).get()
+      .then(async raw => {
+        const guild = new Guild(this, raw);
+        const member = await guild.members.fetch(user.id);
+        return member.roles.cache.has(this.config.supportRole);
+      });
   }
 
   // Updates the presence depending on production or development
