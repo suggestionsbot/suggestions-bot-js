@@ -50,5 +50,7 @@ module.exports = {
   defaultPermissions: 355392,
   logsPermissions: 84992,
   staffChannelPermissions: 85056,
-  supportRole: process.env.NODE_ENV === 'production' ? '602552757634859008' : '551529914315046942'
+  supportRoles: process.env.NODE_ENV === 'production' ?
+    ['602552757634859008', '629883041946533893'] :
+    ['551529914315046942', '776576870245597255']
 };

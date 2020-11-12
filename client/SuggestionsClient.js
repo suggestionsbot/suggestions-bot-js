@@ -145,7 +145,7 @@ module.exports = class SuggestionsClient extends Client {
       .then(async raw => {
         const guild = new Guild(this, raw);
         const member = await guild.members.fetch(user.id);
-        return member.roles.cache.has(this.config.supportRole);
+        return member.roles.cache.some(r => this.config.supportRoles.includes(r.id));
       });
   }
 
