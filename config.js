@@ -50,7 +50,8 @@ module.exports = {
   defaultPermissions: 355392,
   logsPermissions: 84992,
   staffChannelPermissions: 85056,
+  // Leadership, Moderators, Trusted
   supportRoles: process.env.NODE_ENV === 'production' ?
-    ['602552757634859008', '629883041946533893'] :
-    ['551529914315046942', '776576870245597255']
+    ['603803993562677258', '601235098502823947', '629883041946533893'] :
+    ['782810845444964383', '485987998794514442', '776576870245597255']
 };
