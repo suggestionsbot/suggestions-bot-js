@@ -30,7 +30,7 @@ module.exports = class InfoCommand extends Command {
       .addField('Support Discord', discord)
       .addField('Website', website)
       .addField('Bot Version', version)
-      .setFooter('© 2020 Nerd Cave Development');
+      .setFooter('© 2021 Anthony Collier');
 
     return message.channel.send(embed);
   }
