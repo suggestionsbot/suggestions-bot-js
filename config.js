@@ -1,4 +1,5 @@
 require('dotenv-flow').config();
+const isProduction = () => process.env.NODE_ENV === 'production';
 
 module.exports = {
   prefix: ',',
@@ -10,7 +11,7 @@ module.exports = {
   website: 'https://suggestionsbot.com',
   docs: 'https://docs.suggestionsbot.com',
   invite: `https://discord.com/oauth2/authorize?client_id=${
-    process.env.NODE_ENV === 'production' ? '474051954998509571' : '476928510573805568'
+    isProduction() ? '474051954998509571' : '771924181784854579'
   }&scope=bot&permissions=355392`,
   suggestionColors: {
     approved: '#00e640',
@@ -45,13 +46,16 @@ module.exports = {
     fetchedMessages: false
   },
   emojis: {
-    success: '578409088157876255'
+    success: {
+      id: isProduction() ? '605265580416565269' : '578409088157876255',
+      value: isProduction() ? '<:nerdSuccess:605265580416565269>' : '<:nerdSuccess:578409088157876255>'
+    }
   },
   defaultPermissions: 355392,
   logsPermissions: 84992,
   staffChannelPermissions: 85056,
   // Leadership, Moderators, Trusted
-  supportRoles: process.env.NODE_ENV === 'production' ?
+  supportRoles: isProduction() ?
     ['603803993562677258', '601235098502823947', '629883041946533893'] :
     ['782810845444964383', '485987998794514442', '776576870245597255']
 };

@@ -18,7 +18,7 @@ module.exports = class ConfigCommand extends Command {
 
   async run(message, args, settings) {
 
-    const { embedColor, docs, emojis: { success }, discord } = this.client.config;
+    const { embedColor, docs, emojis: { success: { value: success } }, discord } = this.client.config;
     const { help: { usage, name } } = this;
     const confDocs = `${docs}/docs/configuration.html`;
 
@@ -66,23 +66,6 @@ module.exports = class ConfigCommand extends Command {
       .setColor(embedColor)
       .setFooter(`Guild: ${message.guild.id}`)
       .setTimestamp();
-
-    const successEmoji = await this.client.shard.broadcastEval(`this.findEmojiByID.call(this, '${success}')`)
-      .then(emojiArray => {
-        const found = emojiArray.find(e => e);
-        if (!found) return '✅';
-
-        return this.client.api.guilds(found.guild).get()
-          .then(raw => {
-            const guild = new Guild(this.client, raw);
-            const gEmoji = new GuildEmoji(this.client, found, guild);
-            return `<:${gEmoji.name}:${gEmoji.id}>`;
-          });
-      })
-      .catch(error => {
-        this.client.logger.error(error.stack);
-        return message.channel.send(`An error occurred: **${error.message}**`);
-      });
 
     switch (setting) {
     case 'prefix': {
@@ -254,35 +237,10 @@ module.exports = class ConfigCommand extends Command {
         const foundSet = this.client.voteEmojis.find(filter);
         if (!foundSet) return this.client.errors.voteEmojiNotFound(updated, channel);
 
-        const emojis = foundSet.emojis.map(async e => {
-          if (foundSet.custom) {
-            return this.client.shard.broadcastEval(`this.findEmojiByID.call(this, '${e}')`)
-              .then(async emojiArray => {
-                const found = emojiArray.find(e => e);
-                if (!found) return '**N/A**';
-
-                const emoji = await this.client.api.guilds(found.guild).get()
-                  .then(raw => {
-                    const guild = new Guild(this.client, raw)
-                    const gEmoji = new GuildEmoji(this.client, found, guild);
-                    return gEmoji;
-                  });
-
-                return `<:${emoji.name}:${emoji.id}>`;
-              })
-              .catch(error => {
-                this.client.logger.error(error.stack);
-                return message.channel.send(`An error occurred: **${error.message}**`);
-              });
-          } else {
-            return e;
-          }
-        });
-
         try {
-          const emojiSet = await Promise.all(emojis);
+          const emojiSet = foundSet.emojis.join(' ')
           await this.client.settings.updateGuild(message.guild, { voteEmojis: foundSet.name });
-          configEmbed.setDescription(`${successEmoji} The default vote emojis have been changed to ${emojiSet.join(' ')}`);
+          configEmbed.setDescription(`${success} The default vote emojis have been changed to ${emojiSet}`);
           message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
         } catch (error) {
           this.client.logger.error(error.stack);
@@ -293,35 +251,9 @@ module.exports = class ConfigCommand extends Command {
       }
 
       const emojiSets = this.client.voteEmojis.map(async set => {
-        let emojiSet = set.emojis;
-
-        if (set.custom) {
-          emojiSet = emojiSet.map(async e => {
-            return this.client.shard.broadcastEval(`this.findEmojiByID.call(this, '${e}')`)
-              .then(async emojiArray => {
-                const found = emojiArray.find(e => e);
-                if (!found) return '**N/A**';
-
-                const emoji = await this.client.api.guilds(found.guild).get()
-                  .then(raw => {
-                    const guild = new Guild(this.client, raw)
-                    const gEmoji = new GuildEmoji(this.client, found, guild);
-                    return gEmoji;
-                  });
-
-                return `<:${emoji.name}:${emoji.id}>`;
-              })
-              .catch(error => {
-                this.client.logger.error(error.stack);
-                return message.channel.send(`An error occurred: **${error.message}**`);
-              });
-          });
-        }
-
-        const emojiSetView = await Promise.all(emojiSet);
-
-        if (voteEmojis === set.name) return `\`${set.id}\`: ${emojiSetView.join(' ')} ***(Currently Using)***`;
-        else return `\`${set.id}\`: ${emojiSetView.join(' ')}`;
+        const emojiSet = set.emojis.join(' ');
+        if (voteEmojis === set.name) return `\`${set.id}\`: ${emojiSet} ***(Currently Using)***`;
+        else return `\`${set.id}\`: ${emojiSet}`;
       });
 
       const mainView = await Promise.all(emojiSets);
@@ -333,8 +265,6 @@ module.exports = class ConfigCommand extends Command {
         ${mainView.join('\n\n')}
 
         You can do \`${settings.prefix + name} emojis [id]\` to set the desired emojis.
-
-        Submit new emoji set suggestions any time by joining our Discord server: ${discord}
       `);
       configEmbed.addField('More Information', `[Link](${confDocs}#vote-emojis)`);
       message.channel.send(configEmbed);
