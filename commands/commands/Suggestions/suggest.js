@@ -1,12 +1,11 @@
 /* eslint-disable no-useless-escape */
-const { MessageEmbed, Guild, GuildEmoji, Util: { escapeMarkdown } } = require('discord.js');
+const { MessageEmbed, Util: { escapeMarkdown } } = require('discord.js');
 const { oneLine, stripIndent } = require('common-tags');
 const crypto = require('crypto');
 require('moment-duration-format');
 require('moment-timezone');
 
 const Command = require('../../Command');
-const permissions = require('../../../utils/perms');
 
 module.exports = class SuggestCommand extends Command {
   constructor(client) {
@@ -24,7 +23,7 @@ module.exports = class SuggestCommand extends Command {
   }
 
   async run(message, args, settings) {
-    const { embedColor, emojis: { success }, defaultPermissions } = this.client.config;
+    const { embedColor, emojis: { success: { value: success } }, defaultPermissions } = this.client.config;
     const { suggestionsChannel, voteEmojis: emojis } = settings;
     const suggestion = args.join(' ');
 
@@ -96,47 +95,12 @@ module.exports = class SuggestCommand extends Command {
       const emojiIndex = emojiSet.indexOf(emoji);
       if (!m) await sChannel.messages.fetch(mID);
 
-      if (foundSet.custom) {
-        this.client.shard.broadcastEval(`this.findEmojiByID.call(this, '${emoji}')`)
-          .then(async emojiArray => {
-            const found = emojiArray.find(e => e);
-            if (!found) return await m.react(fallbackSet[emojiIndex]);
-
-            return this.client.api.guilds(found.guild).get()
-              .then(async raw => {
-                const guild = new Guild(this.client, raw);
-                const gEmoji = new GuildEmoji(this.client, found, guild);
-                if (!this._canUseGuildEmoji(message.guild.me, gEmoji)) return await m.react(fallbackSet[emojiIndex]);
-                return await m.react(gEmoji);
-              });
-          })
-          .catch(error => {
-            this.client.logger.error(error.stack);
-            return message.channel.send(`An error occurred: **${error.message}**`);
-          });
-      } else
-        await m.react(emoji);
+      if (foundSet.custom) await m.react(emoji).catch(e => m.react(fallbackSet[emojiIndex]))
+      else await m.react(emoji);
     }
 
-    this.client.shard.broadcastEval(`this.findEmojiByID.call(this, '${success}')`)
-      .then(async emojiArray => {
-        const found = emojiArray.find(e => e);
-        if (!found) return message.react('✅');
-
-        return this.client.api.guilds(found.guild).get()
-          .then(async raw => {
-            const guild = new Guild(this.client, raw);
-            const gEmoji = new GuildEmoji(this.client, found, guild);
-            if (!this._canUseGuildEmoji(message.guild.me, gEmoji)) return message.react('✅');
-            return await message.react(gEmoji);
-          });
-      })
-      .catch(error => {
-        this.client.logger.error(error.stack);
-        return message.channel.send(`An error occurred: **${error.message}**`);
-      });
-
     try {
+      await message.react(success)
       if (settings.dmResponses && message.guild.members.cache.get(sUser.id)) sUser.send(dmEmbed);
     } catch (error) {
       message.channel.send(oneLine`
