@@ -75,7 +75,7 @@ module.exports = class ConfigCommand extends Command {
         try {
           if (updated.length > 5) return this.client.errors.invalidPrefixLength(message.channel, updated);
           await this.client.settings.updateGuild(message.guild, { prefix: updated });
-          configEmbed.setDescription(`${successEmoji} Prefix has been updated to: \`${updated}\``);
+          configEmbed.setDescription(`${success} Prefix has been updated to: \`${updated}\``);
 
           return message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
         } catch (err) {
@@ -100,7 +100,7 @@ module.exports = class ConfigCommand extends Command {
 
         try {
           await this.client.settings.updateGuild(message.guild, { suggestionsChannel: verified.id });
-          configEmbed.setDescription(`${successEmoji} Suggestions channel has been updated to: ${verified}`);
+          configEmbed.setDescription(`${success} Suggestions channel has been updated to: ${verified}`);
 
           return message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
         } catch (err) {
@@ -126,7 +126,7 @@ module.exports = class ConfigCommand extends Command {
 
         try {
           await this.client.settings.updateGuild(message.guild, { suggestionsLogs: verified.id });
-          configEmbed.setDescription(`${successEmoji} Suggestion logs channel has been updated to: ${verified}`);
+          configEmbed.setDescription(`${success} Suggestion logs channel has been updated to: ${verified}`);
 
           return message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
         } catch (err) {
@@ -152,7 +152,7 @@ module.exports = class ConfigCommand extends Command {
 
         try {
           await this.client.settings.updateGuild(message.guild, { staffSuggestionsChannel: verified.id });
-          configEmbed.setDescription(`${successEmoji} Suggestions staff channel has been updated to: ${verified}`);
+          configEmbed.setDescription(`${success} Suggestions staff channel has been updated to: ${verified}`);
 
           return message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
         } catch (err) {
@@ -185,7 +185,7 @@ module.exports = class ConfigCommand extends Command {
 
         if (sRole) {
           try {
-            configEmbed.setDescription(`${successEmoji} Removed **${verified.name}** from the staff roles.`);
+            configEmbed.setDescription(`${success} Removed **${verified.name}** from the staff roles.`);
             await this.client.settings.updateGuildStaffRoles(updateRole, false);
             message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
           } catch (error) {
@@ -194,7 +194,7 @@ module.exports = class ConfigCommand extends Command {
           }
         } else {
           try {
-            configEmbed.setDescription(`${successEmoji} Added **${verified.name}** to the staff roles.`);
+            configEmbed.setDescription(`${success} Added **${verified.name}** to the staff roles.`);
             await this.client.settings.updateGuildStaffRoles(updateRole, true);
             message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
           } catch (error) {
@@ -278,7 +278,7 @@ module.exports = class ConfigCommand extends Command {
         case 'true':
           try {
             await this.client.settings.updateGuild(message.guild, { responseRequired: true });
-            configEmbed.setDescription(`${successEmoji} Responses required set to \`true\`. This means a response **is required** when using the \`reject\` command.`);
+            configEmbed.setDescription(`${success} Responses required set to \`true\`. This means a response **is required** when using the \`reject\` command.`);
             message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
           } catch (err) {
             this.client.logger.error(err.stack);
@@ -288,7 +288,7 @@ module.exports = class ConfigCommand extends Command {
         case 'false':
           try {
             await this.client.settings.updateGuild(message.guild, { responseRequired: false });
-            configEmbed.setDescription(`${successEmoji} Responses required set to \`false\`. This means a response **is not required** when using the \`reject\` command.`);
+            configEmbed.setDescription(`${success} Responses required set to \`false\`. This means a response **is not required** when using the \`reject\` command.`);
             message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
           } catch (err) {
             this.client.logger.error(err.stack);
@@ -334,7 +334,7 @@ module.exports = class ConfigCommand extends Command {
         const foundCmd = disabledCommands.find(c => c.command === cmd.help.name);
         if (foundCmd) {
           try {
-            configEmbed.setDescription(`${successEmoji} Enabled the **${cmd.help.name}** command.`);
+            configEmbed.setDescription(`${success} Enabled the **${cmd.help.name}** command.`);
             await this.client.settings.updateGuildCommands(enabledCommand, false);
             message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
           } catch (err) {
@@ -343,7 +343,7 @@ module.exports = class ConfigCommand extends Command {
           }
         } else {
           try {
-            configEmbed.setDescription(`${successEmoji} Disabled the **${cmd.help.name}** command.`);
+            configEmbed.setDescription(`${success} Disabled the **${cmd.help.name}** command.`);
             await this.client.settings.updateGuildCommands(disabledCommand, true);
             message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
           } catch (err) {
@@ -371,7 +371,7 @@ module.exports = class ConfigCommand extends Command {
           try {
             await this.client.settings.updateGuild(message.guild, { dmResponses: true });
             configEmbed.setDescription(stripIndent`
-                ${successEmoji} DM responses have been **enabled**. The bot will DM users when these actions happen:
+                ${success} DM responses have been **enabled**. The bot will DM users when these actions happen:
                   
                   - Suggestion submitted
                   - Suggestion approved
@@ -390,7 +390,7 @@ module.exports = class ConfigCommand extends Command {
           try {
             await this.client.settings.updateGuild(message.guild, { dmResponses: false });
             configEmbed.setDescription(stripIndent`
-                ${successEmoji} DM responses have been **disabled**. The bot will *not* DM users when these actions happen:
+                ${success} DM responses have been **disabled**. The bot will *not* DM users when these actions happen:
                   
                   - Suggestion submitted
                   - Suggestion approved
