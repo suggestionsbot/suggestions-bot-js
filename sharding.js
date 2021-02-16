@@ -4,14 +4,11 @@ require('dotenv-flow').config();
 
 const { NODE_ENV, DISCORD_TOKEN } = process.env;
 
-const { Intents } = require('discord.js');
 const { ShardingManager, SharderEvents } = require('kurasuta');
 const { join } = require('path');
 const logger = require('./utils/logger');
 
 const SuggestionsClient = require('./client/SuggestionsClient');
-const myIntents = new Intents(Intents.ALL);
-myIntents.remove(['GUILD_PRESENCES', 'GUILD_MEMBERS']);
 
 const sharder = new ShardingManager(join(__dirname, 'shard'), {
   clientOptions: {
@@ -20,7 +17,15 @@ const sharder = new ShardingManager(join(__dirname, 'shard'), {
     messageSweepInterval: 600,
     messageCacheLifetime: 300,
     messageCacheMaxSize: 25,
-    ws: { intents: myIntents }
+    ws: {
+      intents: [
+        'GUILDS',
+        'GUILD_MESSAGES',
+        'GUILD_MESSAGE_REACTIONS',
+        'DIRECT_MESSAGES',
+        'DIRECT_MESSAGE_REACTIONS'
+      ]
+    }
   },
   development: NODE_ENV !== 'production',
   client: SuggestionsClient,
