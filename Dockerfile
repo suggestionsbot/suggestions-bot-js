@@ -8,12 +8,18 @@ RUN ["apt-get", "install", "-y", "vim-tiny", "apt-utils"]
 RUN mkdir -p /usr/src/suggestions-bot
 WORKDIR /usr/src/suggestions-bot
 
-#Copy and install the bot
-COPY package.json /usr/src/suggestions-bot
+#Copy package.json and lockfile
+COPY package.json ./
+COPY package-lock.json ./
+
+#Install from package.json
 RUN npm install
 
-#Now this is the bot
-COPY . /usr/src/suggestions-bot
+#Copy remaining files
+COPY . .
+
+#Set enivornment variables (this MUST be done BEFORE copying rest of files)
+ENV NODE_ENV=production
 
 #Start the bot!
 CMD ["npm", "start"]
