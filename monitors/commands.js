@@ -70,10 +70,10 @@ module.exports = class CommandHandler {
       adminCheck;
 
     if (message.guild) {
-      const member = await message.guild.members.fetch({ user: message.author.id, cache: false }).catch(() => { return null; })
+      const member = await message.guild.members.fetch(message.author.id, false).catch(() => { return null; })
       if (staffRoles) staffCheck = member.roles.cache.some(r => staffRoles.map(sr => sr.id).includes(r.id));
-      else staffCheck = member.hasPermission('MANAGE_GUILD') || ownerCheck;
-      adminCheck = member.hasPermission('MANAGE_GUILD') || ownerCheck;
+      else staffCheck = this.client.isAdmin(member) || ownerCheck;
+      adminCheck = this.client.isAdmin(member) || ownerCheck;
     }
 
     if (!cmd.conf.enabled) return this.client.errors.adminCommandIsDisabled(cmd, channel);
