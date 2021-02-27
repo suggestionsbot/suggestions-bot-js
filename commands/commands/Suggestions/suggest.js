@@ -45,8 +45,8 @@ module.exports = class SuggestCommand extends Command {
     const sChannel = suggestionsChannel && (
       suggestionsChannel === 'suggestions'
         ? await message.guild.channels.fetch({ cache: false })
-          .then(res => res.find(c => c.name === 'suggestions'))
-        : await message.guild.channels.fetch(suggestionsChannel)
+          .then(res => res.find(c => c.name === 'suggestions')).catch(() => { return false; })
+        : await message.guild.channels.fetch(suggestionsChannel).catch(() => { return false; })
     );
     if (!sChannel) return this.client.errors.noSuggestions(message.channel);
 
