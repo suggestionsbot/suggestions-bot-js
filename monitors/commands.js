@@ -70,7 +70,7 @@ module.exports = class CommandHandler {
       adminCheck;
 
     if (message.guild) {
-      const member = message.guild.members.fetch({ user: message.author.id, cache: false }).catch(() => { return null; })
+      const member = await message.guild.members.fetch({ user: message.author.id, cache: false }).catch(() => { return null; })
       if (staffRoles) staffCheck = member.roles.cache.some(r => staffRoles.map(sr => sr.id).includes(r.id));
       else staffCheck = member.hasPermission('MANAGE_GUILD') || ownerCheck;
       adminCheck = member.hasPermission('MANAGE_GUILD') || ownerCheck;
