@@ -13,7 +13,7 @@ const SuggestionsClient = require('./client/SuggestionsClient');
 const sharder = new ShardingManager(join(__dirname, 'shard'), {
   clientOptions: {
     disableEveryone: true,
-    partials: ['MESSAGE', 'CHANNEL', 'REACTION'],
+    partials: ['MESSAGE', 'CHANNEL', 'REACTION', 'GUILD_MEMBER', 'USER'],
     messageSweepInterval: 600,
     messageCacheLifetime: 300,
     messageCacheMaxSize: 25,
@@ -31,7 +31,24 @@ const sharder = new ShardingManager(join(__dirname, 'shard'), {
   development: NODE_ENV !== 'production',
   client: SuggestionsClient,
   guildsPerShard: 1500,
-  token: DISCORD_TOKEN
+  token: DISCORD_TOKEN,
+  disabledEvents: [
+    'channelCreate',
+    'channelDelete',
+    'channelPinsUpdate',
+    'emojiCreate',
+    'emojiDelete',
+    'emojiUpdate',
+    'guildBanAdd',
+    'guildBanRemove',
+    'guildMemberSpeaking',
+    'inviteCreate',
+    'inviteDelete',
+    'presenceUpdate',
+    'typingStart',
+    'voiceStateUpdate',
+    'webhookUpdate'
+  ]
 });
 
 
