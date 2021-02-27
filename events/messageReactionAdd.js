@@ -18,8 +18,8 @@ module.exports = class {
     const sChannel = settings.suggestionsChannel && (
       settings.suggestionsChannel === 'suggestions'
         ? await message.guild.channels.fetch({ cache: false })
-          .then(res => res.find(c => c.name === 'suggestions'))
-        : await message.guild.channels.fetch(settings.suggestionsChannel)
+          .then(res => res.find(c => c.name === 'suggestions')).catch(() => { return false; })
+        : await message.guild.channels.fetch(settings.suggestionsChannel).catch(() => { return false; })
     );
     if (!sChannel || (message.channel.id !== sChannel.id)) return;
     if (messageReaction.partial) await messageReaction.fetch();
