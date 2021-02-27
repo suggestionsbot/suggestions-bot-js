@@ -11,7 +11,7 @@ module.exports = class {
     let guildOwner;
 
     try {
-      guildOwner = await this.client.shard.fetchUser(guild.ownerID);
+      guildOwner = await this.client.users.fetch(guild.ownerID, false);
     } catch (error) {
       this.client.logger.error(error.stack);
     }
@@ -23,7 +23,7 @@ module.exports = class {
         **Name:** \`${guild.name}\`
         **Members:** \`${guild.members.cache.size}\`
         **Created:** \`${moment(guild.createdAt).fromNow()}\`
-        **Owner:** <@${guildOwner.id}> \`[${guildOwner.tag}]\`
+        **Owner:** ${guildOwner} \`[${guildOwner.tag}]\`
       `)
       .setColor(created)
       .setTimestamp();
