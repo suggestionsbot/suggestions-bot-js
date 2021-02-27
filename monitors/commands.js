@@ -23,8 +23,8 @@ module.exports = class CommandHandler {
     if (!message.guild) settings.prefix = this.client.config.prefix;
 
     const channel = message.guild
-      ? await message.guild.channels.fetch(message.channel.id)
-      : await this.client.channels.fetch(message.channel.id);
+      ? await message.guild.channels.fetch(message.channel.id).catch(() => { return null; })
+      : await this.client.channels.fetch(message.channel.id).catch(() => { return null; });
 
     const prefixMention = new RegExp(`^<@!?${this.client.user.id}> `);
     const newPrefix = message.content.match(prefixMention) ? message.content.match(prefixMention)[0] : settings.prefix;
