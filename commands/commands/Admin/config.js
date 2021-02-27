@@ -18,9 +18,10 @@ module.exports = class ConfigCommand extends Command {
 
   async run(message, args, settings) {
 
-    const { embedColor, docs, emojis: { success: { value: success } }, discord } = this.client.config;
+    const { embedColor, docs, emojis: { success: successEmoji } } = this.client.config;
     const { help: { usage, name } } = this;
     const confDocs = `${docs}/docs/configuration.html`;
+    const success = this.client.emojis.forge(successEmoji)
 
     const setting = args[0],
       updated = args.slice(1).join(' ');
@@ -39,27 +40,6 @@ module.exports = class ConfigCommand extends Command {
       suggestionsChannel,
       staffSuggestionsChannel
     } = settings;
-
-    let roles = [];
-    try {
-      roles = message.guild.roles.cache.filter(role => staffRoles.map(r => r.role).includes(role.id));
-
-      suggestionsChannel = message.guild.channels.cache.find(c => c.name === suggestionsChannel) ||
-        (message.guild.channels.cache.get(suggestionsChannel)) ||
-        '';
-
-      suggestionsLogs = message.guild.channels.cache.find(c => c.name === suggestionsLogs) ||
-          message.guild.channels.cache.get(suggestionsLogs) ||
-          '';
-
-      staffSuggestionsChannel = message.guild.channels.cache.find(c => c.name === staffSuggestionsChannel) ||
-        (message.guild.channels.cache.find(c => c.id === staffSuggestionsChannel)) ||
-        '';
-
-    } catch (err) {
-      this.client.logger.error(err.stack);
-      return message.channel.send(err.message);
-    }
 
     const configEmbed = new MessageEmbed()
       .setAuthor(message.guild, message.guild.iconURL())
@@ -93,8 +73,9 @@ module.exports = class ConfigCommand extends Command {
       configEmbed.setAuthor(`${message.guild} | Suggestions Channel`, message.guild.iconURL());
 
       if (updated) {
-        const verified = message.guild.channels.cache.find(c => c.name === updated) ||
-          message.guild.channels.cache.get(updated) ||
+        const channels = await message.guild.channels.fetch({ cache: false })
+        const verified = channels.find(c => c.name === updated) ||
+          channels.get(updated) ||
           message.mentions.channels.first();
         if (!verified) return this.client.errors.channelNotFound(updated, message.channel);
 
@@ -109,8 +90,12 @@ module.exports = class ConfigCommand extends Command {
         }
       }
 
+      const isDefault = suggestionsChannel === 'suggestions'
+      suggestionsChannel = isDefault
+        ? await message.guild.channels.fetch({ cache: false }).then(res => res.find(c => c.name === 'suggestions'))
+        : message.guild.channels.forge(suggestionsChannel)
       if (!suggestionsChannel) return this.client.errors.noSuggestions(message.channel);
-      configEmbed.setDescription(`Current suggestions channel: ${suggestionsChannel}`);
+      configEmbed.setDescription(`Current suggestions channel: ${suggestionsChannel}${isDefault ? ' *(config default)*' : ''}`);
       configEmbed.addField('More Information', `[Link](${confDocs}#suggestions-channel)`);
       message.channel.send(configEmbed);
       break;
@@ -119,8 +104,9 @@ module.exports = class ConfigCommand extends Command {
       configEmbed.setAuthor(`${message.guild} | Suggestion Logs Channel`, message.guild.iconURL());
 
       if (updated) {
-        const verified = message.guild.channels.cache.find(c => c.name === updated) ||
-          message.guild.channels.cache.get(updated) ||
+        const channels = await message.guild.channels.fetch({ cache: false })
+        const verified = channels.find(c => c.name === updated) ||
+          channels.get(updated) ||
           message.mentions.channels.first();
         if (!verified) return this.client.errors.channelNotFound(updated, message.channel);
 
@@ -136,7 +122,7 @@ module.exports = class ConfigCommand extends Command {
       }
 
       if (!suggestionsLogs) return this.client.errors.noSuggestionsLogs(message.channel);
-      configEmbed.setDescription(`Current suggestions logs channel: ${suggestionsLogs}`);
+      configEmbed.setDescription(`Current suggestions logs channel: ${message.guild.channels.forge(suggestionsLogs)}`);
       configEmbed.addField('More Information', `[Link](${confDocs}#suggestions-logs-channel)`);
       message.channel.send(configEmbed);
       break;
@@ -145,8 +131,9 @@ module.exports = class ConfigCommand extends Command {
       configEmbed.setAuthor(`${message.guild} | Suggestions Staff Channel`, message.guild.iconURL());
 
       if (updated) {
-        const verified = message.guild.channels.cache.find(c => c.name === updated) ||
-          message.guild.channels.cache.get(updated) ||
+        const channels = await message.guild.channels.fetch({ cache: false })
+        const verified = channels.find(c => c.name === updated) ||
+          channels.get(updated) ||
           message.mentions.channels.first();
         if (!verified) return this.client.errors.channelNotFound(updated, message.channel);
 
@@ -162,7 +149,7 @@ module.exports = class ConfigCommand extends Command {
       }
 
       if (!staffSuggestionsChannel) return this.client.errors.noStaffSuggestions(message.channel);
-      configEmbed.setDescription(`Current staff suggestions channel: ${staffSuggestionsChannel}`);
+      configEmbed.setDescription(`Current staff suggestions channel: ${message.guild.channels.forge(staffSuggestionsChannel)}`);
       configEmbed.addField('More Information', `[Link](${confDocs}#staff-suggestions-channel)`);
       message.channel.send(configEmbed);
       break;
@@ -171,8 +158,9 @@ module.exports = class ConfigCommand extends Command {
       configEmbed.setAuthor(`${message.guild} | Staff Roles`, message.guild.iconURL());
 
       if (updated) {
-        const verified = message.guild.roles.cache.find(c => c.name === updated) ||
-          message.guild.roles.cache.get(updated) ||
+        const roles = await message.guild.roles.fetch({ cache: false })
+        const verified = roles.find(c => c.name === updated) ||
+          roles.get(updated) ||
           message.mentions.roles.first();
         if (!verified) return this.client.errors.roleNotFound(updated, message.channel);
 
@@ -238,7 +226,7 @@ module.exports = class ConfigCommand extends Command {
         if (!foundSet) return this.client.errors.voteEmojiNotFound(updated, channel);
 
         try {
-          const emojiSet = foundSet.emojis.join(' ')
+          const emojiSet = foundSet.emojis.map(e => foundSet.custom ? this.client.emojis.forge(e) : e).join(' ')
           await this.client.settings.updateGuild(message.guild, { voteEmojis: foundSet.name });
           configEmbed.setDescription(`${success} The default vote emojis have been changed to ${emojiSet}`);
           message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
@@ -250,8 +238,8 @@ module.exports = class ConfigCommand extends Command {
         return;
       }
 
-      const emojiSets = this.client.voteEmojis.map(async set => {
-        const emojiSet = set.emojis.join(' ');
+      const emojiSets = this.client.voteEmojis.map(set => {
+        const emojiSet = set.emojis.map(e => set.custom ? this.client.emojis.forge(e) : e).join(' ');
         if (voteEmojis === set.name) return `\`${set.id}\`: ${emojiSet} ***(Currently Using)***`;
         else return `\`${set.id}\`: ${emojiSet}`;
       });

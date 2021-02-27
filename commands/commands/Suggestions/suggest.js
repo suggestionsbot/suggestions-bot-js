@@ -23,7 +23,7 @@ module.exports = class SuggestCommand extends Command {
   }
 
   async run(message, args, settings) {
-    const { embedColor, emojis: { success: { value: success } }, defaultPermissions } = this.client.config;
+    const { embedColor, emojis: { success: successEmoji }, defaultPermissions } = this.client.config;
     const { suggestionsChannel, voteEmojis: emojis } = settings;
     const suggestion = args.join(' ');
 
@@ -42,8 +42,12 @@ module.exports = class SuggestCommand extends Command {
     }
 
     const sUser = message.author;
-    const sChannel = message.guild.channels.cache.find(c => c.name === suggestionsChannel) ||
-      message.guild.channels.cache.get(suggestionsChannel);
+    const sChannel = suggestionsChannel && (
+      suggestionsChannel === 'suggestions'
+        ? await message.guild.channels.fetch({ cache: false })
+          .then(res => res.find(c => c.name === 'suggestions'))
+        : await message.guild.channels.fetch(suggestionsChannel)
+    )
     if (!sChannel) return this.client.errors.noSuggestions(message.channel);
 
     // If the sID exists globally, this will force a new one to be generated
@@ -81,27 +85,28 @@ module.exports = class SuggestCommand extends Command {
     const defaults = set => set.name === 'defaultEmojis';
     const fallback = set => set.name === 'oldDefaults';
 
-    const missingPermissions = sChannel.permissionsFor(this.client.user).missing(defaultPermissions);
+    const missingPermissions = sChannel.permissionsFor(message.guild.me).missing(defaultPermissions);
     if (missingPermissions.length > 0) return this.client.errors.noChannelPerms(message, sChannel, missingPermissions);
 
-    const m = await sChannel.send(embed);
+    let m = await sChannel.send(embed);
     const mID = m.id;
 
     const foundSet = this.client.voteEmojis.find(filter) || this.client.voteEmojis.find(defaults);
     const emojiSet = foundSet.emojis;
     const fallbackSet = this.client.voteEmojis.find(fallback).emojis;
 
-    for (const emoji of emojiSet) {
-      const emojiIndex = emojiSet.indexOf(emoji);
-      if (!m) await sChannel.messages.fetch(mID);
+    for (const e of emojiSet) {
+      const emojiIndex = emojiSet.indexOf(e);
+      if (!m) m = await sChannel.messages.fetch(mID);
 
-      if (foundSet.custom) await m.react(emoji).catch(e => m.react(fallbackSet[emojiIndex]))
-      else await m.react(emoji);
+      if (foundSet.custom) await m.react(message.guild.emojis.forge(e))
+        .catch(e => m.react(fallbackSet[emojiIndex]))
+      else await m.react(e);
     }
 
     try {
-      await message.react(success)
-      if (settings.dmResponses && message.guild.members.cache.get(sUser.id)) sUser.send(dmEmbed);
+      await message.react(this.client.emojis.forge(successEmoji))
+      if (settings.dmResponses) await sUser.send(dmEmbed);
     } catch (error) {
       message.channel.send(oneLine`
         I could not DM you because you have DMs disabled from server members. However, for reference, your suggestion
@@ -164,8 +169,6 @@ module.exports = class SuggestCommand extends Command {
         return message.channel.send(`An error occurred: **${error.message}**`);
       }
     }
-
-    return;
   }
 
   _canUseGuildEmoji(guildMember, guildEmoji) {

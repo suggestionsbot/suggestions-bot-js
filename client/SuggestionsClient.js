@@ -1,5 +1,5 @@
 require('dotenv-flow').config();
-const { Client, Collection, Guild } = require('discord.js');
+const { Client, Collection, Guild } = require('discord.js-light');
 const { Poster } = require('dbots');
 const Mongoose = require('../db/mongoose');
 
@@ -57,6 +57,18 @@ module.exports = class SuggestionsClient extends Client {
       },
       clientLibrary: 'discord.js'
     });
+
+    this.lastChangelog = null
+
+    this.fetchLastChangelog().catch(e => this.logger.error(e))
+  }
+
+  async fetchLastChangelog() {
+    const channelID = process.env.NODE_ENV === 'production' ? '602326597613256734' : '504074783604998154';
+
+    this.lastChangelog = await this.channels.fetch(channelID)
+      .then(channel => channel.messages.fetch({ limit: 1 }))
+      .then(res => res.first())
   }
 
   /**
@@ -127,8 +139,10 @@ module.exports = class SuggestionsClient extends Client {
   }
 
   async isStaff(guild, user) {
-    const member = await guild.members.fetch(user.id);
-    if (!member) return false;
+    const member = await guild.members.fetch({ user: user.id, cache: false }).catch(() => {
+      return false;
+    })
+
     let staffCheck;
     const adminCheck = this.isAdmin(member) || this.isOwner(member.id);
     const staffRoles = guild.settings.get(guild.id).staffRoles;
@@ -144,8 +158,8 @@ module.exports = class SuggestionsClient extends Client {
     return this.api.guilds(id).get()
       .then(async raw => {
         const guild = new Guild(this, raw);
-        const member = await guild.members.fetch(user.id);
-        return member.roles.cache.some(r => this.config.supportRoles.includes(r.id));
+        const member = await guild.members.fetch({ user: user.id, cache: false });
+        return member.roles.cache.some(r => this.config.supportRoles.includes(r.id)) || this.isOwner(member.id);
       });
   }
 
@@ -166,47 +180,5 @@ module.exports = class SuggestionsClient extends Client {
   get voteEmojis() {
     const emojis = require('../utils/voteEmojis');
     return emojis;
-  }
-
-  findEmojiByID(id) {
-    const temp = this.emojis.cache.get(id);
-    if (!temp) return null;
-
-    // Clone the object because it is modified right after, so as to not affect the cache in client.emojis
-    const emoji = Object.assign({}, temp);
-    // Circular references can't be returned outside of eval, so change it to the id
-    if (emoji.guild) emoji.guild = emoji.guild.id;
-    // A new object will be constructed, so simulate raw data by adding this property back
-    emoji.require_colons = emoji.requireColons;
-
-    return emoji;
-  }
-
-  findEmojiByName(name) {
-    const temp = this.emojis.cache.find(e => e.name === name);
-    if (!temp) return null;
-
-    // Clone the object because it is modified right after, so as to not affect the cache in client.emojis
-    const emoji = Object.assign({}, temp);
-    // Circular references can't be returned outside of eval, so change it to the id
-    if (emoji.guild) emoji.guild = emoji.guild.id;
-    // A new object will be constructed, so simulate raw data by adding this property back
-    emoji.require_colons = emoji.requireColons;
-
-    return emoji;
-  }
-
-  findEmojiByString(string) {
-    const temp = this.emojis.cache.find(e => e.toString() === string);
-    if (!temp) return null;
-
-    // Clone the object because it is modified right after, so as to not affect the cache in client.emojis
-    const emoji = Object.assign({}, temp);
-    // Circular references can't be returned outside of eval, so change it to the id
-    if (emoji.guild) emoji.guild = emoji.guild.id;
-    // A new object will be constructed, so simulate raw data by adding this property back
-    emoji.require_colons = emoji.requireColons;
-
-    return emoji;
   }
 };

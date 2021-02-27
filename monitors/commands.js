@@ -1,5 +1,4 @@
 require('dotenv-flow').config();
-const moment = require('moment');
 const { oneLine } = require('common-tags');
 const permissions = require('../utils/perms');
 
@@ -23,16 +22,20 @@ module.exports = class CommandHandler {
 
     if (!message.guild) settings.prefix = this.client.config.prefix;
 
+    const channel = message.guild
+      ? await message.guild.channels.fetch(message.channel.id)
+      : await this.client.channels.fetch(message.channel.id)
+
     const prefixMention = new RegExp(`^<@!?${this.client.user.id}> `);
     const newPrefix = message.content.match(prefixMention) ? message.content.match(prefixMention)[0] : settings.prefix;
 
     const getPrefix = new RegExp(`^<@!?${this.client.user.id}>( |)$`);
-    if (message.content.match(getPrefix) && !message.author.bot) return message.channel.send(`My prefix in this guild is \`${settings.prefix}\``);
+    if (message.content.match(getPrefix) && !message.author.bot) return channel.send(`My prefix in this guild is \`${settings.prefix}\``);
 
     if (message.author.bot) return;
     if (message.content.indexOf(newPrefix) !== 0) return;
 
-    if (message.guild && !message.channel.permissionsFor(this.client.user).missing('SEND_MESSAGES')) return;
+    if (message.guild && !channel.permissionsFor(message.guild.me).missing('SEND_MESSAGES')) return;
 
     const args = message.content.slice(newPrefix.length).trim().split(/ +/g);
     const command = args.shift().toLowerCase();
@@ -74,8 +77,8 @@ module.exports = class CommandHandler {
       adminCheck = message.member.hasPermission('MANAGE_GUILD') || ownerCheck;
     }
 
-    if (!cmd.conf.enabled) return this.client.errors.adminCommandIsDisabled(cmd, message.channel);
-    if ((!message.guild && cmd.conf.guildOnly)) return this.client.errors.commandGuildOnly(cmd, message.channel);
+    if (!cmd.conf.enabled) return this.client.errors.adminCommandIsDisabled(cmd, channel);
+    if ((!message.guild && cmd.conf.guildOnly)) return this.client.errors.commandGuildOnly(cmd, channel);
     if (cmd.conf.superSecretOnly && !superCheck) return;
     if (cmd.conf.supportOnly && !supportCheck) return;
 
@@ -91,15 +94,15 @@ module.exports = class CommandHandler {
     const newCommand = {
       guildID: message.guild ? message.guild.id : null,
       command: cmd.help.name,
-      channel: message.guild ? message.channel.name : null,
+      channel: message.guild ? channel.name : null,
       userID: message.author.id,
       newTime: message.createdTimestamp
     };
 
     if (message.guild) {
       // check bot permissions
-      if (message.channel.type === 'text' && cmd.conf.botPermissions) {
-        const missing = message.channel.permissionsFor(this.client.user).missing(cmd.conf.botPermissions);
+      if (channel.type === 'text' && cmd.conf.botPermissions) {
+        const missing = channel.permissionsFor(message.guild.me).missing(cmd.conf.bostPermissions);
         if (missing.length > 0) {
           this.client.emit('commandBlocked', cmd, `botPermissions: ${missing.join(', ')}`);
           if (missing.length === 1) return message.reply(`I need the \`${permissions[missing[0]]}\` permission for the \`${cmd.help.name}\` command to work.`).then(msg => msg.delete({ timeout: 5000 }));
@@ -128,7 +131,7 @@ module.exports = class CommandHandler {
 
     try {
       if (throttle) throttle.usages++;
-      if (disabledCommand && !ownerCheck) return this.client.errors.commandIsDisabled(cmd, message.channel);
+      if (disabledCommand && !ownerCheck) return this.client.errors.commandIsDisabled(cmd, channel);
       cmd.run(message, args, settings);
       if (process.env.NODE_ENV === 'production') await this.client.settings.newCommandUsage(newCommand);
     } catch (err) {

@@ -24,7 +24,7 @@ module.exports = class MySuggestionsCommand extends Command {
     await message.delete().catch(O_o => {});
 
     const sUser = message.mentions.users.first() ||
-      await this.client.users.fetch(args[0]).catch(err => this.client.logger.error(err)) ||
+      args[0] && await this.client.users.fetch(args[0], false).catch(err => this.client.logger.error(err)) ||
       message.author;
 
     let gSuggestions;

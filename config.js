@@ -46,10 +46,7 @@ module.exports = {
     fetchedMessages: false
   },
   emojis: {
-    success: {
-      id: isProduction() ? '605265580416565269' : '578409088157876255',
-      value: isProduction() ? '<:nerdSuccess:605265580416565269>' : '<:nerdSuccess:578409088157876255>'
-    }
+    success: isProduction() ? '605265580416565269' : '578409088157876255'
   },
   defaultPermissions: 355392,
   logsPermissions: 84992,

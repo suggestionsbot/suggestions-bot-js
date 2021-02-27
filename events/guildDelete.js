@@ -32,15 +32,8 @@ module.exports = class {
 
     try {
       await this.client.settings.deleteGuild(guild);
-      await this.client.shard.fetchChannel(process.env.NODE_ENV === 'production' ? '602332466476482616' : '498627833233539086')
-        .then(found => {
-          return this.client.api.guilds(found.guild).get()
-            .then(async raw => {
-              const fetchedGuild = new Guild(this.client, raw);
-              const channel = new TextChannel(fetchedGuild, found);
-              return channel.send(oldServer);
-            });
-        });
+      const logs = process.env.NODE_ENV === 'production' ? '602332466476482616' : '498627833233539086'
+      await this.client.channels.forge(logs).send(oldServer).catch(e => this.client.logger.error(e))
     } catch (err) {
       this.client.logger.error(err.stack);
     }

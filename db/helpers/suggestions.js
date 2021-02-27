@@ -14,10 +14,8 @@ module.exports = class SuggestionsHelpers {
      * @param {String} sID - The unique suggestion ID.
      */
   async getGuildSuggestion(guild, sID) {
-    const data = await Suggestion
+    return Suggestion
       .findOne({ $and: [{ guildID: guild.id || guild, sID: sID }] });
-
-    return data;
   }
 
   /**
@@ -26,10 +24,8 @@ module.exports = class SuggestionsHelpers {
      * @param {String} sID - The unique suggestion ID.
      */
   async getGlobalSuggestion(sID) {
-    const data = await Suggestion
+    return Suggestion
       .findOne({ sID: sID });
-
-    return data;
   }
 
   /**
@@ -38,10 +34,8 @@ module.exports = class SuggestionsHelpers {
      * @param {Object} guild - The guild object.
      */
   async getGuildSuggestions(guild) {
-    const data = await Suggestion
+    return Suggestion
       .find({ guildID: guild.id });
-
-    return data;
   }
 
   /**
@@ -51,11 +45,9 @@ module.exports = class SuggestionsHelpers {
      * @param {Object} member - The member object.
      */
   async getGuildMemberSuggestions(guild, member) {
-    const data = await Suggestion
+    return Suggestion
       .find({ $and: [{ guildID: guild.id, userID: member.id }] })
       .sort({ time: -1 });
-
-    return data;
   }
 
   /**
@@ -64,11 +56,9 @@ module.exports = class SuggestionsHelpers {
      * @param {Object} user - The user object.
      */
   async getUserGlobalSuggestions(user) {
-    const data = await Suggestion
+    return Suggestion
       .find({ userID: user.id })
       .sort({ _id: -1 });
-
-    return data;
   }
 
   /**
@@ -79,8 +69,7 @@ module.exports = class SuggestionsHelpers {
   async isResponseRequired(guild) {
     const { responseRequired } = await this.client.settings.getGuild(guild);
 
-    if (responseRequired) return true;
-    else return false;
+    return !!responseRequired;
   }
 
   /**
@@ -93,18 +82,7 @@ module.exports = class SuggestionsHelpers {
     const merged = Object.assign(defaults, suggestion);
 
     const newSuggestion = await new Suggestion(merged);
-    const data = await newSuggestion.save();
-    const { userID, guildID } = data;
-
-    const fetchedUser = await this.client.shard.fetchUser(userID);
-    const fetchedGuild = await this.client.shard.fetchGuild(guildID);
-
-    this.client.logger.log(oneLine`
-      New suggestion submitted by "${fetchedUser.tag}" (${fetchedUser.id}) in the guild
-      "${fetchedGuild.name}" (${fetchedGuild.id}).
-    `);
-
-    return data;
+    return newSuggestion.save();
   }
 
   /**
@@ -115,17 +93,8 @@ module.exports = class SuggestionsHelpers {
   async handleGuildSuggestion({ query, data }) {
 
     const guildSuggestion = await Suggestion.findOne({ $and: query });
-    const { sID, guildID } = guildSuggestion;
 
-    const updated = await guildSuggestion.updateOne(data);
-
-    const fetchedGuild = await this.client.shard.fetchGuild(guildID);
-    this.client.logger.log(oneLine`
-      sID "${sID}" has been ${data.status} in the guild "${fetchedGuild.name}" (${fetchedGuild.id}) 
-      ${data.statusReply ? `with the response ${data.statusReply}` : ''}.
-    `);
-
-    return updated;
+    return guildSuggestion.updateOne(data);
   }
 
   /**
@@ -135,21 +104,9 @@ module.exports = class SuggestionsHelpers {
      */
   async addGuildSuggestionNote({ query, data }) {
     // let { query, note } = suggestion;
-    const { staffMemberID } = data;
     const guildSuggestion = await Suggestion.findOne({ $and: query });
-    const { guildID, sID } = guildSuggestion;
-    const updatedData = { notes: data };
 
-    const fetchedUser = await this.client.shard.fetchUser(staffMemberID)
-    const fetchedGuild = await this.client.shard.fetchGuild(guildID);
-
-    const updated = await guildSuggestion.updateOne({ $push: updatedData });
-    this.client.logger.log(oneLine`
-      sID "${sID}" had a note added by "${fetchedUser.tag}" (${fetchedUser.id}) in the guild 
-      "${fetchedGuild.name}" (${fetchedGuild.id}).
-    `);
-
-    return updated;
+    return guildSuggestion.updateOne({ $push: updatedData });
   }
 
   /**
@@ -159,8 +116,6 @@ module.exports = class SuggestionsHelpers {
    */
   async updateGuildSuggestion({ query, data }) {
     const guildSuggestion = await Suggestion.findOne({ $and: query });
-    const updated = await guildSuggestion.updateOne(data);
-    this.client.logger.log(`${guildSuggestion.sID} has been updated.`);
-    return updated;
+    return guildSuggestion.updateOne(data);
   }
 };
