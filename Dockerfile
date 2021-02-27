@@ -10,10 +10,10 @@ WORKDIR /usr/src/suggestions-bot
 
 #Copy package.json and lockfile
 COPY package.json ./
-COPY package-lock.json ./
+COPY yarn.json ./
 
 #Install from package.json
-RUN npm install
+RUN yarn install
 
 #Copy remaining files
 COPY . .
@@ -22,4 +22,4 @@ COPY . .
 ENV NODE_ENV=production
 
 #Start the bot!
-CMD ["npm", "start"]
+CMD ["yarn", "start"]
