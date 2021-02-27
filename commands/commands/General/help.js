@@ -82,7 +82,7 @@ module.exports = class HelpCommand extends Command {
       const isDefault = settings.suggestionsChannel === 'suggestions';
       helpEmbed
         .addField('📣 Current Prefix', `\`${prefix}\``)
-        .addField('💬 Suggestions Channel', suggestionsChannel.toString() + `${isDefault ? ' *(config default)*' : ''}` ||
+        .addField('💬 Suggestions Channel', suggestionsChannel ? suggestionsChannel.toString() + `${isDefault ? ' *(config default)*' : ''}` :
           (message.member.hasPermission('MANAGE_GUILD') && !suggestionsChannel ?
             `***Not set. Use*** \`${prefix + configCmdName} channel <#channel_name>\`` :
             '***Not set. Contact a server administrator.***'
