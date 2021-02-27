@@ -1,17 +1,9 @@
 require('dotenv-flow').config();
 const mongoose = require('mongoose');
-// const cachegoose = require('cachegoose');
 const _ = require('lodash');
 
 const { oneLine } = require('common-tags');
 const { Blacklist, Command, Settings, Suggestion } = require('../models');
-
-// cachegoose(mongoose, {
-//   engine: 'redis',
-//   port: process.env.REDIS_PORT,
-//   host: process.env.REDIS_HOSTNAME,
-//   password: process.env.REDIS_PASSWORD
-// });
 
 module.exports = class SettingsHelpers {
   constructor(client) {
@@ -152,12 +144,7 @@ module.exports = class SettingsHelpers {
     const merged = Object.assign(defaults, command);
 
     const newCommand = await new Command(merged);
-    const data = await newCommand.save();
-
-    const cUser = await this.client.shard.fetchUser(data.userID);
-    this.client.logger.log(`"${cUser.tag}" (${cUser.id}) ran the command "${data.command}"`, 'cmd');
-
-    return data;
+    return newCommand.save();
   }
 
   /**
@@ -172,8 +159,6 @@ module.exports = class SettingsHelpers {
         { guildID: guild.guildID }
       ]
     });
-    // cachegoose.clearCache(guild.id || guild.guildName);
-    this.client.logger.log(`Settings data deleted for guild ${guild.name || guild.guildName} (${guild.id || guild.guildID})`);
 
     await Suggestion.deleteMany({
       $or: [
@@ -181,7 +166,6 @@ module.exports = class SettingsHelpers {
         { guildID: guild.guildID }
       ]
     });
-    this.client.logger.log(`Suggestions data deleted for guild ${guild.name || guild.guildName} (${guild.id || guild.guildID})`);
 
     await Command.deleteMany({
       $or: [
@@ -189,7 +173,6 @@ module.exports = class SettingsHelpers {
         { guildID: guild.guildID }
       ]
     });
-    this.client.logger.log(`Command data deleted for guild ${guild.name || guild.guildName} (${guild.id || guild.guildID})`);
 
     await Blacklist.deleteMany({
       $or: [
@@ -200,7 +183,6 @@ module.exports = class SettingsHelpers {
 
     guild.settings.delete(guild.id);
     this.client.logger.log(`Blacklist data deleted for guild ${guild.name || guild.guildName} (${guild.id || guild.guildID})`);
-
     this.client.logger.log(`${this.client.user.username} has left a guild: ${guild.name || guild.guildName } (${guild.id || guild.guildID})`);
   }
 
@@ -209,6 +191,6 @@ module.exports = class SettingsHelpers {
      * @returns {Promise}
      */
   async getAllBlacklists() {
-    return await Blacklist.find({});
+    return Blacklist.find({});
   }
 };
