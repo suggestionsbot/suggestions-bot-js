@@ -12,7 +12,7 @@ class ErrorHandler {
 
     const embed = new MessageEmbed()
       .setTitle('Error')
-      .setDescription(message.author + ', you lack certain permissions to do this action.')
+      .setDescription(`${message.author}, you lack certain permissions to do this action.`)
       .setColor(this.colors.red)
       .addField('Permission', `\`${permissions[perm]} (${perm})\``);
 

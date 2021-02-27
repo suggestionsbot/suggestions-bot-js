@@ -18,6 +18,7 @@ const sharder = new ShardingManager(join(__dirname, 'shard'), {
     messageCacheLifetime: 300,
     messageCacheMaxSize: 25,
     cacheOverwrites: true,
+    cacheRoles: true,
     ws: {
       intents: [
         'GUILDS',
