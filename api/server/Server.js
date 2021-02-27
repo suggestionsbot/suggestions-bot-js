@@ -15,9 +15,9 @@ module.exports = class Server {
     return new Promise((res, rej) => {
       // this.app.listen(port, err => err ? rej(err) : res());
       this.app.listen(port, err => {
-        if (err) {
+        if (err)
           return rej(err);
-        } else {
+        else {
           this.client.logger.log(`Bot API opened on https://localhost:${port}`, 'ready');
           return res();
         }

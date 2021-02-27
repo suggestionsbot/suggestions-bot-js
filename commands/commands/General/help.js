@@ -33,7 +33,7 @@ module.exports = class HelpCommand extends Command {
           ? await message.guild.channels.fetch({ cache: false })
             .then(res => res.find(c => c.name === 'suggestions'))
           : await message.guild.channels.fetch(suggestionsChannel)
-      )
+      );
 
       staffRoles = [];
       if (roles) staffRoles = roles.map(({ role }) => message.guild.roles.cache.get(role));

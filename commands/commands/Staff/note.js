@@ -30,8 +30,8 @@ module.exports = class NoteCommand extends Command {
     const note = args.slice(1).join(' ');
     if (!note) return this.client.errors.noUsage(message.channel, this, settings);
 
-    let sID,
-      guild = message.guild;
+    const guild = message.guild;
+    let sID;
     try {
       sID = await this.client.suggestions.getGlobalSuggestion(id);
     } catch (err) {
@@ -49,19 +49,19 @@ module.exports = class NoteCommand extends Command {
 
     const sUser = await this.client.users.fetch(userID).catch(err => this.client.logger.error(err));
 
-    let suggestionsChannel
+    let suggestionsChannel;
     try {
       suggestionsChannel = settings.suggestionsChannel && (
         settings.suggestionsChannel === 'suggestions'
           ? await message.guild.channels.fetch({ cache: false })
             .then(res => res.find(c => c.name === 'suggestions'))
           : await message.guild.channels.fetch(settings.suggestionsChannel)
-      )
-      if (!suggestionsChannel) return this.client.errors.noSuggestions(message.channel)
+      );
+      if (!suggestionsChannel) return this.client.errors.noSuggestions(message.channel);
     } catch (error) {
-      if (!suggestionsChannel) return this.client.errors.noSuggestions(message.channel)
-      this.client.logger.error(error.stack)
-      return message.channel.send(`An error occurred: **${error.message}**`)
+      if (!suggestionsChannel) return this.client.errors.noSuggestions(message.channel);
+      this.client.logger.error(error.stack);
+      return message.channel.send(`An error occurred: **${error.message}**`);
     }
 
 

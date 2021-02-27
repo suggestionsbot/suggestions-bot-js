@@ -103,8 +103,8 @@ module.exports = class SuggestionsHelpers {
      * @param {Object} suggestion - The suggestion object.
      */
   async addGuildSuggestionNote({ query, data }) {
-    // let { query, note } = suggestion;
     const guildSuggestion = await Suggestion.findOne({ $and: query });
+    const updatedData = { notes: data };
 
     return guildSuggestion.updateOne({ $push: updatedData });
   }

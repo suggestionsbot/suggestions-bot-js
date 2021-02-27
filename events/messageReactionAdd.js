@@ -10,7 +10,7 @@ module.exports = class {
 
     let settings;
     try {
-      settings = await this.client.settings.getGuild(guild);
+      settings = await this.client.settings.getGuild(message.guild);
     } catch (err) {
       return this.client.logger.error(err.stack);
     }
@@ -25,8 +25,8 @@ module.exports = class {
     if (messageReaction.partial) await messageReaction.fetch();
 
     const reactions = await Promise.all(message.reactions.cache.map(r => {
-      return r.users.fetch(false).then(res => res.filter(u => u.id === user.id).size)
-    }))
+      return r.users.fetch(false).then(res => res.filter(u => u.id === user.id).size);
+    }));
 
     const reactionCount = reactions.reduce((acc, cur) => acc + cur, 0);
     if (reactionCount > 1) return await messageReaction.users.remove(user.id);

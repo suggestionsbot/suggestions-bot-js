@@ -37,7 +37,7 @@ module.exports = class NewChangelogCommand extends Command {
       );
       if (confirmation === 'submit') {
         this.client.lastChangelog = await channel.send(embed);
-        return this.client.lastChangelog
+        return this.client.lastChangelog;
       }
     } catch (err) {
       this.client.logger.error(err.message);

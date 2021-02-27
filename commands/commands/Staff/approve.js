@@ -68,22 +68,22 @@ module.exports = class ApproveCommand extends Command {
     }
 
     let suggestionsChannel,
-      suggestionsLogs
+      suggestionsLogs;
     try {
       suggestionsChannel = settings.suggestionsChannel && (
         settings.suggestionsChannel === 'suggestions'
           ? await message.guild.channels.fetch({ cache: false })
             .then(res => res.find(c => c.name === 'suggestions'))
           : await message.guild.channels.fetch(settings.suggestionsChannel)
-      )
-      if (!suggestionsChannel) return this.client.errors.noSuggestions(message.channel)
-      suggestionsLogs = settings.suggestionsLogs && await message.guild.channels.fetch(settings.suggestionsLogs)
+      );
+      if (!suggestionsChannel) return this.client.errors.noSuggestions(message.channel);
+      suggestionsLogs = settings.suggestionsLogs && await message.guild.channels.fetch(settings.suggestionsLogs);
       if (!suggestionsLogs) return this.client.errors.noSuggestionsLogs(message.channel);
     } catch (error) {
-      if (!suggestionsChannel) return this.client.errors.noSuggestions(message.channel)
+      if (!suggestionsChannel) return this.client.errors.noSuggestions(message.channel);
       if (!suggestionsLogs) return this.client.errors.noSuggestionsLogs(message.channel);
-      this.client.logger.error(error.stack)
-      return message.channel.send(`An error occurred: **${error.message}**`)
+      this.client.logger.error(error.stack);
+      return message.channel.send(`An error occurred: **${error.message}**`);
     }
 
 
@@ -130,10 +130,10 @@ module.exports = class ApproveCommand extends Command {
     const [reacts, reactCount] = [
       sMessage.reactions.cache.map(e => e.emoji.toString()),
       sMessage.reactions.cache.map(e => e.count)
-    ]
+    ];
 
     const getResults = (view = false) => {
-      const count = (idx) => reactCount[idx] - 1 || 0
+      const count = (idx) => reactCount[idx] - 1 || 0;
 
       if (view) {
         return reacts.map((r, i) => {
@@ -147,7 +147,7 @@ module.exports = class ApproveCommand extends Command {
           };
         });
       }
-    }
+    };
 
     const logsEmbed = new MessageEmbed()
       .setAuthor(guild, guild.iconURL())
@@ -210,7 +210,7 @@ module.exports = class ApproveCommand extends Command {
       sMessage.edit(approvedEmbed).then(m => m.delete({ timeout: 5000 }));
       suggestionsLogs.send(logsEmbed);
       await this.client.suggestions.handleGuildSuggestion(approveSuggestion);
-      await guild.members.fetch({ user: userID, cache: false })
+      await guild.members.fetch({ user: userID, cache: false });
       if (settings.dmResponses) submitter.send(dmEmbed);
     } catch (error) {
       if (error.message === 'Unknown Member') return;

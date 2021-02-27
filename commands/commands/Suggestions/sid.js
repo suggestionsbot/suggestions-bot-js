@@ -38,10 +38,8 @@ module.exports = class SIDCommand extends Command {
     if (suggestion.newStatusUpdated) updatedOn = suggestion.newStatusUpdated;
 
     const sUser = await this.client.users.fetch(suggestion.userID, false).catch(err => this.client.logger.error(err));
-    if (suggestion._doc.hasOwnProperty('staffMemberID')) {
+    if (Object.prototype.hasOwnProperty.call(suggestion._doc, 'staffMemberID'))
       sStaff = await this.client.users.fetch(suggestion.staffMemberID, false).catch(err => this.client.logger.error(err));
-    }
-
 
     const embed = new MessageEmbed()
       .setAuthor(message.guild, message.guild.iconURL())
@@ -54,27 +52,27 @@ module.exports = class SIDCommand extends Command {
     if (!suggestion.time && !suggestion.newTime) time = suggestion._id.getTimestamp();
 
     const view = suggestion.results.length > 1 && suggestion.results.map((r) => {
-      return `${r.emoji}**: ${r.count}**`
-    })
+      return `${r.emoji}**: ${r.count}**`;
+    });
 
     switch (suggestion.status) {
-    case undefined: {
-      embed
-        .setDescription(stripIndent`
+      case undefined: {
+        embed
+          .setDescription(stripIndent`
           **Submitter**
           ${sUser}
 
           **Suggestion**
           ${escapeMarkdown(suggestion.suggestion)}
         `)
-        .setColor(embedColor)
-        .setTimestamp(time);
-      message.channel.send(embed);
-      break;
-    }
-    case 'approved': {
-      embed
-        .setDescription(stripIndent`
+          .setColor(embedColor)
+          .setTimestamp(time);
+        message.channel.send(embed);
+        break;
+      }
+      case 'approved': {
+        embed
+          .setDescription(stripIndent`
           **Submitter**
           ${sUser}
 
@@ -87,14 +85,14 @@ module.exports = class SIDCommand extends Command {
           **Results**
           ${view.join('\n')}
         `)
-        .setColor(suggestionColors.approved)
-        .setTimestamp(updatedOn);
-      message.channel.send(embed);
-      break;
-    }
-    case 'rejected': {
-      embed
-        .setDescription(stripIndent`
+          .setColor(suggestionColors.approved)
+          .setTimestamp(updatedOn);
+        message.channel.send(embed);
+        break;
+      }
+      case 'rejected': {
+        embed
+          .setDescription(stripIndent`
           **Submitter**
           ${sUser}
 
@@ -107,13 +105,13 @@ module.exports = class SIDCommand extends Command {
           **Results**
           ${view.join('\n')}
         `)
-        .setColor(suggestionColors.rejected)
-        .setTimestamp(updatedOn);
-      message.channel.send(embed);
-      break;
-    }
-    default:
-      break;
+          .setColor(suggestionColors.rejected)
+          .setTimestamp(updatedOn);
+        message.channel.send(embed);
+        break;
+      }
+      default:
+        break;
     }
   }
 };

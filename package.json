@@ -7,7 +7,7 @@
     "start": "node .",
     "test": "eslint .",
     "lint": "eslint --fix .",
-    "prod": "export NODE_ENV=production&&npm start",
+    "prod": "export NODE_ENV=production&&yarn start",
     "dev": "set NODE_ENV=development&&nodemon",
     "start:dev": "set NODE_ENV=development&&node ."
   },

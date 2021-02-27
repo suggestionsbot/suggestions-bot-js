@@ -24,7 +24,7 @@ module.exports = class CommandHandler {
 
     const channel = message.guild
       ? await message.guild.channels.fetch(message.channel.id)
-      : await this.client.channels.fetch(message.channel.id)
+      : await this.client.channels.fetch(message.channel.id);
 
     const prefixMention = new RegExp(`^<@!?${this.client.user.id}> `);
     const newPrefix = message.content.match(prefixMention) ? message.content.match(prefixMention)[0] : settings.prefix;
@@ -59,9 +59,9 @@ module.exports = class CommandHandler {
       staffRoles = message.guild.roles.cache
         .filter(role => roles.map(r => r.role).includes(role.id))
         .map(r => r);
-    } else {
+    } else
       staffRoles = [];
-    }
+
 
     const supportCheck = await this.client.isSupport(message.author)
       .catch(e => this.client.logger.error(e));

@@ -47,7 +47,7 @@ module.exports = class SuggestCommand extends Command {
         ? await message.guild.channels.fetch({ cache: false })
           .then(res => res.find(c => c.name === 'suggestions'))
         : await message.guild.channels.fetch(suggestionsChannel)
-    )
+    );
     if (!sChannel) return this.client.errors.noSuggestions(message.channel);
 
     // If the sID exists globally, this will force a new one to be generated
@@ -99,13 +99,14 @@ module.exports = class SuggestCommand extends Command {
       const emojiIndex = emojiSet.indexOf(e);
       if (!m) m = await sChannel.messages.fetch(mID);
 
-      if (foundSet.custom) await m.react(message.guild.emojis.forge(e))
-        .catch(e => m.react(fallbackSet[emojiIndex]))
-      else await m.react(e);
+      if (foundSet.custom) {
+        await m.react(message.guild.emojis.forge(e))
+          .catch(() => m.react(fallbackSet[emojiIndex]));
+      } else await m.react(e);
     }
 
     try {
-      await message.react(this.client.emojis.forge(successEmoji))
+      await message.react(this.client.emojis.forge(successEmoji));
       if (settings.dmResponses) await sUser.send(dmEmbed);
     } catch (error) {
       message.channel.send(oneLine`

@@ -14,7 +14,7 @@ module.exports = class RestartCommand extends Command {
 
   async run(message, args) {
     try {
-      if (args[0] && isNaN(args[0])) return message.channel.send('Please provide a cluster ID!')
+      if (args[0] && isNaN(args[0])) return message.channel.send('Please provide a cluster ID!');
       if (args[0]) await this.client.shard.restart(+args[0]);
       else await this.client.shard.respawnAll();
 

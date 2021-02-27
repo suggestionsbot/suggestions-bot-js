@@ -23,14 +23,14 @@ module.exports = class StaffSuggestCommand extends Command {
 
     const sUser = message.author;
 
-    let suggestionsChannel
+    let suggestionsChannel;
     try {
-      suggestionsChannel = settings.staffSuggestionsChannel && await message.guild.channels.fetch(settings.staffSuggestionsChannel)
-      if (!suggestionsChannel) return this.client.errors.noStaffSuggestions(message.channel)
+      suggestionsChannel = settings.staffSuggestionsChannel && await message.guild.channels.fetch(settings.staffSuggestionsChannel);
+      if (!suggestionsChannel) return this.client.errors.noStaffSuggestions(message.channel);
     } catch (error) {
-      if (!suggestionsChannel) return this.client.errors.noStaffSuggestions(message.channel)
-      this.client.logger.error(error.stack)
-      return message.channel.send(`An error occurred: **${error.message}**`)
+      if (!suggestionsChannel) return this.client.errors.noStaffSuggestions(message.channel);
+      this.client.logger.error(error.stack);
+      return message.channel.send(`An error occurred: **${error.message}**`);
     }
 
 

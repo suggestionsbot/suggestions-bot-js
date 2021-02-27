@@ -99,7 +99,7 @@ module.exports = class GBlacklistCommand extends Command {
     if (args[0] === 'help') return this.client.errors.noUsage(message.channel, this, settings);
     let blUser = message.mentions.users.size > 1 ? message.mentions.users.first().id : args[1];
     blUser = await this.client.users.fetch(blUser, false).catch(() => {
-      return this.client.errors.userNotFound(args[1], message.channel)
+      return this.client.errors.userNotFound(args[1], message.channel);
     });
     const reason = args.slice(2).join(' ');
 
@@ -111,70 +111,70 @@ module.exports = class GBlacklistCommand extends Command {
     }
 
     switch(args[0]) {
-    case 'add': {
-      if (!blUser) return this.client.errors.userNotFound(args[1], message.channel);
-      if (!reason) return message.channel.send('Please provide a reason!').then(msg => msg.delete({ timeout: 5000 })).catch(err => this.client.logger.error(err.stack));
+      case 'add': {
+        if (!blUser) return this.client.errors.userNotFound(args[1], message.channel);
+        if (!reason) return message.channel.send('Please provide a reason!').then(msg => msg.delete({ timeout: 5000 })).catch(err => this.client.logger.error(err.stack));
 
-      const newBlacklist = {
-        guildID: message.guild.id,
-        userID: blUser.id,
-        reason: reason,
-        issuerID: message.author.id,
-        newTime: message.createdTimestamp,
-        status: true,
-        case: caseNum,
-        scope: 'global'
-      };
+        const newBlacklist = {
+          guildID: message.guild.id,
+          userID: blUser.id,
+          reason: reason,
+          issuerID: message.author.id,
+          newTime: message.createdTimestamp,
+          status: true,
+          case: caseNum,
+          scope: 'global'
+        };
 
-      blEmbed.setTitle(`${this.client.user.username} | Blacklisted User Added`);
-      blEmbed.setColor('#00e640');
-      blEmbed.addField('User', `${blUser} \`[${blUser.tag}]\``, true);
-      blEmbed.addField('Reason', reason, true);
-      blEmbed.addField('Issuer', `${message.author} \`[${message.author.id}]\``);
+        blEmbed.setTitle(`${this.client.user.username} | Blacklisted User Added`);
+        blEmbed.setColor('#00e640');
+        blEmbed.addField('User', `${blUser} \`[${blUser.tag}]\``, true);
+        blEmbed.addField('Reason', reason, true);
+        blEmbed.addField('Issuer', `${message.author} \`[${message.author.id}]\``);
 
-      try {
-        const check = await this.client.blacklists.checkRecentBlacklist(blUser, message.guild, true);
-        if (check && check.status) return this.client.errors.userAlreadyBlacklisted(message.channel, blUser);
-        await this.client.blacklists.addUserBlacklist(newBlacklist);
-        message.channel.send(blEmbed).then(msg => msg.delete({ timeout: 5000 }));
-      } catch (err) {
-        this.client.logger.error(err.stack);
-        message.channel.send(`An error occurred: **${err.message}**.`);
-      }
-      break;
-    }
-    case 'remove': {
-      if (!blUser) return this.client.errors.userNotFound(args[1], message.channel);
-      const removeBlacklist = {
-        query: [
-          { userID: blUser.id },
-          { status: true }
-        ],
-        data: {
-          status: false,
-          issuerID: message.author.id
+        try {
+          const check = await this.client.blacklists.checkRecentBlacklist(blUser, message.guild, true);
+          if (check && check.status) return this.client.errors.userAlreadyBlacklisted(message.channel, blUser);
+          await this.client.blacklists.addUserBlacklist(newBlacklist);
+          message.channel.send(blEmbed).then(msg => msg.delete({ timeout: 5000 }));
+        } catch (err) {
+          this.client.logger.error(err.stack);
+          message.channel.send(`An error occurred: **${err.message}**.`);
         }
-      };
-
-      blEmbed.setTitle(`${this.client.user.username} | Blacklisted User Removed`);
-      blEmbed.setColor('#d64541');
-      blEmbed.addField('User ID', `${blUser} \`[${blUser.id}]\``, true);
-      blEmbed.addField('Issuer', `${message.author} \`[${message.author.id}]\``);
-
-      try {
-        const check = await this.client.blacklists.checkRecentBlacklist(blUser, message.guild, true);
-        if (check && !check.status) return this.client.errors.userAlreadyBlacklisted(message.channel, blUser);
-        await this.client.blacklists.removeUserBlacklist(removeBlacklist);
-        message.channel.send(blEmbed).then(msg => msg.delete({ timeout: 5000 }));
-      } catch (err) {
-        this.client.logger.error(err.stack);
-        message.channel.send(`An error occurred: **${err.message}**.`);
+        break;
       }
-      break;
-    }
-    default:
-      this.client.errors.noUsage(message.channel, this, settings);
-      break;
+      case 'remove': {
+        if (!blUser) return this.client.errors.userNotFound(args[1], message.channel);
+        const removeBlacklist = {
+          query: [
+            { userID: blUser.id },
+            { status: true }
+          ],
+          data: {
+            status: false,
+            issuerID: message.author.id
+          }
+        };
+
+        blEmbed.setTitle(`${this.client.user.username} | Blacklisted User Removed`);
+        blEmbed.setColor('#d64541');
+        blEmbed.addField('User ID', `${blUser} \`[${blUser.id}]\``, true);
+        blEmbed.addField('Issuer', `${message.author} \`[${message.author.id}]\``);
+
+        try {
+          const check = await this.client.blacklists.checkRecentBlacklist(blUser, message.guild, true);
+          if (check && !check.status) return this.client.errors.userAlreadyBlacklisted(message.channel, blUser);
+          await this.client.blacklists.removeUserBlacklist(removeBlacklist);
+          message.channel.send(blEmbed).then(msg => msg.delete({ timeout: 5000 }));
+        } catch (err) {
+          this.client.logger.error(err.stack);
+          message.channel.send(`An error occurred: **${err.message}**.`);
+        }
+        break;
+      }
+      default:
+        this.client.errors.noUsage(message.channel, this, settings);
+        break;
     }
   }
 };
