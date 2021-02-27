@@ -10,7 +10,7 @@ WORKDIR /usr/src/suggestions-bot
 
 #Copy package.json and lockfile
 COPY package.json ./
-COPY yarn.json ./
+COPY yarn.lock ./
 
 #Install from package.json
 RUN yarn install
