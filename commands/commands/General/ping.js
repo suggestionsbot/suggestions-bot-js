@@ -22,7 +22,7 @@ module.exports = class PingCommand extends Command {
       return msg.edit(oneLine`
         Pong! 
         Latency is \`${msg.createdTimestamp - message.createdTimestamp}ms\`.
-        API Latency is \`${Math.round(ping[message.guild ? message.guild.shardID : this.client.shard.ids[0]])}ms\`.
+        API Latency is \`${Math.round(ping[message.guild ? message.guild.shardID : 0])}ms\`.
       `);
     } catch (e) {
       this.client.logger.error(e);

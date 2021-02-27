@@ -22,16 +22,23 @@ module.exports = class StaffSuggestCommand extends Command {
     await message.delete().catch(O_o => {});
 
     const sUser = message.author;
-    const sChannel = message.guild.channels.cache.find(c => c.name === settings.staffSuggestionsChannel) ||
-      message.guild.channels.cache.find(c => c.toString() === settings.staffSuggestionsChannel) ||
-      message.guild.channels.cache.get(settings.staffSuggestionsChannel);
-    if (!sChannel) return this.client.errors.noStaffSuggestions(message.channel);
+
+    let suggestionsChannel
+    try {
+      suggestionsChannel = settings.staffSuggestionsChannel && await message.guild.channels.fetch(settings.staffSuggestionsChannel)
+      if (!suggestionsChannel) return this.client.errors.noStaffSuggestions(message.channel)
+    } catch (error) {
+      if (!suggestionsChannel) return this.client.errors.noStaffSuggestions(message.channel)
+      this.client.logger.error(error.stack)
+      return message.channel.send(`An error occurred: **${error.message}**`)
+    }
+
 
     if (!settings.staffRoles) return this.client.errors.noStaffRoles(message.channel);
 
     const embed = new MessageEmbed()
       .setAuthor(sUser.tag, sUser.displayAvatarURL())
-      .setDescription(`Hey, ${sUser}. Your suggestion has been added in the ${sChannel} channel to be voted on!`)
+      .setDescription(`Hey, ${sUser}. Your suggestion has been added in the ${suggestionsChannel} channel to be voted on!`)
       .setColor(embedColor)
       .setFooter(`User ID: ${sUser.id}`)
       .setTimestamp();
@@ -52,14 +59,12 @@ module.exports = class StaffSuggestCommand extends Command {
       .setFooter(`User ID: ${sUser.id}`)
       .setTimestamp();
 
-    const missingPermissions = sChannel.permissionsFor(this.client.user).missing(staffChannelPermissions);
-    if (missingPermissions.length > 0) return this.client.errors.noChannelPerms(message, sChannel, missingPermissions);
+    const missingPermissions = suggestionsChannel.permissionsFor(message.guild.me).missing(staffChannelPermissions);
+    if (missingPermissions.length > 0) return this.client.errors.noChannelPerms(message, suggestionsChannel, missingPermissions);
 
     message.channel.send(embed).then(msg => msg.delete({ timeout: 5000 })).catch(err => this.client.logger.error(err.stack));
 
-    this.client.logger.log(`New staff suggestion submitted by "${sUser.tag}" (${sUser.id}) in "${message.guild}" (${message.guild.id})`);
-
-    return sChannel.send(sEmbed)
+    return suggestionsChannel.send(sEmbed)
       .then(async msg => {
         await msg.react('✅');
         await msg.react('❌');

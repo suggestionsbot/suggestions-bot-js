@@ -26,7 +26,7 @@ module.exports = class InfoCommand extends Command {
       .setColor(embedColor)
       .setThumbnail(this.client.user.avatarURL())
       .addField(owners.length <= 1 ? 'Bot Author' : 'Bot Author(s)',
-        owners.map(o => `<@${o}>`).join(', '))
+        owners.map(o => this.client.users.forge(o)).join(', '))
       .addField('Support Discord', discord)
       .addField('Website', website)
       .addField('Bot Version', version)

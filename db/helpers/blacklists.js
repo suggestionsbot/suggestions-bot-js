@@ -118,17 +118,7 @@ module.exports = class BlacklistsHelpers {
     const merged = Object.assign(defaults, user);
 
     const newBlacklist = await new Blacklist(merged);
-    const data = await newBlacklist.save();
-
-    const issued = await this.client.shard.fetchUser(data.userID);
-    const issuer = await this.client.shard.fetchUser(data.issuerID);
-
-    this.client.logger.log(oneLine`
-      "${issuer.tag}" (${issuer.id}) has issued a ${data.scope === 'global' ? 'global blacklist' : 'guild blacklist'}
-      to the user "${issued.tag}" (${issued.id}).
-    `);
-
-    return data;
+    return newBlacklist.save();
   }
   /**
      * Update a blacklisted user's status to false in the database.
@@ -141,18 +131,6 @@ module.exports = class BlacklistsHelpers {
       .findOne({ $and: query })
       .sort({ case: -1 });
 
-    const updated = await guildMemberBlacklist.updateOne(data);
-
-    const issuedID = query[0].userID;
-
-    const issued = await this.client.shard.fetchUser(issuedID);
-    const issuer = await this.client.shard.fetchUser(data.issuerID);
-
-    this.client.logger.log(oneLine`
-      "${issuer.tag}" (${issuer.id}) has issued a ${data.scope === 'global' ? 'global blacklist' : 'guild blacklist'}
-      to the user "${issued.tag}" (${issued.id}).
-    `);
-
-    return updated;
+    return guildMemberBlacklist.updateOne(data);
   }
 };

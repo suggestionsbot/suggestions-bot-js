@@ -20,40 +20,16 @@ module.exports = class ChangelogCommand extends Command {
 
     const { embedColor, discord } = this.client.config;
 
-    const channelID = process.env.NODE_ENV === 'production' ? '602326597613256734' : '504074783604998154';
-    this.client.shard.fetchChannel(channelID)
-      .then(async found => {
-        return this.client.api.guilds(found.guild).get()
-          .then(async raw => {
-            const guild = new Guild(this.client, raw);
-            const channel = new TextChannel(guild, found);
+    const changelog = this.client.lastChangelog;
+    const changelogEmbed = new MessageEmbed()
+      .setTitle(`${this.client.user.username}'s Changelog 🗄`)
+      .setThumbnail(this.client.user.avatarURL())
+      .setDescription(changelog.embeds[0].description)
+      .addField('Date', changelog.embeds[0].fields[0].value)
+      .setColor(embedColor);
 
-            if (channel.messages.cache.size === 0) {
-              await channel.messages.fetch({ limit: 5 }).catch(error => {
-                this.client.logger.error(error.message);
-                return message.channel.send(`An error occurred: **${error.message}&+**`);
-              });
-            }
+    changelogEmbed.addField('More Information', `Please check our ${changelog.channel} channel at ${discord} for previous updates!`);
 
-            const m = channel.messages.cache.first();
-
-            const changelogEmbed = new MessageEmbed()
-              .setTitle(`${this.client.user.username}'s Changelog 🗄`)
-              .setThumbnail(this.client.user.avatarURL())
-              .setDescription(m.embeds[0].description)
-              .addField('Date', m.embeds[0].fields[0].value)
-              .setColor(embedColor);
-
-            changelogEmbed.addField('More Information', `Please check our ${channel || `#${channel.name}`} channel at ${discord} for previous updates!`);
-
-            return message.channel.send(changelogEmbed);
-          });
-      })
-      .catch(error => {
-        this.client.logger.error(error.stack);
-        return message.channel.send(`An error occurred: **${error.message}**`);
-      });
-
-    return;
+    return message.channel.send(changelogEmbed);
   }
 };

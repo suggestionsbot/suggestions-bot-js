@@ -8,22 +8,6 @@ class ErrorHandler {
     this.colors = { red: '#FF4500' };
   }
 
-  async gRoles(message, settings) {
-    const roles = settings.staffRoles;
-
-    const staffRoles = [];
-    roles.forEach(role => {
-      const gRole = message.guild.roles.cache.find(r => r.id === role.role);
-      if (!gRole) return;
-
-      return staffRoles.push(gRole);
-    });
-
-    staffRoles.sort((a, b) => b.position - a.position);
-
-    return staffRoles[staffRoles.length - 1].toString();
-  }
-
   noPerms(message, perm) {
 
     const embed = new MessageEmbed()

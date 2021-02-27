@@ -54,8 +54,8 @@ module.exports = class BlacklistCommand extends Command {
 
         const blacklists = activeBlacklists.map(async blacklist => {
           let time;
-          const issued = await this.client.users.fetch(blacklist.userID);
-          const issuer = await this.client.users.fetch(blacklist.issuerID);
+          const issued = await this.client.users.fetch(blacklist.userID, false);
+          const issuer = await this.client.users.fetch(blacklist.issuerID, false);
           const num = blacklist.case;
           const reason = blacklist.reason;
           const caseStatus = this.blStatus[blacklist.status];
@@ -103,7 +103,9 @@ module.exports = class BlacklistCommand extends Command {
 
     if (args[0] === 'help') return this.client.errors.noUsage(message.channel, this, settings);
     let blUser = message.mentions.users.size >= 1 ? message.mentions.users.first().id : args[1];
-    blUser = await this.client.users.fetch(blUser);
+    blUser = await this.client.users.fetch(blUser, false).catch(() => {
+      return this.client.errors.userNotFound(args[1], message.channel)
+    });
     const reason = args.slice(2).join(' ');
 
     if (!blUser) return this.client.errors.userNotFound(args[1], message.channel);
@@ -222,6 +224,5 @@ module.exports = class BlacklistCommand extends Command {
       this.client.errors.noUsage(message.channel, this, settings);
       break;
     }
-    return;
   }
 };

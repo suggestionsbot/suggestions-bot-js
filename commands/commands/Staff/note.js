@@ -49,31 +49,26 @@ module.exports = class NoteCommand extends Command {
 
     const sUser = await this.client.users.fetch(userID).catch(err => this.client.logger.error(err));
 
-    if (!message.guild) {
-      try {
-        guild = await this.client.shard.broadcastEval(`this.client.guilds.cache.get('${sID.guildID}');`);
-        guild = guild[0];
-        settings = await this.client.settings.getGuild(sID.guildID);
-      } catch (err) {
-        this.client.logger.error(err.message);
-        return message.channel.send(`An error occurred: **${err.message}**`);
-      }
+    let suggestionsChannel
+    try {
+      suggestionsChannel = settings.suggestionsChannel && (
+        settings.suggestionsChannel === 'suggestions'
+          ? await message.guild.channels.fetch({ cache: false })
+            .then(res => res.find(c => c.name === 'suggestions'))
+          : await message.guild.channels.fetch(settings.suggestionsChannel)
+      )
+      if (!suggestionsChannel) return this.client.errors.noSuggestions(message.channel)
+    } catch (error) {
+      if (!suggestionsChannel) return this.client.errors.noSuggestions(message.channel)
+      this.client.logger.error(error.stack)
+      return message.channel.send(`An error occurred: **${error.message}**`)
     }
 
-    const suggestionsChannel = guild.channels.cache.find(c => c.name === settings.suggestionsChannel) ||
-      (guild.channels.cache.get(settings.suggestionsChannel));
 
     if (status === 'approved' || status === 'rejected') {
       return message.channel.send(`sID **${id}** has already been approved or rejected. Cannot do this action again.`)
         .then(msg => msg.delete({ timeout: 3000 }))
         .catch(err => this.client.logger.error(err.stack));
-    }
-
-    try {
-      await guild.members.fetch(userID);
-    } catch (error) {
-      message.channel.send(`**${sUser.tag}** is no longer in the guild, but this note will still be added to their suggestion.`)
-        .then(msg => msg.delete({ timeout: 3000 }));
     }
 
     if (!messageID) {
@@ -85,19 +80,17 @@ module.exports = class NoteCommand extends Command {
 
     let sMessage;
     try {
-      sMessage = await suggestionsChannel.messages.fetch(messageID);
+      sMessage = await suggestionsChannel.messages.fetch(messageID, false);
     } catch (err) {
       this.client.logger.error(err.stack);
       message.channel.send('The suggestion message was not found, but still will be updated!')
         .then(m => m.delete({ timeout: 5000 }));
     }
 
-    const embed = sMessage.embeds[0];
-
-    const suggestion = new MessageEmbed(embed);
+    const suggestion = new MessageEmbed(sMessage.embeds[0]);
 
     const dmEmbed = new MessageEmbed()
-      .setAuthor(guild, guild.iconURL())
+      .setAuthor(guild, message.guild.iconURL())
       .setDescription(`Hey, ${sUser}. ${message.author} has added a note to your suggestion:
 
         Staff note: **${note}**
@@ -105,10 +98,10 @@ module.exports = class NoteCommand extends Command {
         Your suggestion ID (sID) for reference was **${id}**.
       `)
       .setColor(embedColor)
-      .setFooter(`Guild ID: ${guild.id} | sID: ${id}`)
+      .setFooter(`Guild ID: ${message.guild.id} | sID: ${id}`)
       .setTimestamp();
 
-    if (embed.fields.length && embed.fields[0].name === 'Staff Note') {
+    if (suggestion.fields.length && suggestion.fields[0].name === 'Staff Note') {
       suggestion.fields[0].value = note;
       suggestion.fields[1].value = `${message.author} (${message.author.id})`;
 
@@ -125,7 +118,7 @@ module.exports = class NoteCommand extends Command {
 
     const suggestionNote = {
       query: [
-        { guildID: guild.id },
+        { guildID: message.guild.id },
         { sID: id }
       ],
       data: {
@@ -137,21 +130,16 @@ module.exports = class NoteCommand extends Command {
 
     try {
       message.channel.send(`Added a note to **${id}**: **${note}**.`).then(m => m.delete({ timeout: 5000 }));
-      sMessage.edit(suggestion);
-      try {
-        if (settings.dmResponses && guild.members.cache.get(sUser.id)) sUser.send(dmEmbed);
-      } catch (err) {
-        this.client.logger.error(err.stack);
-        message.channel.send(`An error occurred DMing **${sUser.tag}** their suggestion note: **${err.message}**.`);
-      }
-
       await this.client.suggestions.addGuildSuggestionNote(suggestionNote);
+      await sMessage.edit(suggestion);
+      await message.guild.members.fetch({ user: userID, cache: false });
+      if (settings.dmResponses) await sUser.send(dmEmbed);
     } catch (err) {
+      if (err.message === 'Unknown Member') return;
+      if (err.message === 'Cannot send messages to this user') return;
       this.client.logger.error(err.stack);
       message.delete({ timeout: 3000 }).catch(O_o => {});
       message.channel.send(`Error updating this suggestion in the database: **${err.message}**`);
     }
-
-    return;
   }
 };

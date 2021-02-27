@@ -37,9 +37,9 @@ module.exports = class StatsCommand extends Command {
     try {
       const resolved = await Promise.all(promises);
 
-      guildSize = (resolved[0].reduce((prev, count) => prev + count, 0)).toLocaleString();
-      userSize = (resolved[1].reduce((prev, count) => prev + count, 0)).toLocaleString();
-      memUsage = resolved[2].reduce((prev, count) => prev + count, 0).toFixed(2).toLocaleString();
+      guildSize = (resolved[0].filter(Boolean).reduce((prev, count) => prev + count, 0)).toLocaleString();
+      userSize = (resolved[1].filter(Boolean).reduce((prev, count) => prev + count, 0)).toLocaleString();
+      memUsage = resolved[2].filter(Boolean).reduce((prev, count) => prev + count, 0).toFixed(2).toLocaleString();
     } catch (err) {
       this.client.logger.error(err.stack);
       return message.channel.send(`An error occurred: **${err.message}**`);
@@ -54,7 +54,7 @@ module.exports = class StatsCommand extends Command {
       .addField('Memory', `${Math.round(memUsage)} MB`, true)
       .addField('Discord.js', `v${discordVersion}`, true)
       .addField('Node', `${process.version}`, true)
-      .setFooter(`Shard ${shardID === 0 ? 1 : shardID}`)
+      .setFooter(`PID ${process.pid} | Cluster ${this.client.shard.id} | Shard ${message.guild ? message.guild.shardID : 0}`)
       .setTimestamp();
 
     return message.channel.send(embed);

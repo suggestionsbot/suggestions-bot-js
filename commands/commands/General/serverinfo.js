@@ -80,7 +80,7 @@ module.exports = class GuildInfoCommand extends Command {
       }
 
       const lastsID = lastSuggestion.sID;
-      const lastSuggestionInfo = `${lastsID} (${lastDate})`;
+      const lastSuggestionInfo = `\`${lastsID}\` (${lastDate})`;
 
       serverEmbed.addField('Suggestions', suggestions.join('\n'));
       serverEmbed.addField('Last Suggestion (sID)', lastSuggestionInfo);

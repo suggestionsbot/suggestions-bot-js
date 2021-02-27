@@ -1,4 +1,4 @@
-const { MessageEmbed, Guild, GuildEmoji } = require('discord.js');
+const { MessageEmbed, Util: { escapeMarkdown } } = require('discord.js');
 const { stripIndent } = require('common-tags');
 const Command = require('../../Command');
 
@@ -52,7 +52,7 @@ module.exports = class RejectCommand extends Command {
         .catch(err => this.logger.error(err.stack));
     }
 
-    const submitter = await this.client.users.fetch(userID).catch(err => this.client.logger.error(err));
+    const submitter = await this.client.users.fetch(userID, false).catch(err => this.client.logger.error(err));
     const guild = message.guild ? message.guild : this.client.guilds.cache.get(guildID);
 
     try {
@@ -69,16 +69,28 @@ module.exports = class RejectCommand extends Command {
         Please contact the developer via the Support Discord: ${discord}`);
     }
 
-    const suggestionsChannel = guild.channels.cache.find(c => c.name === settings.suggestionsChannel) ||
-      guild.channels.cache.get(settings.suggestionsChannel);
+    let suggestionsChannel,
+      suggestionsLogs
+    try {
+      suggestionsChannel = settings.suggestionsChannel && (
+        settings.suggestionsChannel === 'suggestions'
+          ? await message.guild.channels.fetch({ cache: false })
+            .then(res => res.find(c => c.name === 'suggestions'))
+          : await message.guild.channels.fetch(settings.suggestionsChannel)
+      )
+      if (!suggestionsChannel) return this.client.errors.noSuggestions(message.channel)
+      suggestionsLogs = settings.suggestionsLogs && await message.guild.channels.fetch(settings.suggestionsLogs)
+      if (!suggestionsLogs) return this.client.errors.noSuggestionsLogs(message.channel);
+    } catch (error) {
+      if (!suggestionsChannel) return this.client.errors.noSuggestions(message.channel)
+      if (!suggestionsLogs) return this.client.errors.noSuggestionsLogs(message.channel);
+      this.client.logger.error(error.stack)
+      return message.channel.send(`An error occurred: **${error.message}**`)
+    }
 
-    const suggestionsLogs = guild.channels.cache.find(c => c.name === settings.suggestionsLogs) ||
-      guild.channels.cache.get(settings.suggestionsLogs);
-
-    if (!suggestionsLogs) return this.client.errors.noSuggestionsLogs(message.channel);
 
     try {
-      await guild.members.fetch(userID);
+      await guild.members.fetch({ user: userID, cache: false });
     } catch (error) {
       message.channel.send(`**${submitter.tag}** is no longer in the guild, but their suggestion will still be approved.`)
         .then(msg => msg.delete({ timeout: 3000 }));
@@ -86,7 +98,7 @@ module.exports = class RejectCommand extends Command {
 
     let sMessage;
     try {
-      sMessage = await suggestionsChannel.messages.fetch(messageID);
+      sMessage = await suggestionsChannel.messages.fetch(messageID, false);
     } catch (err) {
       this.client.logger.error(err.stack);
       return message.channel.send('The suggestion message was not found!')
@@ -117,68 +129,36 @@ module.exports = class RejectCommand extends Command {
         Your suggestion ID (sID) for reference was **${id}**.`);
     }
 
-    const reactions = sMessage.reactions.cache;
-    const reactName = reactions.map(e => e._emoji.name);
-    const reactCount = reactions.map(e => e.count);
+    const [reacts, reactCount] = [
+      sMessage.reactions.cache.map(e => e.emoji.toString()),
+      sMessage.reactions.cache.map(e => e.count)
+    ]
 
-    const fallback = set => set.name === 'oldDefaults';
-    const fallbackSet = this.client.voteEmojis.find(fallback).emojis;
+    const getResults = (view = false) => {
+      const count = (idx) => reactCount[idx] - 1 || 0
 
-    const results = reactName.map(async (r, c) => {
-      const emojiIndex = reactName.indexOf(r);
-
-      await this.client.shard.broadcastEval(`this.findEmojiByName.call(this, '${r}')`)
-        .then(async emojiArray => {
-          const found = emojiArray.find(e => e);
-          if (!found) {
-            r = fallbackSet[emojiIndex];
-            return;
-          }
-
-          const emoji = await this.client.api.guilds(found.guild).get()
-            .then(async raw => {
-              const fGuild = new Guild(this.client, raw);
-              const fEmoji = new GuildEmoji(this.client, found, fGuild);
-              return fEmoji;
-            });
-
-          r = `<:${emoji.name}:${emoji.id}>`;
-        })
-        .catch(error => {
-          this.client.logger.error(error.stack);
-          return message.channel.send(`An error occurred: **${error.message}**`);
+      if (view) {
+        return reacts.map((r, i) => {
+          return `${r}**: ${count(i)}**`;
         });
-
-      return {
-        emoji: r,
-        count: reactCount[c] - 1 || 0
-      };
-    });
-
-    const newResults = Array.from(results).map(async r => {
-      const res = await r;
-      return `${res.emoji}**: ${res.count}**`;
-    });
-
-    let view,
-      savedResults;
-
-    try {
-      view = await Promise.all(newResults);
-      savedResults = await Promise.all(results);
-    } catch (error) {
-      this.client.logger.error(error.stack);
-      return message.channel.send(`An error occurred: **${error.message}**`);
+      } else {
+        return reacts.map((r, i) => {
+          return {
+            emoji: r,
+            count: count(i)
+          };
+        });
+      }
     }
 
     const logsEmbed = new MessageEmbed()
       .setAuthor(guild, guild.iconURL())
       .setDescription(stripIndent`
         **Results**
-        ${view.join('\n')}
+        ${getResults(true).join('\n')}
 
         **Suggestion**
-        ${suggestion}
+        ${escapeMarkdown(suggestion)}
 
         **Submitter**
         ${submitter}
@@ -194,10 +174,10 @@ module.exports = class RejectCommand extends Command {
       logsEmbed
         .setDescription(stripIndent`
           **Results**
-          ${view.join('\n')}
+          ${getResults(true).join('\n')}
 
           **Suggestion**
-          ${suggestion}
+          ${escapeMarkdown(suggestion)}
 
           **Submitter**
           ${submitter}
@@ -210,7 +190,7 @@ module.exports = class RejectCommand extends Command {
         `);
     }
 
-    const missingPermissions = suggestionsLogs.permissionsFor(this.client.user).missing(logsPermissions);
+    const missingPermissions = suggestionsLogs.permissionsFor(message.guild.me).missing(logsPermissions);
     if (missingPermissions.length > 0) return this.client.errors.noChannelPerms(message, suggestionsLogs, missingPermissions);
 
     const rejectSuggestion = {
@@ -223,7 +203,7 @@ module.exports = class RejectCommand extends Command {
         statusUpdated: message.createdTimestamp,
         statusReply: reply,
         staffMemberID: message.author.id,
-        results: savedResults
+        results: getResults()
       }
     };
 
@@ -231,19 +211,15 @@ module.exports = class RejectCommand extends Command {
       message.channel.send(`Suggestion **${id}** has been rejected.`).then(m => m.delete({ timeout: 5000 }));
       sMessage.edit(rejectedEmbed).then(m => m.delete({ timeout: 5000 }));
       suggestionsLogs.send(logsEmbed);
-      try {
-        if ((settings.dmResponses === true) && guild.members.cache.get(submitter.id)) submitter.send(dmEmbed);
-      } catch (err) {
-        message.channel.send(`**${submitter.tag}** has DMs disabled, but their suggestion will still be rejected.`);
-      }
-
       await this.client.suggestions.handleGuildSuggestion(rejectSuggestion);
+      await guild.members.fetch({ user: submitter, cache: false })
+      if (settings.dmResponses) submitter.send(dmEmbed);
     } catch (error) {
+      if (error.message === 'Unknown Member') return;
+      if (error.message === 'Cannot send messages to this user') return;
       this.client.logger.error(error.stack);
       message.delete({ timeout: 3000 }).catch(O_o=>{});
       return message.channel.send(`An error occurred: **${error.message}**`);
     }
-
-    return;
   }
 };

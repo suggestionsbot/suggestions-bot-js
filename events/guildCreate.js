@@ -28,16 +28,7 @@ module.exports = class {
       .setColor(created)
       .setTimestamp();
 
-    // 602332466476482616 = #server_logs / Suggestions
-    // 498627833233539086 = #server_logs / Nerd Cave Testing
-    this.client.shard.fetchChannel(process.env.NODE_ENV === 'production' ? '602332466476482616' : '498627833233539086')
-      .then(found => {
-        return this.client.api.guilds(found.guild).get()
-          .then(async raw => {
-            const fetchedGuild = new Guild(this.client, raw);
-            const channel = new TextChannel(fetchedGuild, found);
-            return channel.send(newServer);
-          });
-      }).catch(e => this.client.logger.error(e));
+    const logs = process.env.NODE_ENV === 'production' ? '602332466476482616' : '498627833233539086'
+    await this.client.channels.forge(logs).send(newServer).catch(e => this.client.logger.error(e))
   }
 };

@@ -28,9 +28,12 @@ module.exports = class HelpCommand extends Command {
     const ownerCheck = this.client.isOwner(message.author.id);
 
     if (message.guild) {
-      suggestionsChannel = message.guild.channels.cache.find(c => c.name === suggestionsChannel) ||
-        message.guild.channels.cache.find(c => c.toString() === suggestionsChannel) ||
-        message.guild.channels.cache.get(suggestionsChannel) || '';
+      suggestionsChannel = suggestionsChannel && (
+        settings.suggestionsChannel === 'suggestions'
+          ? await message.guild.channels.fetch({ cache: false })
+            .then(res => res.find(c => c.name === 'suggestions'))
+          : await message.guild.channels.fetch(suggestionsChannel)
+      )
 
       staffRoles = [];
       if (roles) staffRoles = roles.map(({ role }) => message.guild.roles.cache.get(role));
@@ -76,9 +79,10 @@ module.exports = class HelpCommand extends Command {
       .setColor(embedColor);
 
     if (message.guild) {
+      const isDefault = settings.suggestionsChannel === 'suggestions';
       helpEmbed
         .addField('📣 Current Prefix', `\`${prefix}\``)
-        .addField('💬 Suggestions Channel', suggestionsChannel.toString() ||
+        .addField('💬 Suggestions Channel', suggestionsChannel.toString() + `${isDefault ? ' *(config default)*' : ''}` ||
           (message.member.hasPermission('MANAGE_GUILD') && !suggestionsChannel ?
             `***Not set. Use*** \`${prefix + configCmdName} channel <#channel_name>\`` :
             '***Not set. Contact a server administrator.***'

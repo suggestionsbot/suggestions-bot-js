@@ -7,8 +7,8 @@ module.exports = [
     name: 'defaultEmojis',
     fullName: 'Defaults',
     emojis: isProduction()
-      ? ['<:nerdSuccess:605265580416565269>', '<:nerdError:605265598343020545>']
-      : ['<:nerdSuccess:578409088157876255>', '<:nerdError:578409123876438027>'],
+      ? ['605265580416565269', '605265598343020545']
+      : ['578409088157876255', '578409123876438027'],
     custom: true
   },
   {
@@ -44,8 +44,8 @@ module.exports = [
     name: 'fancyEmojis',
     fullName: 'Fancy',
     emojis: isProduction()
-      ? ['<:nerdApprove:605265652856389642>', '<:nerdDisapprove:605265697794162690>']
-      : ['<:nerdApprove:555537247881920521>', '<:nerdDisapprove:555537277200367627>'],
+      ? ['605265652856389642', '605265697794162690']
+      : ['555537247881920521', '555537277200367627'],
     custom: true
   }
 ];

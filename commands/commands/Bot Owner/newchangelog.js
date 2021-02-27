@@ -13,14 +13,14 @@ module.exports = class NewChangelogCommand extends Command {
   }
 
   async run(message, args) {
-    const { embedColor } = this.client.config;
+    const { embedColor, emojis: { success } } = this.client.config;
 
     message.delete().catch(O_o=>{});
 
     const changes = args.join(' ');
     if (!changes) return this.client.errors.noUsage(message.channel, this);
 
-    const channel = message.guild.channels.cache.find(c => c.name === 'changelog');
+    const channel = this.client.lastChangelog.channel;
 
     const embed = new MessageEmbed()
       .setAuthor(message.author.tag, message.author.avatarURL())
@@ -36,10 +36,8 @@ module.exports = class NewChangelogCommand extends Command {
         embed
       );
       if (confirmation === 'submit') {
-        await message.channel.bulkDelete(2);
-        return channel.send(embed);
-      } else {
-        await message.channel.bulkDelete(2);
+        this.client.lastChangelog = await channel.send(embed);
+        return this.client.lastChangelog
       }
     } catch (err) {
       this.client.logger.error(err.message);
