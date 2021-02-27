@@ -40,8 +40,6 @@ module.exports = class CommandHandler {
     const args = message.content.slice(newPrefix.length).trim().split(/ +/g);
     const command = args.shift().toLowerCase();
 
-    if (message.guild && !message.member) await message.guild.members.fetch(message.author);
-
     const cmd = this.client.commands.get(command) || this.client.commands.get(this.client.aliases.get(command));
     if (!cmd) return;
 
@@ -72,9 +70,10 @@ module.exports = class CommandHandler {
       adminCheck;
 
     if (message.guild) {
-      if (staffRoles) staffCheck = message.member.roles.cache.some(r => staffRoles.map(sr => sr.id).includes(r.id));
-      else staffCheck = message.member.hasPermission('MANAGE_GUILD') || ownerCheck;
-      adminCheck = message.member.hasPermission('MANAGE_GUILD') || ownerCheck;
+      const member = message.guild.members.fetch({ user: message.author.id, cache: false }).catch(() => { return null; })
+      if (staffRoles) staffCheck = member.roles.cache.some(r => staffRoles.map(sr => sr.id).includes(r.id));
+      else staffCheck = member.hasPermission('MANAGE_GUILD') || ownerCheck;
+      adminCheck = member.hasPermission('MANAGE_GUILD') || ownerCheck;
     }
 
     if (!cmd.conf.enabled) return this.client.errors.adminCommandIsDisabled(cmd, channel);

@@ -212,7 +212,7 @@ module.exports = class RejectCommand extends Command {
       sMessage.edit(rejectedEmbed).then(m => m.delete({ timeout: 5000 }));
       suggestionsLogs.send(logsEmbed);
       await this.client.suggestions.handleGuildSuggestion(rejectSuggestion);
-      await guild.members.fetch({ user: submitter, cache: false });
+      await guild.members.fetch({ user: userID, cache: false });
       if (settings.dmResponses) submitter.send(dmEmbed);
     } catch (error) {
       if (error.message === 'Unknown Member') return;
