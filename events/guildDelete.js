@@ -32,8 +32,8 @@ module.exports = class {
 
     try {
       await this.client.settings.deleteGuild(guild);
-      const logs = process.env.NODE_ENV === 'production' ? '602332466476482616' : '498627833233539086'
-      await this.client.channels.forge(logs).send(oldServer).catch(e => this.client.logger.error(e))
+      const logs = process.env.NODE_ENV === 'production' ? '602332466476482616' : '498627833233539086';
+      await this.client.channels.forge(logs).send(oldServer).catch(e => this.client.logger.error(e));
     } catch (err) {
       this.client.logger.error(err.stack);
     }

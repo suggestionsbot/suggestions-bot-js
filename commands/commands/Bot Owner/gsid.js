@@ -41,9 +41,8 @@ module.exports = class GSIDCommand extends Command {
 
     const sUser = await this.client.users.fetch(suggestion.userID, false).catch(err => this.client.logger.error(err));
 
-    if (suggestion._doc.hasOwnProperty('staffMemberID')) {
+    if (Object.prototype.hasOwnProperty.call(suggestion._doc, 'staffMemberID'))
       sStaff = await this.client.users.fetch(suggestion.staffMemberID, false).catch(err => this.client.logger.error(err));
-    }
 
     const sGuild = await this.client.shard.fetchGuild(suggestion.guildID);
 
@@ -52,33 +51,33 @@ module.exports = class GSIDCommand extends Command {
       .setTitle(`Info for ${suggestion.sID}`)
       .setFooter(`User ID: ${sUser.id} | sID: ${suggestion.sID}`);
 
-    let time
+    let time;
     if (suggestion.time && !suggestion.newTime) time = suggestion.time;
     if (!suggestion.time && suggestion.newTime) time = suggestion.newTime;
     if (!suggestion.time && !suggestion.newTime) time = suggestion._id.getTimestamp();
 
     const view = suggestion.results.length > 1 && suggestion.results.map((r) => {
-      return `${r.emoji}**: ${r.count}**`
-    })
+      return `${r.emoji}**: ${r.count}**`;
+    });
 
     switch (suggestion.status) {
-    case undefined: {
-      embed
-        .setDescription(stripIndent`
+      case undefined: {
+        embed
+          .setDescription(stripIndent`
           **Submitter**
           ${sUser}
 
           **Suggestion**
           ${escapeMarkdown(suggestion.suggestion)}
         `)
-        .setColor(embedColor)
-        .setTimestamp(time);
-      message.channel.send(embed);
-      break;
-    }
-    case 'approved': {
-      embed
-        .setDescription(stripIndent`
+          .setColor(embedColor)
+          .setTimestamp(time);
+        message.channel.send(embed);
+        break;
+      }
+      case 'approved': {
+        embed
+          .setDescription(stripIndent`
           **Submitter**
           ${sUser}
 
@@ -91,14 +90,14 @@ module.exports = class GSIDCommand extends Command {
           **Results**
           ${view.join('\n')}
         `)
-        .setColor(suggestionColors.approved)
-        .setTimestamp(updatedOn);
-      message.channel.send(embed);
-      break;
-    }
-    case 'rejected': {
-      embed
-        .setDescription(stripIndent`
+          .setColor(suggestionColors.approved)
+          .setTimestamp(updatedOn);
+        message.channel.send(embed);
+        break;
+      }
+      case 'rejected': {
+        embed
+          .setDescription(stripIndent`
           **Submitter**
           ${sUser}
 
@@ -111,13 +110,13 @@ module.exports = class GSIDCommand extends Command {
           **Results**
           ${view.join('\n')}
         `)
-        .setColor(suggestionColors.rejected)
-        .setTimestamp(updatedOn);
-      message.channel.send(embed);
-      break;
-    }
-    default:
-      break;
+          .setColor(suggestionColors.rejected)
+          .setTimestamp(updatedOn);
+        message.channel.send(embed);
+        break;
+      }
+      default:
+        break;
     }
   }
 };

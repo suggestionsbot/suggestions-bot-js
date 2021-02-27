@@ -104,7 +104,7 @@ module.exports = class BlacklistCommand extends Command {
     if (args[0] === 'help') return this.client.errors.noUsage(message.channel, this, settings);
     let blUser = message.mentions.users.size >= 1 ? message.mentions.users.first().id : args[1];
     blUser = await this.client.users.fetch(blUser, false).catch(() => {
-      return this.client.errors.userNotFound(args[1], message.channel)
+      return this.client.errors.userNotFound(args[1], message.channel);
     });
     const reason = args.slice(2).join(' ');
 
@@ -116,32 +116,32 @@ module.exports = class BlacklistCommand extends Command {
     }
 
     switch(args[0]) {
-    case 'add': {
-      if (!reason) {
-        return message.channel.send('Please provide a reason!')
-          .then(msg => msg.delete({ timeout: 5000 }))
-          .catch(err => this.client.logger.error(err.stack));
-      }
+      case 'add': {
+        if (!reason) {
+          return message.channel.send('Please provide a reason!')
+            .then(msg => msg.delete({ timeout: 5000 }))
+            .catch(err => this.client.logger.error(err.stack));
+        }
 
-      const newBlacklist = {
-        guildID: message.guild.id,
-        userID: blUser.id,
-        reason: reason,
-        issuerID: message.author.id,
-        newTime: message.createdTimestamp,
-        status: true,
-        case: caseNum
-      };
+        const newBlacklist = {
+          guildID: message.guild.id,
+          userID: blUser.id,
+          reason: reason,
+          issuerID: message.author.id,
+          newTime: message.createdTimestamp,
+          status: true,
+          case: caseNum
+        };
 
-      blEmbed.setTitle(`${this.client.user.username} | Blacklisted User Added`);
-      blEmbed.setColor('#00e640');
-      blEmbed.addField('User', `${blUser} \`[${blUser.tag}]\``, true);
-      blEmbed.addField('Reason', reason, true);
-      blEmbed.addField('Issuer', `${message.author} \`[${message.author.id}]\``);
+        blEmbed.setTitle(`${this.client.user.username} | Blacklisted User Added`);
+        blEmbed.setColor('#00e640');
+        blEmbed.addField('User', `${blUser} \`[${blUser.tag}]\``, true);
+        blEmbed.addField('Reason', reason, true);
+        blEmbed.addField('Issuer', `${message.author} \`[${message.author.id}]\``);
 
 
-      const dmBlacklistAdd = new MessageEmbed()
-        .setDescription(stripIndent`
+        const dmBlacklistAdd = new MessageEmbed()
+          .setDescription(stripIndent`
           Hello ${blUser},
 
           You have been blacklisted by ${message.author} from using any of the ${this.client.user}'s commands in the guild **${message.guild}**.
@@ -150,79 +150,79 @@ module.exports = class BlacklistCommand extends Command {
 
           **Reason:** ${reason}
           `)
-        .setColor('#00e640')
-        .setTimestamp();
+          .setColor('#00e640')
+          .setTimestamp();
 
-      try {
-        const check = await this.client.blacklists.checkRecentBlacklist(blUser, message.guild);
-        if (check && check.status) return this.client.errors.userAlreadyBlacklisted(message.channel, blUser);
-        await this.client.blacklists.addUserBlacklist(newBlacklist);
-        message.channel.send(blEmbed).then(msg => msg.delete({ timeout: 5000 }));
-        await blUser.send(dmBlacklistAdd);
-      } catch (err) {
-        this.client.logger.error(err.stack);
-        if (err.code === 50007) {
-          return message.channel.send(oneLine`
+        try {
+          const check = await this.client.blacklists.checkRecentBlacklist(blUser, message.guild);
+          if (check && check.status) return this.client.errors.userAlreadyBlacklisted(message.channel, blUser);
+          await this.client.blacklists.addUserBlacklist(newBlacklist);
+          message.channel.send(blEmbed).then(msg => msg.delete({ timeout: 5000 }));
+          await blUser.send(dmBlacklistAdd);
+        } catch (err) {
+          this.client.logger.error(err.stack);
+          if (err.code === 50007) {
+            return message.channel.send(oneLine`
             Bot blacklist has been issued. However, I could not DM **${blUser.tag}** because they either have DMs disabled
             or aren't a member of this server.
           `)
-            .then(m => m.delete({ timeout: 5000 }));
+              .then(m => m.delete({ timeout: 5000 }));
+          }
+          message.channel.send(`An error occurred: **${err.message}**.`);
         }
-        message.channel.send(`An error occurred: **${err.message}**.`);
+        break;
       }
-      break;
-    }
-    case 'remove': {
+      case 'remove': {
 
-      const removeBlacklist = {
-        query: [
-          { userID: blUser.id },
-          { status: true }
-        ],
-        data: {
-          status: false,
-          issuerID: message.author.id
-        }
-      };
+        const removeBlacklist = {
+          query: [
+            { userID: blUser.id },
+            { status: true }
+          ],
+          data: {
+            status: false,
+            issuerID: message.author.id
+          }
+        };
 
-      blEmbed.setTitle(`${this.client.user.username} | Blacklisted User Removed`);
-      blEmbed.setColor('#d64541');
-      blEmbed.addField('User ID', `${blUser} \`[${blUser.id}]\``, true);
-      blEmbed.addField('Issuer', `${message.author} \`[${message.author.id}]\``);
+        blEmbed.setTitle(`${this.client.user.username} | Blacklisted User Removed`);
+        blEmbed.setColor('#d64541');
+        blEmbed.addField('User ID', `${blUser} \`[${blUser.id}]\``, true);
+        blEmbed.addField('Issuer', `${message.author} \`[${message.author.id}]\``);
 
-      const dmBlacklistRemove = new MessageEmbed()
-        .setDescription(stripIndent`
+        const dmBlacklistRemove = new MessageEmbed()
+          .setDescription(stripIndent`
           Hello ${blUser},
 
           You have been unblacklisted by ${message.author}. This means you are now able to use the ${this.client.user}'s commands in the guild **${message.guild}**.
 
           **Reason:** ${reason ? reason : 'None provided'}
         `)
-        .setColor('#d64541')
-        .setTimestamp();
+          .setColor('#d64541')
+          .setTimestamp();
 
-      try {
-        const check = await this.client.blacklists.checkRecentBlacklist(blUser, message.guild);
-        if (check && !check.status) return this.client.errors.userNoLongerBlacklisted(message.channel, blUser);
-        await this.client.blacklists.removeUserBlacklist(removeBlacklist);
-        message.channel.send(blEmbed).then(msg => msg.delete({ timeout: 5000 }));
-        await blUser.send(dmBlacklistRemove);
-      } catch (err) {
-        this.client.logger.error(err.stack);
-        if (err.code === 50007) {
-          return message.channel.send(oneLine`
+        try {
+          const check = await this.client.blacklists.checkRecentBlacklist(blUser, message.guild);
+          if (check && !check.status) return this.client.errors.userNoLongerBlacklisted(message.channel, blUser);
+          await this.client.blacklists.removeUserBlacklist(removeBlacklist);
+          message.channel.send(blEmbed).then(msg => msg.delete({ timeout: 5000 }));
+          await blUser.send(dmBlacklistRemove);
+        } catch (err) {
+          this.client.logger.error(err.stack);
+          if (err.code === 50007) {
+            return message.channel.send(oneLine`
             Bot blacklist removal has been issued. However, I could not DM **${blUser.tag}** because they either have DMs disabled
             or aren't a member of this server.
           `)
-            .then(m => m.delete({ timeout: 5000 }));
+              .then(m => m.delete({ timeout: 5000 }));
+          }
+          message.channel.send(`An error occurred: **${err.message}**.`);
         }
-        message.channel.send(`An error occurred: **${err.message}**.`);
+        break;
       }
-      break;
-    }
-    default:
-      this.client.errors.noUsage(message.channel, this, settings);
-      break;
+      default:
+        this.client.errors.noUsage(message.channel, this, settings);
+        break;
     }
   }
 };

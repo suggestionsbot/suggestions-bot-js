@@ -14,13 +14,13 @@ module.exports = class ChannelCommand extends Command {
 
     await message.delete().catch(O_o => {});
 
-    const isDefault = settings.suggestionsChannel === 'suggestions'
+    const isDefault = settings.suggestionsChannel === 'suggestions';
     const validation = settings.suggestionsChannel && (
       settings.suggestionsChannel === 'suggestions'
         ? await message.guild.channels.fetch({ cache: false })
           .then(res => res.find(c => c.name === 'suggestions'))
         : await message.guild.channels.fetch(settings.suggestionsChannel)
-    )
+    );
 
     if (!validation) return message.channel.send('There is no suggestions channel set or I can\'t find the default one.');
 

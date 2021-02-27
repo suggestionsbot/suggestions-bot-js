@@ -81,9 +81,9 @@ module.exports = class MySuggestionsCommand extends Command {
         .setAuthor(`${sUser.tag} | ${message.guild}`, sUser.avatarURL())
         .addField('Created On', createdOn)
         .addField('Joined', joinedOn);
-    } else {
+    } else
       embed.setAuthor(`${sUser.tag} | Global Statistics`, sUser.avatarURL());
-    }
+
 
     if (gSuggestions.length >= 1) {
       embed.addField('Suggestions', suggestions.join('\n'));

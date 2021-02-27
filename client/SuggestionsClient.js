@@ -58,9 +58,9 @@ module.exports = class SuggestionsClient extends Client {
       clientLibrary: 'discord.js'
     });
 
-    this.lastChangelog = null
+    this.lastChangelog = null;
 
-    this.fetchLastChangelog().catch(e => this.logger.error(e))
+    this.fetchLastChangelog().catch(e => this.logger.error(e));
   }
 
   async fetchLastChangelog() {
@@ -68,7 +68,7 @@ module.exports = class SuggestionsClient extends Client {
 
     this.lastChangelog = await this.channels.fetch(channelID)
       .then(channel => channel.messages.fetch({ limit: 1 }))
-      .then(res => res.first())
+      .then(res => res.first());
   }
 
   /**
@@ -141,7 +141,7 @@ module.exports = class SuggestionsClient extends Client {
   async isStaff(guild, user) {
     const member = await guild.members.fetch({ user: user.id, cache: false }).catch(() => {
       return false;
-    })
+    });
 
     let staffCheck;
     const adminCheck = this.isAdmin(member) || this.isOwner(member.id);
