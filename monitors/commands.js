@@ -100,7 +100,7 @@ module.exports = class CommandHandler {
     if (message.guild) {
       // check bot permissions
       if (channel.type === 'text' && cmd.conf.botPermissions) {
-        const missing = channel.permissionsFor(message.guild.me).missing(cmd.conf.bostPermissions);
+        const missing = channel.permissionsFor(message.guild.me).missing(cmd.conf.botPermissions);
         if (missing.length > 0) {
           this.client.emit('commandBlocked', cmd, `botPermissions: ${missing.join(', ')}`);
           if (missing.length === 1) return message.reply(`I need the \`${permissions[missing[0]]}\` permission for the \`${cmd.help.name}\` command to work.`).then(msg => msg.delete({ timeout: 5000 }));
