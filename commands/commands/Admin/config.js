@@ -1,4 +1,4 @@
-const { Constants, MessageEmbed, Guild, GuildEmoji  } = require('discord.js');
+const { MessageEmbed  } = require('discord.js-light');
 const { stripIndent } = require('common-tags');
 const Command = require('../../Command');
 

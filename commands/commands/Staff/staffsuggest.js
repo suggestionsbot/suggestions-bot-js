@@ -1,4 +1,4 @@
-const { MessageEmbed } = require('discord.js');
+const { MessageEmbed } = require('discord.js-light');
 const Command = require('../../Command');
 require('moment-duration-format');
 require('moment-timezone');

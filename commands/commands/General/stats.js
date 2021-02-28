@@ -1,4 +1,4 @@
-const { MessageEmbed, version: discordVersion } = require('discord.js');
+const { MessageEmbed, version: discordVersion } = require('discord.js-light');
 const moment = require('moment');
 const Command = require('../../Command');
 const { version } = require('../../../package.json');

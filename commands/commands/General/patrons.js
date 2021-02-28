@@ -1,4 +1,4 @@
-const { RichEmbed } = require('discord.js');
+const { RichEmbed } = require('discord.js-light');
 const Command = require('../../Command');
 
 module.exports = class PatronsCommand extends Command {
