@@ -198,7 +198,7 @@ module.exports = class ConfigCommand extends Command {
       const viewRoles = roles
         .sort((a, b) => b.position - a.position)
         .map(r => r.toString())
-        .join('\n') || null;
+        .join('\n');
 
       const admins = message.guild.members.cache
         .filter(m => !m.user.bot && m.hasPermission('MANAGE_GUILD'))
@@ -209,7 +209,7 @@ module.exports = class ConfigCommand extends Command {
         .setDescription(`Add/remove a staff role by doing \`${prefix + name} roles [role]\``)
         .addField('Admins', admins);
 
-      if (staffRoles.length >= 1) configEmbed.addField('Staff Roles', viewRoles);
+      if (viewRoles.length >= 1) configEmbed.addField('Staff Roles', viewRoles);
       configEmbed.addField('More Information', `[Link](${confDocs}#staff-roles)`);
 
       message.channel.send(configEmbed);
@@ -430,7 +430,5 @@ module.exports = class ConfigCommand extends Command {
       break;
     }
     }
-
-    return;
   }
 };
