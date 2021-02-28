@@ -16,3 +16,6 @@ events/debug.js
 nodemon.json
 data/
 .env
+
+# IDEA / Webstorm
+.idea/

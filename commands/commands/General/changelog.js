@@ -1,7 +1,5 @@
-const { MessageEmbed, TextChannel, Guild, Constants } = require('discord.js');
+const { MessageEmbed } = require('discord.js');
 const Command = require('../../Command');
-const { version } = require('../../../package.json');
-require('dotenv-flow').config();
 
 module.exports = class ChangelogCommand extends Command {
   constructor(client) {

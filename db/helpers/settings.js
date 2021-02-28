@@ -1,4 +1,3 @@
-require('dotenv-flow').config();
 const mongoose = require('mongoose');
 const _ = require('lodash');
 

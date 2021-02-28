@@ -1,4 +1,3 @@
-require('dotenv-flow').config();
 const giphy = require('giphy-api')({
   apiKey: process.env.GIPHY,
   https: true
