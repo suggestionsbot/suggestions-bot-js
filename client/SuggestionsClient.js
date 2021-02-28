@@ -1,5 +1,4 @@
-require('dotenv-flow').config();
-const { Client, Collection, Guild } = require('discord.js-light');
+const { Client, Collection } = require('discord.js-light');
 const { Poster } = require('dbots');
 const Mongoose = require('../db/mongoose');
 

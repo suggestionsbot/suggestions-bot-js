@@ -1,4 +1,3 @@
-require('dotenv-flow').config();
 const { isMaster } = require('cluster');
 const { version } = require('../package.json');
 

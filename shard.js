@@ -1,8 +1,6 @@
-require('dotenv-flow').config();
 const { oneLine } = require('common-tags');
 const { BaseCluster } = require('kurasuta');
 
-// const SuggestionsClient = require('./client/SuggestionsClient');
 const logger = require('./utils/logger');
 
 require('./extensions/Guild');

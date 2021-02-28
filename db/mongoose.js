@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-require('dotenv-flow').config();
 
 module.exports = class Mongoose {
   constructor(client) {

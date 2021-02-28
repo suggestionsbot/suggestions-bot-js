@@ -1,4 +1,3 @@
-require('dotenv-flow').config();
 const { oneLine } = require('common-tags');
 const permissions = require('../utils/perms');
 
