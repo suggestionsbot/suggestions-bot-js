@@ -194,6 +194,7 @@ module.exports = class ConfigCommand extends Command {
         return;
       }
 
+      const roles = message.guild.roles.cache.filter(role => staffRoles.map(r => r.role).includes(role.id));
       const viewRoles = roles
         .sort((a, b) => b.position - a.position)
         .map(r => r.toString())
