@@ -128,8 +128,7 @@ module.exports = class SuggestionsClient extends Client {
 
   // this method checks if the user ID is a bot owner or not
   isOwner(id) {
-    if (this.config.owners.includes(id)) return true;
-    else return false;
+    return this.config.owners.includes(id);
   }
 
   // this method checks if the user ID has the "MANAGE_GUILD" permission or "ADMINISTRATOR" permission
@@ -153,13 +152,9 @@ module.exports = class SuggestionsClient extends Client {
 
   async isSupport(user) {
     const id = process.env.NODE_ENV === 'production' ? '601219766258106399' : '345753533141876737';
-
-    return this.api.guilds(id).get()
-      .then(async raw => {
-        const guild = new Guild(this, raw);
-        const member = await guild.members.fetch({ user: user.id, cache: false });
-        return member.roles.cache.some(r => this.config.supportRoles.includes(r.id)) || this.isOwner(member.id);
-      });
+    return this.guilds.forge(id).members.fetch({ user: user.id, cache: false }).then(member => {
+      return member.roles.cache.some(r => this.config.supportRoles.includes(r.id)) || this.isOwner(member.id)
+    }).catch(() => { return this.isOwner(user.id) || false; });
   }
 
   // Updates the presence depending on production or development
