@@ -8,13 +8,9 @@ module.exports = class {
 
   async run(guild) {
     const { guildStatusColors: { created } } = this.client.config;
-    let guildOwner;
 
-    try {
-      guildOwner = await this.client.users.fetch(guild.ownerID, false);
-    } catch (error) {
-      this.client.logger.error(error.stack);
-    }
+    const guildOwner = await this.client.users.fetch(guild.ownerID)
+      .catch(e => this.client.logger.error(e))
 
     const newServer = new MessageEmbed()
       .setTitle('Added')
@@ -23,7 +19,7 @@ module.exports = class {
         **Name:** \`${guild.name}\`
         **Members:** \`${guild.members.cache.size}\`
         **Created:** \`${moment(guild.createdAt).fromNow()}\`
-        **Owner:** ${guildOwner} \`[${guildOwner.tag}]\`
+        **Owner:** ${guildOwner} \`[${guildOwner?.tag}]\`
       `)
       .setColor(created)
       .setTimestamp();

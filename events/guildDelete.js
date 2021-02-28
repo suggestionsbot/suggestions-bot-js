@@ -10,13 +10,8 @@ module.exports = class {
 
     const { guildStatusColors: { deleted } } = this.client.config;
 
-    let guildOwner;
-
-    try {
-      guildOwner = await this.client.users.fetch(guild.ownerID);
-    } catch (error) {
-      this.client.logger.error(error.stack);
-    }
+    const guildOwner = await this.client.users.fetch(guild.ownerID, false, true)
+      .catch(e => this.client.logger.error(e))
 
     const oldServer = new MessageEmbed()
       .setTitle('Removed')
@@ -25,7 +20,7 @@ module.exports = class {
         **Name:** \`${guild}\`
         **Members:** \`${guild.members.cache.size}\`
         **Joined:** \`${moment(this.client.user.joinedAt).fromNow()}\`
-        **Owner:** ${guildOwner} \`[${guildOwner.tag}]\`
+        **Owner:** ${guildOwner?.toString() ?? `<@${guild.ownerID}>`} \`[${guildOwner?.tag ?? 'N/A'}]\`
       `)
       .setColor(deleted)
       .setTimestamp();
@@ -38,4 +33,4 @@ module.exports = class {
       this.client.logger.error(err.stack);
     }
   }
-};
+}
