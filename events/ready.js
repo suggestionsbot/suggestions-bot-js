@@ -1,4 +1,3 @@
-const { isMaster } = require('cluster');
 const { version } = require('../package.json');
 
 const versions = {
@@ -28,14 +27,9 @@ module.exports = class {
 
     this.client.botPresence();
 
-    // If the bot was invited to a guild while it was offline, the "ready" event will
-    // be emitted (ONLY IN PRODUCTION)
-    if ((process.env.NODE_ENV === 'production') && isMaster) {
+    if (process.env.NODE_ENV === 'production') {
       // handle posting stats to bot lists
       this.client.votePoster.startInterval();
-      this.client.logger.log('ALL SHARDS SPAWNED AND READY', 'ready');
-
-      this.client.setInterval(() => { this.client.sweepMessages(); }, 600000);
     }
   }
 };
