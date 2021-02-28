@@ -1,5 +1,5 @@
 /* eslint-disable no-useless-escape */
-const { MessageEmbed, Util: { escapeMarkdown } } = require('discord.js');
+const { MessageEmbed, Util: { escapeMarkdown } } = require('discord.js-light');
 const { oneLine, stripIndent } = require('common-tags');
 const crypto = require('crypto');
 require('moment-duration-format');

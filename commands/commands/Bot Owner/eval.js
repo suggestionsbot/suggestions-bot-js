@@ -1,4 +1,4 @@
-const { MessageEmbed } = require('discord.js');
+const { MessageEmbed } = require('discord.js-light');
 const hastebin = require('hastebin-gen');
 const Command = require('../../Command');
 

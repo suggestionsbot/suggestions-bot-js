@@ -1,4 +1,4 @@
-const { MessageEmbed, Guild, TextChannel } = require('discord.js');
+const { MessageEmbed } = require('discord.js-light');
 const moment = require('moment');
 
 module.exports = class {

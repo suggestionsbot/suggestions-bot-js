@@ -19,3 +19,6 @@ data/
 
 # IDEA / Webstorm
 .idea/
+
+# Docker
+docker-compose.yml

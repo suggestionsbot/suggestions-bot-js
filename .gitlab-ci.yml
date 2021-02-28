@@ -27,6 +27,6 @@ deploy:
     - docker login -u $GL_REG_USER -p $GL_REG_TOKEN $GL_REGISTRY
     - docker build -t $GL_REG_HOST .
     - docker push $GL_REG_HOST
-    - ssh -t -t $SSH_LOGIN "sh /root/suggestions-bot/update.sh"
+    - ssh -t -t $SSH_LOGIN "sh /root/bot/update.sh"
   environment: production
   when: manual

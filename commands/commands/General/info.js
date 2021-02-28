@@ -1,5 +1,4 @@
-const { MessageEmbed } = require('discord.js');
-const { oneLine } = require('common-tags');
+const { MessageEmbed } = require('discord.js-light');
 const Command = require('../../Command');
 const { version, description } = require('../../../package.json');
 

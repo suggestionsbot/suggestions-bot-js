@@ -1,4 +1,4 @@
-const { Constants, MessageEmbed, Guild, GuildEmoji  } = require('discord.js');
+const { MessageEmbed  } = require('discord.js-light');
 const { stripIndent } = require('common-tags');
 const Command = require('../../Command');
 
@@ -198,7 +198,7 @@ module.exports = class ConfigCommand extends Command {
       const viewRoles = roles
         .sort((a, b) => b.position - a.position)
         .map(r => r.toString())
-        .join('\n') || null;
+        .join('\n');
 
       const admins = message.guild.members.cache
         .filter(m => !m.user.bot && m.hasPermission('MANAGE_GUILD'))
@@ -209,7 +209,7 @@ module.exports = class ConfigCommand extends Command {
         .setDescription(`Add/remove a staff role by doing \`${prefix + name} roles [role]\``)
         .addField('Admins', admins);
 
-      if (staffRoles.length >= 1) configEmbed.addField('Staff Roles', viewRoles);
+      if (viewRoles.length >= 1) configEmbed.addField('Staff Roles', viewRoles);
       configEmbed.addField('More Information', `[Link](${confDocs}#staff-roles)`);
 
       message.channel.send(configEmbed);
@@ -224,7 +224,7 @@ module.exports = class ConfigCommand extends Command {
       if (updated) {
         const filter = set => set.id === setID;
         const foundSet = this.client.voteEmojis.find(filter);
-        if (!foundSet) return this.client.errors.voteEmojiNotFound(updated, channel);
+        if (!foundSet) return this.client.errors.voteEmojiNotFound(updated, message.channel);
 
         try {
           const emojiSet = foundSet.emojis.map(e => foundSet.custom ? this.client.emojis.forge(e) : e).join(' ')
@@ -430,7 +430,5 @@ module.exports = class ConfigCommand extends Command {
       break;
     }
     }
-
-    return;
   }
 };

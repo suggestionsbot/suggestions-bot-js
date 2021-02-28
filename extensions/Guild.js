@@ -1,4 +1,4 @@
-const { Structures } = require('discord.js');
+const { Structures } = require('discord.js-light');
 
 module.exports = Structures.extend('Guild', Guild => {
   return class extends Guild {

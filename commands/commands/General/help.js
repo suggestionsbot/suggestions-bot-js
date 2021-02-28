@@ -1,5 +1,5 @@
 const { oneLine } = require('common-tags');
-const { MessageEmbed } = require('discord.js');
+const { MessageEmbed } = require('discord.js-light');
 const Command = require('../../Command');
 
 module.exports = class HelpCommand extends Command {

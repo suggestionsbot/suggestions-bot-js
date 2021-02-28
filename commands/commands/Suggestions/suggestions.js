@@ -1,4 +1,4 @@
-const { MessageEmbed } = require('discord.js');
+const { MessageEmbed } = require('discord.js-light');
 const moment = require('moment');
 const Command = require('../../Command');
 require('moment-duration-format');
@@ -23,14 +23,20 @@ module.exports = class MySuggestionsCommand extends Command {
 
     await message.delete().catch(O_o => {});
 
-    const sUser = message.mentions.users.first() ||
-      args[0] && await this.client.users.fetch(args[0], false).catch(err => this.client.logger.error(err)) ||
+    const operation = async userID => {
+      return message.guild
+        ? await message.guild.members.fetch({ user: userID, cache: false })
+        : await this.client.users.fetch(userID, false)
+    }
+
+    const submitter = (message.guild ? message.mentions.members.first() : message.mentions.users.first()) ||
+      args[0] && await operation(args[0]).catch(err => this.client.logger.error(err)) ||
       message.author;
 
     let gSuggestions;
     try {
-      if (message.guild) gSuggestions = await this.client.suggestions.getGuildMemberSuggestions(message.guild, sUser);
-      else gSuggestions = await this.client.suggestions.getUserGlobalSuggestions(sUser);
+      if (message.guild) gSuggestions = await this.client.suggestions.getGuildMemberSuggestions(message.guild, submitter);
+      else gSuggestions = await this.client.suggestions.getUserGlobalSuggestions(submitter);
     } catch (err) {
       this.client.logger.error(err.stack);
       return message.channel.send(`Error querying the database for your suggestions: **${err.message}**.`);
@@ -39,7 +45,7 @@ module.exports = class MySuggestionsCommand extends Command {
     gSuggestions = gSuggestions.sort((a, b) => b._id.getTimestamp() - a._id.getTimestamp());
 
     if (gSuggestions.length === 0) {
-      return message.channel.send(`No suggestions data exists for **${sUser.tag}**${message.guild ? ' in this guild' : ''}!`)
+      return message.channel.send(`No suggestions data exists for **${submitter?.user?.tag ?? submitter?.tag}**${message.guild ? ' in this guild' : ''}!`)
         .then(msg => msg.delete({ timeout: 3000 }))
         .catch(err => this.client.logger.error(err.stack));
     }
@@ -67,22 +73,21 @@ module.exports = class MySuggestionsCommand extends Command {
 
     if (message.guild) {
       createdOn = moment.utc(message.guild.createdAt).format('MM/DD/YY @ h:mm A (z)');
-      joinedOn = moment.utc(message.guild.members.cache.get(sUser.id).joinedAt).format('MM/DD/YY @ h:mm A (z)');
+      joinedOn = moment.utc(submitter.joinedAt).format('MM/DD/YY @ h:mm A (z)');
     }
 
     const embed = new MessageEmbed()
       .setColor(embedColor)
-      .setThumbnail(sUser.avatarURL())
-      .addField('User', `${sUser} \`[${sUser.id}]\``)
+      .setThumbnail(submitter.avatarURL())
+      .addField('User', `${submitter} \`[${submitter.id}]\``)
       .setTimestamp();
 
     if (message.guild) {
       embed
-        .setAuthor(`${sUser.tag} | ${message.guild}`, sUser.avatarURL())
+        .setAuthor(`${submitter.tag} | ${message.guild}`, submitter.avatarURL())
         .addField('Created On', createdOn)
         .addField('Joined', joinedOn);
-    } else
-      embed.setAuthor(`${sUser.tag} | Global Statistics`, sUser.avatarURL());
+    } else embed.setAuthor(`${submitter.tag} | Global Statistics`, submitter.avatarURL());
 
 
     if (gSuggestions.length >= 1) {
