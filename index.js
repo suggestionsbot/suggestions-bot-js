@@ -16,7 +16,7 @@ const sharder = new ShardingManager(join(__dirname, 'shard'), {
     partials: ['MESSAGE', 'CHANNEL', 'REACTION', 'GUILD_MEMBER', 'USER'],
     messageSweepInterval: 600,
     messageCacheLifetime: 300,
-    messageCacheMaxSize: 25,
+    messageCacheMaxSize: 0,
     cacheOverwrites: true,
     cacheRoles: true,
     ws: {
