@@ -224,7 +224,7 @@ module.exports = class ConfigCommand extends Command {
       if (updated) {
         const filter = set => set.id === setID;
         const foundSet = this.client.voteEmojis.find(filter);
-        if (!foundSet) return this.client.errors.voteEmojiNotFound(updated, channel);
+        if (!foundSet) return this.client.errors.voteEmojiNotFound(updated, message.channel);
 
         try {
           const emojiSet = foundSet.emojis.map(e => foundSet.custom ? this.client.emojis.forge(e) : e).join(' ')
