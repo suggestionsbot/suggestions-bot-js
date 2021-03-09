@@ -49,7 +49,6 @@ module.exports = class SuggestionsClient extends Client {
       apiKeys: {
         discordbotsgg: process.env.BOTSGG,
         topgg: process.env.TOPGGTOKEN,
-        discordappsdev: process.env.TERMTOKEN,
         discordbotlist: process.env.DBL2TOKEN,
         spacebotslist: process.env.BLSTOKEN,
         botsfordiscord: process.env.BFDTOKEN
