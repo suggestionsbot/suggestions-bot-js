@@ -49,12 +49,16 @@ module.exports = class SuggestionsClient extends Client {
       apiKeys: {
         discordbotsgg: process.env.BOTSGG,
         topgg: process.env.TOPGGTOKEN,
-        discordappsdev: process.env.TERMTOKEN,
         discordbotlist: process.env.DBL2TOKEN,
         spacebotslist: process.env.BLSTOKEN,
         botsfordiscord: process.env.BFDTOKEN
       },
-      clientLibrary: 'discord.js'
+      clientLibrary: 'discord.js',
+      clientID: this.user.id,
+      serverCount: () => this.shard.fetchClientValues('guilds.cache.size')
+        .then(res => res.filter(Boolean).reduce((prev, count) => prev + count, 0)),
+      userCount: () => this.shard.broadcastEval('this.guilds.cache.reduce((prev, guild) => prev + guild.memberCount, 0')
+        .then(res => res.filter(Boolean).reduce((prev, count) => prev + count, 0))
     });
 
     this.lastChangelog = null;

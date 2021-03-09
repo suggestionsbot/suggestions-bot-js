@@ -12,7 +12,6 @@ module.exports = async (client) => {
       postBotsGG,
       postDBotList,
       postBLSpace,
-      postDiscordApps,
       postBfd
     ];
 
@@ -110,28 +109,6 @@ module.exports = async (client) => {
       else client.logger.log('Server count posted to botlist.space!');
     } catch (err) {
       return client.logger.error(`Error posting to botlist.space: ${err.message}`);
-    }
-  }
-
-  async function postDiscordApps() {
-    // Discord Bot List by Terminal.ink (ls.terminal.ink)
-    try {
-      const data = { bot: { count: guildSizeCount } };
-      const body = JSON.stringify(data);
-
-      const posted = await fetch(`https://api.discordapps.dev/api/v2/bots/${client.user.id}`, {
-        method: 'POST',
-        headers: {
-          'Authorization': process.env.TERMTOKEN,
-          'Content-Type': 'application/json'
-        },
-        body: body
-      });
-
-      if (!posted.ok) throw new Error(posted.statusText);
-      else client.logger.log('Server count posted to ls.terminal.ink!');
-    } catch (err) {
-      return client.logger.error(`Error posting to ls.terminal.ink: ${err.message}`);
     }
   }
 
