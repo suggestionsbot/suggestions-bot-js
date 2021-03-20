@@ -14,14 +14,16 @@ module.exports = class RestartCommand extends Command {
 
   async run(message, args) {
     try {
-      if (args[0] && isNaN(args[0])) return message.channel.send('Please provide a cluster ID!');
+      const clusters = Array.from(Array(this.client.shard.clusterCount).keys());
+      if (args[0] && isNaN(args[0])) return message.channel.send('Please provide a valid number!');
+      if (args[0] && !clusters.includes(+args[0])) return message.channel.send(`Please provide a valid cluster ID: \`${clusters.join(', ')}\` .`);
       if (args[0]) await this.client.shard.restart(+args[0]);
       else await this.client.shard.respawnAll();
 
       await message.channel.send({
         embed: {
           color: this.client.config.embedColor,
-          description: `Restarted ${args[0] ? `cluster **${args[0]}**` : 'all clusters'}.`,
+          description: `Restarting ${args[0] ? `cluster **${args[0]}**` : 'all clusters'}.`,
           footer: { text: `ID: ${message.author.id}` },
           timestamp: Date.now()
         }
