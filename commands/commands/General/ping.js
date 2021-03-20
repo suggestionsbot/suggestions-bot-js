@@ -1,4 +1,4 @@
-const { oneLine } = require('common-tags');
+const { stripIndents } = require('common-tags');
 const Command = require('../../Command');
 
 module.exports = class PingCommand extends Command {
@@ -18,7 +18,7 @@ module.exports = class PingCommand extends Command {
     try {
       const msg = await message.channel.send('🏓 Ping!');
       const [shard, cluster] = [message.guild ? message.guild.shardID : 0, this.client.shard.id];
-      return msg.edit(oneLine`
+      return msg.edit(stripIndents`
         Pong!
         **Latency:** \`${msg.createdTimestamp - message.createdTimestamp}ms\`.
         **Shard ${shard} - Cluster ${cluster}:** \`${Math.round(this.client.ws.ping)}ms\`.
