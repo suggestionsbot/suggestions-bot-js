@@ -54,7 +54,6 @@ module.exports = class SuggestionsClient extends Client {
         botsfordiscord: process.env.BFDTOKEN
       },
       clientLibrary: 'discord.js',
-      clientID: this.user.id,
       serverCount: () => this.shard.fetchClientValues('guilds.cache.size')
         .then(res => res.filter(Boolean).reduce((prev, count) => prev + count, 0)),
       userCount: () => this.shard.broadcastEval('this.guilds.cache.reduce((prev, guild) => prev + guild.memberCount, 0')
@@ -157,7 +156,7 @@ module.exports = class SuggestionsClient extends Client {
   async isSupport(user) {
     const id = process.env.NODE_ENV === 'production' ? '601219766258106399' : '345753533141876737';
     return this.guilds.forge(id).members.fetch({ user: user.id, cache: false }).then(member => {
-      return member.roles.cache.some(r => this.config.supportRoles.includes(r.id)) || this.isOwner(member.id)
+      return member.roles.cache.some(r => this.config.supportRoles.includes(r.id)) || this.isOwner(member.id);
     }).catch(() => { return this.isOwner(user.id) || false; });
   }
 
