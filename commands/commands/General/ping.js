@@ -21,7 +21,7 @@ module.exports = class PingCommand extends Command {
       return msg.edit(stripIndents`
         Pong!
         **Latency:** \`${msg.createdTimestamp - message.createdTimestamp}ms\`.
-        **Shard ${shard} - Cluster ${cluster}:** \`${Math.round(this.client.ws.ping)}ms\`.
+        **Cluster ${cluster} - Shard ${shard}:** \`${Math.round(this.client.ws.ping)}ms\`.
       `);
     } catch (e) {
       this.client.logger.error(e);
