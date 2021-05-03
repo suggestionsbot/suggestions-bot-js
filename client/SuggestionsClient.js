@@ -136,7 +136,7 @@ module.exports = class SuggestionsClient extends Client {
 
   // this method checks if the user ID has the "MANAGE_GUILD" permission or "ADMINISTRATOR" permission
   isAdmin(member) {
-    return member.hasPermission(['ADMINISTRATOR', 'MANAGE_GUILD']);
+    return member.permissions.any(['ADMINISTRATOR', 'MANAGE_GUILD']);
   }
 
   async isStaff(guild, user) {
