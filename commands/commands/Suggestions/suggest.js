@@ -42,13 +42,17 @@ module.exports = class SuggestCommand extends Command {
     }
 
     const sUser = message.author;
-    const sChannel = suggestionsChannel && (
-      suggestionsChannel === 'suggestions'
-        ? await message.guild.channels.fetch({ cache: false })
-          .then(res => res.find(c => c.name === 'suggestions')).catch(() => { return false; })
-        : await message.guild.channels.fetch(suggestionsChannel).catch(() => { return false; })
-    );
-    if (!sChannel) return this.client.errors.noSuggestions(message.channel);
+    let sChannel;
+    try {
+      sChannel = suggestionsChannel && (
+        suggestionsChannel === 'suggestions'
+          ? await message.guild.channels.fetch({ cache: false }).then(res => res.find(c => c.name === 'suggestions'))
+          : await message.guild.channels.fetch(suggestionsChannel)
+      );
+      if (!sChannel) return this.client.errors.noSuggestions(message.channel);
+    } catch (e) {
+      return this.client.errors.noSuggestions(message.channel);
+    }
 
     // If the sID exists globally, this will force a new one to be generated
     do id = crypto.randomBytes(20).toString('hex').slice(12, 20);
@@ -88,24 +92,26 @@ module.exports = class SuggestCommand extends Command {
     const missingPermissions = sChannel.permissionsFor(message.guild.me).missing(defaultPermissions);
     if (missingPermissions.length > 0) return this.client.errors.noChannelPerms(message, sChannel, missingPermissions);
 
-    let m = await sChannel.send(embed);
-    const mID = m.id;
-
-    const foundSet = this.client.voteEmojis.find(filter) || this.client.voteEmojis.find(defaults);
-    const emojiSet = foundSet.emojis;
-    const fallbackSet = this.client.voteEmojis.find(fallback).emojis;
-
-    for (const e of emojiSet) {
-      const emojiIndex = emojiSet.indexOf(e);
-      if (!m) m = await sChannel.messages.fetch(mID);
-
-      if (foundSet.custom) {
-        await m.react(message.guild.emojis.forge(e))
-          .catch(() => m.react(fallbackSet[emojiIndex]));
-      } else await m.react(e);
-    }
-
+    let m,
+      mID;
     try {
+      m = await sChannel.send(embed);
+      mID = m.id;
+
+      const foundSet = this.client.voteEmojis.find(filter) || this.client.voteEmojis.find(defaults);
+      const emojiSet = foundSet.emojis;
+      const fallbackSet = this.client.voteEmojis.find(fallback).emojis;
+
+      for (const e of emojiSet) {
+        const emojiIndex = emojiSet.indexOf(e);
+        if (!m) m = await sChannel.messages.fetch(mID);
+
+        if (foundSet.custom) {
+          await m.react(message.guild.emojis.forge(e))
+            .catch(() => m.react(fallbackSet[emojiIndex]));
+        } else await m.react(e);
+      }
+
       await message.react(this.client.emojis.forge(successEmoji));
       if (settings.dmResponses) await sUser.send(dmEmbed);
     } catch (error) {
@@ -115,7 +121,12 @@ module.exports = class SuggestCommand extends Command {
       `);
     }
 
-    if (!m) await sChannel.messages.fetch(mID);
+    try {
+      if (!m) await sChannel.messages.fetch(mID);
+    } catch (error) {
+      this.client.logger.error(error.stack);
+      return message.channel.send(`An error occurred: **${error.message}**`);
+    }
     const newSuggestion = {
       guildID: message.guild.id,
       userID: message.author.id,
@@ -135,32 +146,32 @@ module.exports = class SuggestCommand extends Command {
     }
 
     if (!settings.fetchedMessages) {
-      const messages = await sChannel.messages.fetch();
-      const filtered = messages
-        .filter(msg => msg.embeds.length >= 1 && msg.author.id === this.client.user.id);
+      try {
+        const messages = await sChannel.messages.fetch();
+        const filtered = messages
+          .filter(msg => msg.embeds.length >= 1 && msg.author.id === this.client.user.id);
 
-      for (const msg of filtered.array()) {
-        if (!msg.embeds[0].footer) return;
-        const footer = msg.embeds[0].footer.text.split('sID:');
-        const sID = footer[1].trim();
+        for (const msg of filtered.array()) {
+          if (!msg.embeds[0].footer) return;
+          const footer = msg.embeds[0].footer.text.split('sID:');
+          const sID = footer[1].trim();
 
-        const data = await this.client.suggestions.getGuildSuggestion(msg.guild.id, sID);
-        if (!data) break;
+          const data = await this.client.suggestions.getGuildSuggestion(msg.guild.id, sID);
+          if (!data) break;
 
-        const updateSuggestion = {
-          query: [
-            { guildID: m.guild.id },
-            { sID: sID }
-          ],
-          data: { messageID: m.id }
-        };
+          const updateSuggestion = {
+            query: [
+              { guildID: m.guild.id },
+              { sID: sID }
+            ],
+            data: { messageID: m.id }
+          };
 
-        try {
           await this.client.suggestions.updateGuildSuggestion(updateSuggestion);
-        } catch (error) {
-          this.client.logger.error(error.stack);
-          return message.channel.send(`An error occurred: **${error.message}**`);
         }
+      } catch (error) {
+        this.client.logger.error(error.stack);
+        return message.channel.send(`An error occurred: **${error.message}**`);
       }
 
       try {
@@ -170,20 +181,5 @@ module.exports = class SuggestCommand extends Command {
         return message.channel.send(`An error occurred: **${error.message}**`);
       }
     }
-  }
-
-  _canUseGuildEmoji(guildMember, guildEmoji) {
-    let canUseGuildEmoji = false;
-    for (const role of guildMember.roles.cache) {
-      if (guildEmoji.roles.cache.size === 0) {
-        canUseGuildEmoji = true;
-        break;
-      }
-      if (guildEmoji.roles.cache.has(role.id)) {
-        canUseGuildEmoji = true;
-        break;
-      }
-    }
-    return canUseGuildEmoji;
   }
 };
