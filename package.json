@@ -26,7 +26,7 @@
     "common-tags": "^1.8.0",
     "dblapi.js": "^2.4.1",
     "dbots": "^7.0.1",
-    "discord.js-light": "https://github.com/timotejroiko/discord.js-light#d3a213ae7a9db76b81147b0666089c9f02cb5ca2",
+    "discord.js-light": "^3.5.11",
     "dotenv": "^8.2.0",
     "erlpack": "^0.1.3",
     "express": "^4.17.1",
