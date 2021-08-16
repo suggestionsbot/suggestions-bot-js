@@ -9,9 +9,9 @@ module.exports = class {
   async run(message) {
 
     try {
-      if (this.client.mongoose.connection.readyState !== 1) await this.commands.run(message);
+      if (this.client.mongoose.connection.readyState === 1) await this.commands.run(message);
     } catch (e) {
-      this.client.logger.error('you\'re fucking stupid');
+      this.client.logger.error(e.stack);
     }
   }
 };
