@@ -66,6 +66,8 @@ sharder.on(SharderEvents.SHARD_RESUME, (replayed, shardID) =>
 sharder.on(SharderEvents.SHARD_DISCONNECT, (closeEvent, shardID) =>
   logger.log(`Shard ${shardID} disconnected`));
 
+sharder.on(SharderEvents.DEBUG, (message => logger.log(`SHARDER DEBUG: ${message}`)));
+
 sharder.spawn().catch(e => logger.error(`SHARD SPAWN: ${e}`));
 
 /* MISCELLANEOUS NON-CRITICAL FUNCTIONS */

@@ -7,7 +7,7 @@ logs/
 
 # Commands & Events
 commands/commands/Bot\ Owner/beta.js
-events/debug.js
+#events/debug.js
 
 # Miscellaneous
 .tmp/
