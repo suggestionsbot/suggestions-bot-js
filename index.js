@@ -12,7 +12,7 @@ const SuggestionsClient = require('./client/SuggestionsClient');
 
 const sharder = new ShardingManager(join(__dirname, 'shard'), {
   clientOptions: {
-    disableEveryone: true,
+    disableMentions: 'all',
     partials: ['MESSAGE', 'CHANNEL', 'REACTION', 'GUILD_MEMBER', 'USER'],
     messageSweepInterval: 600,
     messageCacheLifetime: 300,
@@ -94,7 +94,6 @@ process.on('unhandledRejection', err => {
 process.on('SIGINT', async () => {
   logger.log('SIGINT signal received.');
   logger.log('Bot shutting down...');
-  await sharder.client.mongoose.close();
   await sharder.client.destroy();
   await process.exit(0);
 });

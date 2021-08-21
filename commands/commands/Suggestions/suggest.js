@@ -144,42 +144,5 @@ module.exports = class SuggestCommand extends Command {
       this.client.logger.error(error.stack);
       return message.channel.send(`An error occurred: **${error.message}**`);
     }
-
-    if (!settings.fetchedMessages) {
-      try {
-        const messages = await sChannel.messages.fetch();
-        const filtered = messages
-          .filter(msg => msg.embeds.length >= 1 && msg.author.id === this.client.user.id);
-
-        for (const msg of filtered.array()) {
-          if (!msg.embeds[0].footer) return;
-          const footer = msg.embeds[0].footer.text.split('sID:');
-          const sID = footer[1].trim();
-
-          const data = await this.client.suggestions.getGuildSuggestion(msg.guild.id, sID);
-          if (!data) break;
-
-          const updateSuggestion = {
-            query: [
-              { guildID: m.guild.id },
-              { sID: sID }
-            ],
-            data: { messageID: m.id }
-          };
-
-          await this.client.suggestions.updateGuildSuggestion(updateSuggestion);
-        }
-      } catch (error) {
-        this.client.logger.error(error.stack);
-        return message.channel.send(`An error occurred: **${error.message}**`);
-      }
-
-      try {
-        await this.client.settings.updateGuild(message.guild, { fetchedMessages: true });
-      } catch (error) {
-        this.client.logger.error(error.stack);
-        return message.channel.send(`An error occurred: **${error.message}**`);
-      }
-    }
   }
 };
