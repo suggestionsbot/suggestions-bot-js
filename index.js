@@ -12,7 +12,7 @@ const SuggestionsClient = require('./client/SuggestionsClient');
 
 const sharder = new ShardingManager(join(__dirname, 'shard'), {
   clientOptions: {
-    disableEveryone: true,
+    disableMentions: 'all',
     partials: ['MESSAGE', 'CHANNEL', 'REACTION', 'GUILD_MEMBER', 'USER'],
     messageSweepInterval: 600,
     messageCacheLifetime: 300,
