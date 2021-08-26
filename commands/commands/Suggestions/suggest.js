@@ -31,15 +31,7 @@ module.exports = class SuggestCommand extends Command {
 
     const imageCheck = /(http(s?):)([/|.|\w|\s|-])*\.(?:jpg|gif|png)/.exec(suggestion);
 
-    let id = crypto.randomBytes(20).toString('hex').slice(12, 20);
-
-    let verifySuggestion;
-    try {
-      verifySuggestion = await this.client.suggestions.getGlobalSuggestion(id);
-    } catch (err) {
-      this.client.logger.error(err.stack);
-      return message.channel.send(`Error querying the database for this guild's suggestions: **${err.message}**.`);
-    }
+    const id = crypto.randomBytes(20).toString('hex').slice(33, 40);
 
     const sUser = message.author;
     let sChannel;
@@ -53,10 +45,6 @@ module.exports = class SuggestCommand extends Command {
     } catch (e) {
       return this.client.errors.noSuggestions(message.channel);
     }
-
-    // If the sID exists globally, this will force a new one to be generated
-    do id = crypto.randomBytes(20).toString('hex').slice(12, 20);
-    while (verifySuggestion);
 
     const embed = new MessageEmbed()
       .setDescription(stripIndent`
