@@ -1,14 +1,15 @@
 const { MessageEmbed, Util: { escapeMarkdown } } = require('discord.js-light');
 const { stripIndent } = require('common-tags');
 const Command = require('../../Command');
+const { validateSnowflake } = require('../../../utils/functions');
 
 module.exports = class ApproveCommand extends Command {
   constructor(client) {
     super(client, {
       name: 'approve',
       category: 'Staff',
-      description: 'Approve a submitted suggestion via the suggestion ID (sID).',
-      usage: 'approve <sID> [response]',
+      description: 'Approve a submitted suggestion via the suggestion ID (sID) or message ID.',
+      usage: 'approve <sID|message ID> [response]',
       staffOnly: true,
       guildOnly: true,
       botPermissions: ['MANAGE_MESSAGES', 'USE_EXTERNAL_EMOJIS']
@@ -20,7 +21,7 @@ module.exports = class ApproveCommand extends Command {
     message.delete().catch(O_o => {});
 
     const { discord, suggestionColors: { approved }, logsPermissions } = this.client.config;
-    let sID;
+    let document;
 
     const id = args[0];
     if (!id) return this.client.errors.noUsage(message.channel, this, settings);
@@ -28,24 +29,27 @@ module.exports = class ApproveCommand extends Command {
     const reply = args.slice(1).join(' ');
 
     try {
-      sID = await this.client.suggestions.getGlobalSuggestion(id);
+      if (id.length === 7) document = await this.client.suggestions.getGlobalSuggestion(id);
+      if (validateSnowflake(id)) document = await this.client.suggestions.getGuildSuggestionViaMessageID(message.guild, id);
+      if (!document) return message.channel.send(`\`${id}\` does not resolve to or return a valid suggestion!`);
     } catch (error) {
       this.client.logger.error(error.stack);
       return message.channel.send(`Error querying this suggestion: **${error.message}**`);
     }
 
-    if (!sID) return this.client.errors.noSuggestion(message.channel, id);
+    if (!document) return this.client.errors.noSuggestion(message.channel, id);
 
     const {
+      sID,
       userID,
       guildID,
       messageID,
       suggestion,
       status
-    } = sID;
+    } = document;
 
     if (status === 'approved') {
-      return message.channel.send(`sID **${id}** has already been approved. Cannot do this action again.`)
+      return message.channel.send(`sID **${sID}** has already been approved. Cannot do this action again.`)
         .then(msg => msg.delete({ timeout: 3000 }))
         .catch(err => this.logger.error(err.stack));
     }
@@ -113,7 +117,7 @@ module.exports = class ApproveCommand extends Command {
       .setAuthor(guild, guild.iconURL())
       .setDescription(stripIndent`Hey, ${submitter}. Your suggestion has been approved by ${message.author}!
       
-      Your suggestion ID (sID) for reference was **${id}**.`)
+      Your suggestion ID (sID) for reference was **${sID}**.`)
       .setColor(approved)
       .setFooter(`Guild ID: ${guild.id} | sID: ${id}`)
       .setTimestamp();
@@ -124,7 +128,7 @@ module.exports = class ApproveCommand extends Command {
       
         **Staff Response:** ${reply}
 
-        Your suggestion ID (sID) for reference was **${id}**.`);
+        Your suggestion ID (sID) for reference was **${sID}**.`);
     }
 
     const [reacts, reactCount] = [
@@ -165,7 +169,7 @@ module.exports = class ApproveCommand extends Command {
         ${message.author}
       `)
       .setColor(approved)
-      .setFooter(`sID: ${id}`)
+      .setFooter(`sID: ${sID}`)
       .setTimestamp();
 
     if (reply) {
@@ -194,7 +198,7 @@ module.exports = class ApproveCommand extends Command {
     const approveSuggestion = {
       query: [
         { guildID: guild.id },
-        { sID: id }
+        { sID }
       ],
       data: {
         status: 'approved',
@@ -206,7 +210,7 @@ module.exports = class ApproveCommand extends Command {
     };
 
     try {
-      message.channel.send(`Suggestion **${id}** has been approved.`).then(m => m.delete({ timeout: 5000 }));
+      message.channel.send(`Suggestion **${sID}** has been approved.`).then(m => m.delete({ timeout: 5000 }));
       sMessage.edit(approvedEmbed).then(m => m.delete({ timeout: 5000 }));
       suggestionsLogs.send(logsEmbed);
       await this.client.suggestions.handleGuildSuggestion(approveSuggestion);

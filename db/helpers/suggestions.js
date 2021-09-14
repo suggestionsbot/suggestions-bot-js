@@ -19,6 +19,18 @@ module.exports = class SuggestionsHelpers {
   }
 
   /**
+   * Get a guild suggestion from the database using the message ID.
+   *
+   * @param {Object} guild - The guild object.
+   * @param {String} messageID - The message ID.
+   * @return {Promise<Query<Document | null, Document>>}
+   */
+  async getGuildSuggestionViaMessageID(guild, messageID) {
+    return Suggestion
+      .findOne({ $and: [{ guildID: guild.id || guild, messageID }] });
+  }
+
+  /**
      * Get a suggestion globally from the database (for administrative use).
      *
      * @param {String} sID - The unique suggestion ID.

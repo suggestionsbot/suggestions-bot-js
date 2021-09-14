@@ -2,6 +2,7 @@ const { MessageEmbed } = require('discord.js-light');
 const moment = require('moment');
 const { oneLine } = require('common-tags');
 const Command = require('../../Command');
+const { validateSnowflake } = require('../../../utils/functions');
 require('moment-duration-format');
 require('moment-timezone');
 moment.suppressDeprecationWarnings = true;
@@ -12,7 +13,7 @@ module.exports = class NoteCommand extends Command {
       name: 'note',
       category: 'Staff',
       description: 'Add a new note to a submitted suggestion.',
-      usage: 'note <sID> <note>',
+      usage: 'note <sID|message ID> <note>',
       staffOnly: true,
       guildOnly: false,
       botPermissions: ['MANAGE_MESSAGES'],
@@ -31,21 +32,24 @@ module.exports = class NoteCommand extends Command {
     if (!note) return this.client.errors.noUsage(message.channel, this, settings);
 
     const guild = message.guild;
-    let sID;
+    let document;
     try {
-      sID = await this.client.suggestions.getGlobalSuggestion(id);
+      if (id.length === 7) document = await this.client.suggestions.getGlobalSuggestion(id);
+      if (validateSnowflake(id)) document = await this.client.suggestions.getGuildSuggestionViaMessageID(message.guild, id);
+      if (!document) return message.channel.send(`\`${id}\` does not resolve to or return a valid suggestion!`);
     } catch (err) {
       this.client.logger.error(err.stack);
       return message.channel.send(`Error querying the database for this suggestions: **${err.message}**.`);
     }
 
-    if (!sID) return this.client.errors.noSuggestion(message.channel, id);
+    if (!document) return this.client.errors.noSuggestion(message.channel, id);
 
     const {
+      sID,
       userID,
       messageID,
       status
-    } = sID;
+    } = document;
 
     const sUser = await this.client.users.fetch(userID).catch(err => this.client.logger.error(err));
 
@@ -66,7 +70,7 @@ module.exports = class NoteCommand extends Command {
 
 
     if (status === 'approved' || status === 'rejected') {
-      return message.channel.send(`sID **${id}** has already been approved or rejected. Cannot do this action again.`)
+      return message.channel.send(`sID **${sID}** has already been approved or rejected. Cannot do this action again.`)
         .then(msg => msg.delete({ timeout: 3000 }))
         .catch(err => this.client.logger.error(err.stack));
     }
@@ -95,10 +99,10 @@ module.exports = class NoteCommand extends Command {
 
         Staff note: **${note}**
                     
-        Your suggestion ID (sID) for reference was **${id}**.
+        Your suggestion ID (sID) for reference was **${sID}**.
       `)
       .setColor(embedColor)
-      .setFooter(`Guild ID: ${message.guild.id} | sID: ${id}`)
+      .setFooter(`Guild ID: ${message.guild.id} | sID: ${sID}`)
       .setTimestamp();
 
     if (suggestion.fields.length && suggestion.fields[0].name === 'Staff Note') {
@@ -109,7 +113,7 @@ module.exports = class NoteCommand extends Command {
 
       Staff note: **${note}**
                   
-      Your suggestion ID (sID) for reference was **${id}**.
+      Your suggestion ID (sID) for reference was **${sID}**.
       `);
     } else {
       suggestion.addField('Staff Note', note);
@@ -119,7 +123,7 @@ module.exports = class NoteCommand extends Command {
     const suggestionNote = {
       query: [
         { guildID: message.guild.id },
-        { sID: id }
+        { sID }
       ],
       data: {
         note,
@@ -129,7 +133,7 @@ module.exports = class NoteCommand extends Command {
     };
 
     try {
-      message.channel.send(`Added a note to **${id}**: **${note}**.`).then(m => m.delete({ timeout: 5000 }));
+      message.channel.send(`Added a note to **${sID}**: **${note}**.`).then(m => m.delete({ timeout: 5000 }));
       await this.client.suggestions.addGuildSuggestionNote(suggestionNote);
       await sMessage.edit(suggestion);
       await message.guild.members.fetch({ user: userID, cache: false });
