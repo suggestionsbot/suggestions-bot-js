@@ -23,15 +23,16 @@ module.exports = class MySuggestionsCommand extends Command {
 
     await message.delete().catch(O_o => {});
 
-    const operation = async userID => {
+    const getSubmitter = async userID => {
       return message.guild
         ? await message.guild.members.fetch({ user: userID, cache: false })
         : await this.client.users.fetch(userID, false)
     }
 
     const submitter = (message.guild ? message.mentions.members.first() : message.mentions.users.first()) ||
-      args[0] && await operation(args[0]).catch(err => this.client.logger.error(err)) ||
+      args[0] && await getSubmitter(args[0]).catch(err => this.client.logger.error(err)) ||
       message.author;
+    const avatarURL = submitter.guild ? submitter.user.avatarURL() : submitter.avatarURL()
 
     let gSuggestions;
     try {
@@ -78,16 +79,16 @@ module.exports = class MySuggestionsCommand extends Command {
 
     const embed = new MessageEmbed()
       .setColor(embedColor)
-      .setThumbnail(submitter.avatarURL())
+      .setThumbnail(avatarURL)
       .addField('User', `${submitter} \`[${submitter.id}]\``)
       .setTimestamp();
 
     if (message.guild) {
       embed
-        .setAuthor(`${submitter.tag} | ${message.guild}`, submitter.avatarURL())
+        .setAuthor(`${submitter.user.tag} | ${message.guild}`, avatarURL)
         .addField('Created On', createdOn)
         .addField('Joined', joinedOn);
-    } else embed.setAuthor(`${submitter.tag} | Global Statistics`, submitter.avatarURL());
+    } else embed.setAuthor(`${submitter.tag} | Global Statistics`, avatarURL);
 
 
     if (gSuggestions.length >= 1) {

@@ -6,6 +6,7 @@ require('moment-duration-format');
 require('moment-timezone');
 
 const Command = require('../../Command');
+const { validateSnowflake } = require('../../../utils/functions');
 
 module.exports = class SuggestCommand extends Command {
   constructor(client) {
@@ -29,18 +30,16 @@ module.exports = class SuggestCommand extends Command {
 
     if (!suggestion) return this.client.errors.noUsage(message.channel, this, settings);
 
-    const imageCheck = /(http(s?):)([/|.|\w|\s|-])*\.(?:jpg|gif|png)/.exec(suggestion);
+    const imageCheck = /(http(s?):)([/|.|\w|\s|-])*\.(?:jpe?g|gifv?|png|webp|bmp|tiff?)/.exec(suggestion);
 
     const id = crypto.randomBytes(20).toString('hex').slice(33, 40);
 
     const sUser = message.author;
     let sChannel;
     try {
-      sChannel = suggestionsChannel && (
-        suggestionsChannel === 'suggestions'
-          ? await message.guild.channels.fetch({ cache: false }).then(res => res.find(c => c.name === 'suggestions'))
-          : await message.guild.channels.fetch(suggestionsChannel)
-      );
+      sChannel = suggestionsChannel && validateSnowflake(suggestionsChannel)
+        ? await message.guild.channels.fetch(suggestionsChannel)
+        : await message.guild.channels.fetch({ cache: false }).then(res => res.find(c => c.name === 'suggestions'));
       if (!sChannel) return this.client.errors.noSuggestions(message.channel);
     } catch (e) {
       return this.client.errors.noSuggestions(message.channel);
@@ -99,9 +98,14 @@ module.exports = class SuggestCommand extends Command {
             .catch(() => m.react(fallbackSet[emojiIndex]));
         } else await m.react(e);
       }
+    } catch (error) {
+      this.client.logger.error(error.stack);
+      return message.channel.send(`An error occurred: **${error.message}**`);
+    }
 
-      await message.react(this.client.emojis.forge(successEmoji));
+    try {
       if (settings.dmResponses) await sUser.send(dmEmbed);
+      await message.react(this.client.emojis.forge(successEmoji));
     } catch (error) {
       message.channel.send(oneLine`
         I could not DM you because you have DMs disabled from server members. However, for reference, your suggestion
