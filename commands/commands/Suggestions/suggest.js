@@ -29,7 +29,7 @@ module.exports = class SuggestCommand extends Command {
 
     if (!suggestion) return this.client.errors.noUsage(message.channel, this, settings);
 
-    const imageCheck = /(http(s?):)([/|.|\w|\s|-])*\.(?:jpg|gif|png)/.exec(suggestion);
+    const imageCheck = /(http(s?):)([/|.|\w|\s|-])*\.(?:jpe?g|gifv?|png|webp|bmp|tiff?)/.exec(suggestion);
 
     const id = crypto.randomBytes(20).toString('hex').slice(33, 40);
 
