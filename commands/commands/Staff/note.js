@@ -91,7 +91,7 @@ module.exports = class NoteCommand extends Command {
     const suggestion = new MessageEmbed(sMessage.embeds[0]);
 
     const dmEmbed = new MessageEmbed()
-      .setAuthor(guild, message.guild.iconURL())
+      .setAuthor(message.guild, message.guild.iconURL())
       .setDescription(`Hey, ${sUser}. ${message.author} has added a note to your suggestion:
 
         Staff note: **${note}**
