@@ -31,15 +31,13 @@ module.exports = class RejectCommand extends Command {
     const reply = args.slice(1).join(' ');
 
     try {
-      if (id.length === 7) document = await this.client.suggestions.getGlobalSuggestion(id);
-      if (validateSnowflake(id)) document = await this.client.suggestions.getGuildSuggestionViaMessageID(message.guild, id);
-      if (!document) return message.channel.send(`\`${id}\` does not resolve to or return a valid suggestion!`);
+      if ([7, 8].includes(id.length)) document = await this.client.suggestions.getGlobalSuggestion(id);
+      else if (validateSnowflake(id)) document = await this.client.suggestions.getGuildSuggestionViaMessageID(message.guild, id);
+      else return message.channel.send(`\`${id}\` does not resolve to or return a valid suggestion!`);
     } catch (error) {
       this.client.logger.error(error.stack);
       return message.channel.send(`Error querying this suggestion: **${error.message}**`);
     }
-
-    if (!document) return this.client.errors.noSuggestion(message.channel, id);
 
     const {
       sID,

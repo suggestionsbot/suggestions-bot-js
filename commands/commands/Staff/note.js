@@ -31,18 +31,15 @@ module.exports = class NoteCommand extends Command {
     const note = args.slice(1).join(' ');
     if (!note) return this.client.errors.noUsage(message.channel, this, settings);
 
-    const guild = message.guild;
     let document;
     try {
-      if (id.length === 7) document = await this.client.suggestions.getGlobalSuggestion(id);
-      if (validateSnowflake(id)) document = await this.client.suggestions.getGuildSuggestionViaMessageID(message.guild, id);
-      if (!document) return message.channel.send(`\`${id}\` does not resolve to or return a valid suggestion!`);
+      if ([7, 8].includes(id.length)) document = await this.client.suggestions.getGlobalSuggestion(id);
+      else if (validateSnowflake(id)) document = await this.client.suggestions.getGuildSuggestionViaMessageID(message.guild, id);
+      else return message.channel.send(`\`${id}\` does not resolve to or return a valid suggestion!`);
     } catch (err) {
       this.client.logger.error(err.stack);
       return message.channel.send(`Error querying the database for this suggestions: **${err.message}**.`);
     }
-
-    if (!document) return this.client.errors.noSuggestion(message.channel, id);
 
     const {
       sID,
