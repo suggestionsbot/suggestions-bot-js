@@ -94,7 +94,6 @@ process.on('unhandledRejection', err => {
 process.on('SIGINT', async () => {
   logger.log('SIGINT signal received.');
   logger.log('Bot shutting down...');
-  await sharder.client.destroy();
   await process.exit(0);
 });
 
