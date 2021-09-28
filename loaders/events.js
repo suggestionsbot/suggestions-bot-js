@@ -4,10 +4,12 @@ const readdir = promisify(require('fs').readdir);
 module.exports = class EventLoader {
   constructor(client) {
     this.client = client;
+    this.skippedEvents = ['debug'];
   }
 
   async init() {
-    const evtFiles = await readdir('./events/');
+    let evtFiles = await readdir('./events/');
+    if (process.env.NODE_ENV !== 'development') evtFiles = evtFiles.filter(files => !files.includes(this.skippedEvents));
     this.client.logger.log(`Loading a total of ${evtFiles.length} events.`);
     evtFiles.forEach(file => {
       const evtName = file.split('.')[0];
