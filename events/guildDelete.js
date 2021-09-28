@@ -11,14 +11,14 @@ module.exports = class {
     const { guildStatusColors: { deleted } } = this.client.config;
 
     const guildOwner = await this.client.users.fetch(guild.ownerID, false, true)
-      .catch(e => this.client.logger.error(e))
+      .catch(e => this.client.logger.error(e));
 
     const oldServer = new MessageEmbed()
       .setTitle('Removed')
       .setDescription(`
         **ID:** \`${guild.id}\`
         **Name:** \`${guild}\`
-        **Members:** \`${guild.members.cache.size}\`
+        **Members:** \`${guild.memberCount}\`
         **Joined:** \`${moment(this.client.user.joinedAt).fromNow()}\`
         **Owner:** ${guildOwner?.toString() ?? `<@${guild.ownerID}>`} \`[${guildOwner?.tag ?? 'N/A'}]\`
       `)

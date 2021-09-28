@@ -10,14 +10,14 @@ module.exports = class {
     const { guildStatusColors: { created } } = this.client.config;
 
     const guildOwner = await this.client.users.fetch(guild.ownerID)
-      .catch(e => this.client.logger.error(e))
+      .catch(e => this.client.logger.error(e));
 
     const newServer = new MessageEmbed()
       .setTitle('Added')
       .setDescription(`
         **ID:** \`${guild.id}\`
         **Name:** \`${guild.name}\`
-        **Members:** \`${guild.members.cache.size}\`
+        **Members:** \`${guild.memberCount}\`
         **Created:** \`${moment(guild.createdAt).fromNow()}\`
         **Owner:** ${guildOwner} \`[${guildOwner?.tag}]\`
       `)
