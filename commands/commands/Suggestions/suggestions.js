@@ -32,6 +32,9 @@ module.exports = class MySuggestionsCommand extends Command {
     const submitter = (message.guild ? message.mentions.members.first() : message.mentions.users.first()) ||
       args[0] && await getSubmitter(args[0]).catch(err => this.client.logger.error(err)) ||
       message.author;
+
+    console.log(submitter)
+
     const avatarURL = submitter.guild ? submitter.user.avatarURL() : submitter.avatarURL()
 
     let gSuggestions;
@@ -85,7 +88,7 @@ module.exports = class MySuggestionsCommand extends Command {
 
     if (message.guild) {
       embed
-        .setAuthor(`${submitter.user.tag} | ${message.guild}`, avatarURL)
+        .setAuthor(`${submitter.guild ? submitter.user.tag : submitter.tag} | ${message.guild}`, avatarURL)
         .addField('Created On', createdOn)
         .addField('Joined', joinedOn);
     } else embed.setAuthor(`${submitter.tag} | Global Statistics`, avatarURL);
