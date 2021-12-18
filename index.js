@@ -2,8 +2,6 @@ if (Number(process.version.slice(1).split('.')[0]) < 8) throw new Error('Node 8.
 
 require('dotenv').config();
 
-const { NODE_ENV, DISCORD_TOKEN } = process.env;
-
 const { ShardingManager, SharderEvents } = require('kurasuta');
 const { join } = require('path');
 const logger = require('./utils/logger');
@@ -30,10 +28,10 @@ const sharder = new ShardingManager(join(__dirname, 'shard'), {
       ]
     }
   },
-  development: NODE_ENV !== 'production',
+  development: process.env.DEBUG,
   client: SuggestionsClient,
   guildsPerShard: 1500,
-  token: DISCORD_TOKEN,
+  token: process.env.DISCORD_TOKEN,
   disabledEvents: [
     'channelCreate',
     'channelDelete',
@@ -67,7 +65,8 @@ sharder.on(SharderEvents.SHARD_RESUME, (replayed, shardID) =>
 sharder.on(SharderEvents.SHARD_DISCONNECT, (closeEvent, shardID) =>
   logger.log(`Shard ${shardID} disconnected`));
 
-sharder.on(SharderEvents.DEBUG, (message => logger.log(`SHARDER DEBUG: ${message}`)));
+if (!isProduction() && process.env.DEBUG)
+  sharder.on(SharderEvents.DEBUG, (message => logger.log(`SHARDER DEBUG: ${message}`)));
 
 sharder.spawn().catch(e => logger.error(`SHARD SPAWN: ${e}`));
 
