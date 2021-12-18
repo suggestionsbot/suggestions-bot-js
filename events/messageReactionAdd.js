@@ -1,3 +1,4 @@
+const { validateChannel } = require('../utils/functions');
 module.exports = class {
   constructor(client) {
     this.client = client;
@@ -15,12 +16,7 @@ module.exports = class {
       return this.client.logger.error(err.stack);
     }
 
-    const sChannel = settings.suggestionsChannel && (
-      settings.suggestionsChannel === 'suggestions'
-        ? await message.guild.channels.fetch({ cache: false })
-          .then(res => res.find(c => c.name === 'suggestions')).catch(() => { return false; })
-        : await message.guild.channels.fetch(settings.suggestionsChannel).catch(() => { return false; })
-    );
+    const sChannel = settings.suggestionsChannel && await validateChannel(message.guild.channels, settings.suggestionsChannel);
     if (!sChannel || (message.channel.id !== sChannel.id)) return;
     if (messageReaction.partial) await messageReaction.fetch();
 
