@@ -12,7 +12,11 @@ module.exports = class ConfigCommand extends Command {
       usage: 'config [setting] [value]',
       adminOnly: true,
       botPermissions: ['MANAGE_MESSAGES', 'USE_EXTERNAL_EMOJIS'],
-      guarded: true
+      guarded: true,
+      throttling: {
+        usages: 3,
+        duration: 60
+      }
     });
   }
 
