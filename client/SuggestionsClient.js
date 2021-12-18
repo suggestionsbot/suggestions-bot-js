@@ -1,5 +1,4 @@
 const { Client, Collection } = require('discord.js-light');
-const { Poster } = require('dbots');
 const Mongoose = require('../db/mongoose');
 
 // Stores for handling various functions
@@ -8,8 +7,6 @@ const { Blacklists, Suggestions, Settings } = require('../db/helpers');
 const { CommandLoader, EventLoader } = require('../loaders');
 
 const ErrorHandler = require('../utils/errors');
-
-const DashboardClient = require('../api');
 
 module.exports = class SuggestionsClient extends Client {
   constructor(options) {
@@ -40,27 +37,9 @@ module.exports = class SuggestionsClient extends Client {
 
     this.errors = new ErrorHandler(this);
 
-    this.dashboard = new DashboardClient(this);
-
     this.eventLoader.init();
 
     this.commandLoader.init();
-
-    this.votePoster = new Poster({
-      client: this,
-      apiKeys: {
-        discordbotsgg: process.env.BOTSGG,
-        topgg: process.env.TOPGGTOKEN,
-        discordbotlist: process.env.DBL2TOKEN,
-        spacebotslist: process.env.BLSTOKEN,
-        botsfordiscord: process.env.BFDTOKEN
-      },
-      clientLibrary: 'discord.js',
-      serverCount: () => this.shard.fetchClientValues('guilds.cache.size')
-        .then(res => res.filter(Boolean).reduce((prev, count) => prev + count, 0)),
-      userCount: () => this.shard.broadcastEval('this.guilds.cache.reduce((prev, guild) => prev + guild.memberCount, 0')
-        .then(res => res.filter(Boolean).reduce((prev, count) => prev + count, 0))
-    });
 
     this.lastChangelog = null;
 
