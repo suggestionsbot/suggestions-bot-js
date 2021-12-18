@@ -9,6 +9,8 @@ module.exports = class extends BaseCluster {
   launch() {
     this.client.login(process.env.DISCORD_TOKEN).catch(e => logger.error(e));
 
+    this.client.mongoose.init(); // initialize connection to the database
+
     this.client.on('commandBlocked', (cmd, reason) => {
       this.client.logger.warn(oneLine `
             Command ${cmd ? `${cmd.help.category}:${cmd.help.name}` : ''}
