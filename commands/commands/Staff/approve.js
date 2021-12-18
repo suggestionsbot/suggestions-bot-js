@@ -10,6 +10,7 @@ module.exports = class ApproveCommand extends Command {
       category: 'Staff',
       description: 'Approve a submitted suggestion via the suggestion ID (sID) or message ID.',
       usage: 'approve <sID|message ID> [response]',
+      aliases: ['accept'],
       staffOnly: true,
       guildOnly: true,
       botPermissions: ['MANAGE_MESSAGES', 'USE_EXTERNAL_EMOJIS']
