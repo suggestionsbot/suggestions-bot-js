@@ -1,6 +1,7 @@
 const isProduction = () => process.env.NODE_ENV === 'production';
 
 module.exports = {
+  isProduction,
   prefix: ',',
   suggestionsChannel: 'suggestions',
   suggestionsLogs: 'suggestion-logs',

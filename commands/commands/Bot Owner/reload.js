@@ -16,7 +16,7 @@ module.exports = class ReloadCommand extends Command {
 
   async run(message, args, settings) {
 
-    if (process.env.NODE_ENV === 'production') {
+    if (this.client.production) {
       return message.channel.send('This command can only be used in a development environment!')
         .then(msg => msg.delete({ timeout: 5000 }))
         .catch(err => this.client.logger.error(err.stack));

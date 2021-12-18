@@ -15,6 +15,8 @@ module.exports = class SuggestionsClient extends Client {
   constructor(options) {
     super(options);
 
+    this.production = (/true/i).test(process.env.NODE_ENV);
+
     this.config = require('../config.js');
 
     this.commands = new Collection();
@@ -66,7 +68,7 @@ module.exports = class SuggestionsClient extends Client {
   }
 
   async fetchLastChangelog() {
-    const channelID = process.env.NODE_ENV === 'production' ? '602326597613256734' : '504074783604998154';
+    const channelID = this.production ? '602326597613256734' : '504074783604998154';
 
     this.lastChangelog = await this.channels.fetch(channelID)
       .then(channel => channel.messages.fetch({ limit: 1 }))
@@ -154,7 +156,7 @@ module.exports = class SuggestionsClient extends Client {
   }
 
   async isSupport(user) {
-    const id = process.env.NODE_ENV === 'production' ? '601219766258106399' : '345753533141876737';
+    const id = this.production ? '601219766258106399' : '345753533141876737';
     return this.guilds.forge(id).members.fetch({ user: user.id, cache: false }).then(member => {
       return member.roles.cache.some(r => this.config.supportRoles.includes(r.id)) || this.isOwner(member.id);
     }).catch(() => { return this.isOwner(user.id) || false; });
@@ -165,7 +167,7 @@ module.exports = class SuggestionsClient extends Client {
     const { prefix } = this.config;
     const { help: { name: cmdName } } = await this.commands.get('help');
 
-    if (process.env.NODE_ENV === 'production') {
+    if (this.production) {
       await this.user.setStatus('online');
       await this.user.setActivity(`your suggestions | ${prefix + cmdName}`, { type: 'WATCHING' });
     } else {

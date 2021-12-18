@@ -24,7 +24,7 @@ module.exports = class {
       .setColor(created)
       .setTimestamp();
 
-    const logs = process.env.NODE_ENV === 'production' ? '602332466476482616' : '498627833233539086';
+    const logs = this.client.production ? '602332466476482616' : '498627833233539086';
     await this.client.channels.forge(logs).send(newServer).catch(e => this.client.logger.error(e));
   }
 };

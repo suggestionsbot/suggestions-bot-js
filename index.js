@@ -9,6 +9,7 @@ const { join } = require('path');
 const logger = require('./utils/logger');
 
 const SuggestionsClient = require('./client/SuggestionsClient');
+const { isProduction } = require('./config');
 
 const sharder = new ShardingManager(join(__dirname, 'shard'), {
   clientOptions: {
