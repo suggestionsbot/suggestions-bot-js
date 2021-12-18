@@ -36,5 +36,8 @@ module.exports = class extends BaseCluster {
         `);
       }
     });
+
+    if (!this.client.production && process.env.DEBUG)
+      this.client.on('debug', info => this.client.logger.debug(info));
   }
 };
