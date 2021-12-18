@@ -12,7 +12,7 @@ module.exports = class SuggestionsClient extends Client {
   constructor(options) {
     super(options);
 
-    this.production = (/true/i).test(process.env.NODE_ENV);
+    this.production = (/production/i).test(process.env.NODE_ENV);
 
     this.config = require('../config.js');
 
