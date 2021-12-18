@@ -14,3 +14,13 @@ exports.validateSnowflake = (snowflake) => {
   const timestamp = new Date(snowflake / (4194304 + epoch));
   return !isNaN(timestamp.getTime());
 };
+
+/**
+ * Validate if provided input resolves to a valid TextChannel
+ * @param {GuildChannelManager|ChannelManager} manager
+ * @param {String} str
+ * @return {Promise<TextChannel|null>}
+ */
+exports.validateChannel = (manager, str) => {
+  return manager.forge(str).fetch({ cache: false }).catch(() => null);
+};

@@ -6,7 +6,6 @@ require('moment-duration-format');
 require('moment-timezone');
 
 const Command = require('../../Command');
-const { validateSnowflake } = require('../../../utils/functions');
 
 module.exports = class SuggestCommand extends Command {
   constructor(client) {
@@ -37,9 +36,7 @@ module.exports = class SuggestCommand extends Command {
     const sUser = message.author;
     let sChannel;
     try {
-      sChannel = suggestionsChannel && validateSnowflake(suggestionsChannel)
-        ? await message.guild.channels.fetch(suggestionsChannel)
-        : await message.guild.channels.fetch({ cache: false }).then(res => res.find(c => c.name === 'suggestions'));
+      sChannel = suggestionsChannel && await message.guild.channels.fetch(suggestionsChannel);
       if (!sChannel) return this.client.errors.noSuggestions(message.channel);
     } catch (e) {
       return this.client.errors.noSuggestions(message.channel);

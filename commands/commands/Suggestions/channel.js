@@ -1,4 +1,5 @@
 const Command = require('../../Command');
+const { validateChannel } = require('../../../utils/functions');
 
 module.exports = class ChannelCommand extends Command {
   constructor(client) {
@@ -14,16 +15,9 @@ module.exports = class ChannelCommand extends Command {
 
     await message.delete().catch(O_o => {});
 
-    const isDefault = settings.suggestionsChannel === 'suggestions';
-    const validation = settings.suggestionsChannel && (
-      settings.suggestionsChannel === 'suggestions'
-        ? await message.guild.channels.fetch({ cache: false })
-          .then(res => res.find(c => c.name === 'suggestions'))
-        : await message.guild.channels.fetch(settings.suggestionsChannel)
-    );
-
+    const validation = await validateChannel(message.guild.channels, settings.suggestionsChannel);
     if (!validation) return message.channel.send('There is no suggestions channel set or I can\'t find the default one.');
 
-    return message.channel.send(`Current suggestions channel: ${validation.toString()}${isDefault ? ' *(config default)*' : ''}`);
+    return message.channel.send(`Current suggestions channel: ${validation.toString()}`);
   }
 };

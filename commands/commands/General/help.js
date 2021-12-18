@@ -1,6 +1,7 @@
 const { oneLine } = require('common-tags');
 const { MessageEmbed } = require('discord.js-light');
 const Command = require('../../Command');
+const { validateChannel } = require('../../../utils/functions');
 
 module.exports = class HelpCommand extends Command {
   constructor(client) {
@@ -28,12 +29,7 @@ module.exports = class HelpCommand extends Command {
     const ownerCheck = this.client.isOwner(message.author.id);
 
     if (message.guild) {
-      suggestionsChannel = suggestionsChannel && (
-        settings.suggestionsChannel === 'suggestions'
-          ? await message.guild.channels.fetch({ cache: false })
-            .then(res => res.find(c => c.name === 'suggestions'))
-          : await message.guild.channels.fetch(suggestionsChannel)
-      );
+      suggestionsChannel = await validateChannel(message.guild.channels, suggestionsChannel);
 
       staffRoles = [];
       if (roles) staffRoles = roles.map(({ role }) => message.guild.roles.cache.get(role));
@@ -79,12 +75,11 @@ module.exports = class HelpCommand extends Command {
       .setColor(embedColor);
 
     if (message.guild) {
-      const isDefault = settings.suggestionsChannel === 'suggestions';
       helpEmbed
         .addField('📣 Current Prefix', `\`${prefix}\``)
-        .addField('💬 Suggestions Channel', suggestionsChannel ? suggestionsChannel.toString() + `${isDefault ? ' *(config default)*' : ''}` :
+        .addField('💬 Suggestions Channel', suggestionsChannel?.toString() ??
           (message.member.hasPermission('MANAGE_GUILD') && !suggestionsChannel ?
-            `***Not set. Use*** \`${prefix + configCmdName} channel <#channel_name>\`` :
+            `***Not set. Use*** \`${prefix + configCmdName} channel #channel_name\`` :
             '***Not set. Contact a server administrator.***'
           )
         )
