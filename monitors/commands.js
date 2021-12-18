@@ -69,7 +69,7 @@ module.exports = class CommandHandler {
       adminCheck;
 
     if (message.guild) {
-      const member = await message.guild.members.fetch(message.author.id, false).catch(() => { return null; })
+      const member = await message.guild.members.fetch(message.author.id, false).catch(() => { return null; });
       if (staffRoles) staffCheck = member.roles.cache.some(r => staffRoles.map(sr => sr.id).includes(r.id));
       else staffCheck = this.client.isAdmin(member) || ownerCheck;
       adminCheck = this.client.isAdmin(member) || ownerCheck;
@@ -131,7 +131,7 @@ module.exports = class CommandHandler {
       if (throttle) throttle.usages++;
       if (disabledCommand && !ownerCheck) return this.client.errors.commandIsDisabled(cmd, channel);
       cmd.run(message, args, settings);
-      if (process.env.NODE_ENV === 'production') await this.client.settings.newCommandUsage(newCommand);
+      if (this.client.production) await this.client.settings.newCommandUsage(newCommand);
     } catch (err) {
       return this.client.logger.error(err.stack);
     }
