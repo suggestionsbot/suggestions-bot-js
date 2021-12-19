@@ -26,14 +26,14 @@ class Logger {
   }
 
   static error(title, ...body) {
-    console.warn(
+    console.error(
       `${chalk.bold.red(title ? `[ ERROR ] [ ${title} ]` : '[ ERROR ] ') + Logger._formMessage(...body)}`
     );
   }
 
   static errorCmd(command, ...body) {
-    console.warn(
-      `${chalk.bold.red(`[ CMD${command.help.name} ]`) + Logger._formMessage(...body)}`
+    console.error(
+      `${chalk.bold.red(`[ CMD:${command.help.name} ]`) + Logger._formMessage(...body)}`
     );
   }
 
