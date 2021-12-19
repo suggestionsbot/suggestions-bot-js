@@ -1,25 +1,27 @@
-FROM node:lts
+FROM node:16-alpine AS base
 
-#Update container and install vim
-RUN ["apt-get", "update"]
-RUN ["apt-get", "install", "-y", "vim-tiny", "apt-utils"]
+# create working directory for bot
+WORKDIR /opt/suggestions
 
-#Create the directory
-RUN mkdir -p /usr/src/suggestions-bot
-WORKDIR /usr/src/suggestions-bot
+### dependencies & builder
+FROM base AS builder
 
-#Copy package.json and lockfile
-COPY package.json ./
-COPY yarn.lock ./
+# install production dependencies
+COPY package.json yarn.lock ./
 
-#Install from package.json
-RUN yarn install
+RUN yarn install --production --pure-lockfile
+RUN cp -RL node_modules /tmp/node_modules
 
-#Copy remaining files
+# install all dependencies
+RUN yarn install --pure-lockfile
+
+### runner
+FROM base
+
+# copy runtime dependencies
+COPY --from=builder /tmp/node_modules node_modules
+
+# copy remaining files
 COPY . .
 
-#Set enivornment variables (this MUST be done BEFORE copying rest of files)
-ENV NODE_ENV=production
-
-#Start the bot!
 CMD ["yarn", "start"]
