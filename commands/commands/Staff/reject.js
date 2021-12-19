@@ -10,7 +10,7 @@ module.exports = class RejectCommand extends Command {
       category: 'Staff',
       description: 'Reject a submitted suggestion via the suggestion ID (sID) or message ID.',
       usage: 'reject <sID|message ID> [response]',
-      aliases: ['aliases'],
+      aliases: ['deny'],
       staffOnly: true,
       guildOnly: true,
       botPermissions: ['MANAGE_MESSAGES', 'USE_EXTERNAL_EMOJIS']
