@@ -6,7 +6,7 @@ logs/
 *.log
 
 # Commands & Events
-commands/commands/Bot\ Owner/beta.js
+src/commands/Bot\ Owner/beta.js
 #events/debug.js
 
 # Miscellaneous
