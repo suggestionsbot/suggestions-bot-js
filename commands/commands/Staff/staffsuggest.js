@@ -1,7 +1,6 @@
 const { MessageEmbed } = require('discord.js-light');
 const Command = require('../../Command');
-require('moment-duration-format');
-require('moment-timezone');
+const Logger = require('../../../utils/logger');
 
 module.exports = class StaffSuggestCommand extends Command {
   constructor(client) {
@@ -29,7 +28,7 @@ module.exports = class StaffSuggestCommand extends Command {
       if (!suggestionsChannel) return this.client.errors.noStaffSuggestions(message.channel);
     } catch (error) {
       if (!suggestionsChannel) return this.client.errors.noStaffSuggestions(message.channel);
-      this.client.logger.error(error.stack);
+      Logger.errorCmd(this, error.stack);
       return message.channel.send(`An error occurred: **${error.message}**`);
     }
 
@@ -62,7 +61,7 @@ module.exports = class StaffSuggestCommand extends Command {
     const missingPermissions = suggestionsChannel.permissionsFor(message.guild.me).missing(staffChannelPermissions);
     if (missingPermissions.length > 0) return this.client.errors.noChannelPerms(message, suggestionsChannel, missingPermissions);
 
-    message.channel.send(embed).then(msg => msg.delete({ timeout: 5000 })).catch(err => this.client.logger.error(err.stack));
+    message.channel.send(embed).then(msg => msg.delete({ timeout: 5000 })).catch(err => Logger.errorCmd(this, err.stack));
 
     return suggestionsChannel.send(sEmbed)
       .then(async msg => {
@@ -70,7 +69,7 @@ module.exports = class StaffSuggestCommand extends Command {
         await msg.react('❌');
       })
       .catch(err => {
-        this.client.logger.error(err.stack);
+        Logger.errorCmd(this, err.stack);
         return message.channel.send(`An error occurred adding reactions to this suggestion: **${err.message}**.`);
       });
   }

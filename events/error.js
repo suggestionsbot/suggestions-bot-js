@@ -1,4 +1,5 @@
 const util = require('util');
+const Logger = require('../utils/logger');
 
 module.exports = class {
   constructor(client) {
@@ -6,6 +7,6 @@ module.exports = class {
   }
 
   async run(error) {
-    this.client.logger.log(`An error event was sent by Discord.js: \n${util.inspect(error)}`, 'error');
+    Logger.log(`An error event was sent by Discord.js: \n${util.inspect(error)}`, 'error');
   }
 };

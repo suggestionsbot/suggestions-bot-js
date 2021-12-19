@@ -1,4 +1,5 @@
 const { CommandHandler } = require('../monitors');
+const Logger = require('../utils/logger');
 
 module.exports = class {
   constructor(client) {
@@ -11,7 +12,7 @@ module.exports = class {
     try {
       if (this.client.mongoose.connection.readyState === 1) await this.commands.run(message);
     } catch (e) {
-      this.client.logger.error(e.stack);
+      Logger.error('MESSAGE', e.stack);
     }
   }
 };

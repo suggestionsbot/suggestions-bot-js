@@ -1,5 +1,6 @@
 const { oneLine } = require('common-tags');
 const permissions = require('../utils/perms');
+const Logger = require('../utils/logger');
 
 module.exports = class CommandHandler {
   constructor(client) {
@@ -133,7 +134,7 @@ module.exports = class CommandHandler {
       cmd.run(message, args, settings);
       if (this.client.production) await this.client.settings.newCommandUsage(newCommand);
     } catch (err) {
-      return this.client.logger.error(err.stack);
+      Logger.error('COMMAND HANDLER', err.stack);
     }
   }
 };

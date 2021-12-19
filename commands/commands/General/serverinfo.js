@@ -1,8 +1,8 @@
 const { MessageEmbed } = require('discord.js-light');
 const moment = require('moment');
 const Command = require('../../Command');
-require('moment-duration-format');
-require('moment-timezone');
+const Logger = require('../../../utils/logger');
+const { displayTimestamp } = require('../../../utils/functions');
 
 module.exports = class GuildInfoCommand extends Command {
   constructor(client) {
@@ -34,7 +34,7 @@ module.exports = class GuildInfoCommand extends Command {
     try {
       gSuggestions = await this.client.suggestions.getGuildSuggestions(message.guild);
     } catch (error) {
-      this.client.logger.error(error.stack);
+      Logger.errorCmd(this, error.stack);
       return message.channel.send(`An error occurred: **${error.message}**`);
     }
 

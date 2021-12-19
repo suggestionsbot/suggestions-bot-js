@@ -7,6 +7,7 @@ const { Blacklists, Suggestions, Settings } = require('../db/helpers');
 const { CommandLoader, EventLoader } = require('../loaders');
 
 const ErrorHandler = require('../utils/errors');
+const Logger = require('../utils/logger');
 
 module.exports = class SuggestionsClient extends Client {
   constructor(options) {
@@ -18,8 +19,6 @@ module.exports = class SuggestionsClient extends Client {
 
     this.commands = new Collection();
     this.aliases = new Collection();
-
-    this.logger = require('../utils/logger');
 
     this.wait = require('util').promisify(setTimeout);
 
@@ -43,7 +42,7 @@ module.exports = class SuggestionsClient extends Client {
 
     this.lastChangelog = null;
 
-    this.fetchLastChangelog().catch(e => this.logger.error(e));
+    this.fetchLastChangelog().catch(e => Logger.error('CLIENT', e));
   }
 
   async fetchLastChangelog() {

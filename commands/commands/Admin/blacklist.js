@@ -1,6 +1,7 @@
 const { MessageEmbed } = require('discord.js-light');
 const { oneLine, stripIndent } = require('common-tags');
 const Command = require('../../Command');
+const Logger = require('../../../utils/logger');
 
 module.exports = class BlacklistCommand extends Command {
   constructor(client) {
@@ -37,7 +38,7 @@ module.exports = class BlacklistCommand extends Command {
       gBlacklists = await this.client.blacklists.getGuildBlacklists(message.guild);
       total = await this.client.blacklists.getTotalBlacklists();
     } catch (err) {
-      this.client.logger.error(err.stack);
+      Logger.errorCmd(this, err.stack);
       return message.channel.send(`An error occurred: **${err.message}**`);
     }
 
@@ -94,7 +95,7 @@ module.exports = class BlacklistCommand extends Command {
 
         message.channel.send(blEmbed);
       } catch (err) {
-        this.client.logger.error(err.stack);
+        Logger.errorCmd(this, err.stack);
         return message.channel.send(`An error occurred: **${err.message}**`);
       }
 
@@ -112,7 +113,7 @@ module.exports = class BlacklistCommand extends Command {
     if (guarded.includes(blUser.id) || await this.client.isStaff(message.guild, blUser)) {
       return message.channel.send('You cannot issue a blacklist to yourself or a guarded user!')
         .then(m => m.delete({ timeout: 5000 }))
-        .catch(e => this.client.logger.error(e.stack));
+        .catch(e => Logger.errorCmd(this, e.stack));
     }
 
     switch(args[0]) {
@@ -120,7 +121,7 @@ module.exports = class BlacklistCommand extends Command {
         if (!reason) {
           return message.channel.send('Please provide a reason!')
             .then(msg => msg.delete({ timeout: 5000 }))
-            .catch(err => this.client.logger.error(err.stack));
+            .catch(err => Logger.errorCmd(this, err.stack));
         }
 
         const newBlacklist = {
@@ -160,7 +161,7 @@ module.exports = class BlacklistCommand extends Command {
           message.channel.send(blEmbed).then(msg => msg.delete({ timeout: 5000 }));
           await blUser.send(dmBlacklistAdd);
         } catch (err) {
-          this.client.logger.error(err.stack);
+          Logger.errorCmd(this, err.stack);
           if (err.code === 50007) {
             return message.channel.send(oneLine`
             Bot blacklist has been issued. However, I could not DM **${blUser.tag}** because they either have DMs disabled
@@ -208,7 +209,7 @@ module.exports = class BlacklistCommand extends Command {
           message.channel.send(blEmbed).then(msg => msg.delete({ timeout: 5000 }));
           await blUser.send(dmBlacklistRemove);
         } catch (err) {
-          this.client.logger.error(err.stack);
+          Logger.errorCmd(this, err.stack);
           if (err.code === 50007) {
             return message.channel.send(oneLine`
             Bot blacklist removal has been issued. However, I could not DM **${blUser.tag}** because they either have DMs disabled

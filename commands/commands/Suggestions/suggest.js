@@ -2,8 +2,7 @@
 const { MessageEmbed, Util: { escapeMarkdown } } = require('discord.js-light');
 const { oneLine, stripIndent } = require('common-tags');
 const crypto = require('crypto');
-require('moment-duration-format');
-require('moment-timezone');
+const Logger = require('../../../utils/logger');
 
 const Command = require('../../Command');
 
@@ -96,7 +95,7 @@ module.exports = class SuggestCommand extends Command {
         } else await m.react(e);
       }
     } catch (error) {
-      this.client.logger.error(error.stack);
+      Logger.errorCmd(this, error.stack);
       return message.channel.send(`An error occurred: **${error.message}**`);
     }
 
@@ -113,7 +112,7 @@ module.exports = class SuggestCommand extends Command {
     try {
       if (!m) await sChannel.messages.fetch(mID);
     } catch (error) {
-      this.client.logger.error(error.stack);
+      Logger.errorCmd(this, error.stack);
       return message.channel.send(`An error occurred: **${error.message}**`);
     }
     const newSuggestion = {
@@ -130,7 +129,7 @@ module.exports = class SuggestCommand extends Command {
       await message.delete({ timeout: 5000 });
     } catch (error) {
       if (error.message === 'Unknown Message') return;
-      this.client.logger.error(error.stack);
+      Logger.errorCmd(this, error.stack);
       return message.channel.send(`An error occurred: **${error.message}**`);
     }
   }

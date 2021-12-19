@@ -1,6 +1,7 @@
 const { MessageEmbed, Util: { escapeMarkdown } } = require('discord.js-light');
 const { stripIndent } = require('common-tags');
 const Command = require('../../Command');
+const Logger = require('../../../utils/logger');
 const { validateSnowflake } = require('../../../utils/functions');
 
 module.exports = class RejectCommand extends Command {
@@ -36,7 +37,7 @@ module.exports = class RejectCommand extends Command {
       else if (validateSnowflake(id)) document = await this.client.suggestions.getGuildSuggestionViaMessageID(message.guild, id);
       else return message.channel.send(`\`${id}\` does not resolve to or return a valid suggestion!`);
     } catch (error) {
-      this.client.logger.error(error.stack);
+      Logger.errorCmd(this, error.stack);
       return message.channel.send(`Error querying this suggestion: **${error.message}**`);
     }
 
@@ -55,13 +56,13 @@ module.exports = class RejectCommand extends Command {
         .catch(err => this.logger.error(err.stack));
     }
 
-    const submitter = await this.client.users.fetch(userID, false).catch(err => this.client.logger.error(err));
+    const submitter = await this.client.users.fetch(userID, false).catch(err => Logger.errorCmd(this, err));
     const guild = message.guild ? message.guild : this.client.guilds.cache.get(guildID);
 
     try {
       settings = await this.client.settings.getGuild(guild);
     } catch (error) {
-      this.client.logger.error(error.stack);
+      Logger.errorCmd(this, error.stack);
       return message.channel.send(`An error occurred: **${error.message}**`);
     }
 
@@ -82,7 +83,7 @@ module.exports = class RejectCommand extends Command {
     } catch (error) {
       if (!suggestionsChannel) return this.client.errors.noSuggestions(message.channel);
       if (!suggestionsLogs) return this.client.errors.noSuggestionsLogs(message.channel);
-      this.client.logger.error(error.stack);
+      Logger.errorCmd(this, error.stack);
       return message.channel.send(`An error occurred: **${error.message}**`);
     }
 
@@ -98,7 +99,7 @@ module.exports = class RejectCommand extends Command {
     try {
       sMessage = await suggestionsChannel.messages.fetch(messageID, false);
     } catch (err) {
-      this.client.logger.error(err.stack);
+      Logger.errorCmd(this, err.stack);
       return message.channel.send('The suggestion message was not found!')
         .then(m => m.delete({ timeout: 5000 }));
     }
@@ -215,7 +216,7 @@ module.exports = class RejectCommand extends Command {
     } catch (error) {
       if (error.message === 'Unknown Member') return;
       if (error.message === 'Cannot send messages to this user') return;
-      this.client.logger.error(error.stack);
+      Logger.errorCmd(this, error.stack);
       message.delete({ timeout: 3000 }).catch(O_o=>{});
       return message.channel.send(`An error occurred: **${error.message}**`);
     }

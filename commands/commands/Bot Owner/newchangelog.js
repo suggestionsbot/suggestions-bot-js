@@ -1,5 +1,6 @@
 const { MessageEmbed } = require('discord.js-light');
 const Command = require('../../Command');
+const Logger = require('../../../utils/logger');
 
 module.exports = class NewChangelogCommand extends Command {
   constructor(client) {
@@ -40,7 +41,7 @@ module.exports = class NewChangelogCommand extends Command {
         return this.client.lastChangelog;
       }
     } catch (err) {
-      this.client.logger.error(err.message);
+      Logger.errorCmd(this, err.message);
       return message.channel.send(`An error occurred: **${err.message}**`);
     }
   }

@@ -1,8 +1,8 @@
 const { MessageEmbed } = require('discord.js-light');
 const moment = require('moment');
 const Command = require('../../Command');
-require('moment-duration-format');
-require('moment-timezone');
+const Logger = require('../../../utils/logger');
+const { displayTimestamp } = require('../../../utils/functions');
 
 module.exports = class MySuggestionsCommand extends Command {
   constructor(client) {
@@ -30,7 +30,7 @@ module.exports = class MySuggestionsCommand extends Command {
     };
 
     const submitter = (message.guild ? message.mentions.members.first() : message.mentions.users.first()) ||
-      args[0] && await getSubmitter(args[0]).catch(err => this.client.logger.error(err)) ||
+      args[0] && await getSubmitter(args[0]).catch(err => Logger.errorCmd(this, err)) ||
       message.author;
 
     console.log(submitter);
@@ -42,7 +42,7 @@ module.exports = class MySuggestionsCommand extends Command {
       if (message.guild) gSuggestions = await this.client.suggestions.getGuildMemberSuggestions(message.guild, submitter);
       else gSuggestions = await this.client.suggestions.getUserGlobalSuggestions(submitter);
     } catch (err) {
-      this.client.logger.error(err.stack);
+      Logger.errorCmd(this, err.stack);
       return message.channel.send(`Error querying the database for your suggestions: **${err.message}**.`);
     }
 
@@ -51,7 +51,7 @@ module.exports = class MySuggestionsCommand extends Command {
     if (gSuggestions.length === 0) {
       return message.channel.send(`No suggestions data exists for **${submitter?.user?.tag ?? submitter?.tag}**${message.guild ? ' in this guild' : ''}!`)
         .then(msg => msg.delete({ timeout: 3000 }))
-        .catch(err => this.client.logger.error(err.stack));
+        .catch(err => Logger.errorCmd(this, err.stack));
     }
 
     const total = gSuggestions.length;

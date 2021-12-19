@@ -1,46 +1,56 @@
 const chalk = require('chalk');
-const moment = require('moment');
+const { inspect } = require('util');
 
 class Logger {
-  static log(content, type = 'log') {
-    const timestamp = `[${moment().format('YYYY-MM-DD HH:mm:ss')}]:`;
-    switch (type) {
-      case 'log': {
-        return console.log(`${timestamp} ${chalk.bgBlue(type.toUpperCase())} ${content} `);
-      }
-      case 'warn': {
-        return console.log(`${timestamp} ${chalk.black.bgYellow(type.toUpperCase())} ${content} `);
-      }
-      case 'error': {
-        return console.log(`${timestamp} ${chalk.bgRed(type.toUpperCase())} ${content} `);
-      }
-      case 'debug': {
-        return console.log(`${timestamp} ${chalk.green(type.toUpperCase())} ${content} `);
-      }
-      case 'cmd': {
-        return console.log(`${timestamp} ${chalk.black.bgWhite(type.toUpperCase())} ${content}`);
-      }
-      case 'ready': {
-        return console.log(`${timestamp} ${chalk.black.bgGreen(type.toUpperCase())} ${content}`);
-      }
-      default: throw new TypeError('Logger type must be either warn, debug, log, ready, cmd or error.');
+  static _formMessage(...body) {
+    const data = [];
+
+    for (const m of body) {
+      if (typeof m === 'object') data.push(inspect(m));
+      else data.push(m);
     }
+
+    return data.join(' ');
   }
 
-  static error(content) {
-    return this.log(content, 'error');
+  static log(...body) {
+    console.log(`${chalk.bold.white('[ LOG ] ') + Logger._formMessage(...body)}`);
   }
 
-  static warn(content) {
-    return this.log(content, 'warn');
+  static success(title, ...body) {
+    console.log(`${chalk.bold.green(`[ SUCCESS ] [ ${title} ]`) + Logger._formMessage(...body)}`);
   }
 
-  static debug(content) {
-    return this.log(content, 'debug');
+  static warning(title, ...body) {
+    console.warn(`${chalk.bold.yellow(`[ WARNING ] [ ${title} ]`) + Logger._formMessage(...body)}`);
   }
 
-  static cmd(content) {
-    return this.log(content, 'cmd');
+  static error(title, ...body) {
+    console.warn(
+      `${chalk.bold.red(title ? `[ ERROR ] [ ${title} ]` : '[ ERROR ] ') + Logger._formMessage(...body)}`
+    );
+  }
+
+  static errorCmd(command, ...body) {
+    console.warn(
+      `${chalk.bold.red(`[ CMD${command.help.name} ]`) + Logger._formMessage(...body)}`
+    );
+  }
+
+  static debug(title, ...body) {
+    console.debug(`${chalk.bold.magenta(`[ DEBUG ] [ ${title} ]`) + Logger._formMessage(...body)}`);
+  }
+
+  static event(event, ...body) {
+    console.log(`${chalk.bold.yellow(`[ EVENT ] [ ${event.toUpperCase()} ]`) + Logger._formMessage(...body)}`);
+  }
+
+  static command(command, ...body) {
+    console.log(`${chalk.bold.green(`[ COMMAND ] [ ${command.toUpperCase()} ]`) + Logger._formMessage(...body)}`);
+  }
+
+  static ready(...body) {
+    console.log(`${chalk.bold.green('[ READY ] ') + Logger._formMessage(...body)}`);
   }
 }
 

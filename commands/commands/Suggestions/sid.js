@@ -1,6 +1,7 @@
 const { MessageEmbed, Util: { escapeMarkdown } } = require('discord.js-light');
 const { stripIndent } = require('common-tags');
 const Command = require('../../Command');
+const Logger = require('../../../utils/logger');
 
 module.exports = class SIDCommand extends Command {
   constructor(client) {
@@ -25,7 +26,7 @@ module.exports = class SIDCommand extends Command {
     try {
       suggestion = await this.client.suggestions.getGuildSuggestion(message.guild, args[0]);
     } catch (err) {
-      this.client.logger.error(err.stack);
+      Logger.errorCmd(this, err.stack);
       return message.channel.send(`An error occurred: **${err.message}**`);
     }
 
@@ -37,9 +38,9 @@ module.exports = class SIDCommand extends Command {
     if (suggestion.statusUpdated) updatedOn = suggestion.statusUpdated;
     if (suggestion.newStatusUpdated) updatedOn = suggestion.newStatusUpdated;
 
-    const sUser = await this.client.users.fetch(suggestion.userID, false).catch(err => this.client.logger.error(err));
+    const sUser = await this.client.users.fetch(suggestion.userID, false).catch(err => Logger.errorCmd(this, err));
     if (Object.prototype.hasOwnProperty.call(suggestion._doc, 'staffMemberID'))
-      sStaff = await this.client.users.fetch(suggestion.staffMemberID, false).catch(err => this.client.logger.error(err));
+      sStaff = await this.client.users.fetch(suggestion.staffMemberID, false).catch(err => Logger.errorCmd(this, err));
 
     const embed = new MessageEmbed()
       .setAuthor(message.guild, message.guild.iconURL())

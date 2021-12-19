@@ -1,6 +1,7 @@
 const { MessageEmbed } = require('discord.js-light');
 const { oneLine, stripIndent } = require('common-tags');
 const Command = require('../../Command');
+const Logger = require('../../../utils/logger');
 
 module.exports = class GBlacklistCommand extends Command {
   constructor(client) {
@@ -39,7 +40,7 @@ module.exports = class GBlacklistCommand extends Command {
       total = await this.client.blacklists.getTotalBlacklists();
 
     } catch (err) {
-      this.client.logger.error(err.stack);
+      Logger.errorCmd(this, err.stack);
       return message.channel.send(`An error occurred: **${err.message}**`);
     }
 
@@ -107,13 +108,13 @@ module.exports = class GBlacklistCommand extends Command {
     if (guarded.includes(blUser.id) || await this.client.isStaff(message.guild, blUser)) {
       return message.channel.send('You cannot issue a blacklist to yourself or a guarded user!')
         .then(m => m.delete({ timeout: 5000 }))
-        .catch(e => this.client.logger.error(e.stack));
+        .catch(e => Logger.errorCmd(this, e.stack));
     }
 
     switch(args[0]) {
       case 'add': {
         if (!blUser) return this.client.errors.userNotFound(args[1], message.channel);
-        if (!reason) return message.channel.send('Please provide a reason!').then(msg => msg.delete({ timeout: 5000 })).catch(err => this.client.logger.error(err.stack));
+        if (!reason) return message.channel.send('Please provide a reason!').then(msg => msg.delete({ timeout: 5000 })).catch(err => Logger.errorCmd(this, err.stack));
 
         const newBlacklist = {
           guildID: message.guild.id,
@@ -138,7 +139,7 @@ module.exports = class GBlacklistCommand extends Command {
           await this.client.blacklists.addUserBlacklist(newBlacklist);
           message.channel.send(blEmbed).then(msg => msg.delete({ timeout: 5000 }));
         } catch (err) {
-          this.client.logger.error(err.stack);
+          Logger.errorCmd(this, err.stack);
           message.channel.send(`An error occurred: **${err.message}**.`);
         }
         break;
@@ -167,7 +168,7 @@ module.exports = class GBlacklistCommand extends Command {
           await this.client.blacklists.removeUserBlacklist(removeBlacklist);
           message.channel.send(blEmbed).then(msg => msg.delete({ timeout: 5000 }));
         } catch (err) {
-          this.client.logger.error(err.stack);
+          Logger.errorCmd(this, err.stack);
           message.channel.send(`An error occurred: **${err.message}**.`);
         }
         break;

@@ -3,9 +3,7 @@ const moment = require('moment');
 const { oneLine } = require('common-tags');
 const Command = require('../../Command');
 const { validateSnowflake } = require('../../../utils/functions');
-require('moment-duration-format');
-require('moment-timezone');
-moment.suppressDeprecationWarnings = true;
+const Logger = require('../../../utils/logger');
 
 module.exports = class NoteCommand extends Command {
   constructor(client) {
@@ -37,7 +35,7 @@ module.exports = class NoteCommand extends Command {
       else if (validateSnowflake(id)) document = await this.client.suggestions.getGuildSuggestionViaMessageID(message.guild, id);
       else return message.channel.send(`\`${id}\` does not resolve to or return a valid suggestion!`);
     } catch (err) {
-      this.client.logger.error(err.stack);
+      Logger.errorCmd(this, err.stack);
       return message.channel.send(`Error querying the database for this suggestions: **${err.message}**.`);
     }
 
@@ -48,7 +46,7 @@ module.exports = class NoteCommand extends Command {
       status
     } = document;
 
-    const sUser = await this.client.users.fetch(userID).catch(err => this.client.logger.error(err));
+    const sUser = await this.client.users.fetch(userID).catch(err => Logger.errorCmd(this, err));
 
     let suggestionsChannel;
     try {
@@ -56,7 +54,7 @@ module.exports = class NoteCommand extends Command {
       if (!suggestionsChannel) return this.client.errors.noSuggestions(message.channel);
     } catch (error) {
       if (!suggestionsChannel) return this.client.errors.noSuggestions(message.channel);
-      this.client.logger.error(error.stack);
+      Logger.errorCmd(this, error.stack);
       return message.channel.send(`An error occurred: **${error.message}**`);
     }
 
@@ -64,7 +62,7 @@ module.exports = class NoteCommand extends Command {
     if (status === 'approved' || status === 'rejected') {
       return message.channel.send(`sID **${sID}** has already been approved or rejected. Cannot do this action again.`)
         .then(msg => msg.delete({ timeout: 3000 }))
-        .catch(err => this.client.logger.error(err.stack));
+        .catch(err => Logger.errorCmd(this, err.stack));
     }
 
     if (!messageID) {
@@ -78,7 +76,7 @@ module.exports = class NoteCommand extends Command {
     try {
       sMessage = await suggestionsChannel.messages.fetch(messageID, false);
     } catch (err) {
-      this.client.logger.error(err.stack);
+      Logger.errorCmd(this, err.stack);
       message.channel.send('The suggestion message was not found, but still will be updated!')
         .then(m => m.delete({ timeout: 5000 }));
     }
@@ -133,7 +131,7 @@ module.exports = class NoteCommand extends Command {
     } catch (err) {
       if (err.message === 'Unknown Member') return;
       if (err.message === 'Cannot send messages to this user') return;
-      this.client.logger.error(err.stack);
+      Logger.errorCmd(this, err.stack);
       message.delete({ timeout: 3000 }).catch(O_o => {});
       message.channel.send(`Error updating this suggestion in the database: **${err.message}**`);
     }

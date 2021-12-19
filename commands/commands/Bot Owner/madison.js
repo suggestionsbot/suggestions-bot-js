@@ -3,6 +3,7 @@ const giphy = require('giphy-api')({
   https: true
 });
 const Command = require('../../Command');
+const Logger = require('../../../utils/logger');
 
 module.exports = class MadisonCommand extends Command {
   constructor(client) {
@@ -29,7 +30,7 @@ module.exports = class MadisonCommand extends Command {
         }
       });
     } catch (err) {
-      this.client.logger.error(err.stack);
+      Logger.errorCmd(this, err.stack);
       return message.channel.send(`Error searching **${query}** on Giphy: **${err.message}**`);
     }
 

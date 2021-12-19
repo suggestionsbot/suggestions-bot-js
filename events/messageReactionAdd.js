@@ -1,4 +1,5 @@
 const { validateChannel } = require('../utils/functions');
+const Logger = require('../utils/logger');
 module.exports = class {
   constructor(client) {
     this.client = client;
@@ -13,7 +14,8 @@ module.exports = class {
     try {
       settings = await this.client.settings.getGuild(message.guild);
     } catch (err) {
-      return this.client.logger.error(err.stack);
+      Logger.error('MESSAGE_REACTION_ADD', err.stack);
+      return;
     }
 
     const sChannel = settings.suggestionsChannel && await validateChannel(message.guild.channels, settings.suggestionsChannel);

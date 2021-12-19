@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const Logger = require('../utils/logger');
 
 module.exports = class Mongoose {
   constructor(client) {
@@ -23,19 +24,19 @@ module.exports = class Mongoose {
     this.connection = mongoose.connection;
 
     mongoose.connection.on('connected', () => {
-      this.client.logger.log('Mongoose connection successfully opened!', 'ready');
+      Logger.ready('Mongoose connection successfully opened!');
     });
 
     mongoose.connection.on('err', err => {
-      this.client.logger.error(`Mongoose connection error: \n ${err.stack}`);
+      Logger.error('MONGODB', 'Connection Error: \n', err.stack);
     });
 
     mongoose.connection.on('disconnected', () => {
-      this.client.logger.log('Mongoose connection disconnected');
+      Logger.log('Mongoose connection disconnected');
     });
 
     mongoose.connection.on('close', () => {
-      this.client.logger.log.log('Mongoose connection closed');
+      Logger.log.log('Mongoose connection closed');
     });
   }
 

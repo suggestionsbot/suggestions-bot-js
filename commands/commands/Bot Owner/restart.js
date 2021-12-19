@@ -1,4 +1,5 @@
 const Command = require('../../Command');
+const Logger = require('../../../utils/logger');
 
 module.exports = class RestartCommand extends Command {
   constructor(client) {
@@ -29,7 +30,7 @@ module.exports = class RestartCommand extends Command {
         }
       });
     } catch (e) {
-      this.client.logger.error(e);
+      Logger.errorCmd(this, e);
       return message.channel.send(`An error has occurred: **${e.message}**`);
     }
   }

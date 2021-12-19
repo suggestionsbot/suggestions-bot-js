@@ -1,5 +1,6 @@
 const { MessageEmbed } = require('discord.js-light');
 const Command = require('../../Command');
+const Logger = require('../../../utils/logger');
 
 module.exports = class InviteCommand extends Command {
   constructor(client) {
@@ -38,7 +39,7 @@ module.exports = class InviteCommand extends Command {
 
     if (message.guild) await message.react('📧').then(() => message.delete({ timeout: 2500 }));
     await message.author.send(dmEmbed).catch(err => {
-      this.client.logger.error(err);
+      Logger.errorCmd(this, err);
       return message.reply('you have DMs disabled! I could not send you the invite link. Enable them to receive the bot invite link.');
     });
 

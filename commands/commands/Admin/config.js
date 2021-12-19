@@ -1,6 +1,7 @@
 const { MessageEmbed  } = require('discord.js-light');
 const { stripIndent } = require('common-tags');
 const Command = require('../../Command');
+const Logger = require('../../../utils/logger');
 
 module.exports = class ConfigCommand extends Command {
   constructor(client) {
@@ -63,7 +64,7 @@ module.exports = class ConfigCommand extends Command {
 
           return message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
         } catch (err) {
-          this.client.logger.error(err.stack);
+          Logger.errorCmd(this, err.stack);
           return message.channel.send(`An error occurred: **${err.message}**`);
         }
       }
@@ -89,7 +90,7 @@ module.exports = class ConfigCommand extends Command {
 
           return message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
         } catch (err) {
-          this.client.logger.error(err);
+          Logger.errorCmd(this, err);
           return message.channel.send(`An error occurred: **${err.message}**`);
         }
       }
@@ -120,7 +121,7 @@ module.exports = class ConfigCommand extends Command {
 
           return message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
         } catch (err) {
-          this.client.logger.error(err);
+          Logger.errorCmd(this, err);
           return message.channel.send(`An error occurred: **${err.message}**`);
         }
       }
@@ -147,7 +148,7 @@ module.exports = class ConfigCommand extends Command {
 
           return message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
         } catch (err) {
-          this.client.logger.error(err);
+          Logger.errorCmd(this, err);
           return message.channel.send(`An error occurred: **${err.message}**`);
         }
       }
@@ -181,7 +182,7 @@ module.exports = class ConfigCommand extends Command {
             await this.client.settings.updateGuildStaffRoles(updateRole, false);
             message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
           } catch (error) {
-            this.client.logger.error(error.stack);
+            Logger.errorCmd(this, error.stack);
             return message.channel.send(`An error occurred: **${error.message}**`);
           }
         } else {
@@ -190,7 +191,7 @@ module.exports = class ConfigCommand extends Command {
             await this.client.settings.updateGuildStaffRoles(updateRole, true);
             message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
           } catch (error) {
-            this.client.logger.error(error.stack);
+            Logger.errorCmd(this, error.stack);
             return message.channel.send(`An error occurred: **${error.message}**`);
           }
         }
@@ -236,7 +237,7 @@ module.exports = class ConfigCommand extends Command {
           configEmbed.setDescription(`${success} The default vote emojis have been changed to ${emojiSet}`);
           message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
         } catch (error) {
-          this.client.logger.error(error.stack);
+          Logger.errorCmd(this, error.stack);
           return message.channel.send(`An error occurred: **${error.message}**`);
         }
 
@@ -274,7 +275,7 @@ module.exports = class ConfigCommand extends Command {
             configEmbed.setDescription(`${success} Responses required set to \`true\`. This means a response **is required** when using the \`reject\` command.`);
             message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
           } catch (err) {
-            this.client.logger.error(err.stack);
+            Logger.errorCmd(this, err.stack);
             return message.channel.send(`Error setting required responses: **${err.message}**.`);
           }
           break;
@@ -284,7 +285,7 @@ module.exports = class ConfigCommand extends Command {
             configEmbed.setDescription(`${success} Responses required set to \`false\`. This means a response **is not required** when using the \`reject\` command.`);
             message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
           } catch (err) {
-            this.client.logger.error(err.stack);
+            Logger.errorCmd(this, err.stack);
             return message.channel.send(`Error setting required responses: **${err.message}**.`);
           }
           break;
@@ -331,7 +332,7 @@ module.exports = class ConfigCommand extends Command {
             await this.client.settings.updateGuildCommands(enabledCommand, false);
             message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
           } catch (err) {
-            this.client.logger.error(err.stack);
+            Logger.errorCmd(this, err.stack);
             return message.channel.send(`An error occurred: **${err.message}**`);
           }
         } else {
@@ -340,7 +341,7 @@ module.exports = class ConfigCommand extends Command {
             await this.client.settings.updateGuildCommands(disabledCommand, true);
             message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
           } catch (err) {
-            this.client.logger.error(err.stack);
+            Logger.errorCmd(this, err.stack);
             return message.channel.send(`An error occurred: **${err.message}**`);
           }
         }
@@ -374,7 +375,7 @@ module.exports = class ConfigCommand extends Command {
 
             message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
           } catch (err) {
-            this.client.logger.error(err.stack);
+            Logger.errorCmd(this, err.stack);
             return message.channel.send(`An error occurred: **${err.message}**.`);
           }
           break;
@@ -393,7 +394,7 @@ module.exports = class ConfigCommand extends Command {
 
             message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
           } catch (err) {
-            this.client.logger.error(err.stack);
+            Logger.errorCmd(this, err.stack);
             return message.channel.send(`An error occurred: **${err.message}**.`);
           }
           break;

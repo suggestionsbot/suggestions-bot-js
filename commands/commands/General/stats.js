@@ -1,6 +1,7 @@
 const { MessageEmbed, version: discordVersion } = require('discord.js-light');
 const moment = require('moment');
 const Command = require('../../Command');
+const Logger = require('../../../utils/logger');
 const { version } = require('../../../package.json');
 require('moment-duration-format');
 
@@ -41,7 +42,7 @@ module.exports = class StatsCommand extends Command {
       userSize = (resolved[1].filter(Boolean).reduce((prev, count) => prev + count, 0)).toLocaleString();
       memUsage = resolved[2].filter(Boolean).reduce((prev, count) => prev + count, 0).toFixed(2).toLocaleString();
     } catch (err) {
-      this.client.logger.error(err.stack);
+      Logger.errorCmd(this, err.stack);
       return message.channel.send(`An error occurred: **${err.message}**`);
     }
 

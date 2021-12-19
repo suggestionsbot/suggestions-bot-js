@@ -1,5 +1,6 @@
 const { stripIndents } = require('common-tags');
 const Command = require('../../Command');
+const Logger = require('../../../utils/logger');
 
 module.exports = class PingCommand extends Command {
   constructor(client) {
@@ -24,7 +25,7 @@ module.exports = class PingCommand extends Command {
         **Cluster ${cluster} - Shard ${shard}:** \`${Math.round(this.client.ws.ping)}ms\`.
       `);
     } catch (e) {
-      this.client.logger.error(e);
+      Logger.errorCmd(this, e);
       return message.channel.send(`Error running this command: **${e.message}**.`);
     }
   }
