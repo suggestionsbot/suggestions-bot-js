@@ -1,5 +1,7 @@
 const { MessageEmbed } = require('discord.js-light');
-const moment = require('moment');
+
+const Logger = require('../utils/logger');
+const { displayTimestamp } = require('../utils/functions');
 
 module.exports = class {
   constructor(client) {
@@ -10,7 +12,7 @@ module.exports = class {
     const { guildStatusColors: { created } } = this.client.config;
 
     const guildOwner = await this.client.users.fetch(guild.ownerID)
-      .catch(e => this.client.logger.error(e));
+      .catch(e => Logger.error('GUILD_CREATE', e));
 
     const newServer = new MessageEmbed()
       .setTitle('Added')
@@ -18,13 +20,13 @@ module.exports = class {
         **ID:** \`${guild.id}\`
         **Name:** \`${guild.name}\`
         **Members:** \`${guild.memberCount}\`
-        **Created:** \`${moment(guild.createdAt).fromNow()}\`
+        **Created:** ${displayTimestamp(guild.createdAt, 'R')}
         **Owner:** ${guildOwner} \`[${guildOwner?.tag}]\`
       `)
       .setColor(created)
       .setTimestamp();
 
     const logs = this.client.production ? '602332466476482616' : '498627833233539086';
-    await this.client.channels.forge(logs).send(newServer).catch(e => this.client.logger.error(e));
+    await this.client.channels.forge(logs).send(newServer).catch(e => Logger.error('GUILD_CREATE', e));
   }
 };

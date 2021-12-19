@@ -1,5 +1,5 @@
 const { MessageEmbed } = require('discord.js-light');
-const moment = require('moment');
+
 const Command = require('../../Command');
 const Logger = require('../../../utils/logger');
 const { displayTimestamp } = require('../../../utils/functions');
@@ -26,9 +26,6 @@ module.exports = class GuildInfoCommand extends Command {
 
     const srvIcon = message.guild.iconURL({ format: 'png', size: 2048, dynamic: true });
 
-    const createdOn = moment.utc(message.guild.createdAt).format('MM/DD/YY @ h:mm A (z)');
-    const joinedOn = moment.utc(message.guild.me.joinedAt).format('MM/DD/YY @ h:mm A (z)');
-
     let gSuggestions;
 
     try {
@@ -44,8 +41,8 @@ module.exports = class GuildInfoCommand extends Command {
       .setColor(embedColor)
       .setThumbnail(srvIcon)
       .addField('Owner', `${message.guild.owner} \`[${message.guild.ownerID}]\``)
-      .addField('Created On', createdOn)
-      .addField('Joined', joinedOn)
+      .addField('Created On', displayTimestamp(message.guild.createdAt))
+      .addField('Joined', displayTimestamp(message.guild.me.joinedAt))
       .setFooter(`ID: ${message.guild.id}`)
       .setTimestamp();
 
@@ -67,20 +64,18 @@ module.exports = class GuildInfoCommand extends Command {
       const lastSuggestion = sortedSuggestions[0];
 
       let lastDate;
-      if (lastSuggestion.time && !lastSuggestion.newTime) {
-        // lastDate = moment.utc(new Date(lastSuggestion.time)).format('MM/DD/YY');
-        lastDate = new Date(lastSuggestion.time).toLocaleDateString();
-      }
-      if (lastSuggestion.newTime && !lastSuggestion.time) {
-        // lastDate = moment.utc(new Date(lastSuggestion.newTime)).format('MM/DD/YY');
-        lastDate = new Date(lastSuggestion.newTime).toLocaleDateString();
-      }
+      if (lastSuggestion.time && !lastSuggestion.newTime)
+        lastDate = lastSuggestion.time;
+
+      if (lastSuggestion.newTime && !lastSuggestion.time)
+        lastDate = lastSuggestion.newTime;
+
       if (!lastSuggestion.time && !lastSuggestion.newTime)
-        lastDate = new Date(lastSuggestion._id.getTimestamp()).toLocaleDateString();
+        lastDate = lastSuggestion._id.getTimestamp();
 
 
       const lastsID = lastSuggestion.sID;
-      const lastSuggestionInfo = `\`${lastsID}\` (${lastDate})`;
+      const lastSuggestionInfo = `\`${lastsID}\` (${displayTimestamp(lastDate)})`;
 
       serverEmbed.addField('Suggestions', suggestions.join('\n'));
       serverEmbed.addField('Last Suggestion (sID)', lastSuggestionInfo);

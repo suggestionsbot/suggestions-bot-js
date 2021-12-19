@@ -1,5 +1,5 @@
 const { MessageEmbed } = require('discord.js-light');
-const moment = require('moment');
+
 const Command = require('../../Command');
 const Logger = require('../../../utils/logger');
 const { displayTimestamp } = require('../../../utils/functions');
@@ -66,19 +66,11 @@ module.exports = class MySuggestionsCommand extends Command {
     const lastSuggestion = gSuggestions[0];
 
     let lastDate;
-    if (lastSuggestion.time) lastDate = moment.utc(new Date(lastSuggestion.time)).format('MM/DD/YY');
-    if (lastSuggestion.newTime) lastDate = moment.utc(new Date(lastSuggestion.newTime)).format('MM/DD/YY');
+    if (lastSuggestion.time) lastDate = displayTimestamp(lastSuggestion.time);
+    if (lastSuggestion.newTime) lastDate = displayTimestamp(lastSuggestion.newTime);
 
     const lastsID = lastSuggestion.sID;
     const lastSuggestionInfo = `\`${lastsID}\` (${lastDate})`;
-
-    let createdOn,
-      joinedOn;
-
-    if (message.guild) {
-      createdOn = moment.utc(message.guild.createdAt).format('MM/DD/YY @ h:mm A (z)');
-      joinedOn = moment.utc(submitter.joinedAt).format('MM/DD/YY @ h:mm A (z)');
-    }
 
     const embed = new MessageEmbed()
       .setColor(embedColor)
@@ -89,8 +81,8 @@ module.exports = class MySuggestionsCommand extends Command {
     if (message.guild) {
       embed
         .setAuthor(`${submitter.guild ? submitter.user.tag : submitter.tag} | ${message.guild}`, avatarURL)
-        .addField('Created On', createdOn)
-        .addField('Joined', joinedOn);
+        .addField('Created On', `<t:${message.guild.createdAt}>`)
+        .addField('Joined', `<t:${submitter.joinedAt}>`);
     } else embed.setAuthor(`${submitter.tag} | Global Statistics`, avatarURL);
 
 

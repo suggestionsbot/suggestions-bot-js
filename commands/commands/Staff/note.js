@@ -1,5 +1,4 @@
 const { MessageEmbed } = require('discord.js-light');
-const moment = require('moment');
 const { oneLine } = require('common-tags');
 const Command = require('../../Command');
 const { validateSnowflake } = require('../../../utils/functions');
