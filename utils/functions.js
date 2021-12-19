@@ -65,6 +65,7 @@ exports.displayTimestamp = (dateType, type) => {
 
 /**
  * Display a user-friendly uptime in days, hours, minutes and seconds.
+ * Source: https://guwii.com/bytes/count-date-time-javascript/
  * @param {Number} uptime The number of milliseconds
  * @return {String} The uptime
  */
