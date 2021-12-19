@@ -13,12 +13,33 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://gitlab.com/acollierr17/suggestions-bot.git"
+    "url": "git+https://github.com/suggestionsbot/suggestions-bot.git"
+  },
+  "keywords": [
+    "suggestions",
+    "suggestions",
+    "bot",
+    "discord",
+    "suggestions",
+    "bot",
+    "suggestions",
+    "discord",
+    "discord",
+    "suggestions",
+    "suggestions",
+    "management",
+    "discord",
+    "bot"
+  ],
+  "author": "Anthony Collier <hello@acollier.dev>",
+  "license": "MIT",
+  "engines": {
+    "node": ">=12.0.0"
   },
   "bugs": {
-    "url": "https://discord.gg/ntXkRan"
+    "url": "https://github.com/suggestionsbot/suggestions-bot/issues"
   },
-  "homepage": "https://suggestionsbot.com",
+  "homepage": "https://github.com/suggestionsbot/suggestions-bot#readme",
   "dependencies": {
     "bufferutil": "^4.0.5",
     "chalk": "^4.1.0",
