@@ -16,7 +16,7 @@ module.exports = class extends Event {
 
     try {
       for (const m of readyMessages) await Logger.event(this.name, m);
-      Logger.ready(`Logged in as ${this.client.user.tag} (${this.client.user.id}) in ${this.client.guilds.cache.size}.`);
+      Logger.ready(`Logged in as ${this.client.user.tag} (${this.client.user.id}) in ${this.client.guilds.cache.size} guilds.`);
       await this.client.botPresence();
     } catch (e) {
       Logger.error('READY EVENT', e);
