@@ -84,7 +84,7 @@ module.exports = class SuggestionsClient extends Client {
     */
 
   async clean(text) {
-    if (text && text.constructor.name == 'Promise') text = await text;
+    if (text && text.constructor.name === 'Promise') text = await text;
     if (typeof text !== 'string') {
       text = require('util').inspect(text, {
         depth: 1
@@ -94,7 +94,10 @@ module.exports = class SuggestionsClient extends Client {
     text = text
       .replace(/`/g, '`' + String.fromCharCode(8203))
       .replace(/@/g, '@' + String.fromCharCode(8203))
-      .replace(this.token, 'mfa.VkO_2G4Qv3T--NO--lWetW_tjND--TOKEN--QFTm6YGtzq9PH--4U--tG0');
+      .replace(this.token, 'mfa.VkO_2G4Qv3T--NO--lWetW_tjND--TOKEN--QFTm6YGtzq9PH--4U--tG0')
+      .replace(process.env.DISCORD_TOKEN, 'mfa.VkO_2G4Qv3T--NO--lWetW_tjND--TOKEN--QFTm6YGtzq9PH--4U--tG0')
+      .replace(process.env.MONGO_URI, '-REDACTED-')
+      .replace(process.env.MONGO_CERTIFICATE, '-REDACTED-');
 
     return text;
   }
@@ -155,7 +158,6 @@ module.exports = class SuggestionsClient extends Client {
   }
 
   get voteEmojis() {
-    const emojis = require('../utils/voteEmojis');
-    return emojis;
+    return require('../utils/voteEmojis');
   }
 };
