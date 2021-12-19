@@ -75,12 +75,7 @@ module.exports = class RejectCommand extends Command {
     let suggestionsChannel,
       suggestionsLogs;
     try {
-      suggestionsChannel = settings.suggestionsChannel && (
-        settings.suggestionsChannel === 'suggestions'
-          ? await message.guild.channels.fetch({ cache: false })
-            .then(res => res.find(c => c.name === 'suggestions'))
-          : await message.guild.channels.fetch(settings.suggestionsChannel)
-      );
+      suggestionsChannel = settings.suggestionsChannel && await message.guild.channels.fetch(settings.suggestionsChannel);
       if (!suggestionsChannel) return this.client.errors.noSuggestions(message.channel);
       suggestionsLogs = settings.suggestionsLogs && await message.guild.channels.fetch(settings.suggestionsLogs);
       if (!suggestionsLogs) return this.client.errors.noSuggestionsLogs(message.channel);
