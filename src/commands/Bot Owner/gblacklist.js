@@ -36,8 +36,8 @@ module.exports = class GBlacklistCommand extends Command {
     let gBlacklists,
       total;
     try {
-      gBlacklists = await this.client.blacklists.getGlobalBlacklists();
-      total = await this.client.blacklists.getTotalBlacklists();
+      gBlacklists = await this.client.mongodb.helpers.blacklists.getGlobalBlacklists();
+      total = await this.client.mongodb.helpers.blacklists.getTotalBlacklists();
 
     } catch (err) {
       Logger.errorCmd(this, err.stack);
@@ -134,9 +134,9 @@ module.exports = class GBlacklistCommand extends Command {
         blEmbed.addField('Issuer', `${message.author} \`[${message.author.id}]\``);
 
         try {
-          const check = await this.client.blacklists.checkRecentBlacklist(blUser, message.guild, true);
+          const check = await this.client.mongodb.helpers.blacklists.checkRecentBlacklist(blUser, message.guild, true);
           if (check && check.status) return this.client.errors.userAlreadyBlacklisted(message.channel, blUser);
-          await this.client.blacklists.addUserBlacklist(newBlacklist);
+          await this.client.mongodb.helpers.blacklists.addUserBlacklist(newBlacklist);
           message.channel.send(blEmbed).then(msg => msg.delete({ timeout: 5000 }));
         } catch (err) {
           Logger.errorCmd(this, err.stack);
@@ -163,9 +163,9 @@ module.exports = class GBlacklistCommand extends Command {
         blEmbed.addField('Issuer', `${message.author} \`[${message.author.id}]\``);
 
         try {
-          const check = await this.client.blacklists.checkRecentBlacklist(blUser, message.guild, true);
+          const check = await this.client.mongodb.helpers.blacklists.checkRecentBlacklist(blUser, message.guild, true);
           if (check && !check.status) return this.client.errors.userAlreadyBlacklisted(message.channel, blUser);
-          await this.client.blacklists.removeUserBlacklist(removeBlacklist);
+          await this.client.mongodb.helpers.blacklists.removeUserBlacklist(removeBlacklist);
           message.channel.send(blEmbed).then(msg => msg.delete({ timeout: 5000 }));
         } catch (err) {
           Logger.errorCmd(this, err.stack);

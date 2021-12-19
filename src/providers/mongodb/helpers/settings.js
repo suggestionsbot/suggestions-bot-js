@@ -1,12 +1,11 @@
 const mongoose = require('mongoose');
 
-const { oneLine } = require('common-tags');
 const { Blacklist, Command, Settings, Suggestion } = require('../models');
-const Logger = require('../../utils/logger');
+const Logger = require('../../../utils/logger');
 
 module.exports = class SettingsHelpers {
-  constructor(client) {
-    this.client = client;
+  constructor(mongo) {
+    this.mongo = mongo;
   }
 
   _guildQuery(guild) {
@@ -25,7 +24,7 @@ module.exports = class SettingsHelpers {
     let data;
     const defaultData = {
       guildID: guild.id,
-      ...this.client.config.defaultSettings
+      ...this.mongo.client.config.defaultSettings
     };
 
     const inMap = guild.settings.has(guild.id);
@@ -66,7 +65,7 @@ module.exports = class SettingsHelpers {
 
     guild.settings.set(guild.id, updated);
 
-    const fetchedGuild = await this.client.shard.fetchGuild(guild.id);
+    const fetchedGuild = await this.mongo.client.shard.fetchGuild(guild.id);
     Logger.log(`Guild "${fetchedGuild.name}" (${fetchedGuild.id}) updated settings: ${Object.keys(newSettings)}`);
 
     return updated;
@@ -126,7 +125,7 @@ module.exports = class SettingsHelpers {
 
     guild.settings.set(guild.id, data);
 
-    const fetchedGuild = await this.client.shard.fetchGuild(guild.id);
+    const fetchedGuild = await this.mongo.client.shard.fetchGuild(guild.id);
     Logger.log(`Default settings saved for guild "${fetchedGuild.name}" (${fetchedGuild.id}).`);
 
     return data;
@@ -182,7 +181,7 @@ module.exports = class SettingsHelpers {
 
     guild.settings.delete(guild.id);
     Logger.log(`Blacklist data deleted for guild ${guild.name || guild.guildName} (${guild.id || guild.guildID})`);
-    Logger.log(`${this.client.user.username} has left a guild: ${guild.name || guild.guildName } (${guild.id || guild.guildID})`);
+    Logger.log(`${this.mongo.client.user.username} has left a guild: ${guild.name || guild.guildName } (${guild.id || guild.guildID})`);
   }
 
   /**

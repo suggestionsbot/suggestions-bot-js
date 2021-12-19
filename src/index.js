@@ -2,10 +2,11 @@ require('dotenv').config();
 require('./utils/extensions');
 
 const { ShardingManager, SharderEvents } = require('kurasuta');
+const { isMaster } = require('cluster');
 const { join } = require('path');
-const logger = require('./utils/logger');
+const Logger = require('./utils/logger');
 
-const SuggestionsClient = require('./structures/SuggestionsClient');
+const SuggestionsClient = require('./structures/Client');
 const { isProduction } = require('./config');
 
 const sharder = new ShardingManager(join(__dirname, 'shard'), {
@@ -48,23 +49,33 @@ const sharder = new ShardingManager(join(__dirname, 'shard'), {
     'voiceStateUpdate',
     'webhookUpdate'
   ]
+  // clusterCount: 4,
+  // shardCount: 4
 });
 
-sharder.on(SharderEvents.MESSAGE, message => logger.log(message));
+sharder.on(SharderEvents.MESSAGE, message => {
+  Logger.log(message);
 
-sharder.on(SharderEvents.READY, startCluster => logger.log(`Cluster ${startCluster.id} ready`));
+  // if (isMaster && (message['name'] === 'shardStats')) dummyFunc(message.data);
+});
 
-sharder.on(SharderEvents.SPAWN, cluster => logger.log(`Cluster ${cluster.id} spawned`));
+sharder.on(SharderEvents.READY, startCluster => Logger.ready(`Cluster ${startCluster.id} ready`));
 
-sharder.on(SharderEvents.SHARD_READY, shardID => logger.log(`Shard ${shardID} ready`));
+sharder.on(SharderEvents.SPAWN, cluster => Logger.log(`Cluster ${cluster.id} spawned`));
+
+sharder.on(SharderEvents.SHARD_READY, shardID => Logger.ready(`Shard ${shardID} ready`));
 
 sharder.on(SharderEvents.SHARD_RESUME, (replayed, shardID) =>
-  logger.log(`Shard ${shardID} resumed connection`));
+  Logger.log(`Shard ${shardID} resumed connection`));
 
 sharder.on(SharderEvents.SHARD_DISCONNECT, (closeEvent, shardID) =>
-  logger.log(`Shard ${shardID} disconnected`));
+  Logger.warning('SHARD DISCONNECT', `Shard ${shardID} disconnected`));
 
 if (!isProduction() && process.env.DEBUG)
-  sharder.on(SharderEvents.DEBUG, (message => logger.log(`SHARDER DEBUG: ${message}`)));
+  sharder.on(SharderEvents.DEBUG, (message => Logger.debug(`SHARDER DEBUG: ${message}`)));
 
-sharder.spawn().catch(e => logger.error(`SHARD SPAWN: ${e}`));
+sharder.spawn().catch(e => Logger.error(`SHARD SPAWN: ${e}`));
+
+const dummyFunc = ({ clusterId, guildCount }) => {
+  Logger.log(`[ CLUSTER ${clusterId} ] The bot is in ${guildCount} guilds!`);
+};

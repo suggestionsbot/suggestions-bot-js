@@ -12,7 +12,7 @@ module.exports = class extends Event {
   async run(message) {
 
     try {
-      if (this.client.mongoose.connection.readyState === 1) await this.commands.run(message);
+      if (this.client.mongodb.connection.readyState === 1) await this.commands.run(message);
     } catch (e) {
       Logger.error('MESSAGE', e.stack);
     }

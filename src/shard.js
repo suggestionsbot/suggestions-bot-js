@@ -9,7 +9,7 @@ module.exports = class extends BaseCluster {
   launch() {
     this.client.login(process.env.DISCORD_TOKEN).catch(e => Logger.error(e));
 
-    this.client.mongoose.init(); // initialize connection to the database
+    this.client.mongodb.init(); // initialize connection to the database
 
     this.client.on('commandBlocked', (cmd, reason) => {
       Logger.warning('COMMAND BLOCKED', oneLine `

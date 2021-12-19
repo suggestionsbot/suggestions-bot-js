@@ -39,8 +39,8 @@ module.exports = class MySuggestionsCommand extends Command {
 
     let gSuggestions;
     try {
-      if (message.guild) gSuggestions = await this.client.suggestions.getGuildMemberSuggestions(message.guild, submitter);
-      else gSuggestions = await this.client.suggestions.getUserGlobalSuggestions(submitter);
+      if (message.guild) gSuggestions = await this.client.mongodb.helpers.suggestions.getGuildMemberSuggestions(message.guild, submitter);
+      else gSuggestions = await this.client.mongodb.helpers.suggestions.getUserGlobalSuggestions(submitter);
     } catch (err) {
       Logger.errorCmd(this, err.stack);
       return message.channel.send(`Error querying the database for your suggestions: **${err.message}**.`);

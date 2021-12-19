@@ -125,7 +125,7 @@ module.exports = class SuggestCommand extends Command {
     };
 
     try {
-      await this.client.suggestions.submitGuildSuggestion(newSuggestion);
+      await this.client.mongodb.helpers.suggestions.submitGuildSuggestion(newSuggestion);
       await message.delete({ timeout: 5000 });
     } catch (error) {
       if (error.message === 'Unknown Message') return;

@@ -30,8 +30,8 @@ module.exports = class NoteCommand extends Command {
 
     let document;
     try {
-      if ([7, 8].includes(id.length)) document = await this.client.suggestions.getGlobalSuggestion(id);
-      else if (validateSnowflake(id)) document = await this.client.suggestions.getGuildSuggestionViaMessageID(message.guild, id);
+      if ([7, 8].includes(id.length)) document = await this.client.mongodb.helpers.suggestions.getGlobalSuggestion(id);
+      else if (validateSnowflake(id)) document = await this.client.mongodb.helpers.suggestions.getGuildSuggestionViaMessageID(message.guild, id);
       else return message.channel.send(`\`${id}\` does not resolve to or return a valid suggestion!`);
     } catch (err) {
       Logger.errorCmd(this, err.stack);
@@ -123,7 +123,7 @@ module.exports = class NoteCommand extends Command {
 
     try {
       message.channel.send(`Added a note to **${sID}**: **${note}**.`).then(m => m.delete({ timeout: 5000 }));
-      await this.client.suggestions.addGuildSuggestionNote(suggestionNote);
+      await this.client.mongodb.helpers.suggestions.addGuildSuggestionNote(suggestionNote);
       await sMessage.edit(suggestion);
       await message.guild.members.fetch({ user: userID, cache: false });
       if (settings.dmResponses) await sUser.send(dmEmbed);

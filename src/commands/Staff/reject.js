@@ -33,8 +33,8 @@ module.exports = class RejectCommand extends Command {
     const reply = args.slice(1).join(' ');
 
     try {
-      if ([7, 8].includes(id.length)) document = await this.client.suggestions.getGlobalSuggestion(id);
-      else if (validateSnowflake(id)) document = await this.client.suggestions.getGuildSuggestionViaMessageID(message.guild, id);
+      if ([7, 8].includes(id.length)) document = await this.client.mongodb.helpers.suggestions.getGlobalSuggestion(id);
+      else if (validateSnowflake(id)) document = await this.client.mongodb.helpers.suggestions.getGuildSuggestionViaMessageID(message.guild, id);
       else return message.channel.send(`\`${id}\` does not resolve to or return a valid suggestion!`);
     } catch (error) {
       Logger.errorCmd(this, error.stack);
@@ -60,7 +60,7 @@ module.exports = class RejectCommand extends Command {
     const guild = message.guild ? message.guild : this.client.guilds.cache.get(guildID);
 
     try {
-      settings = await this.client.settings.getGuild(guild);
+      settings = await this.client.mongodb.helpers.settings.getGuild(guild);
     } catch (error) {
       Logger.errorCmd(this, error.stack);
       return message.channel.send(`An error occurred: **${error.message}**`);
@@ -210,7 +210,7 @@ module.exports = class RejectCommand extends Command {
       message.channel.send(`Suggestion **${sID}** has been rejected.`).then(m => m.delete({ timeout: 5000 }));
       sMessage.edit(rejectedEmbed).then(m => m.delete({ timeout: 5000 }));
       suggestionsLogs.send(logsEmbed);
-      await this.client.suggestions.handleGuildSuggestion(rejectSuggestion);
+      await this.client.mongodb.helpers.suggestions.handleGuildSuggestion(rejectSuggestion);
       await guild.members.fetch({ user: userID, cache: false });
       if (settings.dmResponses) submitter.send(dmEmbed);
     } catch (error) {

@@ -24,7 +24,7 @@ module.exports = class SIDCommand extends Command {
 
     let suggestion;
     try {
-      suggestion = await this.client.suggestions.getGuildSuggestion(message.guild, args[0]);
+      suggestion = await this.client.mongodb.helpers.suggestions.getGuildSuggestion(message.guild, args[0]);
     } catch (err) {
       Logger.errorCmd(this, err.stack);
       return message.channel.send(`An error occurred: **${err.message}**`);

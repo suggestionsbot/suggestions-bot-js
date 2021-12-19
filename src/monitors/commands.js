@@ -14,7 +14,7 @@ module.exports = class CommandHandler {
 
     if (message.guild) {
       try {
-        settings = await this.client.settings.getGuild(message.guild);
+        settings = await this.client.mongodb.helpers.settings.getGuild(message.guild);
       } catch (err) {
         this.client.logger.error(err.stack);
       }
@@ -43,11 +43,11 @@ module.exports = class CommandHandler {
     const cmd = this.client.commands.get(command) || this.client.commands.get(this.client.aliases.get(command));
     if (!cmd) return;
 
-    const gBlacklisted = await this.client.blacklists.checkGlobalBlacklist(message.author);
+    const gBlacklisted = await this.client.mongodb.helpers.blacklists.checkGlobalBlacklist(message.author);
     if (gBlacklisted) return this.client.emit('userBlacklisted', message.author, null, cmd, gBlacklisted.status);
 
     if (message.guild) {
-      const blacklisted = await this.client.blacklists.checkGuildBlacklist(message.author, message.guild);
+      const blacklisted = await this.client.mongodb.helpers.blacklists.checkGuildBlacklist(message.author, message.guild);
       if (blacklisted) return this.client.emit('userBlacklisted', message.author, message.guild, cmd);
     }
 
@@ -132,7 +132,7 @@ module.exports = class CommandHandler {
       if (throttle) throttle.usages++;
       if (disabledCommand && !ownerCheck) return this.client.errors.commandIsDisabled(cmd, channel);
       cmd.run(message, args, settings);
-      if (this.client.production) await this.client.settings.newCommandUsage(newCommand);
+      if (this.client.production) await this.client.mongodb.helpers.settings.newCommandUsage(newCommand);
     } catch (err) {
       Logger.error('COMMAND HANDLER', err.stack);
     }

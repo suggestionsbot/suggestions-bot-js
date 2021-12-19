@@ -59,7 +59,7 @@ module.exports = class ConfigCommand extends Command {
       if (updated) {
         try {
           if (updated.length > 5) return this.client.errors.invalidPrefixLength(message.channel, updated);
-          await this.client.settings.updateGuild(message.guild, { prefix: updated });
+          await this.client.mongodb.helpers.settings.settings.updateGuild(message.guild, { prefix: updated });
           configEmbed.setDescription(`${success} Prefix has been updated to: \`${updated}\``);
 
           return message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
@@ -85,7 +85,7 @@ module.exports = class ConfigCommand extends Command {
         if (!verified) return this.client.errors.channelNotFound(updated, message.channel);
 
         try {
-          await this.client.settings.updateGuild(message.guild, { suggestionsChannel: verified.id });
+          await this.client.mongodb.helpers.settings.updateGuild(message.guild, { suggestionsChannel: verified.id });
           configEmbed.setDescription(`${success} Suggestions channel has been updated to: ${verified}`);
 
           return message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
@@ -116,7 +116,7 @@ module.exports = class ConfigCommand extends Command {
         if (!verified) return this.client.errors.channelNotFound(updated, message.channel);
 
         try {
-          await this.client.settings.updateGuild(message.guild, { suggestionsLogs: verified.id });
+          await this.client.mongodb.helpers.settings.updateGuild(message.guild, { suggestionsLogs: verified.id });
           configEmbed.setDescription(`${success} Suggestion logs channel has been updated to: ${verified}`);
 
           return message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
@@ -143,7 +143,7 @@ module.exports = class ConfigCommand extends Command {
         if (!verified) return this.client.errors.channelNotFound(updated, message.channel);
 
         try {
-          await this.client.settings.updateGuild(message.guild, { staffSuggestionsChannel: verified.id });
+          await this.client.mongodb.helpers.settings.updateGuild(message.guild, { staffSuggestionsChannel: verified.id });
           configEmbed.setDescription(`${success} Suggestions staff channel has been updated to: ${verified}`);
 
           return message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
@@ -179,7 +179,7 @@ module.exports = class ConfigCommand extends Command {
         if (sRole) {
           try {
             configEmbed.setDescription(`${success} Removed **${verified.name}** from the staff roles.`);
-            await this.client.settings.updateGuildStaffRoles(updateRole, false);
+            await this.client.mongodb.helpers.settings.updateGuildStaffRoles(updateRole, false);
             message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
           } catch (error) {
             Logger.errorCmd(this, error.stack);
@@ -188,7 +188,7 @@ module.exports = class ConfigCommand extends Command {
         } else {
           try {
             configEmbed.setDescription(`${success} Added **${verified.name}** to the staff roles.`);
-            await this.client.settings.updateGuildStaffRoles(updateRole, true);
+            await this.client.mongodb.helpers.settings.updateGuildStaffRoles(updateRole, true);
             message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
           } catch (error) {
             Logger.errorCmd(this, error.stack);
@@ -233,7 +233,7 @@ module.exports = class ConfigCommand extends Command {
 
         try {
           const emojiSet = foundSet.emojis.map(e => foundSet.custom ? this.client.emojis.forge(e) : e).join(' ')
-          await this.client.settings.updateGuild(message.guild, { voteEmojis: foundSet.name });
+          await this.client.mongodb.helpers.settings.updateGuild(message.guild, { voteEmojis: foundSet.name });
           configEmbed.setDescription(`${success} The default vote emojis have been changed to ${emojiSet}`);
           message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
         } catch (error) {
@@ -271,7 +271,7 @@ module.exports = class ConfigCommand extends Command {
         switch (updated) {
         case 'true':
           try {
-            await this.client.settings.updateGuild(message.guild, { responseRequired: true });
+            await this.client.mongodb.helpers.settings.updateGuild(message.guild, { responseRequired: true });
             configEmbed.setDescription(`${success} Responses required set to \`true\`. This means a response **is required** when using the \`reject\` command.`);
             message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
           } catch (err) {
@@ -281,7 +281,7 @@ module.exports = class ConfigCommand extends Command {
           break;
         case 'false':
           try {
-            await this.client.settings.updateGuild(message.guild, { responseRequired: false });
+            await this.client.mongodb.helpers.settings.updateGuild(message.guild, { responseRequired: false });
             configEmbed.setDescription(`${success} Responses required set to \`false\`. This means a response **is not required** when using the \`reject\` command.`);
             message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
           } catch (err) {
@@ -329,7 +329,7 @@ module.exports = class ConfigCommand extends Command {
         if (foundCmd) {
           try {
             configEmbed.setDescription(`${success} Enabled the **${cmd.help.name}** command.`);
-            await this.client.settings.updateGuildCommands(enabledCommand, false);
+            await this.client.mongodb.helpers.settings.updateGuildCommands(enabledCommand, false);
             message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
           } catch (err) {
             Logger.errorCmd(this, err.stack);
@@ -338,7 +338,7 @@ module.exports = class ConfigCommand extends Command {
         } else {
           try {
             configEmbed.setDescription(`${success} Disabled the **${cmd.help.name}** command.`);
-            await this.client.settings.updateGuildCommands(disabledCommand, true);
+            await this.client.mongodb.helpers.settings.updateGuildCommands(disabledCommand, true);
             message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
           } catch (err) {
             Logger.errorCmd(this, err.stack);
@@ -363,7 +363,7 @@ module.exports = class ConfigCommand extends Command {
         switch (updated) {
         case 'true': {
           try {
-            await this.client.settings.updateGuild(message.guild, { dmResponses: true });
+            await this.client.mongodb.helpers.settings.updateGuild(message.guild, { dmResponses: true });
             configEmbed.setDescription(stripIndent`
                 ${success} DM responses have been **enabled**. The bot will DM users when these actions happen:
                   
@@ -382,7 +382,7 @@ module.exports = class ConfigCommand extends Command {
         }
         case 'false': {
           try {
-            await this.client.settings.updateGuild(message.guild, { dmResponses: false });
+            await this.client.mongodb.helpers.settings.updateGuild(message.guild, { dmResponses: false });
             configEmbed.setDescription(stripIndent`
                 ${success} DM responses have been **disabled**. The bot will *not* DM users when these actions happen:
                   

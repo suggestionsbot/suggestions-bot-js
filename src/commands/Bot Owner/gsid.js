@@ -26,7 +26,7 @@ module.exports = class GSIDCommand extends Command {
 
     let suggestion;
     try {
-      suggestion = await this.client.suggestions.getGlobalSuggestion(args[0]);
+      suggestion = await this.client.mongodb.helpers.suggestions.getGlobalSuggestion(args[0]);
     } catch (err) {
       Logger.errorCmd(this, err.stack);
       return message.channel.send(`An error occurred: **${err.message}**`);

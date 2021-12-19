@@ -1,10 +1,10 @@
 const mongoose = require('mongoose');
-const { oneLine } = require('common-tags');
+
 const { Suggestion } = require('../models');
 
 module.exports = class SuggestionsHelpers {
-  constructor(client) {
-    this.client = client;
+  constructor(mongo) {
+    this.mongo = mongo;
   }
 
   /**
@@ -79,7 +79,7 @@ module.exports = class SuggestionsHelpers {
      * @param {Object} guild - The guild object.
      */
   async isResponseRequired(guild) {
-    const { responseRequired } = await this.client.settings.getGuild(guild);
+    const { responseRequired } = await this.mongo.client.settings.getGuild(guild);
 
     return !!responseRequired;
   }

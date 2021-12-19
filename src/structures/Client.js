@@ -1,8 +1,7 @@
 const { Client, Collection } = require('discord.js-light');
-const Mongoose = require('../db/mongoose');
 
-// Stores for handling various functions
-const { Blacklists, Suggestions, Settings } = require('../db/helpers');
+// MongoDB Provider Handler
+const MongoDB = require('../providers/mongodb');
 
 const { CommandLoader, EventLoader } = require('../loaders');
 
@@ -23,13 +22,7 @@ module.exports = class SuggestionsClient extends Client {
 
     this.wait = require('util').promisify(setTimeout);
 
-    this.suggestions = new Suggestions(this);
-
-    this.settings = new Settings(this);
-
-    this.blacklists = new Blacklists(this);
-
-    this.mongoose = new Mongoose(this);
+    this.mongodb = new MongoDB(this);
 
     this.commandLoader = new CommandLoader(this);
 

@@ -29,7 +29,7 @@ module.exports = class GuildInfoCommand extends Command {
     let gSuggestions;
 
     try {
-      gSuggestions = await this.client.suggestions.getGuildSuggestions(message.guild);
+      gSuggestions = await this.client.mongodb.helpers.suggestions.getGuildSuggestions(message.guild);
     } catch (error) {
       Logger.errorCmd(this, error.stack);
       return message.channel.send(`An error occurred: **${error.message}**`);

@@ -14,7 +14,7 @@ module.exports = class extends Event {
 
     let settings;
     try {
-      settings = await this.client.settings.getGuild(message.guild);
+      settings = await this.client.mongodb.helpers.settings.getGuild(message.guild);
     } catch (err) {
       Logger.error('MESSAGE_REACTION_ADD', err.stack);
       return;

@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { defaultSettings } = require('../../config');
+const { defaultSettings } = require('../../../config');
 
 const settingsSchema = mongoose.Schema({
   _id: mongoose.Schema.Types.ObjectId,

@@ -35,8 +35,8 @@ module.exports = class BlacklistCommand extends Command {
     let gBlacklists,
       total;
     try {
-      gBlacklists = await this.client.blacklists.getGuildBlacklists(message.guild);
-      total = await this.client.blacklists.getTotalBlacklists();
+      gBlacklists = await this.client.mongodb.helpers.blacklists.getGuildBlacklists(message.guild);
+      total = await this.client.mongodb.helpers.blacklists.getTotalBlacklists();
     } catch (err) {
       Logger.errorCmd(this, err.stack);
       return message.channel.send(`An error occurred: **${err.message}**`);
@@ -155,9 +155,9 @@ module.exports = class BlacklistCommand extends Command {
           .setTimestamp();
 
         try {
-          const check = await this.client.blacklists.checkRecentBlacklist(blUser, message.guild);
+          const check = await this.client.mongodb.helpers.blacklists.checkRecentBlacklist(blUser, message.guild);
           if (check && check.status) return this.client.errors.userAlreadyBlacklisted(message.channel, blUser);
-          await this.client.blacklists.addUserBlacklist(newBlacklist);
+          await this.client.mongodb.helpers.blacklists.addUserBlacklist(newBlacklist);
           message.channel.send(blEmbed).then(msg => msg.delete({ timeout: 5000 }));
           await blUser.send(dmBlacklistAdd);
         } catch (err) {
@@ -203,9 +203,9 @@ module.exports = class BlacklistCommand extends Command {
           .setTimestamp();
 
         try {
-          const check = await this.client.blacklists.checkRecentBlacklist(blUser, message.guild);
+          const check = await this.client.mongodb.helpers.blacklists.checkRecentBlacklist(blUser, message.guild);
           if (check && !check.status) return this.client.errors.userNoLongerBlacklisted(message.channel, blUser);
-          await this.client.blacklists.removeUserBlacklist(removeBlacklist);
+          await this.client.mongodb.helpers.blacklists.removeUserBlacklist(removeBlacklist);
           message.channel.send(blEmbed).then(msg => msg.delete({ timeout: 5000 }));
           await blUser.send(dmBlacklistRemove);
         } catch (err) {

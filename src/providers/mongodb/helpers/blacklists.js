@@ -1,10 +1,10 @@
 const mongoose = require('mongoose');
-const { oneLine } = require('common-tags');
+
 const { Blacklist } = require('../models');
 
 module.exports = class BlacklistsHelpers {
-  constructor(client) {
-    this.client = client;
+  constructor(mongo) {
+    this.mongo = mongo;
   }
 
   /**
