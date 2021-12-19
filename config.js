@@ -7,12 +7,10 @@ module.exports = {
   suggestionsLogs: 'suggestion-logs',
   owners: ['158063324699951104'],
   embedColor: 0xdd9323,
-  discord: 'https://discord.gg/ntXkRan',
+  discord: 'https://discord.gg/suggestions',
   website: 'https://suggestionsbot.com',
   docs: 'https://docs.suggestionsbot.com',
-  invite: `https://discord.com/oauth2/authorize?client_id=${
-    isProduction() ? '474051954998509571' : '771924181784854579'
-  }&scope=bot&permissions=355392`,
+  invite: isProduction() ? 'https://suggestions.bot/invite' : 'https://discord.com/oauth2/authorize?client_id=771924181784854579&scope=bot&permissions=355392',
   suggestionColors: {
     approved: '#00e640',
     rejected: '#cf000f'
