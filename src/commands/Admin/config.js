@@ -205,14 +205,8 @@ module.exports = class ConfigCommand extends Command {
         .map(r => r.toString())
         .join('\n');
 
-      const admins = message.guild.members.cache
-        .filter(m => !m.user.bot && m.hasPermission('MANAGE_GUILD'))
-        ?.map(m => m.toString())
-        ?.join('\n') ?? 'Not cached';
-
       configEmbed
         .setDescription(`Add/remove a staff role by doing \`${prefix + name} roles [role]\``)
-        .addField('Admins', admins);
 
       if (viewRoles.length >= 1) configEmbed.addField('Staff Roles', viewRoles);
       configEmbed.addField('More Information', `[Link](${confDocs}#staff-roles)`);
