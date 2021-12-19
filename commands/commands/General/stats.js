@@ -51,7 +51,7 @@ module.exports = class StatsCommand extends Command {
       .setColor(embedColor)
       .addField('Guilds', guildSize, true)
       .addField('Users', userSize, true)
-      .addField('Uptime', shardUptime, true)
+      .addField('Uptime', displayUptime(this.client.uptime), true)
       .addField('Memory', `${Math.round(memUsage)} MB`, true)
       .addField('Discord.js', `v${discordVersion}`, true)
       .addField('Node', `${process.version}`, true)

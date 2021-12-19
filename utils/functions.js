@@ -50,7 +50,7 @@ exports.walk = (directory, extensions) => {
 
 /**
  * Display a user-friendly timestamp in the Discord client.
- * @param {Number|Date} dateType The UNIX timestamp or Date object
+ * @param {Number|Date} dateType The timestamp or Date object
  * @param {'t', 'T', 'd', 'D', 'f', 'F', 'R'?} type The type of timestamp to display (ex. relative)
  * @return {String} The timestamp style
  */
@@ -61,4 +61,33 @@ exports.displayTimestamp = (dateType, type) => {
   if (type && !validOptions.includes(type)) type = 'f';
 
   return `<t:${Math.floor(timestamp / 1000)}${type ? `:${type}` : ''}>`;
+};
+
+/**
+ * Display a user-friendly uptime in days, hours, minutes and seconds.
+ * @param {Number} uptime The number of milliseconds
+ * @return {String} The uptime
+ */
+exports.displayUptime = (uptime) => {
+  const secondsInADay = 60 * 60 * 1000 * 24;
+  const secondsInAHour = 60 * 60 * 1000;
+
+  const days = Math.floor(uptime / (secondsInADay));
+  const hours = Math.floor((uptime % (secondsInADay)) / (secondsInAHour));
+  const minutes = Math.floor(((uptime % (secondsInADay)) % (secondsInAHour)) / (60 * 1000));
+  const seconds = Math.floor(((((uptime % (secondsInADay)) % (secondsInAHour)) % (60 * 1000)) / 1000));
+
+  const mapped = {
+    s: 'secs',
+    m: 'mins',
+    h: 'hrs',
+    d: 'days'
+  };
+
+  return [
+    { type: 'd', value: days },
+    { type: 'h', value: hours },
+    { type: 'm', value: minutes },
+    { type: 's', value: seconds }
+  ].filter(x => x.value > 0).map(x => `${x.value} ${mapped[x.type]}`).join(', ');
 };
