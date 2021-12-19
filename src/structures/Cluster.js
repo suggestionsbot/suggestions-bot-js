@@ -1,9 +1,9 @@
 const { oneLine } = require('common-tags');
 const { BaseCluster } = require('kurasuta');
 
-const Logger = require('./utils/logger');
+const Logger = require('../utils/logger');
 
-require('./extensions/Guild');
+require('../extensions/Guild');
 
 module.exports = class extends BaseCluster {
   launch() {

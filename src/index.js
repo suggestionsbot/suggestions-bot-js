@@ -9,7 +9,7 @@ const Logger = require('./utils/logger');
 const SuggestionsClient = require('./structures/Client');
 const { isProduction } = require('./config');
 
-const sharder = new ShardingManager(join(__dirname, 'shard'), {
+const sharder = new ShardingManager(join(__dirname, 'structures', 'Cluster.js'), {
   clientOptions: {
     disableMentions: 'all',
     partials: ['MESSAGE', 'CHANNEL', 'REACTION', 'GUILD_MEMBER', 'USER'],
