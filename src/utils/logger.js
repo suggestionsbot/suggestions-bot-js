@@ -18,35 +18,35 @@ class Logger {
   }
 
   static success(title, ...body) {
-    console.log(`${chalk.bold.green(`[ SUCCESS ] [ ${title} ]`) + Logger._formMessage(...body)}`);
+    console.log(`${chalk.bold.green(`[ SUCCESS ] [ ${title} ] `) + Logger._formMessage(...body)}`);
   }
 
   static warning(title, ...body) {
-    console.warn(`${chalk.bold.yellow(`[ WARNING ] [ ${title} ]`) + Logger._formMessage(...body)}`);
+    console.warn(`${chalk.bold.yellow(`[ WARNING ] [ ${title} ] `) + Logger._formMessage(...body)}`);
   }
 
   static error(title, ...body) {
     console.error(
-      `${chalk.bold.red(title ? `[ ERROR ] [ ${title} ]` : '[ ERROR ] ') + Logger._formMessage(...body)}`
+      `${chalk.bold.red(title ? `[ ERROR ] [ ${title} ] ` : '[ ERROR ] ') + Logger._formMessage(...body)}`
     );
   }
 
   static errorCmd(command, ...body) {
     console.error(
-      `${chalk.bold.red(`[ CMD:${command.help.name} ]`) + Logger._formMessage(...body)}`
+      `${chalk.bold.red(`[ CMD:${command.help.name} ] `) + Logger._formMessage(...body)}`
     );
   }
 
   static debug(title, ...body) {
-    console.debug(`${chalk.bold.magenta(`[ DEBUG ] [ ${title} ]`) + Logger._formMessage(...body)}`);
+    console.debug(`${chalk.bold.magenta(`[ DEBUG ] [ ${title} ] `) + Logger._formMessage(...body)}`);
   }
 
   static event(event, ...body) {
-    console.log(`${chalk.bold.yellow(`[ EVENT ] [ ${event.toUpperCase()} ]`) + Logger._formMessage(...body)}`);
+    console.log(`${chalk.bold.yellow(`[ EVENT ] [ ${event.toUpperCase()} ] `) + Logger._formMessage(...body)}`);
   }
 
   static command(command, ...body) {
-    console.log(`${chalk.bold.green(`[ COMMAND ] [ ${command.toUpperCase()} ]`) + Logger._formMessage(...body)}`);
+    console.log(`${chalk.bold.green(`[ COMMAND ] [ ${command.toUpperCase()} ] `) + Logger._formMessage(...body)}`);
   }
 
   static ready(...body) {
