@@ -36,10 +36,6 @@ module.exports = class SuggestionsClient extends Client {
 
     this.errors = new ErrorHandler(this);
 
-    this.eventLoader.init();
-
-    this.commandLoader.init();
-
     this.lastChangelog = null;
 
     this.fetchLastChangelog().catch(e => Logger.error('CLIENT', e));
@@ -152,6 +148,16 @@ module.exports = class SuggestionsClient extends Client {
       await this.user.setStatus('dnd');
       await this.user.setActivity('in code land...', { type: 'PLAYING' });
     }
+  }
+
+  start() {
+    this.commandLoader.init();
+    this.eventLoader.init();
+  }
+
+  login() {
+    this.start();
+    return super.login();
   }
 
   get voteEmojis() {

@@ -1,3 +1,6 @@
+const fs = require('fs');
+const path = require('path');
+
 /**
  * Validate if a string input is a snowflake or not
  * Source: https://github.com/tandpfun/DiscordTools/blob/f452733ba2984a5b87493fb1dc7a8b80612a0760/pages/snowflake.vue#L209-L219
@@ -23,4 +26,39 @@ exports.validateSnowflake = (snowflake) => {
  */
 exports.validateChannel = (manager, str) => {
   return manager.forge(str).fetch({ cache: false }).catch(() => null);
+};
+
+/**
+ * "Walk" through directories to get all files of a particular extension.
+ * @param {String} directory The directory to "walk" through
+ * @param {String[]} extensions An array of file extensions to search by
+ * @return {*[]}
+ */
+exports.walk = (directory, extensions) => {
+  const read = (dir, files = []) => {
+    for (const file of fs.readdirSync(dir)) {
+      const filePath = path.join(dir, file), stats = fs.lstatSync(filePath);
+      if (stats.isFile() && extensions.some(ext => filePath.endsWith(ext))) files.push(filePath);
+      else if (stats.isDirectory()) files = files.concat(read(filePath));
+    }
+
+    return files;
+  };
+
+  return read(directory);
+};
+
+/**
+ * Display a user-friendly timestamp in the Discord client.
+ * @param {Number|Date} dateType The UNIX timestamp or Date object
+ * @param {'t', 'T', 'd', 'D', 'f', 'F', 'R'?} type The type of timestamp to display (ex. relative)
+ * @return {String} The timestamp style
+ */
+exports.displayTimestamp = (dateType, type) => {
+  const timestamp = typeof dateType === 'object' ? new Date(dateType).getTime() : dateType;
+
+  const validOptions = ['t', 'T', 'd', 'D', 'f', 'F', 'R'];
+  if (type && !validOptions.includes(type)) type = 'f';
+
+  return `<t:${Math.floor(timestamp / 1000)}${type ? `:${type}` : ''}>`;
 };
