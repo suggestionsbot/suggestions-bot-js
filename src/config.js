@@ -10,6 +10,7 @@ module.exports = {
   discord: 'https://discord.gg/suggestions',
   website: 'https://suggestionsbot.com',
   docs: 'https://docs.suggestionsbot.com',
+  github: 'https://github.com/suggestionsbot/suggestions-bot',
   invite: isProduction() ? 'https://suggestions.bot/invite' : 'https://discord.com/oauth2/authorize?client_id=771924181784854579&scope=bot&permissions=355392',
   suggestionColors: {
     approved: '#00e640',

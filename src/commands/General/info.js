@@ -17,7 +17,7 @@ module.exports = class InfoCommand extends Command {
 
   async run(message, args) {
 
-    const { embedColor, discord, owners, website } = this.client.config;
+    const { embedColor, discord, owners, website, github } = this.client.config;
 
     const embed = new MessageEmbed()
       .setTitle(this.client.user.username)
@@ -28,6 +28,7 @@ module.exports = class InfoCommand extends Command {
         owners.map(o => this.client.users.forge(o)).join(', '))
       .addField('Support Discord', discord)
       .addField('Website', website)
+      .addField('GitHub', github)
       .addField('Bot Version', version)
       .setFooter('© 2021 Anthony Collier');
 

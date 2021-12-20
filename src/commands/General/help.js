@@ -18,7 +18,7 @@ module.exports = class HelpCommand extends Command {
   }
 
   async run(message, args, settings) {
-    const { embedColor, discord, website, prefix: defPrefix } = this.client.config;
+    const { embedColor, discord, website, prefix: defPrefix, github } = this.client.config;
     let staffRoles,
       staffCheck,
       adminCheck;
@@ -96,6 +96,7 @@ module.exports = class HelpCommand extends Command {
       if (ownerCheck) helpEmbed.addField('🔒 Owner Commands', this.mapCommands(cmds, 'Bot Owner').join(' | '));
     }
     helpEmbed.addField('ℹ Website', website);
+    helpEmbed.addField('⚙ GitHub', github);
     helpEmbed.addField('❗ Found an issue?', `Please report any issues directly to the **Support Team** via the Support Discord: ${discord}`);
 
     message.channel.send(helpEmbed);

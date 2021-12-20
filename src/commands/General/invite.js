@@ -17,7 +17,7 @@ module.exports = class InviteCommand extends Command {
 
   async run(message, args) {
 
-    const { embedColor, discord, invite, website } = this.client.config;
+    const { embedColor, discord, invite, website, github } = this.client.config;
 
     const dmEmbed = new MessageEmbed()
       .setAuthor('Bot Invite Information', this.client.user.avatarURL())
@@ -30,6 +30,9 @@ module.exports = class InviteCommand extends Command {
 
           **Website:**
           ${website}
+          
+          **GitHub:**
+          ${github}
 
           **Support Server:**
           ${discord}
