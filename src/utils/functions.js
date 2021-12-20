@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const petitio = require('petitio');
 
 /**
  * Validate if a string input is a snowflake or not
@@ -91,4 +92,12 @@ exports.displayUptime = (uptime) => {
     { type: 'm', value: minutes },
     { type: 's', value: seconds }
   ].filter(x => x.value > 0).map(x => `${x.value} ${mapped[x.type]}`).join(', ');
+};
+
+exports.getRandomGiphyImage = (query) => {
+  return petitio('https://api.giphy.com/v1/gifs/random')
+    .query('api_key', process.env.GIPHY)
+    .query('tag', query)
+    .json()
+    .then(({ data }) => data.images.original.url);
 };

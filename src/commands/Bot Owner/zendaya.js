@@ -1,9 +1,6 @@
-const giphy = require('giphy-api')({
-  apiKey: process.env.GIPHY,
-  https: true
-});
 const Command = require('../../structures/Command');
 const Logger = require('../../utils/logger');
+const { getRandomGiphyImage } = require('../../utils/functions');
 
 module.exports = class ZendayaCommand extends Command {
   constructor(client) {
@@ -20,10 +17,9 @@ module.exports = class ZendayaCommand extends Command {
     const query = 'zendaya';
 
     try {
-      const { data } = await giphy.random(query);
-      const url = data.images.original.url;
+      const url = await getRandomGiphyImage(query);
 
-      message.channel.send({
+      return message.channel.send({
         embed: {
           color: 0xFF69B4,
           image: { url }
@@ -33,7 +29,5 @@ module.exports = class ZendayaCommand extends Command {
       Logger.errorCmd(this, err.stack);
       return message.channel.send(`Error searching **${query}** on Giphy: **${err.message}**`);
     }
-
-    return;
   }
 };
