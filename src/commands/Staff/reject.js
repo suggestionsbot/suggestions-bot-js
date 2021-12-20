@@ -31,6 +31,7 @@ module.exports = class RejectCommand extends Command {
     if (!id) return this.client.errors.noUsage(message.channel, this, settings);
 
     const reply = args.slice(1).join(' ');
+    if (!reply && settings.responseRequired) return this.client.errors.noRejectedResponse(message.channel);
 
     try {
       if ([7, 8].includes(id.length)) document = await this.client.mongodb.helpers.suggestions.getGlobalSuggestion(id);
