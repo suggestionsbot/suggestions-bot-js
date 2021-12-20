@@ -14,7 +14,7 @@ module.exports = class GuildInfoCommand extends Command {
       aliases: ['guildinfo'],
       throttling: {
         usages: 3,
-        duration: 60
+        duration: 180
       },
       guarded: true
     });

@@ -13,7 +13,11 @@ module.exports = class MySuggestionsCommand extends Command {
       botPermissions: ['MANAGE_MESSAGES'],
       aliases: ['mysuggestions'],
       usage: 'suggestions [@User]',
-      guildOnly: false
+      guildOnly: false,
+      throttling: {
+        usages: 3,
+        duration: 180
+      }
     });
   }
 
