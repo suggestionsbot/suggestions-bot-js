@@ -1,4 +1,4 @@
-const index = require('mongoose');
+const mongoose = require('mongoose');
 
 const MongoHelpers = require('./helpers');
 const Logger = require('../../utils/logger');
@@ -28,26 +28,14 @@ module.exports = class MongoDB {
       sslCA: process.env.MONGO_CERTIFICATE
     };
 
-    await index.connect(process.env.MONGO_URI, this.client.production ? prodOptions : dbOptions);
-    index.Promise = global.Promise;
+    const mongooseInstance = await mongoose.connect(process.env.MONGO_URI, this.client.production ? prodOptions : dbOptions)
+      .then(mongo => {
+        Logger.ready('Successfully connected to the MongoDB database!');
+        return mongo;
+      }).catch(err => Logger.error('MONGODB ERROR', err));
 
-    this.connection = index.connection;
-
-    index.connection.on('connected', () => {
-      Logger.ready('Mongoose connection successfully opened!');
-    });
-
-    index.connection.on('err', err => {
-      Logger.error('MONGODB', 'Connection Error: \n', err.stack);
-    });
-
-    index.connection.on('disconnected', () => {
-      Logger.log('Mongoose connection disconnected');
-    });
-
-    index.connection.on('close', () => {
-      Logger.log.log('Mongoose connection closed');
-    });
+    this.Promise = global.Promise;
+    this.connection = mongooseInstance.connection;
   }
 
   async close() {
