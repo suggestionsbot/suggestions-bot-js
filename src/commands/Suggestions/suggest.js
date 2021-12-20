@@ -5,6 +5,7 @@ const crypto = require('crypto');
 const Logger = require('../../utils/logger');
 
 const Command = require('../../structures/Command');
+const { getDefaultSuggestionsChannel } = require('../../utils/functions');
 
 module.exports = class SuggestCommand extends Command {
   constructor(client) {
@@ -35,8 +36,16 @@ module.exports = class SuggestCommand extends Command {
     const sUser = message.author;
     let sChannel;
     try {
-      sChannel = suggestionsChannel && await message.guild.channels.fetch(suggestionsChannel);
-      if (!sChannel) return this.client.errors.noSuggestions(message.channel);
+      if (!suggestionsChannel || (suggestionsChannel === this.client.config.suggestionsChannel)) {
+        const channel = await getDefaultSuggestionsChannel(message.guild);
+        if (!channel) return this.client.errors.noSuggestions(message.channel);
+
+        await this.client.mongodb.helpers.settings.updateGuild(message.guild, { suggestionsChannel: channel.id });
+        sChannel = channel;
+      } else {
+        sChannel = suggestionsChannel && await message.guild.channels.fetch(suggestionsChannel);
+        if (!sChannel) return this.client.errors.noSuggestions(message.channel);
+      }
     } catch (e) {
       return this.client.errors.noSuggestions(message.channel);
     }

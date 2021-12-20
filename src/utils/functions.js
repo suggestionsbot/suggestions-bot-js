@@ -2,6 +2,8 @@ const fs = require('fs');
 const path = require('path');
 const petitio = require('petitio');
 
+const { suggestionsChannel } = require('../config');
+
 /**
  * Validate if a string input is a snowflake or not
  * Source: https://github.com/tandpfun/DiscordTools/blob/f452733ba2984a5b87493fb1dc7a8b80612a0760/pages/snowflake.vue#L209-L219
@@ -105,4 +107,13 @@ exports.getRandomGiphyImage = (tag) => {
     .query('tag', tag)
     .json()
     .then(({ data }) => data.images.original.url);
+};
+
+/**
+ * Returns the default suggestions channel if it exists in the server.
+ * @param {Guild} guild The guild to check.
+ * @return {Promise<TextChannel>|null} Return the channel, if it exists
+ */
+exports.getDefaultSuggestionsChannel = (guild) => {
+  return guild.channels.fetch({ cache: false }).then(res => res.find(c => c.name === suggestionsChannel)) ?? null;
 };
