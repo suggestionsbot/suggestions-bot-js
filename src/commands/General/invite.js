@@ -8,6 +8,7 @@ module.exports = class InviteCommand extends Command {
       name: 'invite',
       category: 'General',
       description: 'Receive a DM with information on inviting the bot to your server.',
+      usage: 'invite [here]',
       aliases: ['botinvite'],
       botPermissions: ['ADD_REACTIONS', 'EMBED_LINKS'],
       guildOnly: false,
@@ -15,7 +16,7 @@ module.exports = class InviteCommand extends Command {
     });
   }
 
-  async run(message, args) {
+  async run(message, args, settings) {
 
     const { embedColor, discord, invite, website, github } = this.client.config;
 
@@ -40,11 +41,16 @@ module.exports = class InviteCommand extends Command {
       .setColor(embedColor)
       .setTimestamp();
 
-    if (message.guild) await message.react('📧').then(() => message.delete({ timeout: 2500 }));
-    await message.author.send(dmEmbed).catch(err => {
-      Logger.errorCmd(this, err);
-      return message.reply('you have DMs disabled! I could not send you the invite link. Enable them to receive the bot invite link.');
-    });
+    try {
+      if (message.guild && args[0] !== 'here') {
+        await message.author.send(dmEmbed);
+        await message.react('📧').then(() => message.delete({ timeout: 2500 }));
+      } else return await message.channel.send(dmEmbed);
 
+    } catch (e) {
+      const usage = `${settings.prefix}${this.help.name} here`;
+      if (e.code === 50007) return message.reply(`you have DMs disabled! Either enable them so I can message you or run \`${usage}\`.`);
+      Logger.errorCmd(this, e);
+    }
   }
 };
