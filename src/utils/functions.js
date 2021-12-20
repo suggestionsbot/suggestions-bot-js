@@ -94,10 +94,15 @@ exports.displayUptime = (uptime) => {
   ].filter(x => x.value > 0).map(x => `${x.value} ${mapped[x.type]}`).join(', ');
 };
 
-exports.getRandomGiphyImage = (query) => {
+/**
+ * Get a random GIF from the Giphy API via a tag.
+ * @param {String} tag The tag to filter results by
+ * @return {Promise<String>} The static image URL of the GIF.
+ */
+exports.getRandomGiphyImage = (tag) => {
   return petitio('https://api.giphy.com/v1/gifs/random')
     .query('api_key', process.env.GIPHY)
-    .query('tag', query)
+    .query('tag', tag)
     .json()
     .then(({ data }) => data.images.original.url);
 };
