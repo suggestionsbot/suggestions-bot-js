@@ -47,7 +47,6 @@
     "discord.js-light": "^3.5.11",
     "dotenv": "^8.2.0",
     "erlpack": "discord/erlpack",
-    "giphy-api": "^2.0.1",
     "hastebin-gen": "^2.0.5",
     "kurasuta": "^2.2.3",
     "mongoose": "5.11.15",
