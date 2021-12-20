@@ -1,4 +1,4 @@
-FROM node:16-alpine AS base
+FROM nikolaik/python-nodejs:python3.10-nodejs16-alpine AS base
 
 # create working directory for bot
 WORKDIR /opt/suggestions
@@ -8,6 +8,9 @@ FROM base AS builder
 
 # install production dependencies
 COPY package.json yarn.lock ./
+
+# install make
+RUN apk add g++ make
 
 RUN yarn install --production --pure-lockfile
 RUN cp -RL node_modules /tmp/node_modules
