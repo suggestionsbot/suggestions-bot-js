@@ -1,16 +1,21 @@
-/* MISCELLANEOUS NON-CRITICAL FUNCTIONS */
+const mongoose = require('mongoose');
+const Logger = require('./Logger');
 
-// EXTENDING NATIVE TYPES IS BAD PRACTICE. Why? Because if JavaScript adds this
-// later, this conflicts with native code. Also, if some other lib you use does
-// // this, a conflict also occurs. KNOWING THIS however, the following methods
-// // are, we feel, very useful in code.
+mongoose.connection.on('connected', () => {
+  Logger.ready('MONGOOSE', 'Connection successfully opened!');
+});
 
-// These 2 process methods will catch exceptions and give *more details* about the error and stack trace.
-const logger = require('./logger');
+mongoose.connection.on('err', (err) => {
+  Logger.error('MONGOOSE', 'Connection error', err);
+});
+
+mongoose.connection.on('disconnected', () => {
+  Logger.event('MONGOOSE', 'Mongoose connection disconnected');
+});
 
 process.on('uncaughtException', (err) => {
   const msg = err.stack.replace(new RegExp(`${__dirname}/`, 'g'), './');
-  logger.error(`Uncaught Exception: \n ${msg}`);
+  Logger.error(`Uncaught Exception: \n ${msg}`);
   // Always best practice to let the code crash on uncaught exceptions.
   // Because you should be catching them anyway.
   process.exit(1);
@@ -18,12 +23,12 @@ process.on('uncaughtException', (err) => {
 
 process.on('unhandledRejection', err => {
   const msg = err.stack.replace(new RegExp(`${__dirname}/`, 'g'), './');
-  logger.error(`Unhandled Rejection: \n ${msg}`);
+  Logger.error(`Unhandled Rejection: \n ${msg}`);
 });
 
 process.on('SIGINT', async () => {
-  logger.log('SIGINT signal received.');
-  logger.log('Bot shutting down...');
+  Logger.log('SIGINT signal received.');
+  Logger.log('Bot shutting down...');
   await process.exit(0);
 });
 

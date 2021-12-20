@@ -28,17 +28,10 @@ module.exports = class MongoDB {
       sslCA: process.env.MONGO_CERTIFICATE
     };
 
-    const mongooseInstance = await mongoose.connect(process.env.MONGO_URI, this.client.production ? prodOptions : dbOptions)
-      .then(mongo => {
-        Logger.ready('Successfully connected to the MongoDB database!');
-        return mongo;
-      }).catch(err => Logger.error('MONGODB ERROR', err));
+    const connected = await mongoose.connect(process.env.MONGO_URI, this.client.production ? prodOptions : dbOptions)
+      .catch(err => Logger.error('MONGODB ERROR', err));
 
     this.Promise = global.Promise;
-    this.connection = mongooseInstance.connection;
-  }
-
-  async close() {
-    await this.connection.close();
+    this.connection = connected.connection;
   }
 };
