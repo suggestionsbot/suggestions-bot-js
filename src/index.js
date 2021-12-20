@@ -2,8 +2,8 @@ require('dotenv').config();
 require('./utils/extensions');
 
 const { ShardingManager, SharderEvents } = require('kurasuta');
-const { isMaster } = require('cluster');
 const { join } = require('path');
+
 const Logger = require('./utils/logger');
 
 const SuggestionsClient = require('./structures/Client');
@@ -49,15 +49,9 @@ const sharder = new ShardingManager(join(__dirname, 'structures', 'Cluster.js'),
     'voiceStateUpdate',
     'webhookUpdate'
   ]
-  // clusterCount: 4,
-  // shardCount: 4
 });
 
-sharder.on(SharderEvents.MESSAGE, message => {
-  Logger.log(message);
-
-  // if (isMaster && (message['name'] === 'shardStats')) dummyFunc(message.data);
-});
+sharder.on(SharderEvents.MESSAGE, message => Logger.log(message));
 
 sharder.on(SharderEvents.READY, startCluster => Logger.ready(`Cluster ${startCluster.id} ready`));
 
@@ -75,7 +69,3 @@ if (!isProduction() && process.env.DEBUG)
   sharder.on(SharderEvents.DEBUG, (message => Logger.debug(`SHARDER DEBUG: ${message}`)));
 
 sharder.spawn().catch(e => Logger.error(`SHARD SPAWN: ${e}`));
-
-const dummyFunc = ({ clusterId, guildCount }) => {
-  Logger.log(`[ CLUSTER ${clusterId} ] The bot is in ${guildCount} guilds!`);
-};
