@@ -15,7 +15,7 @@ A Discord bot designed to build better communities by encouraging a positive and
 <hr>
 
 ## Statistics
-- Used by nearly **50,000+** servers!
+- Used by nearly **50,000** servers!
 - Over **1 million** suggestions submitted!
 - Over **2 million** commands ran!
 - Serving servers publicly since **August 2018**!
