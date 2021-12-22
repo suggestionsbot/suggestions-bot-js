@@ -1,5 +1,5 @@
-<div style="text-align: center;">
-<img src="./assets/logo.png" width="15%" alt="Suggestions logo">
+<div align="center">
+<img src="./assets/logo.png" align="center" width="15%" alt="Suggestions logo">
 
 [![version](https://img.shields.io/github/package-json/v/suggestionsbot/suggestions-bot?style=for-the-badge)](https://github.com/suggestionsbot/suggestions-bot)
 [![discord](https://img.shields.io/discord/601219766258106399?style=for-the-badge&color=dd9323&label=Discord)](https://suggestions.bot/discord)
