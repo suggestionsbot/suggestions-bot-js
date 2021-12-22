@@ -1,15 +1,17 @@
 <div align="center">
 <img src="./assets/logo.png" align="center" width="15%" alt="Suggestions logo">
 
-[![version](https://img.shields.io/github/package-json/v/suggestionsbot/suggestions-bot?style=for-the-badge)](https://github.com/suggestionsbot/suggestions-bot)
-[![discord](https://img.shields.io/discord/601219766258106399?style=for-the-badge&color=dd9323&label=Discord)](https://suggestions.bot/discord)
-[![issues](https://img.shields.io/github/issues/Androz2091/ManageInvite?style=for-the-badge)](https://github.com/suggestionsbot/suggestions-bot)
 
 # Suggestions
 
 A Discord bot designed to build better communities by encouraging a positive and constructive relationship between community and staff.
-</div>
 
+<hr>
+
+[![version](https://img.shields.io/github/package-json/v/suggestionsbot/suggestions-bot?style=for-the-badge)](https://github.com/suggestionsbot/suggestions-bot)
+[![discord](https://img.shields.io/discord/601219766258106399?style=for-the-badge&color=dd9323&label=Discord)](https://suggestions.bot/discord)
+[![issues](https://img.shields.io/github/issues/Androz2091/ManageInvite?style=for-the-badge)](https://github.com/suggestionsbot/suggestions-bot)
+</div>
 <hr>
 
 ## Statistics
