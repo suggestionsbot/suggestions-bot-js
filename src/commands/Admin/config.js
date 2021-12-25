@@ -208,7 +208,7 @@ module.exports = class ConfigCommand extends Command {
       configEmbed
         .setDescription(`Add/remove a staff role by doing \`${prefix + name} roles [role]\``)
 
-      if (viewRoles.length >= 1) configEmbed.addField('Staff Roles', viewRoles);
+      configEmbed.addField('Staff Roles', viewRoles || 'No roles set.');
       configEmbed.addField('More Information', `[Link](${confDocs}#staff-roles)`);
 
       message.channel.send(configEmbed);
