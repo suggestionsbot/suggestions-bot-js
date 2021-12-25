@@ -11,27 +11,15 @@ module.exports = class MongoDB {
   }
 
   async init() {
-    const dbOptions = {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      useFindAndModify: false,
+    await mongoose.connect(process.env.MONGO_URI, {
       autoIndex: false,
-      poolSize: 5,
       connectTimeoutMS: 10000,
       family: 4
-    };
+    }, err => {
+      if (err) Logger.error('MONGODB ERROR', err);
+      return true;
+    });
 
-    const prodOptions = {
-      ...dbOptions,
-      ssl: true,
-      sslValidate: true,
-      sslCA: process.env.MONGO_CERTIFICATE
-    };
-
-    const connected = await mongoose.connect(process.env.MONGO_URI, this.client.production ? prodOptions : dbOptions)
-      .catch(err => Logger.error('MONGODB ERROR', err));
-
-    this.Promise = global.Promise;
-    this.connection = connected.connection;
+    this.connection = mongoose.connection;
   }
 };
