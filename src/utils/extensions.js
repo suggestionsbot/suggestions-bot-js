@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const Logger = require('./Logger');
+const Logger = require('./logger');
 
 mongoose.connection.on('connected', () => {
   Logger.ready('MONGOOSE', 'Connection successfully opened!');
