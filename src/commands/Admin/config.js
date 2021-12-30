@@ -59,7 +59,7 @@ module.exports = class ConfigCommand extends Command {
       if (updated) {
         try {
           if (updated.length > 5) return this.client.errors.invalidPrefixLength(message.channel, updated);
-          await this.client.mongodb.helpers.settings.settings.updateGuild(message.guild, { prefix: updated });
+          await this.client.mongodb.helpers.settings.updateGuild(message.guild, { prefix: updated });
           configEmbed.setDescription(`${success} Prefix has been updated to: \`${updated}\``);
 
           return message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
