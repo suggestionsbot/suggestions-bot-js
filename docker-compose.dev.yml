@@ -1,0 +1,12 @@
+version: '3'
+
+services:
+  suggestions-bot:
+    container_name: suggestions-bot
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    environment:
+      - DISCORD_TOKEN=${DISCORD_TOKEN}
+    env_file:
+      - .env
