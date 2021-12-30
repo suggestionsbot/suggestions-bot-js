@@ -100,7 +100,7 @@ module.exports = class ConfigCommand extends Command {
         ? await message.guild.channels.fetch({ cache: false }).then(res => res.find(c => c.name === 'suggestions'))
         : message.guild.channels.forge(suggestionsChannel)
       if (!suggestionsChannel) return this.client.errors.noSuggestions(message.channel);
-      configEmbed.setDescription(`Current suggestions channel: ${suggestionsChannel}${isDefault ? ' *(config default)*' : ''}`);
+      configEmbed.setDescription(`Current suggestions channel: ${suggestionsChannel}`);
       configEmbed.addField('More Information', `[Link](${confDocs}#suggestions-channel)`);
       message.channel.send(configEmbed);
       break;
