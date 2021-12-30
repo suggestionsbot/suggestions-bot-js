@@ -37,7 +37,11 @@ module.exports = class CommandHandler {
 
     if (message.guild && !channel.permissionsFor(message.guild.me).missing('SEND_MESSAGES')) return;
 
-    const args = message.content.slice(newPrefix.length).trim().split(/ +/g);
+    const args = message.content.slice(newPrefix.length).trim()
+      // We replace <> and [] from example messages due to confusion among users including placeholders in commands
+      .replace(/\[([^)]+)]/, '$1')
+      .replace(/<([^)]+)>/, '$1')
+      .split(/ +/g);
     const command = args.shift().toLowerCase();
 
     const cmd = this.client.commands.get(command) || this.client.commands.get(this.client.aliases.get(command));
