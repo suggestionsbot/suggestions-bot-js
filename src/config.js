@@ -5,6 +5,7 @@ module.exports = {
   prefix: ',',
   suggestionsChannel: 'suggestions',
   suggestionsLogs: 'suggestion-logs',
+  serverLogs: isProduction() ? '602332466476482616' : '498627833233539086',
   owners: ['158063324699951104'],
   embedColor: 0xdd9323,
   discord: 'https://discord.gg/suggestions',

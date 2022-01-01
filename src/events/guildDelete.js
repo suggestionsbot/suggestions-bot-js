@@ -30,8 +30,7 @@ module.exports = class extends Event {
 
     try {
       await this.client.mongodb.helpers.settings.deleteGuild(guild);
-      const logs = this.client.production ? '602332466476482616' : '498627833233539086';
-      await this.client.channels.forge(logs).send(oldServer).catch(e => Logger.error('GUILD_DELETE', e));
+      await this.client.channels.forge(serverLogs).send(oldServer).catch(e => Logger.error('GUILD_DELETE', e));
     } catch (err) {
       Logger.error('GUILD_DELETE', err.stack);
     }

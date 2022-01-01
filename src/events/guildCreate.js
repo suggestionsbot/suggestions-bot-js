@@ -10,7 +10,7 @@ module.exports = class extends Event {
   }
 
   async run(guild) {
-    const { guildStatusColors: { created } } = this.client.config;
+    const { guildStatusColors: { created }, serverLogs } = this.client.config;
 
     const guildOwner = await this.client.users.fetch(guild.ownerID)
       .catch(e => Logger.error('GUILD_CREATE', e));
@@ -27,7 +27,6 @@ module.exports = class extends Event {
       .setColor(created)
       .setTimestamp();
 
-    const logs = this.client.production ? '602332466476482616' : '498627833233539086';
-    await this.client.channels.forge(logs).send(newServer).catch(e => Logger.error('GUILD_CREATE', e));
+    await this.client.channels.forge(serverLogs).send(newServer).catch(e => Logger.error('GUILD_CREATE', e));
   }
 };
