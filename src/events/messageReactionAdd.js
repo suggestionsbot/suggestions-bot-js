@@ -1,5 +1,4 @@
 const Event = require('../structures/Event');
-const { validateChannel } = require('../utils/functions');
 const Logger = require('../utils/logger');
 
 module.exports = class extends Event {
@@ -20,13 +19,15 @@ module.exports = class extends Event {
       return;
     }
 
-    const sChannel = settings.suggestionsChannel && await validateChannel(message.guild.channels, settings.suggestionsChannel);
-    if (!sChannel || (message.channel.id !== sChannel.id)) return;
+    if (message.channel.id !== settings.suggestionsChannel) return;
     if (messageReaction.partial) await messageReaction.fetch();
 
-    const reactions = await Promise.all(message.reactions.cache.map(r => {
-      return r.users.fetch(false).then(res => res.filter(u => u.id === user.id).size);
-    }));
+    const reactions = await message.fetch({ cache: false }).then(msg => {
+      return Promise.all(msg.reactions.cache.map(reaction => {
+        return reaction.users.fetch({ cache: false })
+          .then(res => res.filter(u => u.id === user.id).size);
+      }));
+    });
 
     const reactionCount = reactions.reduce((acc, cur) => acc + cur, 0);
     if (reactionCount > 1) return await messageReaction.users.remove(user.id);
