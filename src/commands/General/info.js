@@ -30,7 +30,7 @@ module.exports = class InfoCommand extends Command {
       .addField('Website', website)
       .addField('GitHub', github)
       .addField('Bot Version', version)
-      .setFooter('© 2021 Anthony Collier');
+      .setFooter('© 2022 Anthony Collier');
 
     return message.channel.send(embed);
   }
