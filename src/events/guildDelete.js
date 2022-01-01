@@ -10,11 +10,7 @@ module.exports = class extends Event {
   }
 
   async run(guild) {
-
-    const { guildStatusColors: { deleted } } = this.client.config;
-
-    const guildOwner = await this.client.users.fetch(guild.ownerID, false, true)
-      .catch(e => Logger.error('GUILD_DELETE', e));
+    const { guildStatusColors: { deleted }, serverLogs } = this.client.config;
 
     const oldServer = new MessageEmbed()
       .setTitle('Removed')
@@ -23,7 +19,7 @@ module.exports = class extends Event {
         **Name:** \`${guild}\`
         **Members:** \`${guild.memberCount}\`
         **Joined:** ${displayTimestamp(guild.me.joinedAt, 'R')}
-        **Owner:** ${this.client.users.forge(guild.ownerID)} \`[${guildOwner?.tag ?? 'N/A'}]\`
+        **Owner:** ${this.client.users.forge(guild.ownerID)}
       `)
       .setColor(deleted)
       .setTimestamp();
