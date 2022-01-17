@@ -169,7 +169,7 @@ const postStats = async (client) => {
   const data = { 'guild_count': guildCount, timestamp: now };
 
   return petitio(process.env.STATS_API_URL, 'POST')
-    .header('Authorization', process.env.STATS_API_KEY)
+    .header('Authorization', `Bearer ${process.env.STATS_API_KEY}`)
     .body(data)
     .json()
     .then(body => !!body.success);
