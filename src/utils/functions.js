@@ -1,8 +1,12 @@
 const fs = require('fs');
 const path = require('path');
 const petitio = require('petitio');
+const { CronJob } = require('cron');
+const { Client, MessageMentions } = require('discord.js-light');
 
-const { suggestionsChannel } = require('../config');
+const config = require('../config');
+const { postStats } = require('./functions');
+const Logger = require('./logger');
 
 /**
  * Validate if a string input is a snowflake or not
@@ -115,5 +119,76 @@ exports.getRandomGiphyImage = (tag) => {
  * @return {Promise<TextChannel>|null} Return the channel, if it exists
  */
 exports.getDefaultSuggestionsChannel = (guild) => {
-  return guild.channels.fetch({ cache: false }).then(res => res.find(c => c.name === suggestionsChannel)) ?? null;
+  return guild.channels.fetch({ cache: false }).then(res => res.find(c => c.name === config.suggestionsChannel)) ?? null;
+};
+
+/**
+ * Return a new array of parsed array of arguments removing brackets.
+ * @param {Array<String>} args The command arguments.
+ * @return {Array<String>} Return the new array of arguments.
+ */
+exports.parseCommandArguments = (args) => {
+  const toParseRegex = /[<>[\]]/gm;
+
+  const discordPatterns = [
+    MessageMentions.CHANNELS_PATTERN,
+    MessageMentions.EVERYONE_PATTERN,
+    MessageMentions.ROLES_PATTERN,
+    MessageMentions.USERS_PATTERN,
+    // emoji pattern
+    /<?(?:(a):)?(\w{2,32}):(\d{17,19})?>?/
+  ];
+
+  // This functionality could likely be improved. Feel free to open an issue or PR.
+  if (args.length <= 3) {
+    return args.map(x => {
+      const isMatch = discordPatterns.some(r => r.test(x));
+      if (!isMatch) x = x.replace(toParseRegex, '');
+      return x;
+    });
+  } else {
+    const len = args.join(' ').length;
+    return args.join(' ').split('').map((x, i) => {
+      if (i === 0) x = x.replace(/[<[]/gm, '');
+      if (i === len - 1) x = x.replace(/[>\]]/gm, '');
+      return x;
+    }).join('').trim().split(/\s+/g);
+  }
+};
+
+/**
+ * Post bot stats to the voting/stats API.
+ * @param {Client} client The client to post the stats from..
+ * @return {Promise<Boolean>} If the request succeeded or not.
+ */
+exports.postStats = async (client) => {
+  const time = Date.now();
+  const now = Math.floor(time / 1000);
+  const guildCount = await client.shard.fetchClientValues('guilds.cache.size')
+    .then(res => res.reduce((a, b) => a + b, 0));
+
+  const data = { 'guild_count': guildCount, timestamp: now };
+
+  return petitio(process.env.STATS_API_URL, 'POST')
+    .header('Authorization', process.env.STATS_API_API_KEY)
+    .body(data)
+    .json()
+    .then(body => !!body.success);
+};
+
+/**
+ * Create the CronJob for posting stats to the voting/stats API.
+ * @param {Client} client The Discord client to associate with the CronJob.
+ * @return {CronJob} The new CronJob.
+ */
+exports.postStatsCronJob = (client) => {
+  Logger.log('Running cron job for posting bot stats...');
+  return new CronJob(config.timers.stats, async () => {
+    try {
+      const success = await postStats(client);
+      Logger.log(`${success ? 'S' : 'Uns'}uccessfully posted stats to the API!`);
+    } catch (e) {
+      return Logger.error('STATS JOB', e);
+    }
+  }, null, true, 'America/New_York');
 };

@@ -4,6 +4,7 @@ const { BaseCluster } = require('kurasuta');
 const Logger = require('../utils/logger');
 
 require('../extensions/Guild');
+const { postStatsCronJob } = require('../utils/functions');
 
 module.exports = class extends BaseCluster {
   launch() {
@@ -41,5 +42,7 @@ module.exports = class extends BaseCluster {
 
     if (!this.client.production && process.env.DEBUG)
       this.client.on('debug', info => Logger.debug('CLUSTER', info));
+
+    if (this.client.production) postStatsCronJob(this.client).start();
   }
 };
