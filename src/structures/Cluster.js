@@ -43,6 +43,6 @@ module.exports = class extends BaseCluster {
     if (!this.client.production && process.env.DEBUG)
       this.client.on('debug', info => Logger.debug('CLUSTER', info));
 
-    if (this.client.production) postStatsCronJob(this.client).start();
+    if ((this.id === 0) && this.client.production) postStatsCronJob(this.client).start();
   }
 };

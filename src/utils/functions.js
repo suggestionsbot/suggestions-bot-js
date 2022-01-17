@@ -5,7 +5,6 @@ const { CronJob } = require('cron');
 const { Client, MessageMentions } = require('discord.js-light');
 
 const config = require('../config');
-const { postStats } = require('./functions');
 const Logger = require('./logger');
 
 /**
@@ -161,7 +160,7 @@ exports.parseCommandArguments = (args) => {
  * @param {Client} client The client to post the stats from..
  * @return {Promise<Boolean>} If the request succeeded or not.
  */
-exports.postStats = async (client) => {
+const postStats = async (client) => {
   const time = Date.now();
   const now = Math.floor(time / 1000);
   const guildCount = await client.shard.fetchClientValues('guilds.cache.size')
@@ -170,7 +169,7 @@ exports.postStats = async (client) => {
   const data = { 'guild_count': guildCount, timestamp: now };
 
   return petitio(process.env.STATS_API_URL, 'POST')
-    .header('Authorization', process.env.STATS_API_API_KEY)
+    .header('Authorization', process.env.STATS_API_KEY)
     .body(data)
     .json()
     .then(body => !!body.success);
@@ -192,3 +191,5 @@ exports.postStatsCronJob = (client) => {
     }
   }, null, true, 'America/New_York');
 };
+
+exports = { postStats };
