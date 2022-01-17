@@ -151,7 +151,7 @@ exports.parseCommandArguments = (args) => {
       if (i === 0) x = x.replace(/[<[]/gm, '');
       if (i === len - 1) x = x.replace(/[>\]]/gm, '');
       return x;
-    }).join('').trim().split(/\s+/g);
+    }).join('').trim().split(/ +/g);
   }
 };
 
