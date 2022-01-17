@@ -79,10 +79,10 @@ exports.displayUptime = (uptime) => {
   const secondsInADay = 60 * 60 * 1000 * 24;
   const secondsInAHour = 60 * 60 * 1000;
 
-  const days = Math.floor(uptime / (secondsInADay));
-  const hours = Math.floor((uptime % (secondsInADay)) / (secondsInAHour));
-  const minutes = Math.floor(((uptime % (secondsInADay)) % (secondsInAHour)) / (60 * 1000));
-  const seconds = Math.floor(((((uptime % (secondsInADay)) % (secondsInAHour)) % (60 * 1000)) / 1000));
+  const days = Math.floor(uptime / secondsInADay);
+  const hours = Math.floor((uptime % secondsInADay) / secondsInAHour);
+  const minutes = Math.floor(((uptime % secondsInADay) % secondsInAHour) / (60 * 1000));
+  const seconds = Math.floor((uptime % (1000 * 60)) / 1000);
 
   const mapped = {
     s: 'secs',
