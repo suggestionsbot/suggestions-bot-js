@@ -1,6 +1,7 @@
 const { oneLine } = require('common-tags');
 const permissions = require('../utils/perms');
 const Logger = require('../utils/logger');
+const { parseCommandArguments } = require('../utils/functions');
 
 module.exports = class CommandHandler {
   constructor(client) {
@@ -37,9 +38,11 @@ module.exports = class CommandHandler {
 
     if (message.guild && !channel.permissionsFor(message.guild.me).missing('SEND_MESSAGES')) return;
 
-    const [command, ...args] = message.content
+    const [command, ...regArgs] = message.content
       .slice(newPrefix.length)
-      .trim().split(/\s+/g);
+      .trim().split(/ +/g);
+
+    const args = parseCommandArguments(regArgs);
 
     const cmd = this.client.commands.get(command) || this.client.commands.get(this.client.aliases.get(command));
     if (!cmd) return;
