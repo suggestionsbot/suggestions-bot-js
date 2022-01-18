@@ -141,8 +141,8 @@ exports.parseCommandArguments = (args) => {
   // This functionality could likely be improved. Feel free to open an issue or PR.
   if (args.length <= 3) {
     return args.map(x => {
-      const isMatch = discordPatterns.some(r => r.test(x));
-      if (!isMatch) x = x.replace(toParseRegex, '');
+      const isMatch = discordPatterns.some(r => RegExp(r, 'g').test(x));
+      if (!isMatch) return x.replace(toParseRegex, '');
       return x;
     });
   } else {
