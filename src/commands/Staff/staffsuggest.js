@@ -1,6 +1,7 @@
 const { MessageEmbed } = require('discord.js-light');
 const Command = require('../../structures/Command');
 const Logger = require('../../utils/logger');
+const { messageDelete, getChannelAndCache } = require('../../utils/functions');
 
 module.exports = class StaffSuggestCommand extends Command {
   constructor(client) {
@@ -24,7 +25,7 @@ module.exports = class StaffSuggestCommand extends Command {
 
     let suggestionsChannel;
     try {
-      suggestionsChannel = settings.staffSuggestionsChannel && await message.guild.channels.fetch(settings.staffSuggestionsChannel);
+      suggestionsChannel = settings.staffSuggestionsChannel && await getChannelAndCache(this.client, settings.staffSuggestionsChannel, message.guild);
       if (!suggestionsChannel) return this.client.errors.noStaffSuggestions(message.channel);
     } catch (error) {
       if (!suggestionsChannel) return this.client.errors.noStaffSuggestions(message.channel);
@@ -32,14 +33,13 @@ module.exports = class StaffSuggestCommand extends Command {
       return message.channel.send(`An error occurred: **${error.message}**`);
     }
 
-
     if (!settings.staffRoles) return this.client.errors.noStaffRoles(message.channel);
 
     const embed = new MessageEmbed()
-      .setAuthor(sUser.tag, sUser.displayAvatarURL())
+      .setAuthor({ name: sUser.tag, iconURL: sUser.displayAvatarURL() })
       .setDescription(`Hey, ${sUser}. Your suggestion has been added in the ${suggestionsChannel} channel to be voted on!`)
       .setColor(embedColor)
-      .setFooter(`User ID: ${sUser.id}`)
+      .setFooter({ text: `User ID: ${sUser.id}` })
       .setTimestamp();
 
     const suggestion = args.join(' ');
@@ -55,15 +55,15 @@ module.exports = class StaffSuggestCommand extends Command {
       `)
       .setThumbnail(sUser.avatarURL())
       .setColor(embedColor)
-      .setFooter(`User ID: ${sUser.id}`)
+      .setFooter({ text: `User ID: ${sUser.id}` })
       .setTimestamp();
 
     const missingPermissions = suggestionsChannel.permissionsFor(message.guild.me).missing(staffChannelPermissions);
     if (missingPermissions.length > 0) return this.client.errors.noChannelPerms(message, suggestionsChannel, missingPermissions);
 
-    message.channel.send(embed).then(msg => msg.delete({ timeout: 5000 })).catch(err => Logger.errorCmd(this, err.stack));
+    message.channel.send({ embeds: [embed] }).then(msg => messageDelete(msg, 5000)).catch(err => Logger.errorCmd(this, err.stack));
 
-    return suggestionsChannel.send(sEmbed)
+    return suggestionsChannel.send({ embeds: [sEmbed] })
       .then(async msg => {
         await msg.react('✅');
         await msg.react('❌');

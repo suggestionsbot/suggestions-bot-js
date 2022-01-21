@@ -41,7 +41,7 @@ module.exports = class StatsCommand extends Command {
     }
 
     const embed = new MessageEmbed()
-      .setAuthor(`${this.client.user.username} v${version}`, this.client.user.avatarURL())
+      .setAuthor({ name: `${this.client.user.username} v${version}`, iconURL: this.client.user.avatarURL() })
       .setColor(this.client.config.embedColor)
       .addField('Guilds', guildSize, true)
       .addField('Users', userSize, true)
@@ -49,9 +49,9 @@ module.exports = class StatsCommand extends Command {
       .addField('Memory', `${Math.round(memUsage)} MB`, true)
       .addField('Discord.js', `v${discordVersion}`, true)
       .addField('Node', `${process.version}`, true)
-      .setFooter(`PID ${process.pid} | Cluster ${this.client.shard.id} | Shard ${message.guild?.shardID ?? 0}`)
+      .setFooter({ text: `PID ${process.pid} | Cluster ${this.client.shard.id} | Shard ${message.guild?.shardID ?? 0}` })
       .setTimestamp();
 
-    return message.channel.send(embed);
+    return message.channel.send({ embeds: [embed] });
   }
 };

@@ -28,6 +28,6 @@ module.exports = class ChangelogCommand extends Command {
 
     changelogEmbed.addField('More Information', `Please check our ${changelog.channel} channel at ${discord} for previous updates!`);
 
-    return message.channel.send(changelogEmbed);
+    return message.channel.send({ embeds: [changelogEmbed] });
   }
 };

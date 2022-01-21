@@ -43,7 +43,7 @@ module.exports = class GuildInfoCommand extends Command {
       .addField('Owner', `${message.guild.owner} \`[${message.guild.ownerID}]\``)
       .addField('Created On', displayTimestamp(message.guild.createdAt))
       .addField('Joined', displayTimestamp(message.guild.me.joinedAt))
-      .setFooter(`ID: ${message.guild.id}`)
+      .setFooter({ text: `ID: ${message.guild.id}` })
       .setTimestamp();
 
     if (gSuggestions.length >= 1) {
@@ -81,6 +81,6 @@ module.exports = class GuildInfoCommand extends Command {
       serverEmbed.addField('Last Suggestion (sID)', lastSuggestionInfo);
     }
 
-    return message.channel.send(serverEmbed);
+    return message.channel.send({ embeds: [serverEmbed] });
   }
 };

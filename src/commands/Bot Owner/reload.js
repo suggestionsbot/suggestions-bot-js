@@ -1,6 +1,7 @@
 const Command = require('../../structures/Command');
 const { noBotPerms } = require('../../utils/errors');
 const Logger = require('../../utils/logger');
+const { messageDelete } = require('../../utils/functions');
 
 module.exports = class ReloadCommand extends Command {
   constructor(client) {
@@ -19,7 +20,7 @@ module.exports = class ReloadCommand extends Command {
 
     if (this.client.production) {
       return message.channel.send('This command can only be used in a development environment!')
-        .then(msg => msg.delete({ timeout: 5000 }))
+        .then(msg => messageDelete(msg, 5000))
         .catch(err => Logger.errorCmd(this, err.stack));
     }
 
@@ -31,7 +32,7 @@ module.exports = class ReloadCommand extends Command {
     if (!args[0]) return this.client.errors.noUsage(message.channel, this, settings);
 
     const cmd = this.client.commands.get(args[0]) || this.client.commands.get(this.client.aliases.get(args[0]));
-    if (!cmd) return message.channel.send(`The command \`${args[0]}\` does not exist.`).then(msg => msg.delete({ timeout: 5000 })).catch(err => Logger.errorCmd(this, err.stack));
+    if (!cmd) return message.channel.send(`The command \`${args[0]}\` does not exist.`).then(msg => messageDelete(msg, 5000)).catch(err => Logger.errorCmd(this, err.stack));
 
     let response = await this.client.commandHandler.unloadCommand(cmd.conf.location, cmd.help.name);
     if (response) {

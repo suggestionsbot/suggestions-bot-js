@@ -1,6 +1,7 @@
 const { MessageEmbed } = require('discord.js-light');
 const hastebin = require('hastebin-gen');
 const Command = require('../../structures/Command');
+const { messageDelete } = require('../../utils/functions');
 
 module.exports = class EvalCommand extends Command {
   constructor(client) {
@@ -21,8 +22,8 @@ module.exports = class EvalCommand extends Command {
     const code = args.join(' ');
     if (!code) return this.client.errors.noUsage(message.channel, this, settings);
 
-    const embed = new MessageEmbed().setFooter(`ID: ${message.author.id}`);
-    const exceededEmbed = new MessageEmbed().setFooter(`ID: ${message.author.id}`);
+    const embed = new MessageEmbed().setFooter({ text: `ID: ${message.author.id}` });
+    const exceededEmbed = new MessageEmbed(embed);
 
     try {
       const evaled = eval(code);
@@ -40,9 +41,9 @@ module.exports = class EvalCommand extends Command {
         exceededEmbed.setColor(embedColor);
         exceededEmbed.setDescription('📨 Output exceeded 1000 characters. DMing you the Hastebin.');
 
-        const msg = await message.channel.send(exceededEmbed);
+        const msg = await message.channel.send({ embeds: [exceededEmbed] });
         await msg.react('📧');
-        await msg.delete({ timeout: 2500 });
+        await messageDelete(msg, 2500);
         return;
       }
 
@@ -60,9 +61,9 @@ module.exports = class EvalCommand extends Command {
         exceededEmbed.setColor(rejected);
         exceededEmbed.setDescription('📨 Output exceeded 2000 characters. DMing you the Hastebin.');
 
-        const msg = await message.channel.send(exceededEmbed);
+        const msg = await message.channel.send({ embeds: [exceededEmbed] });
         await msg.react('📧');
-        await msg.delete({ timeout: 5000 });
+        await messageDelete(msg, 5000);
         return;
       }
 
@@ -70,6 +71,6 @@ module.exports = class EvalCommand extends Command {
       embed.addField('Error ❗', `\`\`\`bash\n${err}\`\`\``);
     }
 
-    if (!code.startsWith('void')) return message.channel.send(embed);
+    if (!code.startsWith('void')) return message.channel.send({ embeds: [embed] });
   }
 };

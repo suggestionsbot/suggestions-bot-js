@@ -19,14 +19,14 @@ module.exports = class extends Event {
         **Name:** \`${guild}\`
         **Members:** \`${guild.memberCount}\`
         **Joined:** ${displayTimestamp(guild.me.joinedAt, 'R')}
-        **Owner:** ${this.client.users.forge(guild.ownerID)}
+        **Owner:** ${this.client.users.forge(guild.ownerId)}
       `)
       .setColor(deleted)
       .setTimestamp();
 
     try {
       await this.client.mongodb.helpers.settings.deleteGuild(guild);
-      await this.client.channels.forge(serverLogs).send(oldServer).catch(e => Logger.error('GUILD_DELETE', e));
+      await this.client.channels.forge(serverLogs).send({ embeds: [oldServer] }).catch(e => Logger.error('GUILD_DELETE', e));
     } catch (err) {
       Logger.error('GUILD_DELETE', err.stack);
     }

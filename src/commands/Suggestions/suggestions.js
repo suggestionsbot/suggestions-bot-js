@@ -2,7 +2,7 @@ const { MessageEmbed } = require('discord.js-light');
 
 const Command = require('../../structures/Command');
 const Logger = require('../../utils/logger');
-const { displayTimestamp } = require('../../utils/functions');
+const { displayTimestamp, messageDelete } = require('../../utils/functions');
 
 module.exports = class MySuggestionsCommand extends Command {
   constructor(client) {
@@ -29,8 +29,8 @@ module.exports = class MySuggestionsCommand extends Command {
 
     const getSubmitter = async userID => {
       return message.guild
-        ? await message.guild.members.fetch({ user: userID, cache: false })
-        : await this.client.users.fetch(userID, false);
+        ? await message.guild.members.fetch(userID)
+        : await this.client.users.fetch(userID);
     };
 
     const submitter = (message.guild ? message.mentions.members.first() : message.mentions.users.first()) ||
@@ -54,7 +54,7 @@ module.exports = class MySuggestionsCommand extends Command {
 
     if (gSuggestions.length === 0) {
       return message.channel.send(`No suggestions data exists for **${submitter?.user?.tag ?? submitter?.tag}**${message.guild ? ' in this guild' : ''}!`)
-        .then(msg => msg.delete({ timeout: 3000 }))
+        .then(msg => messageDelete(msg, 3000))
         .catch(err => Logger.errorCmd(this, err.stack));
     }
 
@@ -84,10 +84,10 @@ module.exports = class MySuggestionsCommand extends Command {
 
     if (message.guild) {
       embed
-        .setAuthor(`${submitter.guild ? submitter.user.tag : submitter.tag} | ${message.guild}`, avatarURL)
+        .setAuthor({ name: `${submitter.guild ? submitter.user.tag : submitter.tag} | ${message.guild}`, iconURL: avatarURL })
         .addField('Created On', `<t:${message.guild.createdAt}>`)
         .addField('Joined', `<t:${submitter.joinedAt}>`);
-    } else embed.setAuthor(`${submitter.tag} | Global Statistics`, avatarURL);
+    } else embed.setAuthor({ name: `${submitter.tag} | Global Statistics`, iconURL: avatarURL });
 
 
     if (gSuggestions.length >= 1) {
@@ -95,6 +95,6 @@ module.exports = class MySuggestionsCommand extends Command {
       embed.addField('Last Suggestion (sID)', lastSuggestionInfo);
     }
 
-    return message.channel.send(embed);
+    return message.channel.send({ embeds: [embed] });
   }
 };

@@ -2,6 +2,7 @@ const { MessageEmbed } = require('discord.js-light');
 const { oneLine, stripIndent } = require('common-tags');
 const Command = require('../../structures/Command');
 const Logger = require('../../utils/logger');
+const { messageDelete } = require('../../utils/functions');
 
 module.exports = class BlacklistCommand extends Command {
   constructor(client) {
@@ -45,7 +46,7 @@ module.exports = class BlacklistCommand extends Command {
     const caseNum = total + 1;
     const blEmbed = new MessageEmbed()
       .setColor(embedColor)
-      .setFooter(`Guild: ${message.guild.id}`)
+      .setFooter({ text: `Guild: ${message.guild.id}` })
       .setTimestamp();
 
     if (!args[0]) {
@@ -55,8 +56,8 @@ module.exports = class BlacklistCommand extends Command {
 
         const blacklists = activeBlacklists.map(async blacklist => {
           let time;
-          const issued = await this.client.users.fetch(blacklist.userID, false);
-          const issuer = await this.client.users.fetch(blacklist.issuerID, false);
+          const issued = await this.client.users.fetch(blacklist.userID);
+          const issuer = await this.client.users.fetch(blacklist.issuerID);
           const num = blacklist.case;
           const reason = blacklist.reason;
           const caseStatus = this.blStatus[blacklist.status];
@@ -81,7 +82,7 @@ module.exports = class BlacklistCommand extends Command {
 
         for (const blacklist of mappedBlacklists) blEmbed.addField(blacklist.name, blacklist.value);
 
-        blEmbed.setAuthor(`${message.guild} | Blacklisted Users`, message.guild.iconURL);
+        blEmbed.setAuthor({ name: `${message.guild} | Blacklisted Users`, iconURL: message.guild.iconURL });
         blEmbed.setDescription(stripIndent`
           These users are currently blacklisted from using any of the bot commands in this guild.
 
@@ -93,7 +94,7 @@ module.exports = class BlacklistCommand extends Command {
             .then(m => m.delete({ timeout: 5000 }));
         }
 
-        message.channel.send(blEmbed);
+        message.channel.send({ embeds: [blEmbed] });
       } catch (err) {
         Logger.errorCmd(this, err.stack);
         return message.channel.send(`An error occurred: **${err.message}**`);
@@ -104,7 +105,7 @@ module.exports = class BlacklistCommand extends Command {
 
     if (args[0] === 'help') return this.client.errors.noUsage(message.channel, this, settings);
     let blUser = message.mentions.users.size >= 1 ? message.mentions.users.first().id : args[1];
-    blUser = await this.client.users.fetch(blUser, false).catch(() => {
+    blUser = await this.client.users.fetch(blUser).catch(() => {
       return this.client.errors.userNotFound(args[1], message.channel);
     });
     const reason = args.slice(2).join(' ');
@@ -112,7 +113,7 @@ module.exports = class BlacklistCommand extends Command {
     if (!blUser) return this.client.errors.userNotFound(args[1], message.channel);
     if (guarded.includes(blUser.id) || await this.client.isStaff(message.guild, blUser)) {
       return message.channel.send('You cannot issue a blacklist to yourself or a guarded user!')
-        .then(m => m.delete({ timeout: 5000 }))
+        .then(m => messageDelete(m, 5000))
         .catch(e => Logger.errorCmd(this, e.stack));
     }
 
@@ -158,7 +159,7 @@ module.exports = class BlacklistCommand extends Command {
           const check = await this.client.mongodb.helpers.blacklists.checkRecentBlacklist(blUser, message.guild);
           if (check && check.status) return this.client.errors.userAlreadyBlacklisted(message.channel, blUser);
           await this.client.mongodb.helpers.blacklists.addUserBlacklist(newBlacklist);
-          message.channel.send(blEmbed).then(msg => msg.delete({ timeout: 5000 }));
+          message.channel.send({ embeds: [blEmbed] }).then(msg => messageDelete(msg, 5000));
           await blUser.send(dmBlacklistAdd);
         } catch (err) {
           Logger.errorCmd(this, err.stack);
@@ -206,7 +207,7 @@ module.exports = class BlacklistCommand extends Command {
           const check = await this.client.mongodb.helpers.blacklists.checkRecentBlacklist(blUser, message.guild);
           if (check && !check.status) return this.client.errors.userNoLongerBlacklisted(message.channel, blUser);
           await this.client.mongodb.helpers.blacklists.removeUserBlacklist(removeBlacklist);
-          message.channel.send(blEmbed).then(msg => msg.delete({ timeout: 5000 }));
+          message.channel.send({ embeds: [blEmbed] }).then(msg => messageDelete(msg, 5000));
           await blUser.send(dmBlacklistRemove);
         } catch (err) {
           Logger.errorCmd(this, err.stack);

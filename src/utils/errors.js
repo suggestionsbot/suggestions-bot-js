@@ -2,6 +2,7 @@ const { MessageEmbed } = require('discord.js-light');
 const permissions = require('./perms');
 const { stripIndents } = require('common-tags');
 const Logger = require('./logger');
+const { messageDelete } = require('./functions');
 
 class ErrorHandler {
   constructor(client) {
@@ -17,7 +18,7 @@ class ErrorHandler {
       .setColor(this.colors.red)
       .addField('Permission', `\`${permissions[perm]} (${perm})\``);
 
-    message.channel.send(embed).then(m => m.delete({ timeout: 5000 })).catch(err => Logger.error(null, err));
+    message.channel.send({ embeds: [embed] }).then(m => messageDelete(m, 5000)).catch(err => Logger.error(null, err));
   }
 
   noSuggestionsPerms(message, roles) {
@@ -30,13 +31,13 @@ class ErrorHandler {
       .setColor(this.colors.red)
       .addField('Lowest Required Role', sorted[0].toString());
 
-    message.channel.send(embed).then(m => m.delete({ timeout: 5000 })).catch(err => Logger.error(null, err));
+    message.channel.send({ embeds: [embed] }).then(m => messageDelete(m, 5000)).catch(err => Logger.error(null, err));
   }
 
   noChannelPerms(message, channel, perms) {
     return message.channel.send(stripIndents`I am missing these permissions in the ${channel} channel! Make sure I have them: 
       ${perms.length > 1 ? perms.map(p => `\`${permissions[p]}\``).join(', ') : `\`${permissions[perms[0]]}\``}
-    `).then(m => m.delete({ timeout: 5000 })).catch(err => Logger.error(null, err));
+    `).then(m => messageDelete(m, 5000)).catch(err => Logger.error(null, err));
   }
 
   noSuggestions(channel) {
@@ -46,7 +47,7 @@ class ErrorHandler {
       .setDescription('A suggestions channel does not exist! Please create one or contact a server administrator.')
       .setColor(this.colors.red);
 
-    channel.send(embed).then(m => m.delete({ timeout: 5000 })).catch(err => Logger.error(null, err));
+    channel.send({ embeds: [embed] }).then(m => messageDelete(m, 5000)).catch(err => Logger.error(null, err));
   }
 
   noStaffSuggestions(channel) {
@@ -56,7 +57,7 @@ class ErrorHandler {
       .setDescription('A staff suggestions channel does not exist! Please create one or contact a server administrator.')
       .setColor(this.colors.red);
 
-    channel.send(embed).then(m => m.delete({ timeout: 5000 })).catch(err => Logger.error(null, err));
+    channel.send({ embeds: [embed] }).then(m => messageDelete(m, 5000)).catch(err => Logger.error(null, err));
   }
 
   noSuggestionsLogs(channel) {
@@ -66,7 +67,7 @@ class ErrorHandler {
       .setDescription('A suggestions logs channel does not exist! Please create one or contact a server administrator.')
       .setColor(this.colors.red);
 
-    channel.send(embed).then(m => m.delete({ timeout: 5000 })).catch(err => Logger.error(null, err));
+    channel.send({ embeds: [embed] }).then(m => messageDelete(m, 5000)).catch(err => Logger.error(null, err));
   }
 
   noUsage(channel, cmd, settings) {
@@ -81,20 +82,20 @@ class ErrorHandler {
       .addField('Category', `\`${cmd.help.category}\``, true)
       .addField('Usage', `\`${prefix + cmd.help.usage}\``, true)
       .setColor(embedColor)
-      .setFooter('<> = Required | [] = Optional')
+      .setFooter({ text: '<> = Required | [] = Optional' })
       .setTimestamp();
 
     if (cmd.conf.aliases.length) embed.addField('Aliases', `\`${cmd.conf.aliases.join(', ')}\``, true);
 
-    return channel.send(embed)
-      .then(m => m.delete({ timeout: 7500 }))
-      .catch(e => this.client.logger.error(e.stack));
+    return channel.send({ embeds: [embed] })
+      .then(m => messageDelete(m, 7500))
+      .catch(e => Logger.error(e.stack));
   }
 
   noSuggestion(channel, sid) {
     return channel.send(`Could not find the suggestion with the sID **${sid}** in the database.`)
-      .then(m => m.delete({ timeout: 5000 }))
-      .catch(e => this.client.logger.error(e));
+      .then(m => messageDelete(m, 5000))
+      .catch(e => Logger.error(e));
   }
 
   suggestionToLong(channel) {
@@ -104,7 +105,7 @@ class ErrorHandler {
       .setDescription('The suggestion is too long! Please shorten it.')
       .setColor(this.colors.red);
 
-    channel.send(embed).then(m => m.delete({ timeout: 5000 })).catch(err => Logger.error(null, err));
+    channel.send({ embeds: [embed] }).then(m => messageDelete(m, 5000)).catch(err => Logger.error(null, err));
   }
 
   commandNotFound(command, channel) {
@@ -114,7 +115,7 @@ class ErrorHandler {
       .setDescription(`The command \`${command}\` was not found.`)
       .setColor(this.colors.red);
 
-    channel.send(embed).then(m => m.delete({ timeout: 5000 })).catch(err => Logger.error(null, err));
+    channel.send({ embeds: [embed] }).then(m => messageDelete(m, 5000)).catch(err => Logger.error(null, err));
   }
 
   commandIsGuarded(command, channel) {
@@ -124,7 +125,7 @@ class ErrorHandler {
       .setDescription(`The command \`${command.help.name}\` is guarded and cannot be enabled/disabled!`)
       .setColor(this.colors.red);
 
-    channel.send(embed).then(m => m.delete({ timeout: 5000 })).catch(err => Logger.error(null, err));
+    channel.send({ embeds: [embed] }).then(m => messageDelete(m, 5000)).catch(err => Logger.error(null, err));
   }
 
   noDisabledCommands(channel) {
@@ -134,7 +135,7 @@ class ErrorHandler {
       .setDescription(`There are no commands currently disabled for **${channel.guild}**!`)
       .setColor(this.colors.red);
 
-    channel.send(embed).then(m => m.delete({ timeout: 5000 })).catch(err => Logger.error(null, err));
+    channel.send({ embeds: [embed] }).then(m => messageDelete(m, 5000)).catch(err => Logger.error(null, err));
   }
 
   commandIsDisabled(command, channel) {
@@ -144,7 +145,7 @@ class ErrorHandler {
       .setDescription(`The command \`${command.help.name}\` is currently disabled!`)
       .setColor(this.colors.red);
 
-    channel.send(embed).then(m => m.delete({ timeout: 5000 })).catch(err => Logger.error(null, err));
+    channel.send({ embeds: [embed] }).then(m => messageDelete(m, 5000)).catch(err => Logger.error(null, err));
   }
 
   adminCommandIsDisabled(command, channel) {
@@ -154,7 +155,7 @@ class ErrorHandler {
       .setDescription(`The command \`${command.help.name}\` is currently disabled by the bot developer for maintenance!`)
       .setColor(this.colors.red);
 
-    channel.send(embed).then(m => m.delete({ timeout: 5000 })).catch(err => Logger.error(null, err));
+    channel.send({ embeds: [embed] }).then(m => messageDelete(m, 5000)).catch(err => Logger.error(null, err));
   }
 
   commandGuildOnly(command, channel) {
@@ -164,7 +165,7 @@ class ErrorHandler {
       .setDescription(`The command \`${command.help.name}\` can only be ran in a guild/server channel!`)
       .setColor(this.colors.red);
 
-    channel.send(embed).then(m => m.delete({ timeout: 5000 })).catch(err => Logger.error(null, err));
+    channel.send({ embeds: [embed] }).then(m => messageDelete(m, 5000)).catch(err => Logger.error(null, err));
   }
 
   channelNotFound(c, channel) {
@@ -174,7 +175,7 @@ class ErrorHandler {
       .setDescription(`The channel \`${c}\` was not found!`)
       .setColor(this.colors.red);
 
-    channel.send(embed).then(m => m.delete({ timeout: 5000 })).catch(err => Logger.error(null, err));
+    channel.send({ embeds: [embed] }).then(m => messageDelete(m, 5000)).catch(err => Logger.error(null, err));
   }
 
   roleNotFound(role, channel) {
@@ -184,7 +185,7 @@ class ErrorHandler {
       .setDescription(`The role \`${role}\` was not found!`)
       .setColor(this.colors.red);
 
-    channel.send(embed).then(m => m.delete({ timeout: 5000 })).catch(err => Logger.error(null, err));
+    channel.send({ embeds: [embed] }).then(m => messageDelete(m, 5000)).catch(err => Logger.error(null, err));
   }
 
   voteEmojiNotFound(id, channel) {
@@ -193,7 +194,7 @@ class ErrorHandler {
       .setDescription(`The emoji set ID \`${id}\` was not found!`)
       .setColor(this.colors.red);
 
-    channel.send(embed).then(m => m.delete({ timeout: 5000 })).catch(err => Logger.error(null, err));
+    channel.send({ embeds: [embed] }).then(m => messageDelete(m, 5000)).catch(err => Logger.error(null, err));
   }
 
   invalidResponseValue(channel) {
@@ -202,7 +203,7 @@ class ErrorHandler {
       .setDescription('The value must be `true` or `false`!')
       .setColor(this.colors.red);
 
-    channel.send(embed).then(m => m.delete({ timeout: 5000 })).catch(err => Logger.error(null, err));
+    channel.send({ embeds: [embed] }).then(m => messageDelete(m, 5000)).catch(err => Logger.error(null, err));
   }
 
   userNotFound(user, channel) {
@@ -212,7 +213,7 @@ class ErrorHandler {
       .setDescription(`The user \`${user}\` does not exist!`)
       .setColor(this.colors.red);
 
-    channel.send(embed).then(m => m.delete({ timeout: 5000 })).catch(err => Logger.error(null, err));
+    channel.send({ embeds: [embed] }).then(m => messageDelete(m, 5000)).catch(err => Logger.error(null, err));
   }
 
   noStaffRoles(channel) {
@@ -222,7 +223,7 @@ class ErrorHandler {
       .setDescription('No staff roles exist! Please create them or contact a server administrator to handle suggestions.')
       .setColor(this.colors.red);
 
-    channel.send(embed).then(m => m.delete({ timeout: 5000 })).catch(err => Logger.error(null, err));
+    channel.send({ embeds: [embed] }).then(m => messageDelete(m, 5000)).catch(err => Logger.error(null, err));
   }
 
   noRejectedResponse(channel) {
@@ -231,7 +232,7 @@ class ErrorHandler {
       .setDescription('A response is required for rejecting this suggestion!')
       .setColor(this.colors.red);
 
-    channel.send(embed).then(m => m.delete({ timeout: 5000 })).catch(err => Logger.error(null, err));
+    channel.send({ embeds: [embed] }).then(m => messageDelete(m, 5000)).catch(err => Logger.error(null, err));
   }
 
   userAlreadyBlacklisted(channel, user) {
@@ -240,7 +241,7 @@ class ErrorHandler {
       .setDescription(`\`${user.tag}\` is already blacklisted! Cannot do this`)
       .setColor(this.colors.red);
 
-    channel.send(embed).then(m => m.delete({ timeout: 5000 })).catch(err => Logger.error(null, err));
+    channel.send({ embeds: [embed] }).then(m => messageDelete(m, 5000)).catch(err => Logger.error(null, err));
   }
 
   userNoLongerBlacklisted(channel, user) {
@@ -249,7 +250,7 @@ class ErrorHandler {
       .setDescription(`\`${user.tag}\` is no longer blacklisted! Cannot do this`)
       .setColor(this.colors.red);
 
-    channel.send(embed).then(m => m.delete({ timeout: 5000 })).catch(err => Logger.error(null, err));
+    channel.send({ embeds: [embed] }).then(m => messageDelete(m, 5000)).catch(err => Logger.error(null, err));
   }
 
   invalidPrefixLength(channel, prefix) {
@@ -258,7 +259,7 @@ class ErrorHandler {
       .setDescription(`The prefix \`${prefix}\` is too long. It cannot be greater than **5** characters!`)
       .setColor(this.colors.red);
 
-    channel.send(embed).then(m => m.delete({ timeout: 5000 })).catch(err => Logger.error(null, err));
+    channel.send({ embeds: [embed] }).then(m => messageDelete(m, 5000)).catch(err => Logger.error(null, err));
   }
 }
 

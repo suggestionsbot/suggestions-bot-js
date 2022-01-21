@@ -5,7 +5,7 @@ const crypto = require('crypto');
 const Logger = require('../../utils/logger');
 
 const Command = require('../../structures/Command');
-const { getDefaultSuggestionsChannel } = require('../../utils/functions');
+const { getDefaultSuggestionsChannel, messageDelete, cacheChannel, getChannelAndCache } = require('../../utils/functions');
 
 module.exports = class SuggestCommand extends Command {
   constructor(client) {
@@ -41,9 +41,10 @@ module.exports = class SuggestCommand extends Command {
         if (!channel) return this.client.errors.noSuggestions(message.channel);
 
         await this.client.mongodb.helpers.settings.updateGuild(message.guild, { suggestionsChannel: channel.id });
+        await cacheChannel(this.client, channel.id, message.guild);
         sChannel = channel;
       } else {
-        sChannel = suggestionsChannel && await message.guild.channels.fetch(suggestionsChannel);
+        sChannel = suggestionsChannel && await getChannelAndCache(this.client, settings.suggestionsChannel, message.guild);
         if (!sChannel) return this.client.errors.noSuggestions(message.channel);
       }
     } catch (e) {
@@ -60,13 +61,13 @@ module.exports = class SuggestCommand extends Command {
       `)
       .setThumbnail(sUser.avatarURL())
       .setColor(embedColor)
-      .setFooter(`User ID: ${sUser.id} | sID: ${id}`)
+      .setFooter({ text: `User ID: ${sUser.id} | sID: ${id}` })
       .setTimestamp();
 
     if (imageCheck) embed.setImage(imageCheck[0]);
 
     const dmEmbed = new MessageEmbed()
-      .setAuthor(message.guild, message.guild.iconURL())
+      .setAuthor({ name: message.guild.name, iconURL: message.guild.iconURL() })
       .setDescription(stripIndent`Hey, ${sUser}. Your suggestion has been sent to the ${sChannel} channel to be voted on!
         
       Please wait until it gets approved or rejected by a staff member.
@@ -74,7 +75,7 @@ module.exports = class SuggestCommand extends Command {
       Your suggestion ID (sID) for reference is **${id}**.
       `)
       .setColor(embedColor)
-      .setFooter(`Guild ID: ${message.guild.id} | sID: ${id}`)
+      .setFooter({ text: `Guild ID: ${message.guild.id} | sID: ${id}` })
       .setTimestamp();
 
     const filter = set => set.name === emojis;
@@ -87,7 +88,7 @@ module.exports = class SuggestCommand extends Command {
     let m,
       mID;
     try {
-      m = await sChannel.send(embed);
+      m = await sChannel.send({ embeds: [embed] });
       mID = m.id;
 
       const foundSet = this.client.voteEmojis.find(filter) || this.client.voteEmojis.find(defaults);
@@ -99,7 +100,7 @@ module.exports = class SuggestCommand extends Command {
         if (!m) m = await sChannel.messages.fetch(mID);
 
         if (foundSet.custom) {
-          await m.react(message.guild.emojis.forge(e))
+          await m.react(message.guild.emojis.resolve(e))
             .catch(() => m.react(fallbackSet[emojiIndex]));
         } else await m.react(e);
       }
@@ -109,8 +110,8 @@ module.exports = class SuggestCommand extends Command {
     }
 
     try {
-      if (settings.dmResponses) await sUser.send(dmEmbed);
-      await message.react(this.client.emojis.forge(successEmoji));
+      if (settings.dmResponses) await sUser.send({ embeds: [dmEmbed] });
+      await message.react(this.client.emojis.resolve(successEmoji));
     } catch (error) {
       message.channel.send(oneLine`
         I could not DM you because you have DMs disabled from server members. However, for reference, your suggestion
@@ -135,7 +136,7 @@ module.exports = class SuggestCommand extends Command {
 
     try {
       await this.client.mongodb.helpers.suggestions.submitGuildSuggestion(newSuggestion);
-      await message.delete({ timeout: 5000 });
+      await messageDelete(message, 5000);
     } catch (error) {
       if (error.message === 'Unknown Message') return;
       Logger.errorCmd(this, error.stack);

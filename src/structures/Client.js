@@ -33,6 +33,8 @@ module.exports = class SuggestionsClient extends Client {
     this.lastChangelog = null;
 
     this.fetchLastChangelog().catch(e => Logger.error('CLIENT', e));
+
+    this.guildSettings = new Collection();
   }
 
   async fetchLastChangelog() {
@@ -112,13 +114,13 @@ module.exports = class SuggestionsClient extends Client {
   }
 
   async isStaff(guild, user) {
-    const member = await guild.members.fetch({ user: user.id, cache: false }).catch(() => {
+    const member = await guild.members.fetch(user.id).catch(() => {
       return false;
     });
 
     let staffCheck;
     const adminCheck = this.isAdmin(member) || this.isOwner(member.id);
-    const staffRoles = guild.settings.get(guild.id).staffRoles;
+    const staffRoles = this.guildSettings.get(guild.id).staffRoles;
     if (staffRoles) staffCheck = member.roles.cache.some(r => staffRoles.map(sr => sr.id).includes(r.id)) || adminCheck;
     else staffCheck = adminCheck;
 
@@ -127,7 +129,7 @@ module.exports = class SuggestionsClient extends Client {
 
   async isSupport(user) {
     const id = this.production ? '601219766258106399' : '345753533141876737';
-    return this.guilds.forge(id).members.fetch({ user: user.id, cache: false }).then(member => {
+    return this.guilds.forge(id).members.fetch(user.id).then(member => {
       return member.roles.cache.some(r => this.config.supportRoles.includes(r.id)) || this.isOwner(member.id);
     }).catch(() => { return this.isOwner(user.id) || false; });
   }

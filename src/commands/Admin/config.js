@@ -2,6 +2,7 @@ const { MessageEmbed  } = require('discord.js-light');
 const { stripIndent } = require('common-tags');
 const Command = require('../../structures/Command');
 const Logger = require('../../utils/logger');
+const { messageDelete } = require('../../utils/functions');
 
 module.exports = class ConfigCommand extends Command {
   constructor(client) {
@@ -26,7 +27,7 @@ module.exports = class ConfigCommand extends Command {
     const { embedColor, docs, emojis: { success: successEmoji } } = this.client.config;
     const { help: { usage, name } } = this;
     const confDocs = `${docs}/docs/configuration.html`;
-    const success = this.client.emojis.forge(successEmoji)
+    const success = this.client.emojis.resolve(successEmoji)
 
     const setting = args[0],
       updated = args.slice(1).join(' ');
@@ -47,14 +48,14 @@ module.exports = class ConfigCommand extends Command {
     } = settings;
 
     const configEmbed = new MessageEmbed()
-      .setAuthor(message.guild, message.guild.iconURL())
+      .setAuthor({ name: message.guild.name, iconURL: message.guild.iconURL() })
       .setColor(embedColor)
-      .setFooter(`Guild: ${message.guild.id}`)
+      .setFooter({ text: `Guild: ${message.guild.id}` })
       .setTimestamp();
 
     switch (setting) {
     case 'prefix': {
-      configEmbed.setAuthor(`${message.guild} | Prefix`, message.guild.iconURL());
+      configEmbed.setAuthor({ name: `${message.guild} | Prefix`, iconURL: message.guild.iconURL() })
 
       if (updated) {
         try {
@@ -62,7 +63,7 @@ module.exports = class ConfigCommand extends Command {
           await this.client.mongodb.helpers.settings.updateGuild(message.guild, { prefix: updated });
           configEmbed.setDescription(`${success} Prefix has been updated to: \`${updated}\``);
 
-          return message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
+          return message.channel.send({ embeds: [configEmbed] }).then(m => messageDelete(m, 5000));
         } catch (err) {
           Logger.errorCmd(this, err.stack);
           return message.channel.send(`An error occurred: **${err.message}**`);
@@ -71,14 +72,14 @@ module.exports = class ConfigCommand extends Command {
 
       configEmbed.setDescription(`Current prefix: \`${prefix}\``);
       configEmbed.addField('More Information', `[Link](${confDocs}#prefix)`);
-      message.channel.send(configEmbed);
+      message.channel.send({ embeds: [configEmbed] });
       break;
     }
     case 'channel': {
-      configEmbed.setAuthor(`${message.guild} | Suggestions Channel`, message.guild.iconURL());
+      configEmbed.setAuthor({ name: `${message.guild} | Suggestions Channel`, iconURL: message.guild.iconURL() })
 
       if (updated) {
-        const channels = await message.guild.channels.fetch({ cache: false })
+        const channels = await message.guild.channels.fetch()
         const verified = channels.find(c => c.name === updated) ||
           channels.get(updated) ||
           message.mentions.channels.first();
@@ -86,9 +87,10 @@ module.exports = class ConfigCommand extends Command {
 
         try {
           await this.client.mongodb.helpers.settings.updateGuild(message.guild, { suggestionsChannel: verified.id });
+          message.guild.channels.forceSet(verified.id, verified)
           configEmbed.setDescription(`${success} Suggestions channel has been updated to: ${verified}`);
 
-          return message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
+          return message.channel.send({ embeds: [configEmbed] }).then(m => messageDelete(m, 5000));
         } catch (err) {
           Logger.errorCmd(this, err);
           return message.channel.send(`An error occurred: **${err.message}**`);
@@ -97,19 +99,19 @@ module.exports = class ConfigCommand extends Command {
 
       const isDefault = suggestionsChannel === 'suggestions'
       suggestionsChannel = isDefault
-        ? await message.guild.channels.fetch({ cache: false }).then(res => res.find(c => c.name === 'suggestions'))
+        ? await message.guild.channels.fetch().then(res => res.find(c => c.name === 'suggestions'))
         : message.guild.channels.forge(suggestionsChannel)
       if (!suggestionsChannel) return this.client.errors.noSuggestions(message.channel);
       configEmbed.setDescription(`Current suggestions channel: ${suggestionsChannel}`);
       configEmbed.addField('More Information', `[Link](${confDocs}#suggestions-channel)`);
-      message.channel.send(configEmbed);
+      message.channel.send({ embeds: [configEmbed] });
       break;
     }
     case 'logs': {
-      configEmbed.setAuthor(`${message.guild} | Suggestion Logs Channel`, message.guild.iconURL());
+      configEmbed.setAuthor({ name: `${message.guild} | Suggestion Logs Channel`, iconURL: message.guild.iconURL() })
 
       if (updated) {
-        const channels = await message.guild.channels.fetch({ cache: false })
+        const channels = await message.guild.channels.fetch()
         const verified = channels.find(c => c.name === updated) ||
           channels.get(updated) ||
           message.mentions.channels.first();
@@ -119,7 +121,7 @@ module.exports = class ConfigCommand extends Command {
           await this.client.mongodb.helpers.settings.updateGuild(message.guild, { suggestionsLogs: verified.id });
           configEmbed.setDescription(`${success} Suggestion logs channel has been updated to: ${verified}`);
 
-          return message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
+          return message.channel.send({ embeds: [configEmbed] }).then(m => messageDelete(m, 5000));
         } catch (err) {
           Logger.errorCmd(this, err);
           return message.channel.send(`An error occurred: **${err.message}**`);
@@ -129,14 +131,14 @@ module.exports = class ConfigCommand extends Command {
       if (!suggestionsLogs) return this.client.errors.noSuggestionsLogs(message.channel);
       configEmbed.setDescription(`Current suggestions logs channel: ${message.guild.channels.forge(suggestionsLogs)}`);
       configEmbed.addField('More Information', `[Link](${confDocs}#suggestions-logs-channel)`);
-      message.channel.send(configEmbed);
+      message.channel.send({ embeds: [configEmbed] });
       break;
     }
     case 'staffchannel': {
       configEmbed.setAuthor(`${message.guild} | Suggestions Staff Channel`, message.guild.iconURL());
 
       if (updated) {
-        const channels = await message.guild.channels.fetch({ cache: false })
+        const channels = await message.guild.channels.fetch()
         const verified = channels.find(c => c.name === updated) ||
           channels.get(updated) ||
           message.mentions.channels.first();
@@ -146,7 +148,7 @@ module.exports = class ConfigCommand extends Command {
           await this.client.mongodb.helpers.settings.updateGuild(message.guild, { staffSuggestionsChannel: verified.id });
           configEmbed.setDescription(`${success} Suggestions staff channel has been updated to: ${verified}`);
 
-          return message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
+          return message.channel.send({ embeds: [configEmbed] }).then(m => messageDelete(m, 5000));
         } catch (err) {
           Logger.errorCmd(this, err);
           return message.channel.send(`An error occurred: **${err.message}**`);
@@ -156,14 +158,14 @@ module.exports = class ConfigCommand extends Command {
       if (!staffSuggestionsChannel) return this.client.errors.noStaffSuggestions(message.channel);
       configEmbed.setDescription(`Current staff suggestions channel: ${message.guild.channels.forge(staffSuggestionsChannel)}`);
       configEmbed.addField('More Information', `[Link](${confDocs}#staff-suggestions-channel)`);
-      message.channel.send(configEmbed);
+      message.channel.send({ embeds: [configEmbed] });
       break;
     }
     case 'roles': {
-      configEmbed.setAuthor(`${message.guild} | Staff Roles`, message.guild.iconURL());
+      configEmbed.setAuthor({ name: `${message.guild} | Staff Roles`, iconURL: message.guild.iconURL() })
 
       if (updated) {
-        const roles = await message.guild.roles.fetch({ cache: false })
+        const roles = await message.guild.roles.fetch()
         const verified = roles.find(c => c.name === updated) ||
           roles.get(updated) ||
           message.mentions.roles.first();
@@ -180,7 +182,7 @@ module.exports = class ConfigCommand extends Command {
           try {
             configEmbed.setDescription(`${success} Removed **${verified.name}** from the staff roles.`);
             await this.client.mongodb.helpers.settings.updateGuildStaffRoles(updateRole, false);
-            message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
+            message.channel.send({ embeds: [configEmbed] }).then(m => messageDelete(m, 5000));
           } catch (error) {
             Logger.errorCmd(this, error.stack);
             return message.channel.send(`An error occurred: **${error.message}**`);
@@ -189,7 +191,7 @@ module.exports = class ConfigCommand extends Command {
           try {
             configEmbed.setDescription(`${success} Added **${verified.name}** to the staff roles.`);
             await this.client.mongodb.helpers.settings.updateGuildStaffRoles(updateRole, true);
-            message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
+            message.channel.send({ embeds: [configEmbed] }).then(m => messageDelete(m, 5000));
           } catch (error) {
             Logger.errorCmd(this, error.stack);
             return message.channel.send(`An error occurred: **${error.message}**`);
@@ -211,12 +213,12 @@ module.exports = class ConfigCommand extends Command {
       configEmbed.addField('Staff Roles', viewRoles || 'No roles set.');
       configEmbed.addField('More Information', `[Link](${confDocs}#staff-roles)`);
 
-      message.channel.send(configEmbed);
+      message.channel.send({ embeds: [configEmbed] });
       break;
     }
     case 'emojis': {
       if (!voteEmojis) voteEmojis = 'defaultEmojis';
-      configEmbed.setAuthor(`${message.guild} | Vote Emojis`, message.guild.iconURL());
+      configEmbed.setAuthor({ name: `${message.guild} | Vote Emojis`, iconURL: message.guild.iconURL() })
 
       const setID = parseInt(updated);
 
@@ -226,10 +228,10 @@ module.exports = class ConfigCommand extends Command {
         if (!foundSet) return this.client.errors.voteEmojiNotFound(updated, message.channel);
 
         try {
-          const emojiSet = foundSet.emojis.map(e => foundSet.custom ? this.client.emojis.forge(e) : e).join(' ')
+          const emojiSet = foundSet.emojis.map(e => foundSet.custom ? this.client.emojis.resolve(e) : e).join(' ')
           await this.client.mongodb.helpers.settings.updateGuild(message.guild, { voteEmojis: foundSet.name });
           configEmbed.setDescription(`${success} The default vote emojis have been changed to ${emojiSet}`);
-          message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
+          message.channel.send({ embeds: [configEmbed] }).then(m => messageDelete(m, 5000));
         } catch (error) {
           Logger.errorCmd(this, error.stack);
           return message.channel.send(`An error occurred: **${error.message}**`);
@@ -239,7 +241,7 @@ module.exports = class ConfigCommand extends Command {
       }
 
       const emojiSets = this.client.voteEmojis.map(set => {
-        const emojiSet = set.emojis.map(e => set.custom ? this.client.emojis.forge(e) : e).join(' ');
+        const emojiSet = set.emojis.map(e => set.custom ? this.client.emojis.resolve(e) : e).join(' ');
         if (voteEmojis === set.name) return `\`${set.id}\`: ${emojiSet} ***(Currently Using)***`;
         else return `\`${set.id}\`: ${emojiSet}`;
       });
@@ -255,11 +257,11 @@ module.exports = class ConfigCommand extends Command {
         You can do \`${settings.prefix + name} emojis [id]\` to set the desired emojis.
       `);
       configEmbed.addField('More Information', `[Link](${confDocs}#vote-emojis)`);
-      message.channel.send(configEmbed);
+      message.channel.send({ embeds: [configEmbed] });
       break;
     }
     case 'responses': {
-      configEmbed.setAuthor(`${message.guild} | Suggestion Responses`, message.guild.iconURL());
+      configEmbed.setAuthor({ name: `${message.guild} | Suggestion Responses`, iconURL: message.guild.iconURL() })
 
       if (updated) {
         switch (updated) {
@@ -267,7 +269,7 @@ module.exports = class ConfigCommand extends Command {
           try {
             await this.client.mongodb.helpers.settings.updateGuild(message.guild, { responseRequired: true });
             configEmbed.setDescription(`${success} Responses required set to \`true\`. This means a response **is required** when using the \`reject\` command.`);
-            message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
+            message.channel.send({ embeds: [configEmbed] }).then(m => messageDelete(m, 5000));
           } catch (err) {
             Logger.errorCmd(this, err.stack);
             return message.channel.send(`Error setting required responses: **${err.message}**.`);
@@ -277,7 +279,7 @@ module.exports = class ConfigCommand extends Command {
           try {
             await this.client.mongodb.helpers.settings.updateGuild(message.guild, { responseRequired: false });
             configEmbed.setDescription(`${success} Responses required set to \`false\`. This means a response **is not required** when using the \`reject\` command.`);
-            message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
+            message.channel.send({ embeds: [configEmbed] }).then(m => messageDelete(m, 5000));
           } catch (err) {
             Logger.errorCmd(this, err.stack);
             return message.channel.send(`Error setting required responses: **${err.message}**.`);
@@ -292,11 +294,11 @@ module.exports = class ConfigCommand extends Command {
 
       configEmbed.setDescription(`Rejection responses are currently **${responseRequired ? 'required' : 'not required'}**.`);
       configEmbed.addField('More Information', `[Link](${confDocs}#rejection-responses)`);
-      message.channel.send(configEmbed);
+      message.channel.send({ embeds: [configEmbed] });
       break;
     }
     case 'commands': {
-      configEmbed.setAuthor(`${message.guild} | Disabled Commands`, message.guild.iconURL());
+      configEmbed.setAuthor({ name: `${message.guild} | Disabled Commands`, iconURL: message.guild.iconURL() })
 
       if (updated) {
         const cmd = this.client.commands.get(updated);
@@ -324,7 +326,7 @@ module.exports = class ConfigCommand extends Command {
           try {
             configEmbed.setDescription(`${success} Enabled the **${cmd.help.name}** command.`);
             await this.client.mongodb.helpers.settings.updateGuildCommands(enabledCommand, false);
-            message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
+            message.channel.send({ embeds: [configEmbed] }).then(m => messageDelete(m, 5000));
           } catch (err) {
             Logger.errorCmd(this, err.stack);
             return message.channel.send(`An error occurred: **${err.message}**`);
@@ -333,7 +335,7 @@ module.exports = class ConfigCommand extends Command {
           try {
             configEmbed.setDescription(`${success} Disabled the **${cmd.help.name}** command.`);
             await this.client.mongodb.helpers.settings.updateGuildCommands(disabledCommand, true);
-            message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
+            message.channel.send({ embeds: [configEmbed] }).then(m => messageDelete(m, 5000));
           } catch (err) {
             Logger.errorCmd(this, err.stack);
             return message.channel.send(`An error occurred: **${err.message}**`);
@@ -347,11 +349,11 @@ module.exports = class ConfigCommand extends Command {
       configEmbed.setDescription(disabledCommands.map(c => `\`${c.command}\``).join(' | '));
       configEmbed.addField('More Information', `[Link](${confDocs}#disabled-commands)`);
 
-      message.channel.send(configEmbed);
+      message.channel.send({ embeds: [configEmbed] });
       break;
     }
     case 'dmResponses': {
-      configEmbed.setAuthor(`${message.guild} | DM Responses`, message.guild.iconURL());
+      configEmbed.setAuthor({ name: `${message.guild} | DM Responses`, iconURL: message.guild.iconURL() })
 
       if (updated) {
         switch (updated) {
@@ -367,7 +369,7 @@ module.exports = class ConfigCommand extends Command {
                   - Suggestion note added
               `);
 
-            message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
+            message.channel.send({ embeds: [configEmbed] }).then(m => messageDelete(m, 5000));
           } catch (err) {
             Logger.errorCmd(this, err.stack);
             return message.channel.send(`An error occurred: **${err.message}**.`);
@@ -386,7 +388,7 @@ module.exports = class ConfigCommand extends Command {
                   - Suggestion note added
               `);
 
-            message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
+            message.channel.send({ embeds: [configEmbed] }).then(m => messageDelete(m, 5000));
           } catch (err) {
             Logger.errorCmd(this, err.stack);
             return message.channel.send(`An error occurred: **${err.message}**.`);
@@ -403,7 +405,7 @@ module.exports = class ConfigCommand extends Command {
 
       configEmbed.setDescription(`DM responses are currently **${dmResponses ? 'enabled' : 'disabled' }**.`);
       configEmbed.addField('More Information', `[Link](${confDocs}#dm-responses)`);
-      message.channel.send(configEmbed);
+      message.channel.send({ embeds: [configEmbed] });
       break;
     }
     default: {
@@ -425,7 +427,7 @@ module.exports = class ConfigCommand extends Command {
         .addField('Disabled Commands', `\`${prefix + name} commands\``, true)
         .addField('DM Responses', `\`${prefix + name} dmResponses\``, true);
 
-      message.channel.send(configEmbed);
+      message.channel.send({ embeds: [configEmbed] });
       break;
     }
     }

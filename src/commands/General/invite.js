@@ -1,6 +1,7 @@
 const { MessageEmbed } = require('discord.js-light');
 const Command = require('../../structures/Command');
 const Logger = require('../../utils/logger');
+const { messageDelete } = require('../../utils/functions');
 
 module.exports = class InviteCommand extends Command {
   constructor(client) {
@@ -21,7 +22,7 @@ module.exports = class InviteCommand extends Command {
     const { embedColor, discord, invite, website, github } = this.client.config;
 
     const dmEmbed = new MessageEmbed()
-      .setAuthor('Bot Invite Information', this.client.user.avatarURL())
+      .setAuthor({ name: 'Bot Invite Information', iconURL: this.client.user.avatarURL() })
       .setDescription(`Hello ${message.author},
         
           **Before inviting, you need the** \`MANAGE SERVER\` **or** \`ADMINISTRATOR\` **permissions to add bots to a server.** 
@@ -43,9 +44,9 @@ module.exports = class InviteCommand extends Command {
 
     try {
       if (message.guild && args[0] !== 'here') {
-        await message.author.send(dmEmbed);
-        await message.react('📧').then(() => message.delete({ timeout: 2500 }));
-      } else return await message.channel.send(dmEmbed);
+        await message.author.send({ embeds: [dmEmbed] });
+        await message.react('📧').then(() => messageDelete(message, 2500));
+      } else return await message.channel.send({ embeds: [dmEmbed] });
 
     } catch (e) {
       const usage = `${settings.prefix}${this.help.name} here`;

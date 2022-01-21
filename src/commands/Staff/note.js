@@ -1,7 +1,7 @@
 const { MessageEmbed } = require('discord.js-light');
 const { oneLine } = require('common-tags');
 const Command = require('../../structures/Command');
-const { validateSnowflake } = require('../../utils/functions');
+const { validateSnowflake, messageDelete, getChannelAndCache } = require('../../utils/functions');
 const Logger = require('../../utils/logger');
 
 module.exports = class NoteCommand extends Command {
@@ -49,7 +49,7 @@ module.exports = class NoteCommand extends Command {
 
     let suggestionsChannel;
     try {
-      suggestionsChannel = settings.suggestionsChannel && await message.guild.channels.fetch(settings.suggestionsChannel);
+      suggestionsChannel = settings.suggestionsChannel && await getChannelAndCache(this.client, settings.suggestionsChannel, message.guild);
       if (!suggestionsChannel) return this.client.errors.noSuggestions(message.channel);
     } catch (error) {
       if (!suggestionsChannel) return this.client.errors.noSuggestions(message.channel);
@@ -60,7 +60,7 @@ module.exports = class NoteCommand extends Command {
 
     if (status === 'approved' || status === 'rejected') {
       return message.channel.send(`sID **${sID}** has already been approved or rejected. Cannot do this action again.`)
-        .then(msg => msg.delete({ timeout: 3000 }))
+        .then(msg => messageDelete(msg, 3000))
         .catch(err => Logger.errorCmd(this, err.stack));
     }
 
@@ -73,17 +73,17 @@ module.exports = class NoteCommand extends Command {
 
     let sMessage;
     try {
-      sMessage = await suggestionsChannel.messages.fetch(messageID, false);
+      sMessage = await suggestionsChannel.messages.fetch(messageID);
     } catch (err) {
       Logger.errorCmd(this, err.stack);
       message.channel.send('The suggestion message was not found, but still will be updated!')
-        .then(m => m.delete({ timeout: 5000 }));
+        .then(m => messageDelete(m, 5000));
     }
 
     const suggestion = new MessageEmbed(sMessage.embeds[0]);
 
     const dmEmbed = new MessageEmbed()
-      .setAuthor(message.guild, message.guild.iconURL())
+      .setAuthor({ name: message.guild.name, iconURL: message.guild.iconURL() })
       .setDescription(`Hey, ${sUser}. ${message.author} has added a note to your suggestion:
 
         Staff note: **${note}**
@@ -91,7 +91,7 @@ module.exports = class NoteCommand extends Command {
         Your suggestion ID (sID) for reference was **${sID}**.
       `)
       .setColor(embedColor)
-      .setFooter(`Guild ID: ${message.guild.id} | sID: ${sID}`)
+      .setFooter({ text: `Guild ID: ${message.guild.id} | sID: ${sID}` })
       .setTimestamp();
 
     if (suggestion.fields.length && suggestion.fields[0].name === 'Staff Note') {
@@ -122,11 +122,11 @@ module.exports = class NoteCommand extends Command {
     };
 
     try {
-      message.channel.send(`Added a note to **${sID}**: **${note}**.`).then(m => m.delete({ timeout: 5000 }));
+      message.channel.send(`Added a note to **${sID}**: **${note}**.`).then(m => messageDelete(m, 5000));
       await this.client.mongodb.helpers.suggestions.addGuildSuggestionNote(suggestionNote);
-      await sMessage.edit(suggestion);
-      await message.guild.members.fetch({ user: userID, cache: false });
-      if (settings.dmResponses) await sUser.send(dmEmbed);
+      await sMessage.edit({ embeds: [suggestion] });
+      await message.guild.members.fetch(userID);
+      if (settings.dmResponses) await sUser.send({ embeds: [dmEmbed] });
     } catch (err) {
       if (err.message === 'Unknown Member') return;
       if (err.message === 'Cannot send messages to this user') return;

@@ -58,12 +58,12 @@ module.exports = class HelpCommand extends Command {
         .addField('Category', `\`${cmdHelp.category}\``, true)
         .addField('Guild Only', `\`${cmdConf.guildOnly ? 'True' : 'False'}\``, true)
         .setColor(embedColor)
-        .setFooter('<> = Required | [] = Optional')
+        .setFooter({ text: '<> = Required | [] = Optional' })
         .setTimestamp();
       if (cmdHelp.usage !== null) cmdHelpEmbed.addField('Usage', `\`${prefix + cmdHelp.usage}\``, true);
       if (cmdConf.aliases.length) cmdHelpEmbed.addField('Aliases', `\`${cmdConf.aliases.join(', ')}\``, true);
 
-      return message.channel.send(cmdHelpEmbed);
+      return message.channel.send({ embeds: [cmdHelpEmbed] });
     }
 
     const helpEmbed = new MessageEmbed()
@@ -99,7 +99,7 @@ module.exports = class HelpCommand extends Command {
     helpEmbed.addField('⚙ GitHub', github);
     helpEmbed.addField('❗ Found an issue?', `Please report any issues directly to the **Support Team** via the Support Discord: ${discord}`);
 
-    message.channel.send(helpEmbed);
+    message.channel.send({ embeds: [helpEmbed] });
   }
 
   mapCommands(commands, category) {

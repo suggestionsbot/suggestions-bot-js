@@ -40,17 +40,17 @@ module.exports = class GSIDCommand extends Command {
     if (suggestion.statusUpdated) updatedOn = suggestion.statusUpdated;
     if (suggestion.newStatusUpdated) updatedOn = suggestion.newStatusUpdated;
 
-    const sUser = await this.client.users.fetch(suggestion.userID, false).catch(err => Logger.errorCmd(this, err));
+    const sUser = await this.client.users.fetch(suggestion.userID).catch(err => Logger.errorCmd(this, err));
 
     if (Object.prototype.hasOwnProperty.call(suggestion._doc, 'staffMemberID'))
-      sStaff = await this.client.users.fetch(suggestion.staffMemberID, false).catch(err => Logger.errorCmd(this, err));
+      sStaff = await this.client.users.fetch(suggestion.staffMemberID).catch(err => Logger.errorCmd(this, err));
 
     const sGuild = await this.client.shard.fetchGuild(suggestion.guildID);
 
     const embed = new MessageEmbed()
-      .setAuthor(sGuild.name, sGuild.iconURL)
+      .setAuthor({ name: sGuild.name, iconURL: sGuild.iconURL() })
       .setTitle(`Info for ${suggestion.sID}`)
-      .setFooter(`User ID: ${sUser.id} | sID: ${suggestion.sID}`);
+      .setFooter({ text: `User ID: ${sUser.id} | sID: ${suggestion.sID}` });
 
     let time;
     if (suggestion.time && !suggestion.newTime) time = suggestion.time;
@@ -73,7 +73,7 @@ module.exports = class GSIDCommand extends Command {
         `)
           .setColor(embedColor)
           .setTimestamp(time);
-        message.channel.send(embed);
+        message.channel.send({ embeds: [embed] });
         break;
       }
       case 'approved': {
@@ -93,7 +93,7 @@ module.exports = class GSIDCommand extends Command {
         `)
           .setColor(suggestionColors.approved)
           .setTimestamp(updatedOn);
-        message.channel.send(embed);
+        message.channel.send({ embeds: [embed] });
         break;
       }
       case 'rejected': {
@@ -113,7 +113,7 @@ module.exports = class GSIDCommand extends Command {
         `)
           .setColor(suggestionColors.rejected)
           .setTimestamp(updatedOn);
-        message.channel.send(embed);
+        message.channel.send({ embeds: [embed] });
         break;
       }
       default:

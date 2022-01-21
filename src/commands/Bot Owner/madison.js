@@ -20,10 +20,10 @@ module.exports = class MadisonCommand extends Command {
       const url = await getRandomGiphyImage(query);
 
       return message.channel.send({
-        embed: {
+        embeds: [{
           color: 0x670A0A,
           image: { url }
-        }
+        }]
       });
     } catch (err) {
       Logger.errorCmd(this, err.stack);

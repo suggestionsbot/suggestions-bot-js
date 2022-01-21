@@ -1,7 +1,7 @@
 const { oneLine } = require('common-tags');
 const permissions = require('../utils/perms');
 const Logger = require('../utils/logger');
-const { parseCommandArguments } = require('../utils/functions');
+const { parseCommandArguments, messageDelete, cacheChannel } = require('../utils/functions');
 
 module.exports = class CommandHandler {
   constructor(client) {
@@ -17,26 +17,24 @@ module.exports = class CommandHandler {
       try {
         settings = await this.client.mongodb.helpers.settings.getGuild(message.guild);
       } catch (err) {
-        this.client.logger.error(err.stack);
+        Logger.error('COMMAND HANDLER', err.stack);
       }
     }
 
     if (!message.guild) settings.prefix = this.client.config.prefix;
 
-    const channel = message.guild
-      ? await message.guild.channels.fetch(message.channel.id).catch(() => { return null; })
-      : await this.client.channels.fetch(message.channel.id).catch(() => { return null; });
+    if (!this.client.channels.cache.has(message.channel.id)) await cacheChannel(this.client, message.channel.id, message.guild);
 
     const prefixMention = new RegExp(`^<@!?${this.client.user.id}> `);
     const newPrefix = message.content.match(prefixMention) ? message.content.match(prefixMention)[0] : settings.prefix;
 
     const getPrefix = new RegExp(`^<@!?${this.client.user.id}>( |)$`);
-    if (message.content.match(getPrefix) && !message.author.bot) return channel.send(`My prefix in this guild is \`${settings.prefix}\``);
+    if (message.content.match(getPrefix) && !message.author.bot) return message.channel.send(`My prefix in this guild is \`${settings.prefix}\``);
 
     if (message.author.bot) return;
     if (message.content.indexOf(newPrefix) !== 0) return;
 
-    if (message.guild && !channel.permissionsFor(message.guild.me).missing('SEND_MESSAGES')) return;
+    if (message.guild && !message.channel.permissionsFor(message.guild.me).missing('SEND_MESSAGES')) return;
 
     const [command, ...regArgs] = message.content
       .slice(newPrefix.length)
@@ -74,14 +72,14 @@ module.exports = class CommandHandler {
       adminCheck;
 
     if (message.guild) {
-      const member = await message.guild.members.fetch(message.author.id, false).catch(() => { return null; });
+      const member = await message.guild.members.fetch(message.author.id).catch(() => { return null; });
       if (staffRoles) staffCheck = member.roles.cache.some(r => staffRoles.map(sr => sr.id).includes(r.id));
       else staffCheck = this.client.isAdmin(member) || ownerCheck;
       adminCheck = this.client.isAdmin(member) || ownerCheck;
     }
 
-    if (!cmd.conf.enabled) return this.client.errors.adminCommandIsDisabled(cmd, channel);
-    if ((!message.guild && cmd.conf.guildOnly)) return this.client.errors.commandGuildOnly(cmd, channel);
+    if (!cmd.conf.enabled) return this.client.errors.adminCommandIsDisabled(cmd, message.channel);
+    if ((!message.guild && cmd.conf.guildOnly)) return this.client.errors.commandGuildOnly(cmd, message.channel);
     if (cmd.conf.superSecretOnly && !superCheck) return;
     if (cmd.conf.supportOnly && !supportCheck) return;
 
@@ -97,18 +95,22 @@ module.exports = class CommandHandler {
     const newCommand = {
       guildID: message.guild ? message.guild.id : null,
       command: cmd.help.name,
-      channel: message.guild ? channel.name : null,
+      channel: message.guild ? message.channel.name : null,
       userID: message.author.id,
       newTime: message.createdTimestamp
     };
 
     if (message.guild) {
       // check bot permissions
-      if (channel.type === 'text' && cmd.conf.botPermissions) {
-        const missing = channel.permissionsFor(message.guild.me).missing(cmd.conf.botPermissions);
+      if (message.channel.type === 'text' && cmd.conf.botPermissions) {
+        const missing = message.channel.permissionsFor(message.guild.me).missing(cmd.conf.botPermissions);
         if (missing.length > 0) {
           this.client.emit('commandBlocked', cmd, `botPermissions: ${missing.join(', ')}`);
-          if (missing.length === 1) return message.reply(`I need the \`${permissions[missing[0]]}\` permission for the \`${cmd.help.name}\` command to work.`).then(msg => msg.delete({ timeout: 5000 }));
+          if (missing.length === 1) {
+            return message.reply(
+              `I need the \`${permissions[missing[0]]}\` permission for the \`${cmd.help.name}\` command to work.`
+            ).then(msg => messageDelete(msg, 5000));
+          }
           return message.reply(oneLine`
               I need the following permissions for the \`${cmd.help.name}\` command to work:
               ${missing.map(p => `\`${permissions[p]}\``).join(', ')}
@@ -134,7 +136,7 @@ module.exports = class CommandHandler {
 
     try {
       if (throttle) throttle.usages++;
-      if (disabledCommand && !ownerCheck) return this.client.errors.commandIsDisabled(cmd, channel);
+      if (disabledCommand && !ownerCheck) return this.client.errors.commandIsDisabled(cmd, message.channel);
       cmd.run(message, args, settings);
       if (this.client.production) await this.client.mongodb.helpers.settings.newCommandUsage(newCommand);
     } catch (err) {

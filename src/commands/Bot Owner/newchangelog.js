@@ -24,7 +24,7 @@ module.exports = class NewChangelogCommand extends Command {
     const channel = this.client.lastChangelog.channel;
 
     const embed = new MessageEmbed()
-      .setAuthor(message.author.tag, message.author.avatarURL())
+      .setAuthor({ name: message.author.tag, iconURL: message.author.avatarURL() })
       .setDescription(changes)
       .addField('Date', new Date().toLocaleDateString())
       .setColor(embedColor);
@@ -37,7 +37,7 @@ module.exports = class NewChangelogCommand extends Command {
         embed
       );
       if (confirmation === 'submit') {
-        this.client.lastChangelog = await channel.send(embed);
+        this.client.lastChangelog = await channel.send({ embeds: [embed] });
         return this.client.lastChangelog;
       }
     } catch (err) {

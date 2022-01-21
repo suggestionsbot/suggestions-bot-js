@@ -8,6 +8,10 @@ module.exports = class SettingsHelpers {
     this.mongo = mongo;
   }
 
+  get guildSettings() {
+    return this.mongo.client.guildSettings;
+  }
+
   _guildQuery(guild) {
     return [
       { guildID: guild.id },
@@ -27,16 +31,16 @@ module.exports = class SettingsHelpers {
       ...this.mongo.client.config.defaultSettings
     };
 
-    const inMap = guild.settings.has(guild.id);
+    const inMap = this.guildSettings.has(guild.id);
 
     if (inMap)
-      data = guild.settings.get(guild.id);
+      data = this.guildSettings.get(guild.id);
     else {
       let fetchedData = await Settings.findOne({ $or: this._guildQuery(guild) });
       if (newGuild) fetchedData = await this.createGuild(guild);
       if (fetchedData == null) return defaultData;
-      guild.settings.set(guild.id, fetchedData);
-      data = guild.settings.get(guild.id);
+      this.guildSettings.set(guild.id, fetchedData);
+      data = this.guildSettings.get(guild.id);
     }
 
     return data;
@@ -58,12 +62,12 @@ module.exports = class SettingsHelpers {
       else return;
     }
 
-    if (!guild.settings.get(guild.id)) await this.getGuild(guild, true);
+    if (!this.guildSettings.get(guild.id)) await this.getGuild(guild, true);
 
     const updated = await Settings
       .findOneAndUpdate({ $or: this._guildQuery(guild) }, settings, { new: true });
 
-    guild.settings.set(guild.id, updated);
+    this.guildSettings.set(guild.id, updated);
 
     const fetchedGuild = await this.mongo.client.shard.fetchGuild(guild.id);
     Logger.log(`Guild "${fetchedGuild.name}" (${fetchedGuild.id}) updated settings: ${Object.keys(newSettings)}`);
@@ -81,13 +85,13 @@ module.exports = class SettingsHelpers {
     const { guild, staffRoles } = data;
     const updatedData = { staffRoles };
     if (added) {
-      if (!guild.settings.get(guild.id)) await this.getGuild(guild, true);
+      if (!this.guildSettings.get(guild.id)) await this.getGuild(guild, true);
       const updated = await Settings.findOneAndUpdate({ $or: this._guildQuery(guild) }, { $push: updatedData }, { new: true });
-      guild.settings.set(guild.id, updated);
+      this.guildSettings.set(guild.id, updated);
     } else {
-      if (!guild.settings.get(guild.id)) await this.getGuild(guild, true);
+      if (!this.guildSettings.get(guild.id)) await this.getGuild(guild, true);
       const updated = await Settings.findOneAndUpdate({ $or: this._guildQuery(guild) }, { $pull: updatedData }, { new: true });
-      guild.settings.set(guild.id, updated);
+      this.guildSettings.set(guild.id, updated);
     }
   }
 
@@ -101,13 +105,13 @@ module.exports = class SettingsHelpers {
     const { guild, disabledCommands } = data;
     const updatedData = { disabledCommands };
     if (!enabled) {
-      if (!guild.settings.get(guild.id)) await this.getGuild(guild, true);
+      if (!this.guildSettings.get(guild.id)) await this.getGuild(guild, true);
       const updated = await Settings.findOneAndUpdate({ $or: this._guildQuery(guild) }, { $pull: updatedData }, { new: true });
-      guild.settings.set(guild.id, updated);
+      this.guildSettings.set(guild.id, updated);
     } else {
-      if (!guild.settings.get(guild.id)) await this.getGuild(guild, true);
+      if (!this.guildSettings.get(guild.id)) await this.getGuild(guild, true);
       const updated = await Settings.findOneAndUpdate({ $or: this._guildQuery(guild) }, { $push: updatedData }, { new: true });
-      guild.settings.set(guild.id, updated);
+      this.guildSettings.set(guild.id, updated);
     }
   }
 
@@ -123,7 +127,7 @@ module.exports = class SettingsHelpers {
     const newSettings = new Settings(merged);
     const data = await newSettings.save();
 
-    guild.settings.set(guild.id, data);
+    this.guildSettings.set(guild.id, data);
 
     const fetchedGuild = await this.mongo.client.shard.fetchGuild(guild.id);
     Logger.log(`Default settings saved for guild "${fetchedGuild.name}" (${fetchedGuild.id}).`);
@@ -179,7 +183,7 @@ module.exports = class SettingsHelpers {
       ]
     });
 
-    guild.settings.delete(guild.id);
+    this.guildSettings.delete(guild.id);
     Logger.log(`Blacklist data deleted for guild ${guild.name || guild.guildName} (${guild.id || guild.guildID})`);
     Logger.log(`${this.mongo.client.user.username} has left a guild: ${guild.name || guild.guildName } (${guild.id || guild.guildID})`);
   }

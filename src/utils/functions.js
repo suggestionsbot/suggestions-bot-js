@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const petitio = require('petitio');
 const { CronJob } = require('cron');
-const { Client, MessageMentions } = require('discord.js-light');
+const { Client, MessageMentions, Message, Guild, Channel } = require('discord.js-light');
 
 const config = require('../config');
 const Logger = require('./logger');
@@ -13,7 +13,7 @@ const Logger = require('./logger');
  * @param snowflake - The snowflake to validate.
  * @returns {Boolean} If the snowflake is valid or not.
  */
-exports.validateSnowflake = (snowflake) => {
+const validateSnowflake = (snowflake) => {
   const epoch = 1420070400000;
 
   if (!snowflake) return false;
@@ -30,8 +30,8 @@ exports.validateSnowflake = (snowflake) => {
  * @param {String} str
  * @return {Promise<TextChannel|null>}
  */
-exports.validateChannel = (manager, str) => {
-  return manager.forge(str).fetch({ cache: false }).catch(() => null);
+const validateChannel = (manager, str) => {
+  return manager.forge(str).fetch().catch(() => null);
 };
 
 /**
@@ -40,7 +40,7 @@ exports.validateChannel = (manager, str) => {
  * @param {String[]} extensions An array of file extensions to search by
  * @return {*[]}
  */
-exports.walk = (directory, extensions) => {
+const walk = (directory, extensions) => {
   const read = (dir, files = []) => {
     for (const file of fs.readdirSync(dir)) {
       const filePath = path.join(dir, file), stats = fs.lstatSync(filePath);
@@ -60,7 +60,7 @@ exports.walk = (directory, extensions) => {
  * @param {'t', 'T', 'd', 'D', 'f', 'F', 'R'?} type The type of timestamp to display (ex. relative)
  * @return {String} The timestamp style
  */
-exports.displayTimestamp = (dateType, type) => {
+const displayTimestamp = (dateType, type) => {
   const timestamp = typeof dateType === 'object' ? new Date(dateType).getTime() : dateType;
 
   const validOptions = ['t', 'T', 'd', 'D', 'f', 'F', 'R'];
@@ -75,7 +75,7 @@ exports.displayTimestamp = (dateType, type) => {
  * @param {Number} uptime The number of milliseconds
  * @return {String} The uptime
  */
-exports.displayUptime = (uptime) => {
+const displayUptime = (uptime) => {
   const secondsInADay = 60 * 60 * 1000 * 24;
   const secondsInAHour = 60 * 60 * 1000;
 
@@ -104,7 +104,7 @@ exports.displayUptime = (uptime) => {
  * @param {String} tag The tag to filter results by
  * @return {Promise<String>} The static image URL of the GIF.
  */
-exports.getRandomGiphyImage = (tag) => {
+const getRandomGiphyImage = (tag) => {
   return petitio('https://api.giphy.com/v1/gifs/random')
     .query('api_key', process.env.GIPHY)
     .query('tag', tag)
@@ -117,8 +117,8 @@ exports.getRandomGiphyImage = (tag) => {
  * @param {Guild} guild The guild to check.
  * @return {Promise<TextChannel>|null} Return the channel, if it exists
  */
-exports.getDefaultSuggestionsChannel = (guild) => {
-  return guild.channels.fetch({ cache: false }).then(res => res.find(c => c.name === config.suggestionsChannel)) ?? null;
+const getDefaultSuggestionsChannel = (guild) => {
+  return guild.channels.fetch().then(res => res.find(c => c.name === config.suggestionsChannel)) ?? null;
 };
 
 /**
@@ -126,7 +126,7 @@ exports.getDefaultSuggestionsChannel = (guild) => {
  * @param {Array<String>} args The command arguments.
  * @return {Array<String>} Return the new array of arguments.
  */
-exports.parseCommandArguments = (args) => {
+const parseCommandArguments = (args) => {
   const toParseRegex = /[<>[\]]/gm;
 
   const discordPatterns = [
@@ -180,7 +180,7 @@ const postStats = async (client) => {
  * @param {Client} client The Discord client to associate with the CronJob.
  * @return {CronJob} The new CronJob.
  */
-exports.postStatsCronJob = (client) => {
+const postStatsCronJob = (client) => {
   Logger.log('Running cron job for posting bot stats...');
   return new CronJob(config.timers.stats, async () => {
     try {
@@ -192,4 +192,63 @@ exports.postStatsCronJob = (client) => {
   }, null, true, 'America/New_York');
 };
 
-exports = { postStats };
+/**
+ * Deletes a message according to a specified timeout.
+ * @param {Message} message The message to delete, represented as an object.
+ * @param {Number} timeout The timeout, in milliseconds.
+ * @return {Promise<Message>} The deleted message.
+ */
+const messageDelete = (message, timeout) => {
+  return new Promise((resolve, reject) => {
+    const tm = setTimeout(() => {
+      message.delete().then(resolve).catch(err => {
+        clearTimeout(tm);
+        reject(err);
+      });
+    }, timeout);
+
+    return tm;
+  });
+};
+
+/**
+ * Forcefully sets the provided channel ID in the cache.
+ * @param {Client} client The client.
+ * @param {String} channelId The channel ID.
+ * @param {Guild?} guild The guild, if provided.
+ * @return {Promise<Channel>} The channel set into the cache.
+ */
+const cacheChannel = async (client, channelId, guild) => {
+  const channel = await client.channels.fetch(channelId);
+  client.channels.cache.forceSet(channel.id, channel);
+  if (guild) guild.channels.cache.forceSet(channel.id, channel);
+  return channel;
+};
+
+/**
+ * Get a channel from either the cache or REST API (and cache it)..
+ * @param {Client} client The client.
+ * @param {String} channelId The channel ID.
+ * @param {Guild?} guild The guild, if provided.
+ * @return {Promise<Channel>} The channel from the cache..
+ */
+const getChannelAndCache = async (client, channelId, guild) => {
+  return client.channels.cache.has(channelId)
+    ? client.channels.cache.get(channelId)
+    : await cacheChannel(client, channelId, guild);
+};
+
+module.exports = {
+  validateSnowflake,
+  validateChannel,
+  walk,
+  displayTimestamp,
+  displayUptime,
+  getRandomGiphyImage,
+  getDefaultSuggestionsChannel,
+  parseCommandArguments,
+  postStatsCronJob,
+  messageDelete,
+  cacheChannel,
+  getChannelAndCache
+};

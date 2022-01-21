@@ -22,9 +22,9 @@ module.exports = class extends Event {
     if (message.channel.id !== settings.suggestionsChannel) return;
     if (messageReaction.partial) await messageReaction.fetch();
 
-    const reactions = await message.fetch({ cache: false }).then(msg => {
+    const reactions = await message.fetch().then(msg => {
       return Promise.all(msg.reactions.cache.map(reaction => {
-        return reaction.users.fetch({ cache: false })
+        return reaction.users.fetch()
           .then(res => res.filter(u => u.id === user.id).size);
       }));
     });

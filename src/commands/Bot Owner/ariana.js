@@ -20,10 +20,10 @@ module.exports = class ArianaCommand extends Command {
       const url = await getRandomGiphyImage(query);
 
       return message.channel.send({
-        embed: {
+        embeds: [{
           color: 0xCCCCFF,
           image: { url }
-        }
+        }]
       });
     } catch (err) {
       Logger.errorCmd(this, err.stack);

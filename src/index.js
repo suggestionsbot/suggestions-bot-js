@@ -1,6 +1,7 @@
 require('dotenv').config();
 require('./utils/extensions');
 
+const { Options, SnowflakeUtil } = require('discord.js-light');
 const { ShardingManager, SharderEvents } = require('kurasuta');
 const { join } = require('path');
 
@@ -9,24 +10,41 @@ const Logger = require('./utils/logger');
 const SuggestionsClient = require('./structures/Client');
 const { isProduction } = require('./config');
 
+const channelFilter = channel => {
+  return !channel.lastMessageId || SnowflakeUtil.timestampFrom(channel.lastMessageId) < Date.now() - 3600000;
+};
+
 const sharder = new ShardingManager(join(__dirname, 'structures', 'Cluster.js'), {
   clientOptions: {
     disableMentions: 'all',
     partials: ['MESSAGE', 'CHANNEL', 'REACTION', 'GUILD_MEMBER', 'USER'],
-    messageSweepInterval: 600,
-    messageCacheLifetime: 300,
-    messageCacheMaxSize: 0,
     cacheOverwrites: true,
     cacheRoles: true,
-    ws: {
-      intents: [
-        'GUILDS',
-        'GUILD_MESSAGES',
-        'GUILD_MESSAGE_REACTIONS',
-        'DIRECT_MESSAGES',
-        'DIRECT_MESSAGE_REACTIONS'
-      ]
-    }
+    intents: [
+      'GUILDS',
+      'GUILD_MESSAGES',
+      'GUILD_MESSAGE_REACTIONS',
+      'DIRECT_MESSAGES',
+      'DIRECT_MESSAGE_REACTIONS'
+    ],
+    makeCache: Options.cacheWithLimits({
+      GuildManager: Infinity,
+      RoleManager: Infinity,
+      PermissionOverwrites: Infinity,
+      ChannelManager: {
+        maxSize: 0,
+        sweepFilter: () => channelFilter,
+        sweepInterval: 3600
+      },
+      GuildChannelManager: {
+        maxSize: 0,
+        sweepFilter: () => channelFilter,
+        sweepInterval: 3600
+      },
+      MessageManager: {
+        maxSize: 100
+      }
+    })
   },
   development: process.env.DEBUG,
   client: SuggestionsClient,

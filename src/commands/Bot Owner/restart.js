@@ -22,12 +22,12 @@ module.exports = class RestartCommand extends Command {
       else await this.client.shard.respawnAll();
 
       await message.channel.send({
-        embed: {
+        embeds: [{
           color: this.client.config.embedColor,
           description: `Restarting ${args[0] ? `cluster **${args[0]}**` : 'all clusters'}.`,
           footer: { text: `ID: ${message.author.id}` },
           timestamp: Date.now()
-        }
+        }]
       });
     } catch (e) {
       Logger.errorCmd(this, e);

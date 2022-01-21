@@ -20,10 +20,10 @@ module.exports = class SelenaCommand extends Command {
       const url = await getRandomGiphyImage(query);
 
       return message.channel.send({
-        embed: {
+        embeds: [{
           color: 0x32CD32,
           image: { url }
-        }
+        }]
       });
     } catch (err) {
       Logger.errorCmd(this, err.stack);

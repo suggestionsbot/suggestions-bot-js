@@ -20,10 +20,10 @@ module.exports = class ZendayaCommand extends Command {
       const url = await getRandomGiphyImage(query);
 
       return message.channel.send({
-        embed: {
+        embeds: [{
           color: 0xFF69B4,
           image: { url }
-        }
+        }]
       });
     } catch (err) {
       Logger.errorCmd(this, err.stack);

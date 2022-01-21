@@ -3,7 +3,6 @@ const { BaseCluster } = require('kurasuta');
 
 const Logger = require('../utils/logger');
 
-require('../extensions/Guild');
 const { postStatsCronJob } = require('../utils/functions');
 
 module.exports = class extends BaseCluster {

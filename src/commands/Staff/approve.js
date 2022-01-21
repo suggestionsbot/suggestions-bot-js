@@ -2,7 +2,7 @@ const { MessageEmbed, Util: { escapeMarkdown } } = require('discord.js-light');
 const { stripIndent } = require('common-tags');
 const Command = require('../../structures/Command');
 const Logger = require('../../utils/logger');
-const { validateSnowflake } = require('../../utils/functions');
+const { validateSnowflake, messageDelete, getChannelAndCache } = require('../../utils/functions');
 
 module.exports = class ApproveCommand extends Command {
   constructor(client) {
@@ -50,11 +50,11 @@ module.exports = class ApproveCommand extends Command {
 
     if (status === 'approved') {
       return message.channel.send(`sID **${sID}** has already been approved. Cannot do this action again.`)
-        .then(msg => msg.delete({ timeout: 3000 }))
+        .then(msg => messageDelete(msg, 3000))
         .catch(err => this.logger.error(err.stack));
     }
 
-    const submitter = await this.client.users.fetch(userID, false).catch(err => Logger.errorCmd(this, err));
+    const submitter = await this.client.users.fetch(userID).catch(err => Logger.errorCmd(this, err));
     const guild = message.guild ? message.guild : this.client.guilds.cache.get(guildID);
 
     try {
@@ -74,9 +74,9 @@ module.exports = class ApproveCommand extends Command {
     let suggestionsChannel,
       suggestionsLogs;
     try {
-      suggestionsChannel = settings.suggestionsChannel && await message.guild.channels.fetch(settings.suggestionsChannel);
+      suggestionsChannel = settings.suggestionsChannel && await getChannelAndCache(this.client, settings.suggestionsChannel, message.guild);
       if (!suggestionsChannel) return this.client.errors.noSuggestions(message.channel);
-      suggestionsLogs = settings.suggestionsLogs && await message.guild.channels.fetch(settings.suggestionsLogs);
+      suggestionsLogs = settings.suggestionsLogs && await getChannelAndCache(this.client, settings.suggestionsLogs, message.guild);
       if (!suggestionsLogs) return this.client.errors.noSuggestionsLogs(message.channel);
     } catch (error) {
       if (!suggestionsChannel) return this.client.errors.noSuggestions(message.channel);
@@ -87,19 +87,19 @@ module.exports = class ApproveCommand extends Command {
 
 
     try {
-      await guild.members.fetch({ user: userID, cache: false });
+      await guild.members.fetch(userID);
     } catch (error) {
       message.channel.send(`**${submitter.tag}** is no longer in the guild, but their suggestion will still be approved.`)
-        .then(msg => msg.delete({ timeout: 3000 }));
+        .then(msg => messageDelete(msg, 3000));
     }
 
     let sMessage;
     try {
-      sMessage = await suggestionsChannel.messages.fetch(messageID, false);
+      sMessage = await suggestionsChannel.messages.fetch(messageID);
     } catch (err) {
       Logger.errorCmd(this, err.stack);
       return message.channel.send('The suggestion message was not found!')
-        .then(m => m.delete({ timeout: 5000 }));
+        .then(m => messageDelete(m, 5000));
     }
 
     const embed = sMessage.embeds[0];
@@ -109,12 +109,12 @@ module.exports = class ApproveCommand extends Command {
       .setColor(approved);
 
     const dmEmbed = new MessageEmbed()
-      .setAuthor(guild, guild.iconURL())
+      .setAuthor({ name: guild.name, iconURL: guild.iconURL() })
       .setDescription(stripIndent`Hey, ${submitter}. Your suggestion has been approved by ${message.author}!
       
       Your suggestion ID (sID) for reference was **${sID}**.`)
       .setColor(approved)
-      .setFooter(`Guild ID: ${guild.id} | sID: ${id}`)
+      .setFooter({ text: `Guild ID: ${guild.id} | sID: ${id}` })
       .setTimestamp();
 
     if (reply) {
@@ -149,7 +149,7 @@ module.exports = class ApproveCommand extends Command {
     };
 
     const logsEmbed = new MessageEmbed()
-      .setAuthor(guild, guild.iconURL())
+      .setAuthor({ name: guild.name, iconURL: guild.iconURL() })
       .setDescription(stripIndent`
         **Results**
         ${getResults(true).join('\n')}
@@ -164,7 +164,7 @@ module.exports = class ApproveCommand extends Command {
         ${message.author}
       `)
       .setColor(approved)
-      .setFooter(`sID: ${sID}`)
+      .setFooter({ text: `sID: ${sID}` })
       .setTimestamp();
 
     if (reply) {
@@ -205,17 +205,17 @@ module.exports = class ApproveCommand extends Command {
     };
 
     try {
-      message.channel.send(`Suggestion **${sID}** has been approved.`).then(m => m.delete({ timeout: 5000 }));
-      sMessage.edit(approvedEmbed).then(m => m.delete({ timeout: 5000 }));
-      suggestionsLogs.send(logsEmbed);
+      message.channel.send(`Suggestion **${sID}** has been approved.`).then(m => messageDelete(m, 5000));
+      sMessage.edit({ embeds: [approvedEmbed] }).then(m => messageDelete(m, 5000));
+      suggestionsLogs.send({ embeds: [logsEmbed] });
       await this.client.mongodb.helpers.suggestions.handleGuildSuggestion(approveSuggestion);
-      await guild.members.fetch({ user: userID, cache: false });
-      if (settings.dmResponses) submitter.send(dmEmbed);
+      await guild.members.fetch({ user: userID });
+      if (settings.dmResponses) submitter.send({ embeds: [dmEmbed] });
     } catch (error) {
       if (error.message === 'Unknown Member') return;
       if (error.message === 'Cannot send messages to this user') return;
       Logger.errorCmd(this, error.stack);
-      message.delete({ timeout: 3000 }).catch(O_o=>{});
+      messageDelete(message, 3000).catch(O_o=>{});
       return message.channel.send(`An error occurred: **${error.message}**`);
     }
   }
