@@ -140,11 +140,15 @@ module.exports = class SuggestionsClient extends Client {
     const { help: { name: cmdName } } = await this.commands.get('help');
 
     if (this.production) {
-      await this.user.setStatus('online');
-      await this.user.setActivity(`your suggestions | ${prefix + cmdName}`, { type: 'WATCHING' });
+      await this.user.setPresence({
+        activities: [{ name: `your suggestions | ${prefix + cmdName}`, type: 'WATCHING' }],
+        status: 'online'
+      });
     } else {
-      await this.user.setStatus('dnd');
-      await this.user.setActivity('in code land...', { type: 'PLAYING' });
+      await this.user.setPresence({
+        activities: [{ name: 'in code land...', type: 'PLAYING' }],
+        status: 'dnd'
+      });
     }
   }
 
@@ -153,7 +157,7 @@ module.exports = class SuggestionsClient extends Client {
     this.eventLoader.init();
   }
 
-  login() {
+  login(token) {
     this.start();
     return super.login();
   }
