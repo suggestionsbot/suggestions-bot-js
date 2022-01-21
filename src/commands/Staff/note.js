@@ -131,7 +131,7 @@ module.exports = class NoteCommand extends Command {
       if (err.message === 'Unknown Member') return;
       if (err.message === 'Cannot send messages to this user') return;
       Logger.errorCmd(this, err.stack);
-      message.delete({ timeout: 3000 }).catch(O_o => {});
+      messageDelete(message, 3000).catch(O_o => {});
       message.channel.send(`Error updating this suggestion in the database: **${err.message}**`);
     }
   }

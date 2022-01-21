@@ -91,7 +91,7 @@ module.exports = class BlacklistCommand extends Command {
 
         if (activeBlacklists.length < 1) {
           return message.channel.send(`There are currently no active blacklisted users. Use \`${prefix + name} help\` for more information.`)
-            .then(m => m.delete({ timeout: 5000 }));
+            .then(m => messageDelete(m, 5000));
         }
 
         message.channel.send({ embeds: [blEmbed] });
@@ -121,7 +121,7 @@ module.exports = class BlacklistCommand extends Command {
       case 'add': {
         if (!reason) {
           return message.channel.send('Please provide a reason!')
-            .then(msg => msg.delete({ timeout: 5000 }))
+            .then(msg => messageDelete(msg, 5000))
             .catch(err => Logger.errorCmd(this, err.stack));
         }
 
@@ -168,7 +168,7 @@ module.exports = class BlacklistCommand extends Command {
             Bot blacklist has been issued. However, I could not DM **${blUser.tag}** because they either have DMs disabled
             or aren't a member of this server.
           `)
-              .then(m => m.delete({ timeout: 5000 }));
+              .then(m => messageDelete(m, 5000));
           }
           message.channel.send(`An error occurred: **${err.message}**.`);
         }
@@ -216,7 +216,7 @@ module.exports = class BlacklistCommand extends Command {
             Bot blacklist removal has been issued. However, I could not DM **${blUser.tag}** because they either have DMs disabled
             or aren't a member of this server.
           `)
-              .then(m => m.delete({ timeout: 5000 }));
+              .then(m => messageDelete(m, 5000));
           }
           message.channel.send(`An error occurred: **${err.message}**.`);
         }

@@ -218,7 +218,7 @@ module.exports = class RejectCommand extends Command {
       if (error.message === 'Unknown Member') return;
       if (error.message === 'Cannot send messages to this user') return;
       Logger.errorCmd(this, error.stack);
-      message.delete({ timeout: 3000 }).catch(O_o=>{});
+      messageDelete(message, 3000).catch(O_o=>{});
       return message.channel.send(`An error occurred: **${error.message}**`);
     }
   }
