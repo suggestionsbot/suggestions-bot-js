@@ -46,7 +46,7 @@
     "common-tags": "^1.8.0",
     "cron": "^1.8.2",
     "discord.js-light": "^3.5.11",
-    "dotenv": "^14.0.0",
+    "dotenv": "^16.0.0",
     "erlpack": "discord/erlpack",
     "hastebin-gen": "^2.0.5",
     "kurasuta": "^2.2.3",
