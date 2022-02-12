@@ -126,8 +126,12 @@ module.exports = class ConfigCommand extends Command {
         }
       }
 
+      const isDefault = [this.client.config.defaultSettings.suggestionsLogs, "suggestions-logs"].includes(suggestionsLogs);
+      suggestionsLogs = isDefault
+          ? await message.guild.channels.fetch({ cache: false }).then(res => res.find(c => c.name === this.client.config.suggestionLogs))
+          : message.guild.channels.forge(suggestionsLogs);
       if (!suggestionsLogs) return this.client.errors.noSuggestionsLogs(message.channel);
-      configEmbed.setDescription(`Current suggestions logs channel: ${message.guild.channels.forge(suggestionsLogs)}`);
+      configEmbed.setDescription(`Current suggestions logs channel: ${suggestionsLogs}`);
       configEmbed.addField('More Information', `[Link](${confDocs}#suggestions-logs-channel)`);
       message.channel.send(configEmbed);
       break;
