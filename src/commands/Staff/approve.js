@@ -2,7 +2,7 @@ const { MessageEmbed, Util: { escapeMarkdown } } = require('discord.js-light');
 const { stripIndent } = require('common-tags');
 const Command = require('../../structures/Command');
 const Logger = require('../../utils/logger');
-const { validateSnowflake } = require('../../utils/functions');
+const { validateSnowflake, suggestionMessageReactionFilter } = require('../../utils/functions');
 
 module.exports = class ApproveCommand extends Command {
   constructor(client) {
@@ -45,7 +45,8 @@ module.exports = class ApproveCommand extends Command {
       guildID,
       messageID,
       suggestion,
-      status
+      status,
+      voteEmojis
     } = document;
 
     if (status === 'approved') {
@@ -127,8 +128,8 @@ module.exports = class ApproveCommand extends Command {
     }
 
     const [reacts, reactCount] = [
-      sMessage.reactions.cache.map(e => e.emoji.toString()),
-      sMessage.reactions.cache.map(e => e.count)
+      sMessage.reactions.cache.filter(suggestionMessageReactionFilter).map(e => e.emoji.toString()),
+      sMessage.reactions.cache.filter(suggestionMessageReactionFilter).map(e => e.count)
     ];
 
     const getResults = (view = false) => {

@@ -192,4 +192,16 @@ exports.postStatsCronJob = (client) => {
   }, null, true, 'America/New_York');
 };
 
+/**
+ * A filter to check if a message reaction is a vote emoji or not.
+ * @param {MessageReaction} reaction - The message reaction to check.
+ * @return {boolean} If the message reaction is a vote emoji or not.
+ */
+exports.suggestionMessageReactionFilter = (reaction) => {
+  return require('./voteEmojis')
+    .map(set => set.emojis)
+    .flat()
+    .includes(reaction.emoji.id ?? reaction.emoji.name);
+};
+
 exports = { postStats };
