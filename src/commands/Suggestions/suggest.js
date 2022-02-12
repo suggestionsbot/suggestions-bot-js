@@ -112,6 +112,8 @@ module.exports = class SuggestCommand extends Command {
       if (settings.dmResponses) await sUser.send(dmEmbed);
       await message.react(this.client.emojis.forge(successEmoji));
     } catch (error) {
+      if (error.code === 10008) return;
+      Logger.errorCmd(this, error)
       message.channel.send(oneLine`
         I could not DM you because you have DMs disabled from server members. However, for reference, your suggestion
         ID (sID) is **${id}**. Please wait for a staff member to approve/reject your suggestion.
@@ -137,7 +139,7 @@ module.exports = class SuggestCommand extends Command {
       await this.client.mongodb.helpers.suggestions.submitGuildSuggestion(newSuggestion);
       await message.delete({ timeout: 5000 });
     } catch (error) {
-      if (error.message === 'Unknown Message') return;
+      if (error.code === 10008) return;
       Logger.errorCmd(this, error.stack);
       return message.channel.send(`An error occurred: **${error.message}**`);
     }
