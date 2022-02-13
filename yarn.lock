@@ -441,10 +441,10 @@ doctrine@^3.0.0:
   dependencies:
     esutils "^2.0.2"
 
-dotenv@^14.0.0:
-  version "14.0.1"
-  resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-14.0.1.tgz#130e75a16df47de88becdf6d47527df76f864d33"
-  integrity sha512-CuBFi54IgZtRqSls21+DLbQ1YZGEx80DerXbnj+wCGZ+UvxQdfXvWJliB3n3yaeaNAQQs2l/53iZwclTHtL3uA==
+dotenv@^16.0.0:
+  version "16.0.0"
+  resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-16.0.0.tgz#c619001253be89ebb638d027b609c75c26e47411"
+  integrity sha512-qD9WU0MPM4SWLPJy/r2Be+2WgQj8plChsyrCNQzW/0WjvcJQiKQJ9mH3ZgB3fxbUUxgc/11ZJ0Fi5KiimWGz2Q==
 
 erlpack@discord/erlpack:
   version "0.1.3"
