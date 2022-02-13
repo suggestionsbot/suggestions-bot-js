@@ -23,8 +23,6 @@ module.exports = class MySuggestionsCommand extends Command {
 
   async run(message, args) {
 
-    const { embedColor } = this.client.config;
-
     await message.delete().catch(O_o => {});
 
     const getSubmitter = async userID => {
@@ -77,7 +75,7 @@ module.exports = class MySuggestionsCommand extends Command {
     const lastSuggestionInfo = `\`${lastsID}\` (${lastDate})`;
 
     const embed = new MessageEmbed()
-      .setColor(embedColor)
+      .setColor(this.client.config.colors.main)
       .setThumbnail(avatarURL)
       .addField('User', `${submitter} \`[${submitter.id}]\``)
       .setTimestamp();

@@ -2,7 +2,9 @@ const fs = require('fs');
 const path = require('path');
 const petitio = require('petitio');
 const { CronJob } = require('cron');
-const { Client, MessageMentions } = require('discord.js-light');
+const { Client, MessageMentions, MessageEmbed } = require('discord.js-light');
+const { execSync } = require('child_process');
+const sentry = require('@sentry/node');
 
 const config = require('../config');
 const Logger = require('./logger');
@@ -13,7 +15,7 @@ const Logger = require('./logger');
  * @param snowflake - The snowflake to validate.
  * @returns {Boolean} If the snowflake is valid or not.
  */
-exports.validateSnowflake = (snowflake) => {
+const validateSnowflake = (snowflake) => {
   const epoch = 1420070400000;
 
   if (!snowflake) return false;
@@ -30,7 +32,7 @@ exports.validateSnowflake = (snowflake) => {
  * @param {String} str
  * @return {Promise<TextChannel|null>}
  */
-exports.validateChannel = (manager, str) => {
+const validateChannel = (manager, str) => {
   return manager.forge(str).fetch({ cache: false }).catch(() => null);
 };
 
@@ -40,7 +42,7 @@ exports.validateChannel = (manager, str) => {
  * @param {String[]} extensions An array of file extensions to search by
  * @return {*[]}
  */
-exports.walk = (directory, extensions) => {
+const walk = (directory, extensions) => {
   const read = (dir, files = []) => {
     for (const file of fs.readdirSync(dir)) {
       const filePath = path.join(dir, file), stats = fs.lstatSync(filePath);
@@ -60,7 +62,7 @@ exports.walk = (directory, extensions) => {
  * @param {'t', 'T', 'd', 'D', 'f', 'F', 'R'?} type The type of timestamp to display (ex. relative)
  * @return {String} The timestamp style
  */
-exports.displayTimestamp = (dateType, type) => {
+const displayTimestamp = (dateType, type) => {
   const timestamp = typeof dateType === 'object' ? new Date(dateType).getTime() : dateType;
 
   const validOptions = ['t', 'T', 'd', 'D', 'f', 'F', 'R'];
@@ -75,7 +77,7 @@ exports.displayTimestamp = (dateType, type) => {
  * @param {Number} uptime The number of milliseconds
  * @return {String} The uptime
  */
-exports.displayUptime = (uptime) => {
+const displayUptime = (uptime) => {
   const secondsInADay = 60 * 60 * 1000 * 24;
   const secondsInAHour = 60 * 60 * 1000;
 
@@ -104,7 +106,7 @@ exports.displayUptime = (uptime) => {
  * @param {String} tag The tag to filter results by
  * @return {Promise<String>} The static image URL of the GIF.
  */
-exports.getRandomGiphyImage = (tag) => {
+const getRandomGiphyImage = (tag) => {
   return petitio('https://api.giphy.com/v1/gifs/random')
     .query('api_key', process.env.GIPHY)
     .query('tag', tag)
@@ -117,7 +119,7 @@ exports.getRandomGiphyImage = (tag) => {
  * @param {Guild} guild The guild to check.
  * @return {Promise<TextChannel>|null} Return the channel, if it exists
  */
-exports.getDefaultSuggestionsChannel = (guild) => {
+const getDefaultSuggestionsChannel = (guild) => {
   return guild.channels.fetch({ cache: false }).then(res => res.find(c => c.name === config.suggestionsChannel)) ?? null;
 };
 
@@ -126,7 +128,7 @@ exports.getDefaultSuggestionsChannel = (guild) => {
  * @param {Array<String>} args The command arguments.
  * @return {Array<String>} Return the new array of arguments.
  */
-exports.parseCommandArguments = (args) => {
+const parseCommandArguments = (args) => {
   const toParseRegex = /[<>[\]]/gm;
 
   const discordPatterns = [
@@ -180,7 +182,7 @@ const postStats = async (client) => {
  * @param {Client} client The Discord client to associate with the CronJob.
  * @return {CronJob} The new CronJob.
  */
-exports.postStatsCronJob = (client) => {
+const postStatsCronJob = (client) => {
   Logger.log('Running cron job for posting bot stats...');
   return new CronJob(config.timers.stats, async () => {
     try {
@@ -197,11 +199,58 @@ exports.postStatsCronJob = (client) => {
  * @param {MessageReaction} reaction - The message reaction to check.
  * @return {boolean} If the message reaction is a vote emoji or not.
  */
-exports.suggestionMessageReactionFilter = (reaction) => {
+const suggestionMessageReactionFilter = (reaction) => {
   return require('./voteEmojis')
     .map(set => set.emojis)
     .flat()
     .includes(reaction.emoji.id ?? reaction.emoji.name);
 };
 
-exports = { postStats };
+/**
+ * Gets the latest commit hash.
+ * @return {String} The short commit hash.
+ */
+const lastCommitHash = () => execSync('git rev-parse HEAD', { encoding: 'utf8' }).slice(0, 7);
+
+/**
+ * Reports an error to Sentry DSN.
+ * @param {Error|module:mongoose.NativeError} error The error to report.
+ * @return {string} The Sentry error event ID.
+ */
+const reportToSentry = (error) => sentry.captureException(error);
+
+/**
+ * Build an embed to display to the user when an error is thrown.
+ * @param {Error|module:mongoose.NativeError} error The error.
+ * @param {Boolean} report If the error should be reported to sentry;
+ * @return {MessageEmbed} The embed to send in the channel.
+ */
+const buildErrorEmbed = (error, report = true) => {
+  let eventId;
+  if (report) eventId = reportToSentry(error);
+
+  const embed = new MessageEmbed()
+    .setColor(config.colors.error)
+    .setDescription(`An error occurred: ${error?.message ?? error}`)
+    .setTimestamp();
+
+  if (eventId) embed.setFooter(eventId);
+
+  return embed;
+};
+
+module.exports = {
+  validateSnowflake,
+  validateChannel,
+  walk,
+  displayTimestamp,
+  displayUptime,
+  getRandomGiphyImage,
+  getDefaultSuggestionsChannel,
+  parseCommandArguments,
+  postStatsCronJob,
+  suggestionMessageReactionFilter,
+  lastCommitHash,
+  reportToSentry,
+  buildErrorEmbed
+};

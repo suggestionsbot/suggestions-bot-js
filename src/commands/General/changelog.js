@@ -16,7 +16,7 @@ module.exports = class ChangelogCommand extends Command {
 
   async run(message, args) {
 
-    const { embedColor, discord } = this.client.config;
+    const { colors, discord } = this.client.config;
 
     const changelog = this.client.lastChangelog;
     const changelogEmbed = new MessageEmbed()
@@ -24,7 +24,7 @@ module.exports = class ChangelogCommand extends Command {
       .setThumbnail(this.client.user.avatarURL())
       .setDescription(changelog.embeds[0].description)
       .addField('Date', changelog.embeds[0].fields[0].value)
-      .setColor(embedColor);
+      .setColor(colors.main);
 
     changelogEmbed.addField('More Information', `Please check our ${changelog.channel} channel at ${discord} for previous updates!`);
 

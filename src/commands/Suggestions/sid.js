@@ -2,6 +2,7 @@ const { MessageEmbed, Util: { escapeMarkdown } } = require('discord.js-light');
 const { stripIndent } = require('common-tags');
 const Command = require('../../structures/Command');
 const Logger = require('../../utils/logger');
+const { buildErrorEmbed } = require('../../utils/functions');
 
 module.exports = class SIDCommand extends Command {
   constructor(client) {
@@ -16,7 +17,7 @@ module.exports = class SIDCommand extends Command {
 
   async run(message, args, settings) {
 
-    const { embedColor, suggestionColors } = this.client.config;
+    const { colors } = this.client.config;
 
     message.delete().catch(O_o => {});
 
@@ -27,7 +28,7 @@ module.exports = class SIDCommand extends Command {
       suggestion = await this.client.mongodb.helpers.suggestions.getGuildSuggestion(message.guild, args[0]);
     } catch (err) {
       Logger.errorCmd(this, err.stack);
-      return message.channel.send(`An error occurred: **${err.message}**`);
+      return message.channel.send(buildErrorEmbed(err));
     }
 
     if (!suggestion) return this.client.errors.noSuggestion(message.channel, args[0]);
@@ -66,7 +67,7 @@ module.exports = class SIDCommand extends Command {
           **Suggestion**
           ${escapeMarkdown(suggestion.suggestion)}
         `)
-          .setColor(embedColor)
+          .setColor(colors.main)
           .setTimestamp(time);
         message.channel.send(embed);
         break;
@@ -86,7 +87,7 @@ module.exports = class SIDCommand extends Command {
           **Results**
           ${view.join('\n')}
         `)
-          .setColor(suggestionColors.approved)
+          .setColor(colors.suggestion.approved)
           .setTimestamp(updatedOn);
         message.channel.send(embed);
         break;
@@ -106,7 +107,7 @@ module.exports = class SIDCommand extends Command {
           **Results**
           ${view.join('\n')}
         `)
-          .setColor(suggestionColors.rejected)
+          .setColor(colors.suggestion.rejected)
           .setTimestamp(updatedOn);
         message.channel.send(embed);
         break;

@@ -3,7 +3,7 @@ const { MessageEmbed, version: discordVersion } = require('discord.js-light');
 const Command = require('../../structures/Command');
 const Logger = require('../../utils/logger');
 const { version } = require('../../../package.json');
-const { displayUptime } = require('../../utils/functions');
+const { displayUptime, buildErrorEmbed } = require('../../utils/functions');
 
 module.exports = class StatsCommand extends Command {
   constructor(client) {
@@ -37,12 +37,12 @@ module.exports = class StatsCommand extends Command {
       memUsage = resolved[2].filter(Boolean).reduce((prev, count) => prev + count, 0).toFixed(2).toLocaleString();
     } catch (err) {
       Logger.errorCmd(this, err);
-      return message.channel.send(`An error occurred: **${err.message}**`);
+      return message.channel.send(buildErrorEmbed(err));
     }
 
     const embed = new MessageEmbed()
       .setAuthor(`${this.client.user.username} v${version}`, this.client.user.avatarURL())
-      .setColor(this.client.config.embedColor)
+      .setColor(this.client.config.colors.main)
       .addField('Guilds', guildSize, true)
       .addField('Users', userSize, true)
       .addField('Uptime', displayUptime(this.client.uptime), true)

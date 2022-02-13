@@ -1,7 +1,7 @@
 const { MessageEmbed } = require('discord.js-light');
 const { oneLine } = require('common-tags');
 const Command = require('../../structures/Command');
-const { validateSnowflake } = require('../../utils/functions');
+const { validateSnowflake, buildErrorEmbed } = require('../../utils/functions');
 const Logger = require('../../utils/logger');
 
 module.exports = class NoteCommand extends Command {
@@ -20,8 +20,6 @@ module.exports = class NoteCommand extends Command {
 
   async run(message, args, settings) {
 
-    const { embedColor } = this.client.config;
-
     message.delete().catch(O_o => {});
 
     const id = args[0];
@@ -35,7 +33,7 @@ module.exports = class NoteCommand extends Command {
       else return message.channel.send(`\`${id}\` does not resolve to or return a valid suggestion!`);
     } catch (err) {
       Logger.errorCmd(this, err.stack);
-      return message.channel.send(`Error querying the database for this suggestions: **${err.message}**.`);
+      return message.channel.send(buildErrorEmbed(err));
     }
 
     const {
@@ -54,7 +52,7 @@ module.exports = class NoteCommand extends Command {
     } catch (error) {
       if (!suggestionsChannel) return this.client.errors.noSuggestions(message.channel);
       Logger.errorCmd(this, error.stack);
-      return message.channel.send(`An error occurred: **${error.message}**`);
+      return message.channel.send(buildErrorEmbed(error));
     }
 
 
@@ -76,7 +74,7 @@ module.exports = class NoteCommand extends Command {
       sMessage = await suggestionsChannel.messages.fetch(messageID, false);
     } catch (err) {
       Logger.errorCmd(this, err.stack);
-      message.channel.send('The suggestion message was not found, but still will be updated!')
+      message.channel.send(buildErrorEmbed(err))
         .then(m => m.delete({ timeout: 5000 }));
     }
 
@@ -90,7 +88,7 @@ module.exports = class NoteCommand extends Command {
                     
         Your suggestion ID (sID) for reference was **${sID}**.
       `)
-      .setColor(embedColor)
+      .setColor(this.client.config.colors.main)
       .setFooter(`Guild ID: ${message.guild.id} | sID: ${sID}`)
       .setTimestamp();
 
@@ -132,7 +130,7 @@ module.exports = class NoteCommand extends Command {
       if (err.message === 'Cannot send messages to this user') return;
       Logger.errorCmd(this, err.stack);
       message.delete({ timeout: 3000 }).catch(O_o => {});
-      message.channel.send(`Error updating this suggestion in the database: **${err.message}**`);
+      return message.channel.send(buildErrorEmbed(err));
     }
   }
 };

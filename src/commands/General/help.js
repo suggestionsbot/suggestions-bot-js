@@ -18,7 +18,7 @@ module.exports = class HelpCommand extends Command {
   }
 
   async run(message, args, settings) {
-    const { embedColor, discord, website, prefix: defPrefix, github } = this.client.config;
+    const { colors, discord, website, prefix: defPrefix, github } = this.client.config;
     let staffRoles,
       staffCheck,
       adminCheck;
@@ -57,7 +57,7 @@ module.exports = class HelpCommand extends Command {
         .setDescription(cmdHelp.description)
         .addField('Category', `\`${cmdHelp.category}\``, true)
         .addField('Guild Only', `\`${cmdConf.guildOnly ? 'True' : 'False'}\``, true)
-        .setColor(embedColor)
+        .setColor(colors.main)
         .setFooter('<> = Required | [] = Optional')
         .setTimestamp();
       if (cmdHelp.usage !== null) cmdHelpEmbed.addField('Usage', `\`${prefix + cmdHelp.usage}\``, true);
@@ -72,7 +72,7 @@ module.exports = class HelpCommand extends Command {
           View help information for ${this.client.user}.
           (Do ${`\`${prefix + this.help.usage}\``}
           for specific help information).`)
-      .setColor(embedColor);
+      .setColor(colors.main);
 
     if (message.guild) {
       helpEmbed

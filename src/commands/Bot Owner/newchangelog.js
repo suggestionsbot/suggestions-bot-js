@@ -1,6 +1,7 @@
 const { MessageEmbed } = require('discord.js-light');
 const Command = require('../../structures/Command');
 const Logger = require('../../utils/logger');
+const { buildErrorEmbed } = require('../../utils/functions');
 
 module.exports = class NewChangelogCommand extends Command {
   constructor(client) {
@@ -14,8 +15,6 @@ module.exports = class NewChangelogCommand extends Command {
   }
 
   async run(message, args) {
-    const { embedColor, emojis: { success } } = this.client.config;
-
     message.delete().catch(O_o=>{});
 
     const changes = args.join(' ');
@@ -27,7 +26,7 @@ module.exports = class NewChangelogCommand extends Command {
       .setAuthor(message.author.tag, message.author.avatarURL())
       .setDescription(changes)
       .addField('Date', new Date().toLocaleDateString())
-      .setColor(embedColor);
+      .setColor(this.client.config.colors.main);
 
     try {
       const confirmation = await this.client.awaitReply(
@@ -42,7 +41,7 @@ module.exports = class NewChangelogCommand extends Command {
       }
     } catch (err) {
       Logger.errorCmd(this, err.message);
-      return message.channel.send(`An error occurred: **${err.message}**`);
+      return message.channel.send(buildErrorEmbed(err));
     }
   }
 };

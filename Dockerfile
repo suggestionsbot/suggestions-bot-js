@@ -3,6 +3,9 @@ FROM nikolaik/python-nodejs:python3.10-nodejs16-alpine AS base
 # create working directory for bot
 WORKDIR /opt/suggestions
 
+# add git
+RUN apk update && apk add git
+
 ### dependencies & builder
 FROM base AS builder
 

@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Logger = require('./logger');
+const { reportToSentry } = require('./functions');
 
 mongoose.connection.on('connected', () => {
   Logger.ready('MONGOOSE', 'Connection successfully opened!');
@@ -7,6 +8,7 @@ mongoose.connection.on('connected', () => {
 
 mongoose.connection.on('err', (err) => {
   Logger.error('MONGOOSE', 'Connection error', err);
+  reportToSentry(err);
 });
 
 mongoose.connection.on('disconnected', () => {
@@ -16,6 +18,7 @@ mongoose.connection.on('disconnected', () => {
 process.on('uncaughtException', (err) => {
   const msg = err.stack.replace(new RegExp(`${__dirname}/`, 'g'), './');
   Logger.error(`Uncaught Exception: \n ${msg}`);
+  reportToSentry(err);
   // Always best practice to let the code crash on uncaught exceptions.
   // Because you should be catching them anyway.
   process.exit(1);
@@ -24,6 +27,7 @@ process.on('uncaughtException', (err) => {
 process.on('unhandledRejection', err => {
   const msg = err.stack.replace(new RegExp(`${__dirname}/`, 'g'), './');
   Logger.error(`Unhandled Rejection: \n ${msg}`);
+  reportToSentry(err);
 });
 
 process.on('SIGINT', async () => {

@@ -2,6 +2,7 @@ const { MessageEmbed, Util: { escapeMarkdown } } = require('discord.js-light');
 const { stripIndent } = require('common-tags');
 const Command = require('../../structures/Command');
 const Logger = require('../../utils/logger');
+const { buildErrorEmbed } = require('../../utils/functions');
 
 module.exports = class GSIDCommand extends Command {
   constructor(client) {
@@ -18,7 +19,7 @@ module.exports = class GSIDCommand extends Command {
 
   async run(message, args, settings) {
 
-    const { embedColor, suggestionColors } = this.client.config;
+    const { colors, suggestionColors } = this.client.config;
 
     message.delete().catch(O_o => {});
 
@@ -29,7 +30,7 @@ module.exports = class GSIDCommand extends Command {
       suggestion = await this.client.mongodb.helpers.suggestions.getGlobalSuggestion(args[0]);
     } catch (err) {
       Logger.errorCmd(this, err.stack);
-      return message.channel.send(`An error occurred: **${err.message}**`);
+      return message.channel.send(buildErrorEmbed(err));
     }
 
     if (!suggestion) return this.client.errors.noSuggestion(message.channel, args[0]);
@@ -71,7 +72,7 @@ module.exports = class GSIDCommand extends Command {
           **Suggestion**
           ${escapeMarkdown(suggestion.suggestion)}
         `)
-          .setColor(embedColor)
+          .setColor(colors.main)
           .setTimestamp(time);
         message.channel.send(embed);
         break;

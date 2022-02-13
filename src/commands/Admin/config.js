@@ -2,6 +2,7 @@ const { MessageEmbed  } = require('discord.js-light');
 const { stripIndent } = require('common-tags');
 const Command = require('../../structures/Command');
 const Logger = require('../../utils/logger');
+const { buildErrorEmbed } = require('../../utils/functions');
 
 module.exports = class ConfigCommand extends Command {
   constructor(client) {
@@ -23,7 +24,7 @@ module.exports = class ConfigCommand extends Command {
 
   async run(message, args, settings) {
 
-    const { embedColor, docs, emojis: { success: successEmoji } } = this.client.config;
+    const { colors, docs, emojis: { success: successEmoji } } = this.client.config;
     const { help: { usage, name } } = this;
     const confDocs = `${docs}/docs/configuration.html`;
     const success = this.client.emojis.forge(successEmoji)
@@ -48,7 +49,7 @@ module.exports = class ConfigCommand extends Command {
 
     const configEmbed = new MessageEmbed()
       .setAuthor(message.guild, message.guild.iconURL())
-      .setColor(embedColor)
+      .setColor(colors.main)
       .setFooter(`Guild: ${message.guild.id}`)
       .setTimestamp();
 
@@ -65,7 +66,7 @@ module.exports = class ConfigCommand extends Command {
           return message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
         } catch (err) {
           Logger.errorCmd(this, err.stack);
-          return message.channel.send(`An error occurred: **${err.message}**`);
+          return message.channel.send(buildErrorEmbed(err));
         }
       }
 
@@ -91,7 +92,7 @@ module.exports = class ConfigCommand extends Command {
           return message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
         } catch (err) {
           Logger.errorCmd(this, err);
-          return message.channel.send(`An error occurred: **${err.message}**`);
+          return message.channel.send(buildErrorEmbed(err));
         }
       }
 
@@ -122,7 +123,7 @@ module.exports = class ConfigCommand extends Command {
           return message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
         } catch (err) {
           Logger.errorCmd(this, err);
-          return message.channel.send(`An error occurred: **${err.message}**`);
+          return message.channel.send(buildErrorEmbed(err));
         }
       }
 
@@ -153,7 +154,7 @@ module.exports = class ConfigCommand extends Command {
           return message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
         } catch (err) {
           Logger.errorCmd(this, err);
-          return message.channel.send(`An error occurred: **${err.message}**`);
+          return message.channel.send(buildErrorEmbed(err));
         }
       }
 
@@ -187,7 +188,7 @@ module.exports = class ConfigCommand extends Command {
             message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
           } catch (error) {
             Logger.errorCmd(this, error.stack);
-            return message.channel.send(`An error occurred: **${error.message}**`);
+            return message.channel.send(buildErrorEmbed(error));
           }
         } else {
           try {
@@ -196,7 +197,7 @@ module.exports = class ConfigCommand extends Command {
             message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
           } catch (error) {
             Logger.errorCmd(this, error.stack);
-            return message.channel.send(`An error occurred: **${error.message}**`);
+            return message.channel.send(buildErrorEmbed(error));
           }
         }
 
@@ -236,7 +237,7 @@ module.exports = class ConfigCommand extends Command {
           message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
         } catch (error) {
           Logger.errorCmd(this, error.stack);
-          return message.channel.send(`An error occurred: **${error.message}**`);
+          return message.channel.send(buildErrorEmbed(error));
         }
 
         return;
@@ -331,7 +332,7 @@ module.exports = class ConfigCommand extends Command {
             message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
           } catch (err) {
             Logger.errorCmd(this, err.stack);
-            return message.channel.send(`An error occurred: **${err.message}**`);
+            return message.channel.send(buildErrorEmbed(err));
           }
         } else {
           try {
@@ -340,7 +341,7 @@ module.exports = class ConfigCommand extends Command {
             message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
           } catch (err) {
             Logger.errorCmd(this, err.stack);
-            return message.channel.send(`An error occurred: **${err.message}**`);
+            return message.channel.send(buildErrorEmbed(err));
           }
         }
         return;
@@ -374,7 +375,7 @@ module.exports = class ConfigCommand extends Command {
             message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
           } catch (err) {
             Logger.errorCmd(this, err.stack);
-            return message.channel.send(`An error occurred: **${err.message}**.`);
+            return message.channel.send(buildErrorEmbed(err));
           }
           break;
         }
@@ -393,7 +394,7 @@ module.exports = class ConfigCommand extends Command {
             message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
           } catch (err) {
             Logger.errorCmd(this, err.stack);
-            return message.channel.send(`An error occurred: **${err.message}**.`);
+            return message.channel.send(buildErrorEmbed(err));
           }
           break;
         }

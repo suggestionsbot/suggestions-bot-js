@@ -1,6 +1,6 @@
 const Event = require('../structures/Event');
 const Logger = require('../utils/logger');
-const { suggestionMessageReactionFilter } = require('../utils/functions');
+const { suggestionMessageReactionFilter, reportToSentry } = require('../utils/functions');
 
 module.exports = class extends Event {
   constructor(client, name) {
@@ -19,6 +19,7 @@ module.exports = class extends Event {
       suggestion = await this.client.mongodb.helpers.suggestions.getGuildSuggestionViaMessageID(message.guild, message.id);
     } catch (err) {
       Logger.error('MESSAGE_REACTION_ADD', err.stack);
+      reportToSentry(err);
       return;
     }
 

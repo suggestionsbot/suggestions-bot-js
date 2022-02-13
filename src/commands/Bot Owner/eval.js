@@ -16,7 +16,7 @@ module.exports = class EvalCommand extends Command {
 
   async run(message, args, settings) {
 
-    const { embedColor, suggestionColors: { rejected } } = this.client.config;
+    const { colors, suggestionColors: { rejected } } = this.client.config;
 
     const code = args.join(' ');
     if (!code) return this.client.errors.noUsage(message.channel, this, settings);
@@ -37,7 +37,7 @@ module.exports = class EvalCommand extends Command {
         });
         message.author.send(`<${haste}>`);
 
-        exceededEmbed.setColor(embedColor);
+        exceededEmbed.setColor(colors.main);
         exceededEmbed.setDescription('📨 Output exceeded 1000 characters. DMing you the Hastebin.');
 
         const msg = await message.channel.send(exceededEmbed);
@@ -46,7 +46,7 @@ module.exports = class EvalCommand extends Command {
         return;
       }
 
-      embed.setColor(embedColor);
+      embed.setColor(colors.main);
       embed.addField('Input 📥', `\`\`\`js\n${code}\`\`\``);
       embed.addField('Output 📤', `\`\`\`js\n${clean}\`\`\``);
     } catch (err) {

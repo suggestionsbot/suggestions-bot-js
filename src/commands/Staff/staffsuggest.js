@@ -1,6 +1,7 @@
 const { MessageEmbed } = require('discord.js-light');
 const Command = require('../../structures/Command');
 const Logger = require('../../utils/logger');
+const { buildErrorEmbed } = require('../../utils/functions');
 
 module.exports = class StaffSuggestCommand extends Command {
   constructor(client) {
@@ -16,7 +17,7 @@ module.exports = class StaffSuggestCommand extends Command {
 
   async run(message, args, settings) {
 
-    const { embedColor, staffChannelPermissions } = this.client.config;
+    const { colors, staffChannelPermissions } = this.client.config;
 
     await message.delete().catch(O_o => {});
 
@@ -29,7 +30,7 @@ module.exports = class StaffSuggestCommand extends Command {
     } catch (error) {
       if (!suggestionsChannel) return this.client.errors.noStaffSuggestions(message.channel);
       Logger.errorCmd(this, error.stack);
-      return message.channel.send(`An error occurred: **${error.message}**`);
+      return message.channel.send(buildErrorEmbed(error));
     }
 
 
@@ -38,7 +39,7 @@ module.exports = class StaffSuggestCommand extends Command {
     const embed = new MessageEmbed()
       .setAuthor(sUser.tag, sUser.displayAvatarURL())
       .setDescription(`Hey, ${sUser}. Your suggestion has been added in the ${suggestionsChannel} channel to be voted on!`)
-      .setColor(embedColor)
+      .setColor(colors.main)
       .setFooter(`User ID: ${sUser.id}`)
       .setTimestamp();
 
@@ -54,7 +55,7 @@ module.exports = class StaffSuggestCommand extends Command {
       ${suggestion}
       `)
       .setThumbnail(sUser.avatarURL())
-      .setColor(embedColor)
+      .setColor(colors.main)
       .setFooter(`User ID: ${sUser.id}`)
       .setTimestamp();
 
@@ -70,7 +71,7 @@ module.exports = class StaffSuggestCommand extends Command {
       })
       .catch(err => {
         Logger.errorCmd(this, err.stack);
-        return message.channel.send(`An error occurred adding reactions to this suggestion: **${err.message}**.`);
+        return message.channel.send(buildErrorEmbed(err));
       });
   }
 };

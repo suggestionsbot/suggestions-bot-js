@@ -17,12 +17,12 @@ module.exports = class InfoCommand extends Command {
 
   async run(message, args) {
 
-    const { embedColor, discord, owners, website, github } = this.client.config;
+    const { colors, discord, owners, website, github } = this.client.config;
 
     const embed = new MessageEmbed()
       .setTitle(this.client.user.username)
       .setDescription(description)
-      .setColor(embedColor)
+      .setColor(colors.main)
       .setThumbnail(this.client.user.avatarURL())
       .addField(owners.length <= 1 ? 'Bot Author' : 'Bot Author(s)',
         owners.map(o => this.client.users.forge(o)).join(', '))

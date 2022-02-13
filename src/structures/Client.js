@@ -7,6 +7,7 @@ const { CommandLoader, EventLoader } = require('../loaders');
 
 const ErrorHandler = require('../utils/errors');
 const Logger = require('../utils/logger');
+const { reportToSentry } = require('../utils/functions');
 
 module.exports = class SuggestionsClient extends Client {
   constructor(options) {

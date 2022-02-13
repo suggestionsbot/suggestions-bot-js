@@ -15,7 +15,7 @@ module.exports = class VoteCommand extends Command {
 
   async run(message, args) {
 
-    const { embedColor, voteSites, discord } = this.client.config;
+    const { colors, voteSites, discord } = this.client.config;
 
     let i = 1;
     const sites = voteSites
@@ -36,7 +36,7 @@ module.exports = class VoteCommand extends Command {
 
                 For more information regarding voting, feel free to join our Discord: ${discord}
             `)
-      .setColor(embedColor);
+      .setColor(colors.main);
 
     return message.channel.send(voteEmbed);
   }

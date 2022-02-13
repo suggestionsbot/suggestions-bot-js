@@ -2,7 +2,7 @@ const { MessageEmbed, Util: { escapeMarkdown } } = require('discord.js-light');
 const { stripIndent } = require('common-tags');
 const Command = require('../../structures/Command');
 const Logger = require('../../utils/logger');
-const { validateSnowflake, suggestionMessageReactionFilter } = require('../../utils/functions');
+const { validateSnowflake, suggestionMessageReactionFilter, buildErrorEmbed } = require('../../utils/functions');
 
 module.exports = class RejectCommand extends Command {
   constructor(client) {
@@ -65,7 +65,7 @@ module.exports = class RejectCommand extends Command {
       settings = await this.client.mongodb.helpers.settings.getGuild(guild);
     } catch (error) {
       Logger.errorCmd(this, error.stack);
-      return message.channel.send(`An error occurred: **${error.message}**`);
+      return message.channel.send(buildErrorEmbed(error));
     }
 
     if (!settings.staffRoles) return this.client.errors.noStaffRoles(message.channel);
@@ -86,7 +86,7 @@ module.exports = class RejectCommand extends Command {
       if (!suggestionsChannel) return this.client.errors.noSuggestions(message.channel);
       if (!suggestionsLogs) return this.client.errors.noSuggestionsLogs(message.channel);
       Logger.errorCmd(this, error.stack);
-      return message.channel.send(`An error occurred: **${error.message}**`);
+      return message.channel.send(buildErrorEmbed(error));
     }
 
 
@@ -220,7 +220,7 @@ module.exports = class RejectCommand extends Command {
       if (error.message === 'Cannot send messages to this user') return;
       Logger.errorCmd(this, error.stack);
       message.delete({ timeout: 3000 }).catch(O_o=>{});
-      return message.channel.send(`An error occurred: **${error.message}**`);
+      return message.channel.send(buildErrorEmbed(error));
     }
   }
 };

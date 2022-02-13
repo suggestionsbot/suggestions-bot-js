@@ -2,6 +2,7 @@ const { MessageEmbed } = require('discord.js-light');
 const { oneLine, stripIndent } = require('common-tags');
 const Command = require('../../structures/Command');
 const Logger = require('../../utils/logger');
+const { buildErrorEmbed } = require('../../utils/functions');
 
 module.exports = class BlacklistCommand extends Command {
   constructor(client) {
@@ -23,7 +24,7 @@ module.exports = class BlacklistCommand extends Command {
 
     const { name } = this.help;
     const { prefix } = settings;
-    const { embedColor, owners } = this.client.config;
+    const { colors, owners } = this.client.config;
 
     const guarded = [
       message.author.id,
@@ -39,12 +40,12 @@ module.exports = class BlacklistCommand extends Command {
       total = await this.client.mongodb.helpers.blacklists.getTotalBlacklists();
     } catch (err) {
       Logger.errorCmd(this, err.stack);
-      return message.channel.send(`An error occurred: **${err.message}**`);
+      return message.channel.send(buildErrorEmbed(err));
     }
 
     const caseNum = total + 1;
     const blEmbed = new MessageEmbed()
-      .setColor(embedColor)
+      .setColor(colors.main)
       .setFooter(`Guild: ${message.guild.id}`)
       .setTimestamp();
 
@@ -96,7 +97,7 @@ module.exports = class BlacklistCommand extends Command {
         message.channel.send(blEmbed);
       } catch (err) {
         Logger.errorCmd(this, err.stack);
-        return message.channel.send(`An error occurred: **${err.message}**`);
+        return message.channel.send(buildErrorEmbed(err));
       }
 
       return;
@@ -135,7 +136,7 @@ module.exports = class BlacklistCommand extends Command {
         };
 
         blEmbed.setTitle(`${this.client.user.username} | Blacklisted User Added`);
-        blEmbed.setColor('#00e640');
+        blEmbed.setColor(colors.blacklist.add);
         blEmbed.addField('User', `${blUser} \`[${blUser.tag}]\``, true);
         blEmbed.addField('Reason', reason, true);
         blEmbed.addField('Issuer', `${message.author} \`[${message.author.id}]\``);
@@ -169,7 +170,7 @@ module.exports = class BlacklistCommand extends Command {
           `)
               .then(m => m.delete({ timeout: 5000 }));
           }
-          message.channel.send(`An error occurred: **${err.message}**.`);
+          return message.channel.send(buildErrorEmbed(err));
         }
         break;
       }
@@ -187,7 +188,7 @@ module.exports = class BlacklistCommand extends Command {
         };
 
         blEmbed.setTitle(`${this.client.user.username} | Blacklisted User Removed`);
-        blEmbed.setColor('#d64541');
+        blEmbed.setColor(colors.blacklist.remove);
         blEmbed.addField('User ID', `${blUser} \`[${blUser.id}]\``, true);
         blEmbed.addField('Issuer', `${message.author} \`[${message.author.id}]\``);
 
@@ -209,7 +210,6 @@ module.exports = class BlacklistCommand extends Command {
           message.channel.send(blEmbed).then(msg => msg.delete({ timeout: 5000 }));
           await blUser.send(dmBlacklistRemove);
         } catch (err) {
-          Logger.errorCmd(this, err.stack);
           if (err.code === 50007) {
             return message.channel.send(oneLine`
             Bot blacklist removal has been issued. However, I could not DM **${blUser.tag}** because they either have DMs disabled
@@ -217,7 +217,9 @@ module.exports = class BlacklistCommand extends Command {
           `)
               .then(m => m.delete({ timeout: 5000 }));
           }
-          message.channel.send(`An error occurred: **${err.message}**.`);
+
+          Logger.errorCmd(this, err.stack);
+          return message.channel.send(buildErrorEmbed(err));
         }
         break;
       }

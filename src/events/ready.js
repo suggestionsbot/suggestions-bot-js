@@ -1,6 +1,7 @@
 const Event = require('../structures/Event');
 const { version } = require('../../package.json');
 const Logger = require('../utils/logger');
+const { reportToSentry } = require('../utils/functions');
 
 module.exports = class extends Event {
   constructor(client, name) {
@@ -20,6 +21,7 @@ module.exports = class extends Event {
       await this.client.botPresence();
     } catch (e) {
       Logger.error('READY EVENT', e);
+      reportToSentry(e);
     }
   }
 };

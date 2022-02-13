@@ -1,6 +1,7 @@
 const { stripIndents } = require('common-tags');
 const Command = require('../../structures/Command');
 const Logger = require('../../utils/logger');
+const { buildErrorEmbed } = require('../../utils/functions');
 
 module.exports = class PingCommand extends Command {
   constructor(client) {
@@ -26,7 +27,7 @@ module.exports = class PingCommand extends Command {
       `);
     } catch (e) {
       Logger.errorCmd(this, e);
-      return message.channel.send(`Error running this command: **${e.message}**.`);
+      return message.channel.send(buildErrorEmbed(e));
     }
   }
 };

@@ -5,7 +5,7 @@ const crypto = require('crypto');
 const Logger = require('../../utils/logger');
 
 const Command = require('../../structures/Command');
-const { getDefaultSuggestionsChannel } = require('../../utils/functions');
+const { getDefaultSuggestionsChannel, buildErrorEmbed } = require('../../utils/functions');
 
 module.exports = class SuggestCommand extends Command {
   constructor(client) {
@@ -23,7 +23,7 @@ module.exports = class SuggestCommand extends Command {
   }
 
   async run(message, args, settings) {
-    const { embedColor, emojis: { success: successEmoji }, defaultPermissions } = this.client.config;
+    const { colors, emojis: { success: successEmoji }, defaultPermissions } = this.client.config;
     const { suggestionsChannel, voteEmojis: emojis } = settings;
     const suggestion = args.join(' ');
 
@@ -59,7 +59,7 @@ module.exports = class SuggestCommand extends Command {
         ${suggestion}
       `)
       .setThumbnail(sUser.avatarURL())
-      .setColor(embedColor)
+      .setColor(colors.main)
       .setFooter(`User ID: ${sUser.id} | sID: ${id}`)
       .setTimestamp();
 
@@ -73,7 +73,7 @@ module.exports = class SuggestCommand extends Command {
 
       Your suggestion ID (sID) for reference is **${id}**.
       `)
-      .setColor(embedColor)
+      .setColor(colors.main)
       .setFooter(`Guild ID: ${message.guild.id} | sID: ${id}`)
       .setTimestamp();
 
@@ -105,7 +105,7 @@ module.exports = class SuggestCommand extends Command {
       }
     } catch (error) {
       Logger.errorCmd(this, error.stack);
-      return message.channel.send(`An error occurred: **${error.message}**`);
+      return message.channel.send(buildErrorEmbed(error));
     }
 
     try {
@@ -113,7 +113,6 @@ module.exports = class SuggestCommand extends Command {
       await message.react(this.client.emojis.forge(successEmoji));
     } catch (error) {
       if (error.code === 10008) return;
-      Logger.errorCmd(this, error)
       message.channel.send(oneLine`
         I could not DM you because you have DMs disabled from server members. However, for reference, your suggestion
         ID (sID) is **${id}**. Please wait for a staff member to approve/reject your suggestion.
@@ -124,7 +123,7 @@ module.exports = class SuggestCommand extends Command {
       if (!m) await sChannel.messages.fetch(mID);
     } catch (error) {
       Logger.errorCmd(this, error.stack);
-      return message.channel.send(`An error occurred: **${error.message}**`);
+      return message.channel.send(buildErrorEmbed(error));
     }
     const newSuggestion = {
       guildID: message.guild.id,
@@ -141,7 +140,7 @@ module.exports = class SuggestCommand extends Command {
     } catch (error) {
       if (error.code === 10008) return;
       Logger.errorCmd(this, error.stack);
-      return message.channel.send(`An error occurred: **${error.message}**`);
+      return message.channel.send(buildErrorEmbed(error));
     }
   }
 };

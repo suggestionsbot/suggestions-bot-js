@@ -1,7 +1,7 @@
 const { oneLine } = require('common-tags');
 const permissions = require('../utils/perms');
 const Logger = require('../utils/logger');
-const { parseCommandArguments } = require('../utils/functions');
+const { parseCommandArguments, reportToSentry, buildErrorEmbed } = require('../utils/functions');
 
 module.exports = class CommandHandler {
   constructor(client) {
@@ -18,6 +18,7 @@ module.exports = class CommandHandler {
         settings = await this.client.mongodb.helpers.settings.getGuild(message.guild);
       } catch (err) {
         this.client.logger.error(err.stack);
+        reportToSentry(err);
       }
     }
 
@@ -135,10 +136,11 @@ module.exports = class CommandHandler {
     try {
       if (throttle) throttle.usages++;
       if (disabledCommand && !ownerCheck) return this.client.errors.commandIsDisabled(cmd, channel);
-      cmd.run(message, args, settings);
+      await cmd.run(message, args, settings);
       if (this.client.production) await this.client.mongodb.helpers.settings.newCommandUsage(newCommand);
     } catch (err) {
       Logger.error('COMMAND HANDLER', err.stack);
+      return message.channel.send(buildErrorEmbed(err));
     }
   }
 };

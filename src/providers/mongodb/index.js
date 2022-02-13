@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 
 const MongoHelpers = require('./helpers');
 const Logger = require('../../utils/logger');
+const { reportToSentry } = require('../../utils/functions');
 
 module.exports = class MongoDB {
   constructor(client) {
@@ -16,7 +17,11 @@ module.exports = class MongoDB {
       connectTimeoutMS: 10000,
       family: 4
     }, err => {
-      if (err) Logger.error('MONGODB ERROR', err);
+      if (err) {
+        Logger.error('MONGODB ERROR', err);
+        reportToSentry(err);
+        return false;
+      }
       return true;
     });
 

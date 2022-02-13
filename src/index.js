@@ -3,11 +3,47 @@ require('./utils/extensions');
 
 const { ShardingManager, SharderEvents } = require('kurasuta');
 const { join } = require('path');
+const { hostname } = require('os');
+const { init, configureScope, Integrations } = require('@sentry/node');
+const { RewriteFrames } = require('@sentry/integrations');
 
 const Logger = require('./utils/logger');
+const pkg = require('../package.json');
+const { lastCommitHash, reportToSentry } = require('./utils/functions');
 
 const SuggestionsClient = require('./structures/Client');
 const { isProduction } = require('./config');
+
+if (!process.env.SENTRY_DSN)
+  Logger.warning('SENTRY_DSN', 'The "SENTRY_DSN" environment variable is missing. It\'s optional, but recommended!');
+else {
+  Logger.log('Initializing Sentry...');
+  const environment = process.env ?? 'development';
+
+  init({
+    dsn: process.env.SENTRY_DSN,
+    tracesSampleRate: parseFloat(process.env.SENTRY_TRACERATE),
+    release: pkg.version,
+    environment,
+    serverName: hostname(),
+    integrations: [
+      new RewriteFrames({ root: __dirname || process.cwd() }),
+      new Integrations.Http({ tracing: true })
+    ]
+  });
+
+  configureScope(scope => {
+    scope.setTags({
+      'suggestions.environment': environment,
+      'suggestions.version': pkg.version,
+      'suggestions.commit': lastCommitHash(),
+      'system.user': require('os').userInfo().username,
+      'system.os': process.platform
+    });
+  });
+
+  Logger.ready('Sentry successfully initialized. Now starting the bot...');
+}
 
 const sharder = new ShardingManager(join(__dirname, 'structures', 'Cluster.js'), {
   clientOptions: {
@@ -68,4 +104,7 @@ sharder.on(SharderEvents.SHARD_DISCONNECT, (closeEvent, shardID) =>
 if (!isProduction() && process.env.DEBUG)
   sharder.on(SharderEvents.DEBUG, (message => Logger.debug(`SHARDER DEBUG: ${message}`)));
 
-sharder.spawn().catch(e => Logger.error(`SHARD SPAWN: ${e}`));
+sharder.spawn().catch(e => {
+  Logger.error(`SHARD SPAWN: ${e}`);
+  reportToSentry(e);
+});

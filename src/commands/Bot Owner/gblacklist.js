@@ -2,6 +2,7 @@ const { MessageEmbed } = require('discord.js-light');
 const { oneLine, stripIndent } = require('common-tags');
 const Command = require('../../structures/Command');
 const Logger = require('../../utils/logger');
+const { buildErrorEmbed } = require('../../utils/functions');
 
 module.exports = class GBlacklistCommand extends Command {
   constructor(client) {
@@ -22,7 +23,7 @@ module.exports = class GBlacklistCommand extends Command {
 
   async run(message, args, settings) {
 
-    const { embedColor, owners } = this.client.config;
+    const { colors, owners } = this.client.config;
     const { prefix } = settings;
     const { name } = this.help;
 
@@ -41,12 +42,12 @@ module.exports = class GBlacklistCommand extends Command {
 
     } catch (err) {
       Logger.errorCmd(this, err.stack);
-      return message.channel.send(`An error occurred: **${err.message}**`);
+      return message.channel.send(buildErrorEmbed(err));
     }
 
     const caseNum = total + 1;
     const blEmbed = new MessageEmbed()
-      .setColor(embedColor)
+      .setColor(colors.main)
       .setTimestamp();
 
     if (!args[0]) {
@@ -140,7 +141,7 @@ module.exports = class GBlacklistCommand extends Command {
           message.channel.send(blEmbed).then(msg => msg.delete({ timeout: 5000 }));
         } catch (err) {
           Logger.errorCmd(this, err.stack);
-          message.channel.send(`An error occurred: **${err.message}**.`);
+          message.channel.send(buildErrorEmbed(err));
         }
         break;
       }
@@ -169,7 +170,7 @@ module.exports = class GBlacklistCommand extends Command {
           message.channel.send(blEmbed).then(msg => msg.delete({ timeout: 5000 }));
         } catch (err) {
           Logger.errorCmd(this, err.stack);
-          message.channel.send(`An error occurred: **${err.message}**.`);
+          message.channel.send(buildErrorEmbed(err));
         }
         break;
       }

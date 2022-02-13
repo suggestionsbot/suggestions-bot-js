@@ -2,7 +2,7 @@ const { MessageEmbed } = require('discord.js-light');
 
 const Event = require('../structures/Event');
 const Logger = require('../utils/logger');
-const { displayTimestamp } = require('../utils/functions');
+const { displayTimestamp, reportToSentry } = require('../utils/functions');
 
 module.exports = class extends Event {
   constructor(client, name) {
@@ -13,7 +13,10 @@ module.exports = class extends Event {
     const { guildStatusColors: { created }, serverLogs } = this.client.config;
 
     const guildOwner = await this.client.users.fetch(guild.ownerID)
-      .catch(e => Logger.error('GUILD_CREATE', e));
+      .catch(e => {
+        Logger.error('GUILD_CREATE', e);
+        reportToSentry(e);
+      });
 
     const newServer = new MessageEmbed()
       .setTitle('Added')

@@ -71,7 +71,6 @@ class ErrorHandler {
 
   noUsage(channel, cmd, settings) {
 
-    const { embedColor } = this.client.config;
     let { prefix } = this.client.config;
     if (channel.guild) prefix = settings.prefix;
 
@@ -80,7 +79,7 @@ class ErrorHandler {
       .setDescription(cmd.help.description)
       .addField('Category', `\`${cmd.help.category}\``, true)
       .addField('Usage', `\`${prefix + cmd.help.usage}\``, true)
-      .setColor(embedColor)
+      .setColor(this.client.colors.main)
       .setFooter('<> = Required | [] = Optional')
       .setTimestamp();
 

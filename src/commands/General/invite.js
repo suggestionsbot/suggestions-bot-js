@@ -18,7 +18,7 @@ module.exports = class InviteCommand extends Command {
 
   async run(message, args, settings) {
 
-    const { embedColor, discord, invite, website, github } = this.client.config;
+    const { colors, discord, invite, website, github } = this.client.config;
 
     const dmEmbed = new MessageEmbed()
       .setAuthor('Bot Invite Information', this.client.user.avatarURL())
@@ -38,7 +38,7 @@ module.exports = class InviteCommand extends Command {
           **Support Server:**
           ${discord}
       `)
-      .setColor(embedColor)
+      .setColor(colors.main)
       .setTimestamp();
 
     try {

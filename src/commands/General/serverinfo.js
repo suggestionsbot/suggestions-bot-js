@@ -2,7 +2,7 @@ const { MessageEmbed } = require('discord.js-light');
 
 const Command = require('../../structures/Command');
 const Logger = require('../../utils/logger');
-const { displayTimestamp } = require('../../utils/functions');
+const { displayTimestamp, buildErrorEmbed } = require('../../utils/functions');
 
 module.exports = class GuildInfoCommand extends Command {
   constructor(client) {
@@ -22,7 +22,7 @@ module.exports = class GuildInfoCommand extends Command {
 
   async run(message, args) {
 
-    const { embedColor } = this.client.config;
+    const { colors } = this.client.config;
 
     const srvIcon = message.guild.iconURL({ format: 'png', size: 2048, dynamic: true });
 
@@ -32,13 +32,13 @@ module.exports = class GuildInfoCommand extends Command {
       gSuggestions = await this.client.mongodb.helpers.suggestions.getGuildSuggestions(message.guild);
     } catch (error) {
       Logger.errorCmd(this, error.stack);
-      return message.channel.send(`An error occurred: **${error.message}**`);
+      return message.channel.send(buildErrorEmbed(error));
     }
 
     const serverEmbed = new MessageEmbed()
       .setTitle(message.guild)
       .setThumbnail(srvIcon)
-      .setColor(embedColor)
+      .setColor(colors.main)
       .setThumbnail(srvIcon)
       .addField('Owner', `${message.guild.owner} \`[${message.guild.ownerID}]\``)
       .addField('Created On', displayTimestamp(message.guild.createdAt))

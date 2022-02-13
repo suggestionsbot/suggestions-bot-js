@@ -1,5 +1,6 @@
 const Command = require('../../structures/Command');
 const Logger = require('../../utils/logger');
+const { buildErrorEmbed } = require('../../utils/functions');
 
 module.exports = class RestartCommand extends Command {
   constructor(client) {
@@ -23,7 +24,7 @@ module.exports = class RestartCommand extends Command {
 
       await message.channel.send({
         embed: {
-          color: this.client.config.embedColor,
+          color: this.client.config.colors.main,
           description: `Restarting ${args[0] ? `cluster **${args[0]}**` : 'all clusters'}.`,
           footer: { text: `ID: ${message.author.id}` },
           timestamp: Date.now()
@@ -31,7 +32,7 @@ module.exports = class RestartCommand extends Command {
       });
     } catch (e) {
       Logger.errorCmd(this, e);
-      return message.channel.send(`An error has occurred: **${e.message}**`);
+      return message.channel.send(buildErrorEmbed(e));
     }
   }
 };
