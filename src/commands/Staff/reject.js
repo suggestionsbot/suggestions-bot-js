@@ -210,8 +210,19 @@ module.exports = class RejectCommand extends Command {
 
     try {
       message.channel.send(`Suggestion **${sID}** has been rejected.`).then(m => m.delete({ timeout: 5000 }));
-      sMessage.edit(rejectedEmbed).then(m => m.delete({ timeout: 5000 }));
-      suggestionsLogs.send(logsEmbed);
+
+      if (settings.keepLogs || (!settings.keepLogs && !suggestionsLogs)) {
+        const logEmbed = new MessageEmbed(logsEmbed)
+          .setTitle('Suggestion Rejected');
+        await sMessage.edit(logEmbed);
+        await sMessage.reactions.removeAll();
+      }
+
+      if (!settings.keepLogs && suggestionsLogs) {
+        await sMessage.edit(rejectedEmbed).then(m => m.delete({ timeout: 5000 }));
+        await suggestionsLogs.send(logsEmbed);
+      }
+
       await this.client.mongodb.helpers.suggestions.handleGuildSuggestion(rejectSuggestion);
       await guild.members.fetch({ user: userID, cache: false });
       if (settings.dmResponses) submitter.send(dmEmbed);

@@ -1,5 +1,5 @@
 const { MessageEmbed  } = require('discord.js-light');
-const { stripIndent } = require('common-tags');
+const { stripIndent, oneLine } = require('common-tags');
 const Command = require('../../structures/Command');
 const Logger = require('../../utils/logger');
 const { buildErrorEmbed } = require('../../utils/functions');
@@ -37,7 +37,8 @@ module.exports = class ConfigCommand extends Command {
       staffRoles,
       responseRequired,
       disabledCommands,
-      dmResponses
+      dmResponses,
+      keepLogs
     } = settings;
 
     let {
@@ -411,6 +412,34 @@ module.exports = class ConfigCommand extends Command {
       message.channel.send(configEmbed);
       break;
     }
+
+      case 'keepLogs': {
+      if (!suggestionsChannel) return this.client.errors.noSuggestions(message.channel);
+
+      configEmbed.setAuthor(`${message.guild} | Keep Logs`, message.guild.iconURL());
+      const sChannel = message.guild.channels.forge(suggestionsChannel)
+
+      if (updated) {
+        try {
+          const status = updated === 'true';
+          await this.client.mongodb.helpers.settings.updateGuild(message.guild, { keepLogs: status });
+          configEmbed.setDescription(oneLine`
+            Approved/rejected suggestions **will ${status ? '' : 'no longer'}** be kept in ${sChannel}.
+          `);
+
+          return message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
+        } catch (err) {
+          Logger.errorCmd(this, err.stack);
+          return message.channel.send(buildErrorEmbed(err));
+        }
+      }
+
+      configEmbed.setDescription(`Approved/rejected suggestions currently **are ${keepLogs ? '' : 'not'}** kept in ${sChannel}.`)
+      configEmbed.addField('More Information', `[Link](${confDocs}#keep-logs)`);
+      message.channel.send(configEmbed);
+
+      break;
+    }
     default: {
       configEmbed
         .setDescription(stripIndent`
@@ -428,7 +457,8 @@ module.exports = class ConfigCommand extends Command {
         .addField('Vote Emojis', `\`${prefix + name} emojis\``, true)
         .addField('Rejection Responses', `\`${prefix + name} responses\``, true)
         .addField('Disabled Commands', `\`${prefix + name} commands\``, true)
-        .addField('DM Responses', `\`${prefix + name} dmResponses\``, true);
+        .addField('DM Responses', `\`${prefix + name} dmResponses\``, true)
+        .addField('Keep Logs', `\`${prefix + name} keepLogs\``, true);
 
       message.channel.send(configEmbed);
       break;

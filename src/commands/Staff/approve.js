@@ -207,8 +207,19 @@ module.exports = class ApproveCommand extends Command {
 
     try {
       message.channel.send(`Suggestion **${sID}** has been approved.`).then(m => m.delete({ timeout: 5000 }));
-      sMessage.edit(approvedEmbed).then(m => m.delete({ timeout: 5000 }));
-      suggestionsLogs.send(logsEmbed);
+
+      if (settings.keepLogs || (!settings.keepLogs && !suggestionsLogs)) {
+        const logEmbed = new MessageEmbed(logsEmbed)
+          .setTitle('Suggestion Approved');
+        await sMessage.edit(logEmbed);
+        await sMessage.reactions.removeAll();
+      }
+
+      if (!settings.keepLogs && suggestionsLogs) {
+        await sMessage.edit(approvedEmbed).then(m => m.delete({ timeout: 5000 }));
+        await suggestionsLogs.send(logsEmbed);
+      }
+
       await this.client.mongodb.helpers.suggestions.handleGuildSuggestion(approveSuggestion);
       await guild.members.fetch({ user: userID, cache: false });
       if (settings.dmResponses) submitter.send(dmEmbed);
