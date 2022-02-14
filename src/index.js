@@ -18,7 +18,7 @@ if (!process.env.SENTRY_DSN)
   Logger.warning('SENTRY_DSN', 'The "SENTRY_DSN" environment variable is missing. It\'s optional, but recommended!');
 else {
   Logger.log('Initializing Sentry...');
-  const environment = process.env ?? 'development';
+  const environment = process.env.NODE_ENV ?? 'development';
 
   init({
     dsn: process.env.SENTRY_DSN,
