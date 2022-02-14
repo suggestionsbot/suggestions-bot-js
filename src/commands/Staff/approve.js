@@ -22,7 +22,7 @@ module.exports = class ApproveCommand extends Command {
 
     message.delete().catch(O_o => {});
 
-    const { discord, suggestionColors: { approved }, logsPermissions } = this.client.config;
+    const { discord, colors, logsPermissions } = this.client.config;
     let document;
 
     const id = args[0];
@@ -107,14 +107,14 @@ module.exports = class ApproveCommand extends Command {
 
     const approvedEmbed = new MessageEmbed(embed)
       .setTitle('Suggestion Approved')
-      .setColor(approved);
+      .setColor(colors.suggestion.approved);
 
     const dmEmbed = new MessageEmbed()
       .setAuthor(guild, guild.iconURL())
       .setDescription(stripIndent`Hey, ${submitter}. Your suggestion has been approved by ${message.author}!
       
       Your suggestion ID (sID) for reference was **${sID}**.`)
-      .setColor(approved)
+      .setColor(colors.suggestion.approved)
       .setFooter(`Guild ID: ${guild.id} | sID: ${id}`)
       .setTimestamp();
 
@@ -164,7 +164,7 @@ module.exports = class ApproveCommand extends Command {
         **Approved By**
         ${message.author}
       `)
-      .setColor(approved)
+      .setColor(colors.suggestion.approved)
       .setFooter(`sID: ${sID}`)
       .setTimestamp();
 

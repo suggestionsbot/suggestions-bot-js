@@ -24,7 +24,7 @@ module.exports = class RejectCommand extends Command {
 
     message.delete().catch(O_o => {});
 
-    const { discord, suggestionColors: { rejected }, logsPermissions } = this.client.config;
+    const { discord, colors, logsPermissions } = this.client.config;
     let document;
 
     const id = args[0];
@@ -110,14 +110,14 @@ module.exports = class RejectCommand extends Command {
 
     const rejectedEmbed = new MessageEmbed(embed)
       .setTitle('Suggestion Rejected')
-      .setColor(rejected);
+      .setColor(colors.suggestion.rejected);
 
     const dmEmbed = new MessageEmbed()
       .setAuthor(guild, guild.iconURL())
       .setDescription(stripIndent`Hey, ${submitter}. Your suggestion has been rejected by ${message.author}!
       
       Your suggestion sID (sID) for reference was **${sID}**.`)
-      .setColor(rejected)
+      .setColor(colors.suggestion.rejected)
       .setFooter(`Guild ID: ${guild.id} | sID: ${id}`)
       .setTimestamp();
 
@@ -167,7 +167,7 @@ module.exports = class RejectCommand extends Command {
         **Rejected By**
         ${message.author}
       `)
-      .setColor(rejected)
+      .setColor(colors.suggestion.rejected)
       .setFooter(`sID: ${sID}`)
       .setTimestamp();
 

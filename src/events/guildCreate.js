@@ -10,7 +10,7 @@ module.exports = class extends Event {
   }
 
   async run(guild) {
-    const { guildStatusColors: { created }, serverLogs } = this.client.config;
+    const { colors, serverLogs } = this.client.config;
 
     const guildOwner = await this.client.users.fetch(guild.ownerID)
       .catch(e => {
@@ -27,7 +27,7 @@ module.exports = class extends Event {
         **Created:** ${displayTimestamp(guild.createdAt, 'R')}
         **Owner:** ${guildOwner} \`[${guildOwner?.tag}]\`
       `)
-      .setColor(created)
+      .setColor(colors.guild.created)
       .setTimestamp();
 
     await this.client.channels.forge(serverLogs).send(newServer).catch(e => Logger.error('GUILD_CREATE', e));

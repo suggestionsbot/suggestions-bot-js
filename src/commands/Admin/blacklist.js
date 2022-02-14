@@ -152,7 +152,7 @@ module.exports = class BlacklistCommand extends Command {
 
           **Reason:** ${reason}
           `)
-          .setColor('#00e640')
+          .setColor(colors.blacklist.add)
           .setTimestamp();
 
         try {
@@ -200,7 +200,7 @@ module.exports = class BlacklistCommand extends Command {
 
           **Reason:** ${reason ? reason : 'None provided'}
         `)
-          .setColor('#d64541')
+          .setColor(colors.blacklist.remove)
           .setTimestamp();
 
         try {

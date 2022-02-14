@@ -129,7 +129,7 @@ module.exports = class GBlacklistCommand extends Command {
         };
 
         blEmbed.setTitle(`${this.client.user.username} | Blacklisted User Added`);
-        blEmbed.setColor('#00e640');
+        blEmbed.setColor(colors.blacklist.add);
         blEmbed.addField('User', `${blUser} \`[${blUser.tag}]\``, true);
         blEmbed.addField('Reason', reason, true);
         blEmbed.addField('Issuer', `${message.author} \`[${message.author.id}]\``);
@@ -159,7 +159,7 @@ module.exports = class GBlacklistCommand extends Command {
         };
 
         blEmbed.setTitle(`${this.client.user.username} | Blacklisted User Removed`);
-        blEmbed.setColor('#d64541');
+        blEmbed.setColor(colors.blacklist.remove);
         blEmbed.addField('User ID', `${blUser} \`[${blUser.id}]\``, true);
         blEmbed.addField('Issuer', `${message.author} \`[${message.author.id}]\``);
 

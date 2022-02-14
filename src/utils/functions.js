@@ -231,7 +231,7 @@ const buildErrorEmbed = (error, report = true) => {
 
   const embed = new MessageEmbed()
     .setColor(config.colors.error)
-    .setDescription(`An error occurred: ${error?.message ?? error}`)
+    .setDescription(`An error occurred: **${error?.message ?? error}**`)
     .setTimestamp();
 
   if (eventId) embed.setFooter(eventId);

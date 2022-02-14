@@ -19,7 +19,7 @@ module.exports = class GSIDCommand extends Command {
 
   async run(message, args, settings) {
 
-    const { colors, suggestionColors } = this.client.config;
+    const { colors } = this.client.config;
 
     message.delete().catch(O_o => {});
 
@@ -92,7 +92,7 @@ module.exports = class GSIDCommand extends Command {
           **Results**
           ${view.join('\n')}
         `)
-          .setColor(suggestionColors.approved)
+          .setColor(colors.suggestion.approved)
           .setTimestamp(updatedOn);
         message.channel.send(embed);
         break;
@@ -112,7 +112,7 @@ module.exports = class GSIDCommand extends Command {
           **Results**
           ${view.join('\n')}
         `)
-          .setColor(suggestionColors.rejected)
+          .setColor(colors.suggestion.rejected)
           .setTimestamp(updatedOn);
         message.channel.send(embed);
         break;
