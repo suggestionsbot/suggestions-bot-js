@@ -107,6 +107,7 @@ module.exports = class ConfigCommand extends Command {
       message.channel.send(configEmbed);
       break;
     }
+    case 'log':
     case 'logs': {
       configEmbed.setAuthor(`${message.guild} | Suggestion Logs Channel`, message.guild.iconURL());
 
@@ -165,6 +166,7 @@ module.exports = class ConfigCommand extends Command {
       message.channel.send(configEmbed);
       break;
     }
+    case 'role':
     case 'roles': {
       configEmbed.setAuthor(`${message.guild} | Staff Roles`, message.guild.iconURL());
 
@@ -220,6 +222,7 @@ module.exports = class ConfigCommand extends Command {
       message.channel.send(configEmbed);
       break;
     }
+    case 'emoji':
     case 'emojis': {
       if (!voteEmojis) voteEmojis = 'defaultEmojis';
       configEmbed.setAuthor(`${message.guild} | Vote Emojis`, message.guild.iconURL());
@@ -412,7 +415,7 @@ module.exports = class ConfigCommand extends Command {
       message.channel.send(configEmbed);
       break;
     }
-
+      case 'keeplog':
       case 'keeplogs': {
       let sChannel;
       try {
