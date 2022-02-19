@@ -22,7 +22,7 @@ module.exports = class ApproveCommand extends Command {
 
     message.delete().catch(O_o => {});
 
-    const { discord, suggestionColors: { approved }, logsPermissions } = this.client.config;
+    const { discord, colors, logsPermissions } = this.client.config;
     let document;
 
     const id = args[0];
@@ -45,8 +45,7 @@ module.exports = class ApproveCommand extends Command {
       guildID,
       messageID,
       suggestion,
-      status,
-      voteEmojis
+      status
     } = document;
 
     if (status === 'approved') {
@@ -77,11 +76,13 @@ module.exports = class ApproveCommand extends Command {
     try {
       suggestionsChannel = settings.suggestionsChannel && await message.guild.channels.fetch(settings.suggestionsChannel);
       if (!suggestionsChannel) return this.client.errors.noSuggestions(message.channel);
-      suggestionsLogs = settings.suggestionsLogs && await message.guild.channels.fetch(settings.suggestionsLogs);
-      if (!suggestionsLogs) return this.client.errors.noSuggestionsLogs(message.channel);
+      if (!settings.keepLogs) {
+        suggestionsLogs = settings.suggestionsLogs && await message.guild.channels.fetch(settings.suggestionsLogs);
+        if (!suggestionsLogs) return this.client.errors.noSuggestionsLogs(message.channel);
+      }
     } catch (error) {
       if (!suggestionsChannel) return this.client.errors.noSuggestions(message.channel);
-      if (!suggestionsLogs) return this.client.errors.noSuggestionsLogs(message.channel);
+      if (!suggestionsLogs && !settings.keepLogs) return this.client.errors.noSuggestionsLogs(message.channel);
       Logger.errorCmd(this, error.stack);
       return message.channel.send(buildErrorEmbed(error));
     }
@@ -107,14 +108,14 @@ module.exports = class ApproveCommand extends Command {
 
     const approvedEmbed = new MessageEmbed(embed)
       .setTitle('Suggestion Approved')
-      .setColor(approved);
+      .setColor(colors.suggestion.approved);
 
     const dmEmbed = new MessageEmbed()
       .setAuthor(guild, guild.iconURL())
       .setDescription(stripIndent`Hey, ${submitter}. Your suggestion has been approved by ${message.author}!
       
       Your suggestion ID (sID) for reference was **${sID}**.`)
-      .setColor(approved)
+      .setColor(colors.suggestion.approved)
       .setFooter(`Guild ID: ${guild.id} | sID: ${id}`)
       .setTimestamp();
 
@@ -164,7 +165,7 @@ module.exports = class ApproveCommand extends Command {
         **Approved By**
         ${message.author}
       `)
-      .setColor(approved)
+      .setColor(colors.suggestion.approved)
       .setFooter(`sID: ${sID}`)
       .setTimestamp();
 
@@ -188,8 +189,10 @@ module.exports = class ApproveCommand extends Command {
         `);
     }
 
-    const missingPermissions = suggestionsLogs.permissionsFor(message.guild.me).missing(logsPermissions);
-    if (missingPermissions.length > 0) return this.client.errors.noChannelPerms(message, suggestionsLogs, missingPermissions);
+    if (!settings.keepLogs) {
+      const missingPermissions = suggestionsLogs.permissionsFor(message.guild.me).missing(logsPermissions);
+      if (missingPermissions.length > 0) return this.client.errors.noChannelPerms(message, suggestionsLogs, missingPermissions);
+    }
 
     const approveSuggestion = {
       query: [

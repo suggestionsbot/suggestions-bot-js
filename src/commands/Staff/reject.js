@@ -24,7 +24,7 @@ module.exports = class RejectCommand extends Command {
 
     message.delete().catch(O_o => {});
 
-    const { discord, suggestionColors: { rejected }, logsPermissions } = this.client.config;
+    const { discord, colors, logsPermissions } = this.client.config;
     let document;
 
     const id = args[0];
@@ -48,8 +48,7 @@ module.exports = class RejectCommand extends Command {
       guildID,
       messageID,
       suggestion,
-      status,
-      voteEmojis
+      status
     } = document;
 
     if (status === 'rejected') {
@@ -80,11 +79,13 @@ module.exports = class RejectCommand extends Command {
     try {
       suggestionsChannel = settings.suggestionsChannel && await message.guild.channels.fetch(settings.suggestionsChannel);
       if (!suggestionsChannel) return this.client.errors.noSuggestions(message.channel);
-      suggestionsLogs = settings.suggestionsLogs && await message.guild.channels.fetch(settings.suggestionsLogs);
-      if (!suggestionsLogs) return this.client.errors.noSuggestionsLogs(message.channel);
+      if (!settings.keepLogs) {
+        suggestionsLogs = settings.suggestionsLogs && await message.guild.channels.fetch(settings.suggestionsLogs);
+        if (!suggestionsLogs) return this.client.errors.noSuggestionsLogs(message.channel);
+      }
     } catch (error) {
       if (!suggestionsChannel) return this.client.errors.noSuggestions(message.channel);
-      if (!suggestionsLogs) return this.client.errors.noSuggestionsLogs(message.channel);
+      if (!suggestionsLogs && !settings.keepLogs) return this.client.errors.noSuggestionsLogs(message.channel);
       Logger.errorCmd(this, error.stack);
       return message.channel.send(buildErrorEmbed(error));
     }
@@ -110,14 +111,14 @@ module.exports = class RejectCommand extends Command {
 
     const rejectedEmbed = new MessageEmbed(embed)
       .setTitle('Suggestion Rejected')
-      .setColor(rejected);
+      .setColor(colors.suggestion.rejected);
 
     const dmEmbed = new MessageEmbed()
       .setAuthor(guild, guild.iconURL())
       .setDescription(stripIndent`Hey, ${submitter}. Your suggestion has been rejected by ${message.author}!
       
       Your suggestion sID (sID) for reference was **${sID}**.`)
-      .setColor(rejected)
+      .setColor(colors.suggestion.rejected)
       .setFooter(`Guild ID: ${guild.id} | sID: ${id}`)
       .setTimestamp();
 
@@ -167,7 +168,7 @@ module.exports = class RejectCommand extends Command {
         **Rejected By**
         ${message.author}
       `)
-      .setColor(rejected)
+      .setColor(colors.suggestion.rejected)
       .setFooter(`sID: ${sID}`)
       .setTimestamp();
 
@@ -191,8 +192,10 @@ module.exports = class RejectCommand extends Command {
         `);
     }
 
-    const missingPermissions = suggestionsLogs.permissionsFor(message.guild.me).missing(logsPermissions);
-    if (missingPermissions.length > 0) return this.client.errors.noChannelPerms(message, suggestionsLogs, missingPermissions);
+    if (!settings.keepLogs) {
+      const missingPermissions = suggestionsLogs.permissionsFor(message.guild.me).missing(logsPermissions);
+      if (missingPermissions.length > 0) return this.client.errors.noChannelPerms(message, suggestionsLogs, missingPermissions);
+    }
 
     const rejectSuggestion = {
       query: [
