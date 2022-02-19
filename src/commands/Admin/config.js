@@ -2,7 +2,7 @@ const { MessageEmbed  } = require('discord.js-light');
 const { stripIndent } = require('common-tags');
 const Command = require('../../structures/Command');
 const Logger = require('../../utils/logger');
-const { buildErrorEmbed } = require('../../utils/functions');
+const { buildErrorEmbed, getDefaultSuggestionsChannel } = require('../../utils/functions');
 
 module.exports = class ConfigCommand extends Command {
   constructor(client) {
@@ -44,7 +44,8 @@ module.exports = class ConfigCommand extends Command {
       voteEmojis,
       suggestionsLogs,
       suggestionsChannel,
-      staffSuggestionsChannel
+      staffSuggestionsChannel,
+      keepLogs
     } = settings;
 
     const configEmbed = new MessageEmbed()
@@ -411,6 +412,52 @@ module.exports = class ConfigCommand extends Command {
       message.channel.send(configEmbed);
       break;
     }
+
+      case 'keepLogs': {
+      let sChannel;
+      try {
+        if (!suggestionsChannel || (suggestionsChannel === this.client.config.suggestionsChannel)) {
+          const channel = await getDefaultSuggestionsChannel(message.guild)
+          if (!channel) return this.client.errors.noSuggestions(message.channel)
+
+          const updated = await this.client.mongodb.helpers.settings.updateGuild(message.guild, { suggestionsChannel: channel.id })
+          sChannel = channel;
+          keepLogs = updated.keepLogs;
+        } else {
+          sChannel = suggestionsChannel && await message.guild.channels.fetch(suggestionsChannel)
+          if (!sChannel) return this.client.errors.noSuggestions(message.channel)
+        }
+      } catch (err) {
+        Logger.errorCmd(this, err.stack);
+        return message.channel.send(buildErrorEmbed(err));
+      }
+
+      configEmbed.setAuthor(`${message.guild} | Keep Logs`, message.guild.iconURL());
+
+      if (updated) {
+        try {
+          if (!['true', 'false'].includes(updated.toLowerCase()))
+            return this.client.errors.invalidResponseValue(message.channel)
+
+          const status = updated.toLowerCase() === 'true';
+          await this.client.mongodb.helpers.settings.updateGuild(message.guild, { keepLogs: status });
+          configEmbed.setDescription(`
+            Approved/rejected suggestions **will ${status ? '' : 'no longer'}** be kept in ${sChannel}.
+          `);
+
+          return message.channel.send(configEmbed).then(m => m.delete({ timeout: 5000 }));
+        } catch (err) {
+          Logger.errorCmd(this, err.stack);
+          return message.channel.send(buildErrorEmbed(err));
+        }
+      }
+
+      configEmbed.setDescription(`Approved/rejected suggestions currently **are ${keepLogs ? '' : 'not'}** kept in ${sChannel}.`)
+      configEmbed.addField('More Information', `[Link](${confDocs}#keep-logs)`);
+      message.channel.send(configEmbed);
+
+      break;
+    }
     default: {
       configEmbed
         .setDescription(stripIndent`
@@ -428,7 +475,8 @@ module.exports = class ConfigCommand extends Command {
         .addField('Vote Emojis', `\`${prefix + name} emojis\``, true)
         .addField('Rejection Responses', `\`${prefix + name} responses\``, true)
         .addField('Disabled Commands', `\`${prefix + name} commands\``, true)
-        .addField('DM Responses', `\`${prefix + name} dmResponses\``, true);
+        .addField('DM Responses', `\`${prefix + name} dmResponses\``, true)
+        .addField('Keep Logs', `\`${prefix + name} keepLogs\``, true);
 
       message.channel.send(configEmbed);
       break;

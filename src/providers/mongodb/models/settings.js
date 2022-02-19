@@ -35,6 +35,10 @@ const settingsSchema = mongoose.Schema({
   fetchedMessages: {
     type: Boolean,
     default: false
+  },
+  keepLogs: {
+    type: Boolean,
+    default: true
   }
 });
 
