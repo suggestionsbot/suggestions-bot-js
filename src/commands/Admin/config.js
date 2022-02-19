@@ -54,7 +54,7 @@ module.exports = class ConfigCommand extends Command {
       .setFooter(`Guild: ${message.guild.id}`)
       .setTimestamp();
 
-    switch (setting.toLowerCase()) {
+    switch (setting?.toLowerCase()) {
     case 'prefix': {
       configEmbed.setAuthor(`${message.guild} | Prefix`, message.guild.iconURL());
 
