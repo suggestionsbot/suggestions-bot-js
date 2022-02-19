@@ -1,8 +1,8 @@
 const { MessageEmbed  } = require('discord.js-light');
-const { stripIndent, oneLine } = require('common-tags');
+const { stripIndent } = require('common-tags');
 const Command = require('../../structures/Command');
 const Logger = require('../../utils/logger');
-const { buildErrorEmbed } = require('../../utils/functions');
+const { buildErrorEmbed, getDefaultSuggestionsChannel } = require('../../utils/functions');
 
 module.exports = class ConfigCommand extends Command {
   constructor(client) {
@@ -37,15 +37,15 @@ module.exports = class ConfigCommand extends Command {
       staffRoles,
       responseRequired,
       disabledCommands,
-      dmResponses,
-      keepLogs
+      dmResponses
     } = settings;
 
     let {
       voteEmojis,
       suggestionsLogs,
       suggestionsChannel,
-      staffSuggestionsChannel
+      staffSuggestionsChannel,
+      keepLogs
     } = settings;
 
     const configEmbed = new MessageEmbed()
@@ -414,16 +414,34 @@ module.exports = class ConfigCommand extends Command {
     }
 
       case 'keepLogs': {
-      if (!suggestionsChannel) return this.client.errors.noSuggestions(message.channel);
+      let sChannel;
+      try {
+        if (!suggestionsChannel || (suggestionsChannel === this.client.config.suggestionsChannel)) {
+          const channel = await getDefaultSuggestionsChannel(message.guild)
+          if (!channel) return this.client.errors.noSuggestions(message.channel)
+
+          const updated = await this.client.mongodb.helpers.settings.updateGuild(message.guild, { suggestionsChannel: channel.id })
+          sChannel = channel;
+          keepLogs = updated.keepLogs;
+        } else {
+          sChannel = suggestionsChannel && await message.guild.channels.fetch(suggestionsChannel)
+          if (!sChannel) return this.client.errors.noSuggestions(message.channel)
+        }
+      } catch (err) {
+        Logger.errorCmd(this, err.stack);
+        return message.channel.send(buildErrorEmbed(err));
+      }
 
       configEmbed.setAuthor(`${message.guild} | Keep Logs`, message.guild.iconURL());
-      const sChannel = message.guild.channels.forge(suggestionsChannel)
 
       if (updated) {
         try {
-          const status = updated === 'true';
+          if (!['true', 'false'].includes(updated.toLowerCase()))
+            return this.client.errors.invalidResponseValue(message.channel)
+
+          const status = updated.toLowerCase() === 'true';
           await this.client.mongodb.helpers.settings.updateGuild(message.guild, { keepLogs: status });
-          configEmbed.setDescription(oneLine`
+          configEmbed.setDescription(`
             Approved/rejected suggestions **will ${status ? '' : 'no longer'}** be kept in ${sChannel}.
           `);
 
