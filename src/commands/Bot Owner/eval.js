@@ -1,6 +1,6 @@
 const { MessageEmbed } = require('discord.js-light');
-const hastebin = require('hastebin-gen');
 const Command = require('../../structures/Command');
+const { postToHastebin } = require('../../utils/functions');
 
 module.exports = class EvalCommand extends Command {
   constructor(client) {
@@ -31,10 +31,7 @@ module.exports = class EvalCommand extends Command {
       // 6 graves, and 2 characters for "js"
       const MAX_CHARS = 3 + 2 + clean.length + 3;
       if (MAX_CHARS > 1000) {
-        const haste = await hastebin(Buffer.from(clean), {
-          url: 'https://paste.thenerdcave.us',
-          extension: 'js'
-        });
+        const haste = await postToHastebin(clean);
         message.author.send(`<${haste}>`);
 
         exceededEmbed.setColor(colors.main);
@@ -51,10 +48,7 @@ module.exports = class EvalCommand extends Command {
       embed.addField('Output 📤', `\`\`\`js\n${clean}\`\`\``);
     } catch (err) {
       if (err.length > 2000) {
-        const haste = await hastebin(Buffer.from(err), {
-          url: 'https://paste.thenerdcave.us',
-          extension: 'js'
-        });
+        const haste = await postToHastebin(err);
         message.author.send(`<${haste}>`);
 
         exceededEmbed.setColor(colors.error);

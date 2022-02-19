@@ -28,6 +28,7 @@ module.exports = {
   website: 'https://suggestionsbot.com',
   docs: 'https://docs.suggestionsbot.com',
   github: 'https://github.com/suggestionsbot/suggestions-bot',
+  hastebin: 'https://paste.nerdcave.dev',
   invite: isProduction() ? 'https://suggestions.bot/invite' : 'https://discord.com/oauth2/authorize?client_id=771924181784854579&scope=bot&permissions=355392',
   voteSites: [
     { name: 'top.gg', link: 'https://top.gg/bot/474051954998509571', voting: true },

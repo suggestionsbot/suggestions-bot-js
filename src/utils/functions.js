@@ -239,6 +239,21 @@ const buildErrorEmbed = (error, report = true) => {
   return embed;
 };
 
+/**
+ * Posts content to a Hastebin server.
+ * @param {String} content The content to post.
+ * @return {Promise<string>} The link to the paste.
+ */
+const postToHastebin = (content) => {
+  const url = config.hastebin;
+
+  return petitio(`${url}/documents`, 'POST')
+    .header('Content-Type', 'text/plain')
+    .body(Buffer.from(content))
+    .json()
+    .then(({ key }) => `${url}/${key}.js`);
+};
+
 module.exports = {
   validateSnowflake,
   validateChannel,
@@ -252,5 +267,6 @@ module.exports = {
   suggestionMessageReactionFilter,
   lastCommitHash,
   reportToSentry,
-  buildErrorEmbed
+  buildErrorEmbed,
+  postToHastebin
 };
