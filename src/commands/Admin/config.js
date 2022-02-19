@@ -54,7 +54,7 @@ module.exports = class ConfigCommand extends Command {
       .setFooter(`Guild: ${message.guild.id}`)
       .setTimestamp();
 
-    switch (setting) {
+    switch (setting.toLowerCase()) {
     case 'prefix': {
       configEmbed.setAuthor(`${message.guild} | Prefix`, message.guild.iconURL());
 
@@ -356,7 +356,7 @@ module.exports = class ConfigCommand extends Command {
       message.channel.send(configEmbed);
       break;
     }
-    case 'dmResponses': {
+    case 'dmresponses': {
       configEmbed.setAuthor(`${message.guild} | DM Responses`, message.guild.iconURL());
 
       if (updated) {
@@ -413,7 +413,7 @@ module.exports = class ConfigCommand extends Command {
       break;
     }
 
-      case 'keepLogs': {
+      case 'keeplogs': {
       let sChannel;
       try {
         if (!suggestionsChannel || (suggestionsChannel === this.client.config.suggestionsChannel)) {
