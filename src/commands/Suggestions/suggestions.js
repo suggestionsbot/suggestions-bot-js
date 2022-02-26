@@ -1,8 +1,8 @@
-const { MessageEmbed } = require('discord.js-light');
+const { MessageEmbed, MessageMentions } = require('discord.js-light');
 
 const Command = require('../../structures/Command');
 const Logger = require('../../utils/logger');
-const { displayTimestamp } = require('../../utils/functions');
+const { displayTimestamp, buildErrorEmbed } = require('../../utils/functions');
 
 module.exports = class MySuggestionsCommand extends Command {
   constructor(client) {
@@ -25,17 +25,26 @@ module.exports = class MySuggestionsCommand extends Command {
 
     await message.delete().catch(O_o => {});
 
-    const getSubmitter = async userID => {
+    const getSubmitter = userID => {
+      const re = new RegExp(MessageMentions.USERS_PATTERN, 'g');
+      const isMention = re.test(userID);
+
+      const id = isMention ? re.exec(userID)[1] : userID;
+
       return message.guild
-        ? await message.guild.members.fetch({ user: userID, cache: false })
-        : await this.client.users.fetch(userID, false);
+        ? message.guild.members.fetch({ user: id, cache: false })
+        : this.client.users.fetch(id, false);
     };
 
-    const submitter = (message.guild ? message.mentions.members.first() : message.mentions.users.first()) ||
-      args[0] && await getSubmitter(args[0]).catch(err => Logger.errorCmd(this, err)) ||
-      message.author;
-
-    console.log(submitter);
+    let submitter;
+    try {
+      submitter = args[0]
+        ? await getSubmitter(args[0])
+        : message.guild ? message.member : message.author;
+    } catch (err) {
+      Logger.errorCmd(this, err.stack);
+      return message.channel.send(buildErrorEmbed(err));
+    }
 
     const avatarURL = submitter.guild ? submitter.user.avatarURL() : submitter.avatarURL();
 
@@ -45,7 +54,7 @@ module.exports = class MySuggestionsCommand extends Command {
       else gSuggestions = await this.client.mongodb.helpers.suggestions.getUserGlobalSuggestions(submitter);
     } catch (err) {
       Logger.errorCmd(this, err.stack);
-      return message.channel.send(`Error querying the database for your suggestions: **${err.message}**.`);
+      return message.channel.send(buildErrorEmbed(err));
     }
 
     gSuggestions = gSuggestions.sort((a, b) => b._id.getTimestamp() - a._id.getTimestamp());
@@ -83,8 +92,8 @@ module.exports = class MySuggestionsCommand extends Command {
     if (message.guild) {
       embed
         .setAuthor(`${submitter.guild ? submitter.user.tag : submitter.tag} | ${message.guild}`, avatarURL)
-        .addField('Created On', `<t:${message.guild.createdAt}>`)
-        .addField('Joined', `<t:${submitter.joinedAt}>`);
+        .addField('Created On', displayTimestamp(message.guild.createdAt))
+        .addField('Joined', displayTimestamp(submitter.joinedAt));
     } else embed.setAuthor(`${submitter.tag} | Global Statistics`, avatarURL);
 
 
