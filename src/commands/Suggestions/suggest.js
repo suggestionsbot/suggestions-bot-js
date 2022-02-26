@@ -45,6 +45,7 @@ module.exports = class SuggestCommand extends Command {
       } else {
         sChannel = suggestionsChannel && await message.guild.channels.fetch(suggestionsChannel);
         if (!sChannel) return this.client.errors.noSuggestions(message.channel);
+        if (sChannel.type !== 'text') return this.client.errors.channelNotFound(sChannel, message.channel);
       }
     } catch (e) {
       return this.client.errors.noSuggestions(message.channel);
@@ -84,11 +85,9 @@ module.exports = class SuggestCommand extends Command {
     const missingPermissions = sChannel.permissionsFor(message.guild.me).missing(defaultPermissions);
     if (missingPermissions.length > 0) return this.client.errors.noChannelPerms(message, sChannel, missingPermissions);
 
-    let m,
-      mID;
+    let m;
     try {
       m = await sChannel.send(embed);
-      mID = m.id;
 
       const foundSet = this.client.voteEmojis.find(filter) || this.client.voteEmojis.find(defaults);
       const emojiSet = foundSet.emojis;
@@ -96,7 +95,6 @@ module.exports = class SuggestCommand extends Command {
 
       for (const e of emojiSet) {
         const emojiIndex = emojiSet.indexOf(e);
-        if (!m) m = await sChannel.messages.fetch(mID);
 
         if (foundSet.custom) {
           await m.react(message.guild.emojis.forge(e))
@@ -104,6 +102,7 @@ module.exports = class SuggestCommand extends Command {
         } else await m.react(e);
       }
     } catch (error) {
+      if (m) m.delete().catch(() => null);
       Logger.errorCmd(this, error.stack);
       return message.channel.send(buildErrorEmbed(error));
     }
@@ -119,12 +118,6 @@ module.exports = class SuggestCommand extends Command {
       `);
     }
 
-    try {
-      if (!m) await sChannel.messages.fetch(mID);
-    } catch (error) {
-      Logger.errorCmd(this, error.stack);
-      return message.channel.send(buildErrorEmbed(error));
-    }
     const newSuggestion = {
       guildID: message.guild.id,
       userID: message.author.id,

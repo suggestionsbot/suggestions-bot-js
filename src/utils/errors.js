@@ -169,7 +169,7 @@ class ErrorHandler {
 
     const embed = new MessageEmbed()
       .setTitle('Error')
-      .setDescription(`The channel \`${c}\` was not found!`)
+      .setDescription(`The text channel \`${c}\` was not found!`)
       .setColor(this.client.config.colors.error);
 
     channel.send(embed).then(m => m.delete({ timeout: 5000 })).catch(err => Logger.error(null, err));

@@ -2,7 +2,7 @@ const { MessageEmbed  } = require('discord.js-light');
 const { stripIndent } = require('common-tags');
 const Command = require('../../structures/Command');
 const Logger = require('../../utils/logger');
-const { buildErrorEmbed, getDefaultSuggestionsChannel } = require('../../utils/functions');
+const { buildErrorEmbed, getDefaultSuggestionsChannel, getChannel } = require('../../utils/functions');
 
 module.exports = class ConfigCommand extends Command {
   constructor(client) {
@@ -80,10 +80,7 @@ module.exports = class ConfigCommand extends Command {
       configEmbed.setAuthor(`${message.guild} | Suggestions Channel`, message.guild.iconURL());
 
       if (updated) {
-        const channels = await message.guild.channels.fetch({ cache: false })
-        const verified = channels.find(c => c.name === updated) ||
-          channels.get(updated) ||
-          message.mentions.channels.first();
+        const verified = await getChannel(message, updated);
         if (!verified) return this.client.errors.channelNotFound(updated, message.channel);
 
         try {
@@ -112,10 +109,7 @@ module.exports = class ConfigCommand extends Command {
       configEmbed.setAuthor(`${message.guild} | Suggestion Logs Channel`, message.guild.iconURL());
 
       if (updated) {
-        const channels = await message.guild.channels.fetch({ cache: false })
-        const verified = channels.find(c => c.name === updated) ||
-          channels.get(updated) ||
-          message.mentions.channels.first();
+        const verified = await getChannel(message, updated);
         if (!verified) return this.client.errors.channelNotFound(updated, message.channel);
 
         try {
@@ -143,10 +137,7 @@ module.exports = class ConfigCommand extends Command {
       configEmbed.setAuthor(`${message.guild} | Suggestions Staff Channel`, message.guild.iconURL());
 
       if (updated) {
-        const channels = await message.guild.channels.fetch({ cache: false })
-        const verified = channels.find(c => c.name === updated) ||
-          channels.get(updated) ||
-          message.mentions.channels.first();
+        const verified = await getChannel(message, updated);
         if (!verified) return this.client.errors.channelNotFound(updated, message.channel);
 
         try {

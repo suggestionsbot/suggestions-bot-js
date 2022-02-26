@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const petitio = require('petitio');
 const { CronJob } = require('cron');
-const { Client, MessageMentions, MessageEmbed } = require('discord.js-light');
+const { Client, MessageMentions, MessageEmbed, GuildChannel } = require('discord.js-light');
 const { execSync } = require('child_process');
 const sentry = require('@sentry/node');
 
@@ -120,7 +120,7 @@ const getRandomGiphyImage = (tag) => {
  * @return {Promise<TextChannel>|null} Return the channel, if it exists
  */
 const getDefaultSuggestionsChannel = (guild) => {
-  return guild.channels.fetch({ cache: false }).then(res => res.find(c => c.name === config.suggestionsChannel)) ?? null;
+  return guild.channels.fetch({ cache: false }).then(res => res.filter(c => c.type === 'text').find(c => c.name === config.suggestionsChannel)) ?? null;
 };
 
 /**
@@ -254,6 +254,22 @@ const postToHastebin = (content) => {
     .then(({ key }) => `${url}/${key}.js`);
 };
 
+/**
+ * Gets a channel from the guild.
+ * @param {Message} message - The associated message.
+ * @param {string} channel - The channel string to check.
+ * @return {Promise<*|GuildChannel|null>}
+ */
+const getChannel = async (message, channel) => {
+  const channels = await message.guild.channels.fetch({ cache: false })
+    .then(res => res.filter(c => c.type === 'text'));
+
+  return channels.find(c => c.name === channel) ||
+    channels.get(channel) ||
+    await message.mentions.channels.first()?.fetch()
+      .then(c => c?.type === 'text' ? c : null);
+};
+
 module.exports = {
   validateSnowflake,
   validateChannel,
@@ -268,5 +284,6 @@ module.exports = {
   lastCommitHash,
   reportToSentry,
   buildErrorEmbed,
-  postToHastebin
+  postToHastebin,
+  getChannel
 };
