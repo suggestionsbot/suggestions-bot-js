@@ -37,8 +37,7 @@ const settingsSchema = mongoose.Schema({
     default: false
   },
   keepLogs: {
-    type: Boolean,
-    default: true
+    type: Boolean
   }
 });
 

@@ -71,18 +71,21 @@ module.exports = class ApproveCommand extends Command {
         Please contact the developer via the Support Discord: ${discord}`);
     }
 
+    const isDefault = [this.client.config.defaultSettings.suggestionsLogs, 'suggestions-logs'].includes(settings.suggestionsLogs);
+    const willIgnoreLogs = isDefault && !settings.keepLogs;
+
     let suggestionsChannel,
       suggestionsLogs;
     try {
       suggestionsChannel = settings.suggestionsChannel && await message.guild.channels.fetch(settings.suggestionsChannel);
       if (!suggestionsChannel) return this.client.errors.noSuggestions(message.channel);
-      if (!settings.keepLogs) {
+      if (!willIgnoreLogs) {
         suggestionsLogs = settings.suggestionsLogs && await message.guild.channels.fetch(settings.suggestionsLogs);
         if (!suggestionsLogs) return this.client.errors.noSuggestionsLogs(message.channel);
       }
     } catch (error) {
       if (!suggestionsChannel) return this.client.errors.noSuggestions(message.channel);
-      if (!suggestionsLogs && !settings.keepLogs) return this.client.errors.noSuggestionsLogs(message.channel);
+      if (!willIgnoreLogs) return this.client.errors.noSuggestionsLogs(message.channel);
       Logger.errorCmd(this, error.stack);
       return message.channel.send(buildErrorEmbed(error));
     }
@@ -189,7 +192,7 @@ module.exports = class ApproveCommand extends Command {
         `);
     }
 
-    if (!settings.keepLogs) {
+    if (!willIgnoreLogs) {
       const missingPermissions = suggestionsLogs.permissionsFor(message.guild.me).missing(logsPermissions);
       if (missingPermissions.length > 0) return this.client.errors.noChannelPerms(message, suggestionsLogs, missingPermissions);
     }
@@ -209,15 +212,15 @@ module.exports = class ApproveCommand extends Command {
     };
 
     try {
-      message.channel.send(`Suggestion **${sID}** has been approved.`).then(m => m.delete({ timeout: 5000 }));
-
-      if (settings.keepLogs || (!settings.keepLogs && !suggestionsLogs)) {
+      // Will handle suggestion if there's no logs channel set/default value is set OR keepLogs is enabled and a valid logs channel is set
+      if (willIgnoreLogs || (settings.keepLogs && suggestionsLogs)) {
         const logEmbed = new MessageEmbed(logsEmbed)
           .setTitle('Suggestion Approved');
         await sMessage.edit(logEmbed);
         await sMessage.reactions.removeAll();
       }
 
+      // Will handle suggestion if keepLogs is disabled and a valid suggestion logs channel is set
       if (!settings.keepLogs && suggestionsLogs) {
         await sMessage.edit(approvedEmbed).then(m => m.delete({ timeout: 5000 }));
         await suggestionsLogs.send(logsEmbed);
@@ -226,6 +229,7 @@ module.exports = class ApproveCommand extends Command {
       await this.client.mongodb.helpers.suggestions.handleGuildSuggestion(approveSuggestion);
       await guild.members.fetch({ user: userID, cache: false });
       if (settings.dmResponses) submitter.send(dmEmbed);
+      message.channel.send(`Suggestion **${sID}** has been approved.`).then(m => m.delete({ timeout: 5000 }));
     } catch (error) {
       if (error.message === 'Unknown Member') return;
       if (error.message === 'Cannot send messages to this user') return;
