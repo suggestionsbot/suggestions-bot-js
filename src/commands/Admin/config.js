@@ -2,7 +2,7 @@ const { MessageEmbed  } = require('discord.js-light');
 const { stripIndent } = require('common-tags');
 const Command = require('../../structures/Command');
 const Logger = require('../../utils/logger');
-const { buildErrorEmbed, getDefaultSuggestionsChannel, getChannel } = require('../../utils/functions');
+const { buildErrorEmbed, getDefaultSuggestionsChannel, getChannel, validateChannel } = require('../../utils/functions');
 
 module.exports = class ConfigCommand extends Command {
   constructor(client) {
@@ -418,7 +418,7 @@ module.exports = class ConfigCommand extends Command {
           sChannel = channel;
           keepLogs = updated.keepLogs;
         } else {
-          sChannel = suggestionsChannel && await message.guild.channels.fetch(suggestionsChannel)
+          sChannel = suggestionsChannel && await validateChannel(message.guild.channels, suggestionsChannel)
           if (!sChannel) return this.client.errors.noSuggestions(message.channel)
         }
       } catch (err) {
