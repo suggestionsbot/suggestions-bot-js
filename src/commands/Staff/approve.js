@@ -45,14 +45,9 @@ module.exports = class ApproveCommand extends Command {
       guildID,
       messageID,
       suggestion,
-      status
+      status,
+      results
     } = document;
-
-    if (status === 'approved') {
-      return message.channel.send(`sID **${sID}** has already been approved. Cannot do this action again.`)
-        .then(msg => msg.delete({ timeout: 3000 }))
-        .catch(err => this.logger.error(err.stack));
-    }
 
     const submitter = await this.client.users.fetch(userID, false).catch(err => Logger.errorCmd(this, err));
     const guild = message.guild ? message.guild : this.client.guilds.cache.get(guildID);
@@ -98,20 +93,21 @@ module.exports = class ApproveCommand extends Command {
         .then(msg => msg.delete({ timeout: 3000 }));
     }
 
-    let sMessage;
+    let sMessage,
+      approvedEmbed;
     try {
       sMessage = await suggestionsChannel.messages.fetch(messageID, false);
     } catch (err) {
-      Logger.errorCmd(this, err.stack);
-      return message.channel.send('The suggestion message was not found!')
-        .then(m => m.delete({ timeout: 5000 }));
+      sMessage = false;
     }
 
-    const embed = sMessage.embeds[0];
+    if (sMessage) {
+      const embed = sMessage.embeds[0];
 
-    const approvedEmbed = new MessageEmbed(embed)
-      .setTitle('Suggestion Approved')
-      .setColor(colors.suggestion.approved);
+      approvedEmbed = new MessageEmbed(embed)
+        .setTitle('Suggestion Approved')
+        .setColor(colors.suggestion.approved);
+    }
 
     const dmEmbed = new MessageEmbed()
       .setAuthor(guild, guild.iconURL())
@@ -132,12 +128,12 @@ module.exports = class ApproveCommand extends Command {
     }
 
     const [reacts, reactCount] = [
-      sMessage.reactions.cache.filter(suggestionMessageReactionFilter).map(e => e.emoji.toString()),
-      sMessage.reactions.cache.filter(suggestionMessageReactionFilter).map(e => e.count)
+      status ? results.map(e => e.emoji) : sMessage.reactions.cache.filter(suggestionMessageReactionFilter).map(e => e.emoji.toString()),
+      status ? results.map(e => e.count) : sMessage.reactions.cache.filter(suggestionMessageReactionFilter).map(e => e.count)
     ];
 
     const getResults = (view = false) => {
-      const count = (idx) => reactCount[idx] - 1 || 0;
+      const count = (idx) => status ? reactCount[idx] : reactCount[idx] - 1 || 0;
 
       if (view) {
         return reacts.map((r, i) => {
@@ -213,7 +209,7 @@ module.exports = class ApproveCommand extends Command {
 
     try {
       // Will handle suggestion if there's no logs channel set/default value is set OR keepLogs is enabled and a valid logs channel is set
-      if (willIgnoreLogs || (settings.keepLogs && suggestionsLogs)) {
+      if (sMessage && (willIgnoreLogs || (settings.keepLogs && suggestionsLogs))) {
         const logEmbed = new MessageEmbed(logsEmbed)
           .setTitle('Suggestion Approved');
         await sMessage.edit(logEmbed);
@@ -222,7 +218,7 @@ module.exports = class ApproveCommand extends Command {
 
       // Will handle suggestion if keepLogs is disabled and a valid suggestion logs channel is set
       if (!settings.keepLogs && suggestionsLogs) {
-        await sMessage.edit(approvedEmbed).then(m => m.delete({ timeout: 5000 }));
+        if (sMessage) await sMessage.edit(approvedEmbed).then(m => m.delete({ timeout: 5000 }));
         await suggestionsLogs.send(logsEmbed);
       }
 
