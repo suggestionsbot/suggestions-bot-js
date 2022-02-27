@@ -25,7 +25,7 @@ module.exports = class extends Event {
 
     if (message.channel.id !== settings.suggestionsChannel) return;
     if (!suggestion) return;
-    if (messageReaction.partial) await messageReaction.fetch();
+    if (messageReaction.partial) await messageReaction.fetch().catch(() => null);
 
     const reactions = await message.fetch({ cache: false }).then(msg => {
       return Promise.all(msg.reactions.cache
