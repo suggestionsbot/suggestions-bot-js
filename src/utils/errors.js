@@ -86,7 +86,7 @@ class ErrorHandler {
 
     return channel.send(embed)
       .then(m => m.delete({ timeout: 7500 }))
-      .catch(e => this.client.logger.error(e.stack));
+      .catch(e => this.client.logger.error(e));
   }
 
   noSuggestion(channel, sid) {
