@@ -33,14 +33,17 @@ module.exports = class RejectCommand extends Command {
     const reply = args.slice(1).join(' ');
     if (!reply && settings.responseRequired) return this.client.errors.noRejectedResponse(message.channel);
 
+    const errMessage = new Error(`\`${id}\` does not resolve to or return a valid suggestion!`);
     try {
       if ([7, 8].includes(id.length)) document = await this.client.mongodb.helpers.suggestions.getGlobalSuggestion(id);
       else if (validateSnowflake(id)) document = await this.client.mongodb.helpers.suggestions.getGuildSuggestionViaMessageID(message.guild, id);
-      else return message.channel.send(`\`${id}\` does not resolve to or return a valid suggestion!`);
+      else return message.channel.send(buildErrorEmbed(errMessage, false));
     } catch (error) {
       Logger.errorCmd(this, error.stack);
       return message.channel.send(`Error querying this suggestion: **${error.message}**`);
     }
+
+    if (!document) return message.channel.send(buildErrorEmbed(errMessage, false));
 
     const {
       sID,

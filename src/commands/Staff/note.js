@@ -27,14 +27,17 @@ module.exports = class NoteCommand extends Command {
     if (!note) return this.client.errors.noUsage(message.channel, this, settings);
 
     let document;
+    const errMessage = new Error(`\`${id}\` does not resolve to or return a valid suggestion!`);
     try {
       if ([7, 8].includes(id.length)) document = await this.client.mongodb.helpers.suggestions.getGlobalSuggestion(id);
       else if (validateSnowflake(id)) document = await this.client.mongodb.helpers.suggestions.getGuildSuggestionViaMessageID(message.guild, id);
-      else return message.channel.send(`\`${id}\` does not resolve to or return a valid suggestion!`);
+      else return message.channel.send(buildErrorEmbed(errMessage, false));
     } catch (err) {
       Logger.errorCmd(this, err.stack);
       return message.channel.send(buildErrorEmbed(err));
     }
+
+    if (!document) return message.channel.send(buildErrorEmbed(new Error(errMessage), false));
 
     const {
       sID,
