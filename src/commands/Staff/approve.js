@@ -2,7 +2,7 @@ const { MessageEmbed, Util: { escapeMarkdown } } = require('discord.js-light');
 const { stripIndent } = require('common-tags');
 const Command = require('../../structures/Command');
 const Logger = require('../../utils/logger');
-const { validateSnowflake, suggestionMessageReactionFilter, buildErrorEmbed } = require('../../utils/functions');
+const { validateSnowflake, suggestionMessageReactionFilter, buildErrorEmbed, getLogsChannel } = require('../../utils/functions');
 
 module.exports = class ApproveCommand extends Command {
   constructor(client) {
@@ -69,21 +69,18 @@ module.exports = class ApproveCommand extends Command {
         Please contact the developer via the Support Discord: ${discord}`);
     }
 
-    const isDefault = [this.client.config.defaultSettings.suggestionsLogs, 'suggestions-logs'].includes(settings.suggestionsLogs);
-    const willIgnoreLogs = isDefault && !settings.keepLogs;
-
     let suggestionsChannel,
       suggestionsLogs;
     try {
       suggestionsChannel = settings.suggestionsChannel && await message.guild.channels.fetch(settings.suggestionsChannel);
       if (!suggestionsChannel) return this.client.errors.noSuggestions(message.channel);
-      if (!willIgnoreLogs) {
-        suggestionsLogs = settings.suggestionsLogs && await message.guild.channels.fetch(settings.suggestionsLogs);
+      if (!settings.keepLogs) {
+        suggestionsLogs = settings.suggestionsLogs && await getLogsChannel(message, settings.suggestionsLogs);
         if (!suggestionsLogs) return this.client.errors.noSuggestionsLogs(message.channel);
       }
     } catch (error) {
       if (!suggestionsChannel) return this.client.errors.noSuggestions(message.channel);
-      if (!willIgnoreLogs) return this.client.errors.noSuggestionsLogs(message.channel);
+      if (!settings.keepLogs && !suggestionsLogs) return this.client.errors.noSuggestionsLogs(message.channel);
       Logger.errorCmd(this, error.stack);
       return message.channel.send(buildErrorEmbed(error));
     }
@@ -191,7 +188,7 @@ module.exports = class ApproveCommand extends Command {
         `);
     }
 
-    if (!willIgnoreLogs) {
+    if (suggestionsLogs && !settings.keepLogs) {
       const missingPermissions = suggestionsLogs.permissionsFor(message.guild.me).missing(logsPermissions);
       if (missingPermissions.length > 0) return this.client.errors.noChannelPerms(message, suggestionsLogs, missingPermissions);
     }
@@ -212,7 +209,7 @@ module.exports = class ApproveCommand extends Command {
 
     try {
       // Will handle suggestion if there's no logs channel set/default value is set OR keepLogs is enabled and a valid logs channel is set
-      if (sMessage && (willIgnoreLogs || (settings.keepLogs && suggestionsLogs))) {
+      if (sMessage && settings.keepLogs) {
         const logEmbed = new MessageEmbed(logsEmbed)
           .setTitle('Suggestion Approved');
         await sMessage.edit(logEmbed);

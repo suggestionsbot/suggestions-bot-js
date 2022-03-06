@@ -2,7 +2,7 @@ const { MessageEmbed  } = require('discord.js-light');
 const { stripIndent } = require('common-tags');
 const Command = require('../../structures/Command');
 const Logger = require('../../utils/logger');
-const { buildErrorEmbed, getDefaultSuggestionsChannel, getChannel, validateChannel } = require('../../utils/functions');
+const { buildErrorEmbed, getDefaultSuggestionsChannel, getChannel, validateChannel, getLogsChannel } = require('../../utils/functions');
 
 module.exports = class ConfigCommand extends Command {
   constructor(client) {
@@ -96,7 +96,8 @@ module.exports = class ConfigCommand extends Command {
 
       const isDefault = suggestionsChannel === 'suggestions'
       suggestionsChannel = isDefault
-        ? await message.guild.channels.fetch({ cache: false }).then(res => res.find(c => c.name === 'suggestions'))
+        ? await message.guild.channels.fetch({ cache: false })
+          .then(res => res.filter(c => ['text', 'news'].includes(c.type)).find(c => c.name === 'suggestions'))
         : message.guild.channels.forge(suggestionsChannel)
       if (!suggestionsChannel) return this.client.errors.noSuggestions(message.channel);
       configEmbed.setDescription(`Current suggestions channel: ${suggestionsChannel}`);
@@ -123,10 +124,7 @@ module.exports = class ConfigCommand extends Command {
         }
       }
 
-      const isDefault = [this.client.config.defaultSettings.suggestionsLogs, "suggestions-logs"].includes(suggestionsLogs);
-      suggestionsLogs = isDefault
-          ? await message.guild.channels.fetch({ cache: false }).then(res => res.find(c => c.name === this.client.config.suggestionLogs))
-          : message.guild.channels.forge(suggestionsLogs);
+      suggestionsLogs = await getLogsChannel(message, suggestionsLogs)
       if (!suggestionsLogs) return this.client.errors.noSuggestionsLogs(message.channel);
       configEmbed.setDescription(`Current suggestions logs channel: ${suggestionsLogs}`);
       configEmbed.addField('More Information', `[Link](${confDocs}#suggestions-logs-channel)`);

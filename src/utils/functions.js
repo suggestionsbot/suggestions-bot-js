@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const petitio = require('petitio');
 const { CronJob } = require('cron');
-const { Client, MessageMentions, MessageEmbed, GuildChannel } = require('discord.js-light');
+const { Client, MessageMentions, MessageEmbed, GuildChannel, Message, TextChannel } = require('discord.js-light');
 const { execSync } = require('child_process');
 const sentry = require('@sentry/node');
 
@@ -261,13 +261,34 @@ const postToHastebin = (content) => {
  * @return {Promise<*|GuildChannel|null>}
  */
 const getChannel = async (message, channel) => {
+  const acceptedTypes = ['text', 'news'];
   const channels = await message.guild.channels.fetch({ cache: false })
-    .then(res => res.filter(c => ['text', 'news'].includes(c.type)));
+    .then(res => res.filter(c => acceptedTypes.includes(c.type)));
 
   return channels.find(c => c.name === channel) ||
     channels.get(channel) ||
     await message.mentions.channels.first()?.fetch()
-      .then(c => c?.type === 'text' ? c : null);
+      .then(c => c?.type ? acceptedTypes.includes(c.type) && c : null);
+};
+
+/**
+ * Returns the degault logs channel if it exists in the server.
+ * @param {Message} message - The associated message.
+ * @param {String} channel - The channel name (if default) or id..
+ * @return {Promise<TextChannel>} The channel object.
+ */
+const getLogsChannel = async (message, channel) => {
+  const acceptedTypes = ['text', 'news'];
+  const defaultNames = [config.defaultSettings.suggestionsLogs, 'suggestions-logs'];
+  const isDefault = defaultNames.includes(channel);
+
+  const channels = await message.guild.channels.fetch({ cache: false })
+    .then(res => res.filter(c => acceptedTypes.includes(c.type)));
+
+  if (isDefault) return channels.find(c => defaultNames.includes(c.name));
+
+  return channels.get(channel) || await message.mentions.channels.first()?.fetch()
+    .then(c => c?.type ? acceptedTypes.includes(c.type) && c : null);
 };
 
 module.exports = {
@@ -285,5 +306,6 @@ module.exports = {
   reportToSentry,
   buildErrorEmbed,
   postToHastebin,
-  getChannel
+  getChannel,
+  getLogsChannel
 };
