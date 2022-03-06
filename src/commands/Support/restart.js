@@ -6,7 +6,7 @@ module.exports = class RestartCommand extends Command {
   constructor(client) {
     super(client, {
       name: 'restart',
-      category: 'Bot Owner',
+      category: 'Support',
       description: 'Restart a single cluster or all clusters.',
       usage: 'restart [clusterID]',
       supportOnly: true,

@@ -27,6 +27,7 @@ module.exports = class HelpCommand extends Command {
     const configCmdName = this.client.commands.get('config').help.name;
 
     const ownerCheck = this.client.isOwner(message.author.id);
+    const supportCheck = await this.client.isSupport(message.author);
 
     if (message.guild) {
       suggestionsChannel = await validateChannel(message.guild.channels, suggestionsChannel);
@@ -86,15 +87,15 @@ module.exports = class HelpCommand extends Command {
         .addField('🤖 General Commands', this.mapRegularCommands(cmds).join(' | '));
       if (staffCheck) helpEmbed.addField('🗄 Staff Commands', this.mapCommands(cmds, 'Staff').join(' | '));
       if (adminCheck) helpEmbed.addField('🛡 Admin Commands', this.mapCommands(cmds, 'Admin').join(' | '));
-      if (ownerCheck) helpEmbed.addField('🔒 Owner Commands', this.mapCommands(cmds, 'Bot Owner').join(' | '));
     } else {
       helpEmbed
         .addField('📣 Default Prefix', `\`${this.client.config.prefix}\``)
         .addField('🤖 General Commands', this.mapRegularCommands(cmds).join(' | '))
         .addField('🗄 Staff Commands', this.mapCommands(cmds, 'Staff').join(' | '))
         .addField('🛡 Admin Commands', this.mapCommands(cmds, 'Admin').join(' | '));
-      if (ownerCheck) helpEmbed.addField('🔒 Owner Commands', this.mapCommands(cmds, 'Bot Owner').join(' | '));
     }
+    if (supportCheck) helpEmbed.addField('🤝 Support Commands', this.mapCommands(cmds, 'Support').join(' | '));
+    if (ownerCheck) helpEmbed.addField('🔒 Owner Commands', this.mapCommands(cmds, 'Bot Owner').join(' | '));
     helpEmbed.addField('ℹ Website', website);
     helpEmbed.addField('⚙ GitHub', github);
     helpEmbed.addField('❗ Found an issue?', `Please report any issues directly to the **Support Team** via the Support Discord: ${discord}`);
@@ -114,6 +115,7 @@ module.exports = class HelpCommand extends Command {
     return commands
       .filter(c => !c.conf.adminOnly
         && !c.conf.ownerOnly
+        && !c.conf.supportOnly
         && !c.conf.staffOnly
         && !c.conf.superSecretOnly
       )
