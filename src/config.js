@@ -67,5 +67,9 @@ module.exports = {
     ['792914393108054066', '782810845444964383', '485987998794514442', '776576870245597255'],
   timers: {
     stats: '*/30 * * * *'
+  },
+  legal: {
+    terms: 'https://suggestions.bot/terms',
+    privacy: 'https://suggestions.bot/privacy'
   }
 };

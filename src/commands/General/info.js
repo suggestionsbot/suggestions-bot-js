@@ -17,7 +17,7 @@ module.exports = class InfoCommand extends Command {
 
   async run(message, args) {
 
-    const { colors, discord, owners, website, github } = this.client.config;
+    const { colors, discord, owners, website, github, legal } = this.client.config;
 
     const embed = new MessageEmbed()
       .setTitle(this.client.user.username)
@@ -29,6 +29,7 @@ module.exports = class InfoCommand extends Command {
       .addField('Website', `[suggestions.gg](${website})`)
       .addField('Discord', `[suggestions.gg/discord](${discord})`)
       .addField('GitHub', `[suggestions.gg/github](${github})`)
+      .addField('Legal', `[Privacy Policy](${legal.privacy}) | [Terms of Service](${legal.terms})`)
       .addField('Version', version)
       .setFooter('© 2022 Anthony Collier');
 
