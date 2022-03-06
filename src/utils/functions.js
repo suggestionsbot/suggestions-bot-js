@@ -262,7 +262,7 @@ const postToHastebin = (content) => {
  */
 const getChannel = async (message, channel) => {
   const channels = await message.guild.channels.fetch({ cache: false })
-    .then(res => res.filter(c => c.type === 'text'));
+    .then(res => res.filter(c => ['text', 'news'].includes(c.type)));
 
   return channels.find(c => c.name === channel) ||
     channels.get(channel) ||

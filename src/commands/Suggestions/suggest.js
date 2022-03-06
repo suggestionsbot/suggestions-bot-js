@@ -45,7 +45,7 @@ module.exports = class SuggestCommand extends Command {
       } else {
         sChannel = suggestionsChannel && await message.guild.channels.fetch(suggestionsChannel);
         if (!sChannel) return this.client.errors.noSuggestions(message.channel);
-        if (sChannel.type !== 'text') return this.client.errors.channelNotFound(sChannel, message.channel);
+        if (['text', 'news'].includes(sChannel.type)) return this.client.errors.channelNotFound(sChannel, message.channel);
       }
     } catch (e) {
       return this.client.errors.noSuggestions(message.channel);
