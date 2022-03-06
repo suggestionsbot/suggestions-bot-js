@@ -6,7 +6,10 @@ module.exports = {
   suggestionsChannel: 'suggestions',
   suggestionsLogs: 'suggestion-logs',
   serverLogs: isProduction() ? '602332466476482616' : '498627833233539086',
-  owners: ['158063324699951104'],
+  owners: [{
+    id: '158063324699951104',
+    tag: 'anthony#8577'
+  }],
   embedColor: 0xffd663,
   colors: {
     main: 0xffd663,

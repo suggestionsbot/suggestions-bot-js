@@ -104,7 +104,7 @@ module.exports = class SuggestionsClient extends Client {
 
   // this method checks if the user ID is a bot owner or not
   isOwner(id) {
-    return this.config.owners.includes(id);
+    return this.config.owners.map(o => o.id).includes(id);
   }
 
   // this method checks if the user ID has the "MANAGE_GUILD" permission or "ADMINISTRATOR" permission
