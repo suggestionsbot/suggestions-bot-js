@@ -59,6 +59,6 @@
   },
   "devDependencies": {
     "eslint": "8.10.0",
-    "ts-node": "10.5.0"
+    "ts-node": "10.7.0"
   }
 }
