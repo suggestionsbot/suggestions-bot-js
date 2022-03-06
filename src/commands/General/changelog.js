@@ -26,7 +26,7 @@ module.exports = class ChangelogCommand extends Command {
       .addField('Date', changelog.embeds[0].fields[0].value)
       .setColor(colors.main);
 
-    changelogEmbed.addField('More Information', `Please check our ${changelog.channel} channel at ${discord} for previous updates!`);
+    changelogEmbed.addField('More Information', `Please check our ${changelog.channel} channel via our [Discord](${discord}) for previous updates!`);
 
     return message.channel.send(changelogEmbed);
   }

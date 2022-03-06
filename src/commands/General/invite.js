@@ -27,16 +27,16 @@ module.exports = class InviteCommand extends Command {
           **Before inviting, you need the** \`MANAGE SERVER\` **or** \`ADMINISTRATOR\` **permissions to add bots to a server.** 
       
           **Bot Invite:**
-          ${invite}
+          [suggestions.gg/invite](${invite})
 
           **Website:**
-          ${website}
+          [suggestions.gg](${website})
           
           **GitHub:**
-          ${github}
+          [suggestions.gg/github](${github})
 
           **Support Server:**
-          ${discord}
+          [suggestions.gg/discord](${discord})
       `)
       .setColor(colors.main)
       .setTimestamp();

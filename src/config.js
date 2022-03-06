@@ -27,10 +27,10 @@ module.exports = {
       remove: 0xd64541
     }
   },
-  discord: 'https://discord.gg/suggestions',
-  website: 'https://suggestionsbot.com',
+  discord: 'https://suggestions.bot/discord',
+  website: 'https://suggestions.gg',
   docs: 'https://docs.suggestionsbot.com',
-  github: 'https://github.com/suggestionsbot/suggestions-bot',
+  github: 'https://suggestions.bot/discord',
   hastebin: 'https://paste.nerdcave.dev',
   invite: isProduction() ? 'https://suggestions.bot/invite' : 'https://discord.com/oauth2/authorize?client_id=771924181784854579&scope=bot&permissions=355392',
   voteSites: [

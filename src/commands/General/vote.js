@@ -1,5 +1,6 @@
 const { MessageEmbed } = require('discord.js-light');
 const Command = require('../../structures/Command');
+const { invite } = require('../../config');
 
 module.exports = class VoteCommand extends Command {
   constructor(client) {
@@ -34,7 +35,7 @@ module.exports = class VoteCommand extends Command {
                 Voting helps show your support for the bot and the developers. It's not
                 required, but spreading the word and upping our presence is always much appreciated!
 
-                For more information regarding voting, feel free to join our Discord: ${discord}
+                For more information regarding voting, feel free to join our [Discord](${invite}).
             `)
       .setColor(colors.main);
 

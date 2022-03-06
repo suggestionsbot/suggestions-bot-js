@@ -26,10 +26,10 @@ module.exports = class InfoCommand extends Command {
       .setThumbnail(this.client.user.avatarURL())
       .addField(owners.length <= 1 ? 'Bot Author' : 'Bot Author(s)',
         owners.map(o => `${this.client.users.forge(o.id)} \`[${o.tag}]\``).join('\n'))
-      .addField('Support Discord', discord)
-      .addField('Website', website)
-      .addField('GitHub', github)
-      .addField('Bot Version', version)
+      .addField('Website', `[suggestions.gg](${website})`)
+      .addField('Discord', `[suggestions.gg/discord](${discord})`)
+      .addField('GitHub', `[suggestions.gg/github](${github})`)
+      .addField('Version', version)
       .setFooter('© 2022 Anthony Collier');
 
     return message.channel.send(embed);

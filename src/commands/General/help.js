@@ -96,9 +96,9 @@ module.exports = class HelpCommand extends Command {
     }
     if (supportCheck) helpEmbed.addField('🤝 Support Commands', this.mapCommands(cmds, 'Support').join(' | '));
     if (ownerCheck) helpEmbed.addField('🔒 Owner Commands', this.mapCommands(cmds, 'Bot Owner').join(' | '));
-    helpEmbed.addField('ℹ Website', website);
-    helpEmbed.addField('⚙ GitHub', github);
-    helpEmbed.addField('❗ Found an issue?', `Please report any issues directly to the **Support Team** via the Support Discord: ${discord}`);
+    helpEmbed.addField('ℹ Website', `[suggestions.gg](${website})`);
+    helpEmbed.addField('⚙ GitHub', `[suggestions.gg/github](${github})`);
+    helpEmbed.addField('❗ Found an issue?', `Please report any issues directly to the **Support Team** via the Support Discord: [suggestions.gg/discord](${discord})`);
 
     message.channel.send(helpEmbed);
   }
