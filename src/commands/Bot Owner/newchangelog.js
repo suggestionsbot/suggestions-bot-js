@@ -37,6 +37,7 @@ module.exports = class NewChangelogCommand extends Command {
       );
       if (confirmation === 'submit') {
         this.client.lastChangelog = await channel.send(embed);
+        await this.client.lastChangelog.crosspost();
         return this.client.lastChangelog;
       }
     } catch (err) {
