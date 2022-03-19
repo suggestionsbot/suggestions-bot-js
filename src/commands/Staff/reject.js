@@ -19,7 +19,7 @@ module.exports = class RejectCommand extends Command {
       name: 'reject',
       category: 'Staff',
       description:
-				'Reject a submitted suggestion via the suggestion ID (sID) or message ID.',
+                'Reject a submitted suggestion via the suggestion ID (sID) or message ID.',
       usage: 'reject <sID|message ID> [response]',
       aliases: ['deny'],
       staffOnly: true,
@@ -52,15 +52,15 @@ module.exports = class RejectCommand extends Command {
     try {
       if ([7, 8].includes(escapedId.length)) {
         document =
-					await this.client.mongodb.helpers.suggestions.getGlobalSuggestion(
-					  id
-					);
+                    await this.client.mongodb.helpers.suggestions.getGlobalSuggestion(
+                      id
+                    );
       } else if (validateSnowflake(id)) {
         document =
-					await this.client.mongodb.helpers.suggestions.getGuildSuggestionViaMessageID(
-					  message.guild,
-					  id
-					);
+                    await this.client.mongodb.helpers.suggestions.getGuildSuggestionViaMessageID(
+                      message.guild,
+                      id
+                    );
       } else
         return message.channel.send(buildErrorEmbed(errMessage, false));
     } catch (error) {
@@ -74,7 +74,7 @@ module.exports = class RejectCommand extends Command {
       return message.channel.send(buildErrorEmbed(errMessage, false));
 
     const { sID, userID, guildID, messageID, suggestion, status, results } =
-			document;
+            document;
 
     const submitter = await this.client.users
       .fetch(userID, false)
@@ -104,16 +104,16 @@ module.exports = class RejectCommand extends Command {
     let suggestionsChannel, suggestionsLogs;
     try {
       suggestionsChannel =
-				settings.suggestionsChannel &&
-				(await message.guild.channels.fetch(
-				  settings.suggestionsChannel
-				));
+                settings.suggestionsChannel &&
+                (await message.guild.channels.fetch(
+                  settings.suggestionsChannel
+                ));
       if (!suggestionsChannel)
         return this.client.errors.noSuggestions(message.channel);
       if (!settings.keepLogs) {
         suggestionsLogs =
-					settings.suggestionsLogs &&
-					(await getLogsChannel(message, settings.suggestionsLogs));
+                    settings.suggestionsLogs &&
+                    (await getLogsChannel(message, settings.suggestionsLogs));
         if (!suggestionsLogs) {
           return this.client.errors.noSuggestionsLogs(
             message.channel

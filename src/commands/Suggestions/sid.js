@@ -16,7 +16,7 @@ module.exports = class SIDCommand extends Command {
       name: 'sid',
       category: 'Suggestions',
       description:
-				'View the information of a specific guild suggestion by their sID.',
+                'View the information of a specific guild suggestion by their sID.',
       usage: 'sid <sID>',
       botPermissions: ['MANAGE_MESSAGES', 'USE_EXTERNAL_EMOJIS']
     });
@@ -34,10 +34,10 @@ module.exports = class SIDCommand extends Command {
     let suggestion;
     try {
       suggestion =
-				await this.client.mongodb.helpers.suggestions.getGuildSuggestion(
-				  message.guild,
-				  escapedId
-				);
+                await this.client.mongodb.helpers.suggestions.getGuildSuggestion(
+                  message.guild,
+                  escapedId
+                );
     } catch (err) {
       Logger.errorCmd(this, err.stack);
       return message.channel.send(buildErrorEmbed(err));
@@ -78,10 +78,10 @@ module.exports = class SIDCommand extends Command {
       time = suggestion._id.getTimestamp();
 
     const view =
-			suggestion.results.length > 1 &&
-			suggestion.results.map((r) => {
-			  return `${r.emoji}**: ${r.count}**`;
-			});
+            suggestion.results.length > 1 &&
+            suggestion.results.map((r) => {
+              return `${r.emoji}**: ${r.count}**`;
+            });
 
     switch (suggestion.status) {
       case undefined: {

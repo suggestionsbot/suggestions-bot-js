@@ -59,7 +59,7 @@ const walk = (directory, extensions) => {
         stats = fs.lstatSync(filePath);
       if (
         stats.isFile() &&
-				extensions.some((ext) => filePath.endsWith(ext))
+                extensions.some((ext) => filePath.endsWith(ext))
       )
         files.push(filePath);
       else if (stats.isDirectory()) files = files.concat(read(filePath));
@@ -79,7 +79,7 @@ const walk = (directory, extensions) => {
  */
 const displayTimestamp = (dateType, type) => {
   const timestamp =
-		typeof dateType === 'object' ? new Date(dateType).getTime() : dateType;
+        typeof dateType === 'object' ? new Date(dateType).getTime() : dateType;
 
   const validOptions = ['t', 'T', 'd', 'D', 'f', 'F', 'R'];
   if (type && !validOptions.includes(type)) type = 'f';
@@ -325,13 +325,13 @@ const getChannel = async (message, channel) => {
 
   return (
     channels.find((c) => c.name === channel) ||
-		channels.get(channel) ||
-		(await message.mentions.channels
-		  .first()
-		  ?.fetch()
-		  .then((c) =>
-		    c?.type ? acceptedTypes.includes(c.type) && c : null
-		  ))
+        channels.get(channel) ||
+        (await message.mentions.channels
+          .first()
+          ?.fetch()
+          .then((c) =>
+            c?.type ? acceptedTypes.includes(c.type) && c : null
+          ))
   );
 };
 
@@ -357,12 +357,12 @@ const getLogsChannel = async (message, channel) => {
 
   return (
     channels.get(channel) ||
-		(await message.mentions.channels
-		  .first()
-		  ?.fetch()
-		  .then((c) =>
-		    c?.type ? acceptedTypes.includes(c.type) && c : null
-		  ))
+        (await message.mentions.channels
+          .first()
+          ?.fetch()
+          .then((c) =>
+            c?.type ? acceptedTypes.includes(c.type) && c : null
+          ))
   );
 };
 

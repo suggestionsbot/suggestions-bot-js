@@ -16,7 +16,7 @@ module.exports = class GSIDCommand extends Command {
       name: 'gsid',
       category: 'Suggestions',
       description:
-				'View the information of a specific guild suggestion by their sID (globally for bot owners).',
+                'View the information of a specific guild suggestion by their sID (globally for bot owners).',
       usage: 'gsid <sID>',
       ownerOnly: true,
       guildOnly: false,
@@ -36,9 +36,9 @@ module.exports = class GSIDCommand extends Command {
     let suggestion;
     try {
       suggestion =
-				await this.client.mongodb.helpers.suggestions.getGlobalSuggestion(
-				  escapedId
-				);
+                await this.client.mongodb.helpers.suggestions.getGlobalSuggestion(
+                  escapedId
+                );
     } catch (err) {
       Logger.errorCmd(this, err.stack);
       return message.channel.send(buildErrorEmbed(err));
@@ -82,10 +82,10 @@ module.exports = class GSIDCommand extends Command {
       time = suggestion._id.getTimestamp();
 
     const view =
-			suggestion.results.length > 1 &&
-			suggestion.results.map((r) => {
-			  return `${r.emoji}**: ${r.count}**`;
-			});
+            suggestion.results.length > 1 &&
+            suggestion.results.map((r) => {
+              return `${r.emoji}**: ${r.count}**`;
+            });
 
     switch (suggestion.status) {
       case undefined: {

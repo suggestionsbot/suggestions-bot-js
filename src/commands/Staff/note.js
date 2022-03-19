@@ -39,15 +39,15 @@ module.exports = class NoteCommand extends Command {
     try {
       if ([7, 8].includes(escapedId.length)) {
         document =
-					await this.client.mongodb.helpers.suggestions.getGlobalSuggestion(
-					  id
-					);
+                    await this.client.mongodb.helpers.suggestions.getGlobalSuggestion(
+                      id
+                    );
       } else if (validateSnowflake(id)) {
         document =
-					await this.client.mongodb.helpers.suggestions.getGuildSuggestionViaMessageID(
-					  message.guild,
-					  id
-					);
+                    await this.client.mongodb.helpers.suggestions.getGuildSuggestionViaMessageID(
+                      message.guild,
+                      id
+                    );
       } else
         return message.channel.send(buildErrorEmbed(errMessage, false));
     } catch (err) {
@@ -70,10 +70,10 @@ module.exports = class NoteCommand extends Command {
     let suggestionsChannel;
     try {
       suggestionsChannel =
-				settings.suggestionsChannel &&
-				(await message.guild.channels.fetch(
-				  settings.suggestionsChannel
-				));
+                settings.suggestionsChannel &&
+                (await message.guild.channels.fetch(
+                  settings.suggestionsChannel
+                ));
       if (!suggestionsChannel)
         return this.client.errors.noSuggestions(message.channel);
     } catch (error) {
@@ -130,7 +130,7 @@ module.exports = class NoteCommand extends Command {
 
     if (
       suggestion.fields.length &&
-			suggestion.fields[0].name === 'Staff Note'
+            suggestion.fields[0].name === 'Staff Note'
     ) {
       suggestion.fields[0].value = note;
       suggestion.fields[1].value = `${message.author} (${message.author.id})`;
