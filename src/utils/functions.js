@@ -2,7 +2,14 @@ const fs = require('fs');
 const path = require('path');
 const petitio = require('petitio');
 const { CronJob } = require('cron');
-const { Client, MessageMentions, MessageEmbed, GuildChannel, Message, TextChannel } = require('discord.js-light');
+const {
+  Client,
+  MessageMentions,
+  MessageEmbed,
+  GuildChannel,
+  Message,
+  TextChannel
+} = require('discord.js-light');
 const { execSync } = require('child_process');
 const sentry = require('@sentry/node');
 
@@ -33,7 +40,10 @@ const validateSnowflake = (snowflake) => {
  * @return {Promise<TextChannel|null>}
  */
 const validateChannel = (manager, str) => {
-  return manager.forge(str).fetch({ cache: false }).catch(() => null);
+  return manager
+    .forge(str)
+    .fetch({ cache: false })
+    .catch(() => null);
 };
 
 /**
@@ -45,8 +55,13 @@ const validateChannel = (manager, str) => {
 const walk = (directory, extensions) => {
   const read = (dir, files = []) => {
     for (const file of fs.readdirSync(dir)) {
-      const filePath = path.join(dir, file), stats = fs.lstatSync(filePath);
-      if (stats.isFile() && extensions.some(ext => filePath.endsWith(ext))) files.push(filePath);
+      const filePath = path.join(dir, file),
+        stats = fs.lstatSync(filePath);
+      if (
+        stats.isFile() &&
+				extensions.some((ext) => filePath.endsWith(ext))
+      )
+        files.push(filePath);
       else if (stats.isDirectory()) files = files.concat(read(filePath));
     }
 
@@ -63,7 +78,8 @@ const walk = (directory, extensions) => {
  * @return {String} The timestamp style
  */
 const displayTimestamp = (dateType, type) => {
-  const timestamp = typeof dateType === 'object' ? new Date(dateType).getTime() : dateType;
+  const timestamp =
+		typeof dateType === 'object' ? new Date(dateType).getTime() : dateType;
 
   const validOptions = ['t', 'T', 'd', 'D', 'f', 'F', 'R'];
   if (type && !validOptions.includes(type)) type = 'f';
@@ -83,7 +99,9 @@ const displayUptime = (uptime) => {
 
   const days = Math.floor(uptime / secondsInADay);
   const hours = Math.floor((uptime % secondsInADay) / secondsInAHour);
-  const minutes = Math.floor(((uptime % secondsInADay) % secondsInAHour) / (60 * 1000));
+  const minutes = Math.floor(
+    ((uptime % secondsInADay) % secondsInAHour) / (60 * 1000)
+  );
   const seconds = Math.floor((uptime % (1000 * 60)) / 1000);
 
   const mapped = {
@@ -98,7 +116,10 @@ const displayUptime = (uptime) => {
     { type: 'h', value: hours },
     { type: 'm', value: minutes },
     { type: 's', value: seconds }
-  ].filter(x => x.value > 0).map(x => `${x.value} ${mapped[x.type]}`).join(', ');
+  ]
+    .filter((x) => x.value > 0)
+    .map((x) => `${x.value} ${mapped[x.type]}`)
+    .join(', ');
 };
 
 /**
@@ -120,7 +141,15 @@ const getRandomGiphyImage = (tag) => {
  * @return {Promise<TextChannel>|null} Return the channel, if it exists
  */
 const getDefaultSuggestionsChannel = (guild) => {
-  return guild.channels.fetch({ cache: false }).then(res => res.filter(c => c.type === 'text').find(c => c.name === config.suggestionsChannel)) ?? null;
+  return (
+    guild.channels
+      .fetch({ cache: false })
+      .then((res) =>
+        res
+          .filter((c) => c.type === 'text')
+          .find((c) => c.name === config.suggestionsChannel)
+      ) ?? null
+  );
 };
 
 /**
@@ -142,18 +171,24 @@ const parseCommandArguments = (args) => {
 
   // This functionality could likely be improved. Feel free to open an issue or PR.
   if (args.length <= 3) {
-    return args.map(x => {
-      const isMatch = discordPatterns.some(r => RegExp(r, 'g').test(x));
+    return args.map((x) => {
+      const isMatch = discordPatterns.some((r) => RegExp(r, 'g').test(x));
       if (!isMatch) return x.replace(toParseRegex, '');
       return x;
     });
   } else {
     const len = args.join(' ').length;
-    return args.join(' ').split('').map((x, i) => {
-      if (i === 0) x = x.replace(/[<[]/gm, '');
-      if (i === len - 1) x = x.replace(/[>\]]/gm, '');
-      return x;
-    }).join('').trim().split(/ +/g);
+    return args
+      .join(' ')
+      .split('')
+      .map((x, i) => {
+        if (i === 0) x = x.replace(/[<[]/gm, '');
+        if (i === len - 1) x = x.replace(/[>\]]/gm, '');
+        return x;
+      })
+      .join('')
+      .trim()
+      .split(/ +/g);
   }
 };
 
@@ -165,16 +200,17 @@ const parseCommandArguments = (args) => {
 const postStats = async (client) => {
   const time = Date.now();
   const now = Math.floor(time / 1000);
-  const guildCount = await client.shard.fetchClientValues('guilds.cache.size')
-    .then(res => res.reduce((a, b) => a + b, 0));
+  const guildCount = await client.shard
+    .fetchClientValues('guilds.cache.size')
+    .then((res) => res.reduce((a, b) => a + b, 0));
 
-  const data = { 'guild_count': guildCount, timestamp: now };
+  const data = { guild_count: guildCount, timestamp: now };
 
   return petitio(process.env.STATS_API_URL, 'POST')
     .header('Authorization', `Bearer ${process.env.STATS_API_KEY}`)
     .body(data)
     .json()
-    .then(body => !!body.success);
+    .then((body) => !!body.success);
 };
 
 /**
@@ -184,14 +220,24 @@ const postStats = async (client) => {
  */
 const postStatsCronJob = (client) => {
   Logger.log('Running cron job for posting bot stats...');
-  return new CronJob(config.timers.stats, async () => {
-    try {
-      const success = await postStats(client);
-      Logger.log(`${success ? 'S' : 'Uns'}uccessfully posted stats to the API!`);
-    } catch (e) {
-      return Logger.error('STATS JOB', e);
-    }
-  }, null, true, 'America/New_York');
+  return new CronJob(
+    config.timers.stats,
+    async () => {
+      try {
+        const success = await postStats(client);
+        Logger.log(
+          `${
+            success ? 'S' : 'Uns'
+          }uccessfully posted stats to the API!`
+        );
+      } catch (e) {
+        return Logger.error('STATS JOB', e);
+      }
+    },
+    null,
+    true,
+    'America/New_York'
+  );
 };
 
 /**
@@ -201,16 +247,27 @@ const postStatsCronJob = (client) => {
  */
 const suggestionMessageReactionFilter = (reaction) => {
   return require('./voteEmojis')
-    .map(set => set.emojis)
+    .map((set) => set.emojis)
     .flat()
     .includes(reaction.emoji.id ?? reaction.emoji.name);
+};
+
+/**
+ * Escape all non-alphanumeric characters from a suggestion id.
+ * @param {id} The raw suggestion id.
+ * @return {String} The escaped suggestion id.
+ */
+const escapeSuggestionId = (id) => {
+  const idRegex = new RegExp(/[^0-9a-z]/g);
+  return id.replace(idRegex, '');
 };
 
 /**
  * Gets the latest commit hash.
  * @return {String} The short commit hash.
  */
-const lastCommitHash = () => execSync('git rev-parse HEAD', { encoding: 'utf8' }).slice(0, 7);
+const lastCommitHash = () =>
+  execSync('git rev-parse HEAD', { encoding: 'utf8' }).slice(0, 7);
 
 /**
  * Reports an error to Sentry DSN.
@@ -262,13 +319,20 @@ const postToHastebin = (content) => {
  */
 const getChannel = async (message, channel) => {
   const acceptedTypes = ['text', 'news'];
-  const channels = await message.guild.channels.fetch({ cache: false })
-    .then(res => res.filter(c => acceptedTypes.includes(c.type)));
+  const channels = await message.guild.channels
+    .fetch({ cache: false })
+    .then((res) => res.filter((c) => acceptedTypes.includes(c.type)));
 
-  return channels.find(c => c.name === channel) ||
-    channels.get(channel) ||
-    await message.mentions.channels.first()?.fetch()
-      .then(c => c?.type ? acceptedTypes.includes(c.type) && c : null);
+  return (
+    channels.find((c) => c.name === channel) ||
+		channels.get(channel) ||
+		(await message.mentions.channels
+		  .first()
+		  ?.fetch()
+		  .then((c) =>
+		    c?.type ? acceptedTypes.includes(c.type) && c : null
+		  ))
+  );
 };
 
 /**
@@ -279,16 +343,27 @@ const getChannel = async (message, channel) => {
  */
 const getLogsChannel = async (message, channel) => {
   const acceptedTypes = ['text', 'news'];
-  const defaultNames = [config.defaultSettings.suggestionsLogs, 'suggestions-logs'];
+  const defaultNames = [
+    config.defaultSettings.suggestionsLogs,
+    'suggestions-logs'
+  ];
   const isDefault = defaultNames.includes(channel);
 
-  const channels = await message.guild.channels.fetch({ cache: false })
-    .then(res => res.filter(c => acceptedTypes.includes(c.type)));
+  const channels = await message.guild.channels
+    .fetch({ cache: false })
+    .then((res) => res.filter((c) => acceptedTypes.includes(c.type)));
 
-  if (isDefault) return channels.find(c => defaultNames.includes(c.name));
+  if (isDefault) return channels.find((c) => defaultNames.includes(c.name));
 
-  return channels.get(channel) || await message.mentions.channels.first()?.fetch()
-    .then(c => c?.type ? acceptedTypes.includes(c.type) && c : null);
+  return (
+    channels.get(channel) ||
+		(await message.mentions.channels
+		  .first()
+		  ?.fetch()
+		  .then((c) =>
+		    c?.type ? acceptedTypes.includes(c.type) && c : null
+		  ))
+  );
 };
 
 module.exports = {
@@ -302,6 +377,7 @@ module.exports = {
   parseCommandArguments,
   postStatsCronJob,
   suggestionMessageReactionFilter,
+  escapeSuggestionId,
   lastCommitHash,
   reportToSentry,
   buildErrorEmbed,
