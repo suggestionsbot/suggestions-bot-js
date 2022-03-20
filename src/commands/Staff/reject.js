@@ -2,7 +2,7 @@ const { MessageEmbed, Util: { escapeMarkdown } } = require('discord.js-light');
 const { stripIndent } = require('common-tags');
 const Command = require('../../structures/Command');
 const Logger = require('../../utils/logger');
-const { validateSnowflake, suggestionMessageReactionFilter, buildErrorEmbed, getLogsChannel } = require('../../utils/functions');
+const { validateSnowflake, suggestionMessageReactionFilter, buildErrorEmbed, getLogsChannel, escapeSuggestionId } = require('../../utils/functions');
 
 module.exports = class RejectCommand extends Command {
   constructor(client) {
@@ -33,9 +33,10 @@ module.exports = class RejectCommand extends Command {
     const reply = args.slice(1).join(' ');
     if (!reply && settings.responseRequired) return this.client.errors.noRejectedResponse(message.channel);
 
+    const escapedId = escapeSuggestionId(args[0]);
     const errMessage = new Error(`\`${id}\` does not resolve to or return a valid suggestion!`);
     try {
-      if ([7, 8].includes(id.length)) document = await this.client.mongodb.helpers.suggestions.getGlobalSuggestion(id);
+      if ([7, 8].includes(escapedId.length)) document = await this.client.mongodb.helpers.suggestions.getGlobalSuggestion(escapedId);
       else if (validateSnowflake(id)) document = await this.client.mongodb.helpers.suggestions.getGuildSuggestionViaMessageID(message.guild, id);
       else return message.channel.send(buildErrorEmbed(errMessage, false));
     } catch (error) {

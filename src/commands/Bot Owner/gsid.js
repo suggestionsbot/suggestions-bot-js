@@ -2,7 +2,7 @@ const { MessageEmbed, Util: { escapeMarkdown } } = require('discord.js-light');
 const { stripIndent } = require('common-tags');
 const Command = require('../../structures/Command');
 const Logger = require('../../utils/logger');
-const { buildErrorEmbed } = require('../../utils/functions');
+const { buildErrorEmbed, escapeSuggestionId } = require('../../utils/functions');
 
 module.exports = class GSIDCommand extends Command {
   constructor(client) {
@@ -25,9 +25,10 @@ module.exports = class GSIDCommand extends Command {
 
     if (!args[0]) return this.client.errors.noUsage(message.channel, this, settings);
 
+    const escapedId = escapeSuggestionId(args[0]);
     let suggestion;
     try {
-      suggestion = await this.client.mongodb.helpers.suggestions.getGlobalSuggestion(args[0]);
+      suggestion = await this.client.mongodb.helpers.suggestions.getGlobalSuggestion(escapedId);
     } catch (err) {
       Logger.errorCmd(this, err.stack);
       return message.channel.send(buildErrorEmbed(err));
