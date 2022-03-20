@@ -26,11 +26,10 @@ module.exports = class MySuggestionsCommand extends Command {
     await message.delete().catch(O_o => {});
 
     const getSubmitter = userID => {
-      const re = new RegExp(MessageMentions.USERS_PATTERN, 'g');
-      const isMention = re.test(userID);
-
-      const id = isMention ? re.exec(userID)[1] : userID;
-
+      let id;
+      const mention = userID.matchAll(MessageMentions.USERS_PATTERN).next().value;
+      if (!mention) id = userID;
+      else id = mention[1];
       return message.guild
         ? message.guild.members.fetch({ user: id, cache: false })
         : this.client.users.fetch(id, false);
