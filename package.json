@@ -51,7 +51,7 @@
     "discord.js-light": "^3.5.11",
     "dotenv": "^16.0.0",
     "erlpack": "discord/erlpack",
-    "kurasuta": "^2.2.3",
+    "kurasuta": "^3.0.0",
     "mongoose": "6.2.9",
     "petitio": "^1.4.0",
     "utf-8-validate": "^5.0.4",
