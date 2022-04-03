@@ -1,7 +1,7 @@
 const { MessageEmbed } = require('discord.js-light');
 const { oneLine } = require('common-tags');
 const Command = require('../../structures/Command');
-const { validateSnowflake, buildErrorEmbed } = require('../../utils/functions');
+const { validateSnowflake, buildErrorEmbed, escapeSuggestionId } = require('../../utils/functions');
 const Logger = require('../../utils/logger');
 
 module.exports = class NoteCommand extends Command {
@@ -25,11 +25,11 @@ module.exports = class NoteCommand extends Command {
     const id = args[0];
     const note = args.slice(1).join(' ');
     if (!note) return this.client.errors.noUsage(message.channel, this, settings);
-
+    const escapedId = escapeSuggestionId(args[0]);
     let document;
     const errMessage = new Error(`\`${id}\` does not resolve to or return a valid suggestion!`);
     try {
-      if ([7, 8].includes(id.length)) document = await this.client.mongodb.helpers.suggestions.getGlobalSuggestion(id);
+      if ([7, 8].includes(escapedId.length)) document = await this.client.mongodb.helpers.suggestions.getGlobalSuggestion(escapedId);
       else if (validateSnowflake(id)) document = await this.client.mongodb.helpers.suggestions.getGuildSuggestionViaMessageID(message.guild, id);
       else return message.channel.send(buildErrorEmbed(errMessage, false));
     } catch (err) {

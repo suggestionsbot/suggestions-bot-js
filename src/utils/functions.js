@@ -124,6 +124,16 @@ const getDefaultSuggestionsChannel = (guild) => {
 };
 
 /**
+ * Escape all non-alphanumeric characters from a suggestion id.
+ * @param {String} The raw suggestion id.
+ * @return {String} The escaped suggestion id.
+ */
+const escapeSuggestionId = (id) => {
+  const idRegex = new RegExp(/[^0-9a-z]/g);
+  return id.replace(idRegex, '');
+};
+
+/**
  * Return a new array of parsed array of arguments removing brackets.
  * @param {Array<String>} args The command arguments.
  * @return {Array<String>} Return the new array of arguments.
@@ -299,6 +309,7 @@ module.exports = {
   displayUptime,
   getRandomGiphyImage,
   getDefaultSuggestionsChannel,
+  escapeSuggestionId,
   parseCommandArguments,
   postStatsCronJob,
   suggestionMessageReactionFilter,
