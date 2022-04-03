@@ -30,7 +30,7 @@ module.exports = {
   discord: 'https://suggestions.bot/discord',
   website: 'https://suggestions.gg',
   docs: 'https://docs.suggestionsbot.com',
-  github: 'https://suggestions.bot/discord',
+  github: 'https://suggestions.bot/github',
   hastebin: 'https://paste.nerdcave.dev',
   invite: isProduction() ? 'https://suggestions.bot/invite' : 'https://discord.com/oauth2/authorize?client_id=771924181784854579&scope=bot&permissions=355392',
   voteSites: [
