@@ -48,7 +48,7 @@
     "chalk": "^4.1.2",
     "common-tags": "^1.8.0",
     "cron": "^1.8.2",
-    "discord.js-light": "^3.5.11",
+    "discord.js-light": "^4.0.0",
     "dotenv": "^16.0.0",
     "erlpack": "discord/erlpack",
     "kurasuta": "^2.2.3",
