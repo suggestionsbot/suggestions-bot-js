@@ -125,7 +125,7 @@ const getDefaultSuggestionsChannel = (guild) => {
 
 /**
  * Escape all non-alphanumeric characters from a suggestion id.
- * @param {id} The raw suggestion id.
+ * @param {String} The raw suggestion id.
  * @return {String} The escaped suggestion id.
  */
 const escapeSuggestionId = (id) => {
